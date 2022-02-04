@@ -1,0 +1,17 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^.~
+^LICENSE\.md$
+LICENSE
+^codecov\.yml$
+^_pkgdown\.yml$
+^pkgdown$
+^appveyor\.yml$
+^\.travis\.yml$
+^codecov\.yml$
+^vignettes/.\.Rmd\.orig$
+\.Rhistory
+\.gitignore
+^\.github$
+^docs$
+internal.md

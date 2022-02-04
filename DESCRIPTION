@@ -1,0 +1,39 @@
+Package: multilevelcoda
+Title: Estimate and present multilevel compositional data analysis (CoDA)
+Version: 0.0.9000
+Authors@R: 
+    c(person(given = "Flora",
+             family = "Le",
+             role = c("aut", "cre"),
+             email = "flora.le@monash.edu",
+             comment = c(ORCID = "0000-0003-0089-8167")),
+      person(given = "Joshua F.",
+             family = "Wiley",
+             role = c("aut"),
+             email = "jwiley.psych@gmail.com",
+             comment = c(ORCID = "0000-0002-0271-6702")))
+URL: https://florale.github.io/multilevelcoda/,
+    https://github.com/florale/multilevelcoda
+BugReports: https://github.com/florale/multilevelcoda/issues
+Description: Write a couple sentence description.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends:
+    R (>= 4.0.0)
+Imports: 
+    methods,
+    stats,
+    data.table (>= 1.12.0),
+    compositions
+Suggests: 
+    testthat (>= 3.0.0),
+    covr,
+    withr,
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+Config/testthat/parallel: true
+VignetteBuilder: knitr

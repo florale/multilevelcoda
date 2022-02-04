@@ -1,0 +1,16 @@
+desktop.ini
+.DS_Store
+.httr-oauth
+.Rproj.user
+.Rhistory
+R/.Rhistory
+.RData
+*~
+[#]*[#]
+# artifacts of R CMD check/build
+*.Rcheck
+*.tar.gz
+Rplots.pdf
+inst/doc
+docs
+internal.md
