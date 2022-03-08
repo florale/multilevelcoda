@@ -3,8 +3,7 @@
 #' This function is designed to help calculate sets of compositions and IRLs
 #' for \code{brms} Multilevel Compositional Data models
 #'  
-#' @param b A compisition or dataset of composition at between-person level. Required.
-#' @param t A composition or dataset of composition. Required.
+#' @param data A composition or dataset of composition. Required.
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' 
 #' @return A list with six elements.
@@ -23,45 +22,41 @@
 #' @importFrom compositions ilr
 #' @importFrom compositions acomp
 #' @importFrom compositions gsi.buildilrBase
-#'
+#' @importFrom extraoperators %snin%
 #' @export
 #' @examples
 #' 
-#' 
-compilr <- function(b , t, sbp) {
-  
-  if(isTRUE(missing(b))){
-    stop(paste( "'b is a required argument and cannot be missing,",
-                "it should a be data table or data frame representing a between-person composition.",
-                "See ? or the website articles (vignettes) for details.",
-                sep = "\n"))
+#' test <- compilr(data = mcompd[, 1:6], sbp = sbp, idvar = "ID")
+compilr <- function(data, sbp, idvar = "ID") {
+  if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
+    stop("data must be a data table, data frame or matrix.")
+  }
+  if (isFALSE(inherits(sbp, "matrix"))) {
+    stop(sprintf("sbp is a '%s' but must be a matrix.",
+                 paste(class(sbp), collapse = ";")))
+  }
+  if (isFALSE(identical(ncol(data) - 1L, ncol(sbp)))) {
+    stop(sprintf("The number of columns in data (%d) must be the same as in sbp (%d).",
+                 ncol(data),
+                 ncol(sbp)))
   }
   
-  if(isTRUE(missing(t))){
-    
-    stop(paste( "'t' is a required argument and cannot be missing,",
-                "it should a be data table or data frame representing a composition.",
-                "See ? or the website articles (vignettes) for details.",
-                sep = "\n"))
+  b <- copy(data)
+  b <- as.data.table(b)
+  vn <- colnames(b) %snin% idvar
+  for (v in vn) {
+    b[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
   }
-  
-  if(isTRUE(missing(sbp))){
-    
-    stop(paste( "'sbp' is a required argument and cannot be missing,",
-                "it should be a matrix indicating sequential binary partition.",
-                "See ? or the website articles (vignettes) for details.",
-                sep = "\n"))
-  }
+  b <- b[, vn, with = FALSE]
+ 
+  psi <- gsi.buildilrBase(t(sbp))
   
   ## Between-person composition
   bcomp <- acomp(b)
-  
-  ## make composition ilr
-  psi <- gsi.buildilrBase(t(sbp))
   bilr <- ilr(bcomp, V=psi)
   
   ## Total composition
-  tcomp <- acomp(t)
+  tcomp <- acomp(data[, vn, with = FALSE])
   tilr <- ilr(tcomp, V=psi)
   
   ## Within-person composition
@@ -78,4 +73,3 @@ compilr <- function(b , t, sbp) {
   
   return(out)
 }
-

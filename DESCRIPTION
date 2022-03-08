@@ -27,7 +27,8 @@ Imports:
     methods,
     stats,
     data.table (>= 1.12.0),
-    compositions
+    compositions,
+    extraoperators
 Suggests: 
     testthat (>= 3.0.0),
     covr,
