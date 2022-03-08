@@ -35,13 +35,8 @@ CoDA is...
 
 ```r
 
-examplefun(1:5)
-#>    x
-#> 1: 1
-#> 2: 2
-#> 3: 3
-#> 4: 4
-#> 5: 5
+print("write me!")
+#> [1] "write me!"
 ```
 
 ## References

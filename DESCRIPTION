@@ -28,7 +28,9 @@ Imports:
     stats,
     data.table (>= 1.12.0),
     compositions,
-    extraoperators
+    extraoperators,
+    ggplot2,
+    cowplot
 Suggests: 
     testthat (>= 3.0.0),
     covr,

@@ -11,12 +11,13 @@
 #' @param names A vector representing names of variables in the substitution data.  # nolint
 #' @param substitute A vector representing names of substituted compositional component for each row of substitution dataset. # nolint
 #'
-#' @return 
+#' @return
 #' @importFrom data.table as.data.table
 #' @importFrom compositions acomp
 #' @importFrom compositions ilr
 #' @export
 #' @examples
+#' ## TODO
 bsubmargin <- function(object, b, comp, at,
                         names, substitute) {
 
