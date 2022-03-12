@@ -5,7 +5,7 @@
 #'
 #' @param data A composition or dataset of composition. Required.
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
-#' @param idvar a character string indicating the name of the variable containing IDs
+#' @param idvar A character string indicating the name of the variable containing IDs.
 #'
 #' @return A list with six elements.
 #' \itemize{
@@ -30,6 +30,7 @@
 #' str(test)
 #' ## cleanup
 #' rm(test, mcompd)
+#' ##TODO - check for 0 in data
 compilr <- function(data, sbp, idvar = "ID") {
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
