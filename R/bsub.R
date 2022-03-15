@@ -5,137 +5,154 @@
 #' at between-person level.
 #'
 #' @param object A fitted \code{brms} model object. Required.
-#' @param b A compisition or dataset of composition at between-peson level. Required. # nolint
-#' @param comp A data frame or data table indicating the possible substitution of variables. # nolint
-#' @param at Default is 1:60L.
-#' @param names A vector representing names of variables in the substitution data.  # nolint
-#' @param substitute A vector representing names of substituted compositional component for each row of substitution dataset. # nolint
-#'
-#' @return
-#' @importFrom data.table as.data.table
-#' @importFrom compositions acomp
-#' @importFrom compositions ilr
+#' @param data A dataset of composition plus a variable containing IDs that was used for the brms model object. Required.
+#' @param stutitute A data frame or data table indicating the possible substitution of variables. This dataset can be computed using \code{possub}. Required.
+#' @param sbp A signary matrix indicating sequential binary partition. Required.
+#' @param minute A integer or numeric value indicating the minute that compositional variable are substituted to/from. Default is 60L.
+#' @param idvar A character string indicating the name of the variable containing IDs.
+#' 
+#' @return A list
+#' @importFrom data.table as.data.table copy :=
+#' @importFrom compositions acomp ilr clo gsi.buildilrBase
+#' @importFrom extraoperators %snin% %sin%
 #' @export
 #' @examples
 #' ## TODO
-bsubmargin <- function(object, b, comp, at,
-                        names, substitute) {
-
-  if (isTRUE(missing(object))) { ## J to add
-    stop(paste(
-    ))
-  }
-
-  if (isTRUE(missing(b))) { 
-    stop(paste(" 'b' is a required argument and cannot be missing;",
-               "it should be a compositional object resulted from a acomp transformation",
-               sep = "\n"))
-  }
+#' 
+#' sbp <- matrix(c(
+#' -1, -1, -1,-1, 1,
+#' 1, -1, -1, -1, 0,
+#' 0, 1, -1, -1, 0,
+#' 0, 0, 1, -1, 0), ncol = 5, byrow = TRUE)
+#' 
+#' data(mcompd)
+#' 
+#' posubtest <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+#' 
+#' bsubtest <- bsub(object = m, data = mcompd[, 1:6], substitute = posubtest, minute = 10, sbp = sbp)
+#' 
+#' ## cleanup
+#' rm(bsubtest, mcompd)
+bsub <- function(object, data, substitute, sbp, minute = 60, idvar = "ID") { 
   
-  if(isFALSE(missing(at))) {
-    if (isFALSE(is.integer(at))) {
-      stop("'at' must be integer values > 0.")
+  if(isFALSE(missing(minute))) {
+    if (isFALSE(is.integer(minute))) {
+      if (isFALSE(is.numeric(minute))) {
+        stop("'minute' must be an integer or a numeric value > 0.")
+      }
     }
-  } else if (isTRUE(missing(at))) {
-    at <- 1:60L
-  } 
-  
-  if(isFALSE(missing(names))) {
-    if (isFALSE(is.character(names))) {
-      stop(paste("'names' must be a character string representing the names of the following:",
-                 "between-person compostion, total composition, at.",
-                 sep = "\n"))
-    }
-  } else if(isTRUE(missing(names))) {
-    names <- c("BTST", "BAWAKE", "BMVPA", "BLPA", "BSB", 
-               "TST", "AWAKE", "MVPA", "LPA", "SB", "at")
+    
+  } else if (isTRUE(missing(minute))) {
+    minute <- 60L
   }
   
-  if(isTRUE(missing(substitute))) {
-    substitute <- names[7:10]
-  }
+  # Compute between-person composition
+  b <- compilr(data = data, sbp = sbp)[[1]]
+  psi <- gsi.buildilrBase(t(sbp))
   
-  #compute mean composition
-  b <- acomp(b)
+  # Compute compositional mean
   mcomp <- mean(b)
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
+  names(mcomp) <- paste0("B", names(mcomp))
   
-  # possible composition - comp
-  comp <- comp[TST != 0] ## fix
+  # generate input for substitution model
   ID <- 1
+  vn <- colnames(substitute) 
+  min <- as.integer(paste0(minute))
   
-  out <- NULL
-  result <- NULL
-  subd <- vector("list")
-  for (i in at) {
-    sub <- comp * i
-    for (j in 1:nrow(comp)) {
-      newcomp <- mcomp + sub[j, ]
-      subd[[j]] <- cbind(mcomp, newcomp, sub[j, 1])
+  # List to store final output
+  allout <- list()
+  
+  for(i in vn) {
+    posub <- copy(substitute)
+    posub <- as.data.table(posub)
+    posub <- posub[(get(i) != 0)]
+    posub <- posub[order(-rank(get(i)))]
+    
+    # Get substitution variable name for substitution model
+    subvar <- colnames(posub) %snin% eval(i)
+    iv <- i
+    
+    # lists to store results - TODO
+    result <- NULL
+    newcomp <- vector('list')
+    subd <- vector("list")
+    
+    # substitution dataset
+    for (j in 1:min) {
+      sub <- posub * j
+      for (k in 1:nrow(posub)) {
+        newcomp <- mcomp + sub[k, ]
+        names(newcomp) <- paste0(names(substitute))
+        subd[[k]] <- cbind(mcomp, newcomp, sub[k, ][[i]])
+      }
+      result[[j]] <- do.call(rbind, subd)
     }
-    result[[i]] <- do.call(rbind, subd)
-  }
-  subd <- bind_rows(result)
-  names(subd) <- names #check - pass variable names - between + total + delta
-  
-  ## add substitute variable
-  subd[, Substitute := rep(substitute, length.out = nrow(subd))] 
-  
-  ## remove impossible reallocation that result in negative values
-  subd <- subd %>%
-    filter(if_all(-c(Substitute, at), ~ . > 0))
-  
-  ## add comp and ilr
-  bcomp <- acomp(subd[, 1:5])
-  tcomp <- acomp(subd[, 6:10])
-  
-  bilr <- ilr(bcomp, V = psi)
-  tilr <- ilr(bcomp, V = psi)
-  
-  subd$bilr1 <- tilr[, 1]
-  subd$bilr2 <- tilr[, 2]
-  subd$bilr3 <- tilr[, 3]
-  subd$bilr4 <- tilr[, 4]
-  
-  subd$wilr1 <- 0
-  subd$wilr2 <- 0
-  subd$wilr3 <- 0
-  subd$wilr4 <- 0
-  
-  subd$ID <- ID
-  
-  ## dataset for no change
-  samedata <- data.table(bilr1 = bilr[, 1],
-                         bilr2 = bilr[, 2],
-                         bilr3 = bilr[, 3],
-                         bilr4 = bilr[, 4],
-                         wilr1 = 0,
-                         wilr2 = 0,
-                         wilr3 = 0,
-                         wilr4 = 0)
-  
-  samedata$ID <- ID
-  
-  # prediction
-  ## substitution
-  predsub <- as.data.table(fitted(object, newdata = subd, re.form = NA, summary = FALSE))
-  
-  ## no change
-  predsame <- as.data.table(fitted(object, newdata = samedata, re.form = NA, summary = FALSE))
-  
-  # calculate difference between substitution and no change
-  preddif <- predsub - predsame
-  preddif <- rowMeans(preddif)
-  preddif <- as.data.table(describe_posterior(preddif, centrality = "mean", 
-                                              ci = 0.95,
-                                              ci_method = "eti"))
-  preddif <- preddif[, .(Mean, CI_low, CI_high)]
-  
-  # save results
-  out <- do.call(cbind, preddif)
-  out <- cbind(out, subd[, c("at", "Substitute")])
-  names(out) <- c("Mean", "CI_low", "CI_high", "at", "Substitute")
-  
-  return(out)
+    subd <- as.data.table(do.call(rbind,result))
+    
+    # add names
+    colnames(subd)[ncol(subd)] <- "MinSubstituted"
+    subd[, Substitute := rep(subvar, length.out = nrow(subd))]
+    subd$Predictor <- iv
+    
+    ## remove impossible reallocation that result in negative values - TODO
+    subd <- subd %>%
+      filter(if_all(-c(Substitute, MinSubstituted), ~ . > 0))
+    
+    ## add comp and ilr
+    bn <- colnames(subd) %sin% names(mcomp)
+    tn <- colnames(subd) %sin% names(newcomp)
+    
+    bcomp <- acomp(subd[, bn, with = FALSE]) 
+    tcomp <- acomp(subd[, tn, with = FALSE])
+    bilr <- ilr(bcomp, V = psi) 
+    tilr <- ilr(tcomp, V = psi) 
+    
+    subd$bilr1 <- tilr[, 1]
+    subd$bilr2 <- tilr[, 2]
+    subd$bilr3 <- tilr[, 3]
+    subd$bilr4 <- tilr[, 4]
+    
+    subd$wilr1 <- 0
+    subd$wilr2 <- 0
+    subd$wilr3 <- 0
+    subd$wilr4 <- 0
+    
+    subd$ID <- ID
+    
+    ## no change dataset
+    samed <- data.table(bilr1 = bilr[, 1],
+                        bilr2 = bilr[, 2],
+                        bilr3 = bilr[, 3],
+                        bilr4 = bilr[, 4],
+                        wilr1 = 0,
+                        wilr2 = 0,
+                        wilr3 = 0,
+                        wilr4 = 0)
+    samed$ID <- ID
+    
+    # prediction
+    ## substitution
+    predsub <- as.data.table(fitted(object, newdata = subd, re.form = NA, summary = FALSE))
+    
+    ## no change
+    predsame <- as.data.table(fitted(object, newdata = samed, re.form = NA, summary = FALSE))
+    
+    # difference between substitution and no change
+    preddif <- predsub - predsame
+    preddif <- as.data.table(describe_posterior(preddif, centrality = "mean",
+                                                ci = 0.95, ci_method = "eti"))
+    preddif <- preddif[, .(Mean, CI_low, CI_high)]
+    
+    # save results
+    out <- do.call(cbind, preddif)
+    out <- cbind(out, subd[, c("MinSubstituted", "Substitute", "Predictor")])
+    out <- as.data.table(out)
+    names(out) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
+    
+    ## final results for entire composition
+    allout[[i]] <- out
+  }  
+  return(allout)
 }
