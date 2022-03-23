@@ -7,7 +7,7 @@
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' @param idvar A character string indicating the name of the variable containing IDs.
 #'
-#' @return A list with six elements.
+#' @return A list with ten elements.
 #' \itemize{
 #'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
@@ -18,6 +18,10 @@
 #'   \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
 #'   \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
 #'   \item{\code{TotalILR}}{ Isometric log ratio transform of total composition.}
+#'   \item{\code{data}}{ The user's dataset.}
+#'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
+#'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix. }
+#'   \item{\code{idvar}}{ Name of the variable containing IDs.}
 #' }
 #' @importFrom compositions ilr acomp gsi.buildilrBase
 #' @importFrom extraoperators %snin%
@@ -26,11 +30,11 @@
 #' @examples
 #'
 #' data(mcompd)
-#' test <- compilr(data = mcompd[, 1:6], sbp = sbp, idvar = "ID")
-#' str(test)
+#' compilrtest <- compilr(data = mcompd[, 1:6], sbp = sbp, idvar = "ID")
+#' str(compilrtest)
 #' ## cleanup
-#' rm(test, mcompd)
-#' ##TODO - check for 0 in data
+#' rm(compilrtest, mcompd)
+#' ##TODO - check for 0 in data - ask users to check
 compilr <- function(data, sbp, idvar = "ID") {
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
@@ -57,7 +61,7 @@ compilr <- function(data, sbp, idvar = "ID") {
 
   ## Between-person composition
   bcomp <- acomp(b)
-  bilr <- ilr(bcomp, V=psi)
+  bilr <- ilr(bcomp, V = psi)
 
   ## Total composition
   tcomp <- acomp(data[, vn, with = FALSE])
@@ -65,7 +69,7 @@ compilr <- function(data, sbp, idvar = "ID") {
 
   ## Within-person composition
   wcomp <- tcomp - bcomp
-  wilr <- ilr(wcomp, V=psi)
+  wilr <- ilr(wcomp, V = psi)
 
   out <- list(
     BetweenComp = bcomp,
@@ -73,7 +77,11 @@ compilr <- function(data, sbp, idvar = "ID") {
     TotalComp = tcomp,
     BetweenILR = bilr,
     WithinILR = wilr,
-    TotalILR = tilr)
+    TotalILR = tilr,
+    data = data,
+    psi = psi,
+    sbp = sbp,
+    idvar = idvar)
 
   return(out)
 }

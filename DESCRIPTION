@@ -5,7 +5,7 @@ Authors@R:
     c(person(given = "Flora",
              family = "Le",
              role = c("aut", "cre"),
-             email = "flora.le@monash.edu",
+             email = "13florale@gmail.com",
              comment = c(ORCID = "0000-0003-0089-8167")),
       person(given = "Joshua F.",
              family = "Wiley",
@@ -30,7 +30,11 @@ Imports:
     compositions,
     extraoperators,
     ggplot2,
-    cowplot
+    cowplot,
+    dplyr,
+    ggsci,
+    bayestestR,
+    brms
 Suggests: 
     testthat (>= 3.0.0),
     covr,

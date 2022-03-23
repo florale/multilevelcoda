@@ -11,9 +11,18 @@
 #' @importFrom extraoperators %snin%
 #' @export
 #' @examples
-#' posubtest <- possub(count = 4, data = mcompd[, 2:6], idvar = "ID")
+#' 
+#' data(mcompd)
+#' 
+#' posubtest <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+#' 
+#' str(posubtest)
+#' 
+#' ## cleanup
+#' rm(mcompd, posubtest)
 possub <- function(count, data, idvar) {
   
+  # add check for 'count' and number of cols in 'data'
   count <- as.numeric(count)
   n <- count - 2
 

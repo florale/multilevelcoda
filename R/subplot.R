@@ -4,13 +4,12 @@
 #' estimated differences in outcomes when compositional variables
 #' are substituted for a specific period of time
 #'
-#' @param subdata A data table or data frame resulted from a substitution model.
-#' @param subdata It must be a component of a list computed using either of the following:
-#' @param subdata \code{wsub}, \code{bsub}, \code{wsubmargin}, \code{bsubmargin}.
+#' @param data A dataset to use for plot. 
+#' @param data It must be a component of a list computed using either of the following:
+#' @param data \code{wsub}, \code{bsub}, \code{wsubmargin}, \code{bsubmargin}.
 #' @param iv A character string indicating name of the compostional predictor variable
-#' @param iv in the \code{subdata}.
-#' @param dv A character string indicating the name of the outcome variable in the \code{subdata}.
-#' @param font A character string indicating the name of your preferred font. Default is Times New Roman.
+#' @param dv A character string indicating the name of the outcome variable.
+#' @param font A character string indicating the name of preferred font. Default is Times New Roman.
 #' 
 #' @return A ggplot graph object showing the estimated difference in outcome when 
 #' @return each pair of compositional variables are substituted for a specific time.
@@ -22,11 +21,11 @@
 #' ## TODO
 #' 
 #' data(mcompd)
-#' subplot(subdata = wsubmargintest[[2]], iv = "sleep", dv = "stress", font = "Arial")
+#' plotsub(data = wsubtest$MVPA, iv = "sleep", dv = "stress")
 #' 
-subplot <- function(subdata, iv, dv, font = "Times New Roman") {
+plotsub <- function(data, iv, dv, font = "Times New Roman") {
   
-  niceplot <- ggplot(subdata, aes(x = MinSubstituted, y = Mean, colour = Substitute)) +
+  niceplot <- ggplot(data, aes(x = MinSubstituted, y = Mean, colour = Substitute)) +
     geom_hline(yintercept = 0, size = 0.2, linetype = 2) +
     geom_vline(xintercept = 0, size = 0.2, linetype = 2) +
     geom_line(aes(colour = Substitute), size = 1) +
