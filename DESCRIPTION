@@ -34,7 +34,9 @@ Imports:
     dplyr,
     ggsci,
     bayestestR,
-    brms
+    brms,
+    reshape2,
+    zCompositions
 Suggests: 
     testthat (>= 3.0.0),
     covr,

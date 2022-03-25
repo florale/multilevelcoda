@@ -2,35 +2,68 @@
 #'
 #' This provides a few sentence description about the example function.
 #'
-#' @param x A vector.
-#' @return The vector coerced to numeric vector in a data table.
-#' @importFrom data.table data.table
+#' @param data A composition or dataset of composition. Required.
+#' @param composition A string character indicating the names of compositional variables in `data`.
+#' @param sbp A signary matrix indicating sequential binary partition. Required.
+#' @param ... Further arguments passed to \code{\link{brm}}.
+#' @param 
+#' @return 
+#' @importFrom 
 #' @export
 #' @examples
 #'
 #' # just use total comp for this
 #' data(mcompd)
-#'  compilrtest <- compilr(data = mcompd[, 1:6], sbp = sbp, idvar = "ID")
-#'  bilr <- compilrtest$BetweenILR
-#'  wilr <- compilrtest$WithinILR
-#'  names(bilr) <- c(paste0("bilr", 1:ncol(bilr)))
-#'  names(wilr) <- c(paste0("wilr", 1:ncol(wilr)))
-#'  copyd <- cbind(mcompd, bilr, wilr)
-#' coda.lmer <- lmer(STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), data = copyd)
+#' data(sbp)
+#' 
+#' davg <- mcompd[, .(SB = mean(SB, na.rm = TRUE),
+#'                    LPA = mean(LPA, na.rm = TRUE),
+#'                    MVPA = mean(MVPA, na.rm = TRUE),
+#'                    TST = mean(TST, na.rm = TRUE),
+#'                    WAKE = mean(WAKE, na.rm = TRUE),
+#'                    TRESS = mean(STRESS, na.rm = TRUE),
+#'                    Age = mean (Age, na.rm = TRUE),
+#'                    Female = na.omit(Female)[1]),
+#'                    by = .(ID)]
+#'
+#' testsubcoda <- subcoda(data = davg, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), sbp = sbp,
+#'  formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4, minute = 10, substitute = posubtest)
+#'  
+#'  ## cleanup
+#'  rm(mcompd, sbp, davg, testsubcoda)
 
-subcoda <- function(data, sbp, formula, min, substitute, idvar) {
-  b <- compilrtest$BetweenComp
-  # Compute compositional mean
-  mcomp <- rowMeans(b)
+subcoda <- function(data, composition, sbp, formula, minute, substitute, ...) {
+  
+  # compilr
+  psi <- gsi.buildilrBase(t(sbp))
+  
+  compn <- colnames(data) %sin% names(composition)
+  
+  comp <- acomp(data[, composition, with = FALSE])
+  ilr <- ilr(comp, V = psi)
+  
+  names(ilr) <- c(paste0("ilr", 1:ncol(ilr)))
+  
+  copyd <- cbind(data, ilr)
+  
+  # brm model
+  m <- brm(eval(formula),
+           data = copyd,
+           ...)
+  
+  # Substitution model
+  # compute compositional mean
+  mcomp <- mean(comp)
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
-  names(mcomp) <- paste0("B", names(mcomp))
-
+  names(mcomp) <- paste0("M", names(mcomp))
+  
   # generate input for substitution model
-  ID <- 1
   vn <- colnames(substitute)
   min <- as.integer(paste0(minute))
-  psi <- data$CompIlr$psi
+
+  allout <- list()
+  for(i in vn) {
   posub <- copy(substitute)
   posub <- as.data.table(posub)
   posub <- posub[(get(i) != 0)]
@@ -42,16 +75,16 @@ subcoda <- function(data, sbp, formula, min, substitute, idvar) {
 
   # lists to store results - TODO
   result <- NULL
-  newcomp <- vector('list')
+  new <- vector('list')
   subd <- vector("list")
 
   # substitution dataset
   for (j in 1:min) {
     sub <- posub * j
     for (k in 1:nrow(posub)) {
-      newcomp <- mcomp + sub[k, ]
-      names(newcomp) <- paste0(names(substitute))
-      subd[[k]] <- cbind(mcomp, newcomp, sub[k, ][[i]])
+      new <- mcomp + sub[k, ]
+      names(new) <- paste0(names(substitute))
+      subd[[k]] <- cbind(mcomp, new, sub[k, ][[i]])
     }
     result[[j]] <- do.call(rbind, subd)
   }
@@ -74,36 +107,30 @@ subcoda <- function(data, sbp, formula, min, substitute, idvar) {
   subd <- subd[complete.cases(subd), ]
 
   ## add comp and ilr
+  oldvar <- colnames(subd) %sin% names(mcomp)
+  newvar <- colnames(subd) %sin% composition
 
-  bn <- colnames(subd) %sin% names(mcomp)
-  tn <- colnames(subd) %sin% names(newcomp)
+  oldcomp <- acomp(subd[, oldvar, with = FALSE])
+  newcomp <- acomp(subd[, newvar, with = FALSE])
 
-  bcomp <- acomp(subd[, bn, with = FALSE])
-  tcomp <- acomp(subd[, tn, with = FALSE])
+  oldilr <- ilr(oldcomp, V = psi)
+  newilr <- ilr(newcomp, V = psi)
 
-  bilr <- ilr(bcomp, V = psi)
-  tilr <- ilr(tcomp, V = psi)
-  wilr <- matrix(0, nrow = nrow(subd), ncol = ncol(bilr))
-  wilr <- as.data.table(wilr)
-
-  names(bilr) <- c(paste0("bilr", 1:ncol(bilr)))
-  names(tilr) <- c(paste0("bilr", 1:ncol(tilr)))
-  names(wilr) <- c(paste0("wilr", 1:ncol(wilr)))
+  names(oldilr) <- c(paste0("ilr", 1:ncol(ilr)))
+  names(newilr) <- c(paste0("ilr", 1:ncol(ilr)))
 
   ## substitution dataset
-  subd <- cbind(subd, tilr, wilr)
-  subd$ID <- ID
+  subd <- cbind(subd, newilr)
 
   ## no change dataset
-  samed <- cbind(bilr, wilr)
-  samed$ID <- ID
+  samed <- cbind(oldilr)
 
   # prediction
   ## substitution
-  predsub <- as.data.table(fitted(data$Results, newdata = subd, re.form = NA, summary = FALSE))
+  predsub <- as.data.table(fitted(m, newdata = subd, re.form = NA, summary = FALSE))
 
   ## no change
-  predsame <- as.data.table(fitted(data$Results, newdata = samed, re.form = NA, summary = FALSE))
+  predsame <- as.data.table(fitted(m, newdata = samed, re.form = NA, summary = FALSE))
 
   # difference between substitution and no change
   preddif <- predsub - predsame
@@ -119,4 +146,13 @@ subcoda <- function(data, sbp, formula, min, substitute, idvar) {
 
   ## final results for entire composition
   allout[[i]] <- out
+  
+  }
+  
+  finalresult <- list(SubstitutionResults = allout,
+                      BrmsResults = m,
+                      ILR = ilr,
+                      Composition = comp)
+  
+  return(finalresult)
 }

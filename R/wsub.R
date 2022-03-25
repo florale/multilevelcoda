@@ -16,7 +16,7 @@
 #' @export
 #' @examples
 #' ## TODO
-#' wsubtest <- wsub(data = brmcodatest, substitute = posubtest, minute = 10)
+#' wsubtest <- wsub(data = mcm, substitute = posubtest, minute = 10)
 wsub <- function(data, substitute, minute = 60) { 
   
   if(isFALSE(missing(minute))) {
@@ -30,24 +30,24 @@ wsub <- function(data, substitute, minute = 60) {
     minute <- 60L
   }
   
-  # Compute between-person composition
-  b <- data$CompIlr$BetweenComp
+  tmp <- copy(data)
   
   # Compute compositional mean
-  mcomp <- mean(b)
+  b <- tmp$CompIlr$BetweenComp
+  
+  mcomp <- mean.acomp(b)
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
   names(mcomp) <- paste0("B", names(mcomp))
   
   # generate input for substitution model
   ID <- 1
-  vn <- colnames(substitute) 
-  min <- as.integer(paste0(minute))
-  psi <- data$CompIlr$psi
+  min <- as.integer(minute)
+  psi <- tmp$CompIlr$psi
   
   # List to store final output
   allout <- list()
-  for(i in vn) {
+  for(i in colnames(substitute) ) {
     posub <- copy(substitute)
     posub <- as.data.table(posub)
     posub <- posub[(get(i) != 0)]
@@ -63,9 +63,9 @@ wsub <- function(data, substitute, minute = 60) {
     subd <- vector("list")
     
     # substitution dataset
-    for (j in 1:min) {
+    for (j in seq_len(min)) {
       sub <- posub * j
-      for (k in 1:nrow(posub)) {
+      for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k, ]
         names(newcomp) <- paste0(names(substitute))
         subd[[k]] <- cbind(mcomp, newcomp, sub[k, ][[i]])
@@ -91,7 +91,6 @@ wsub <- function(data, substitute, minute = 60) {
     subd <- subd[complete.cases(subd), ]
     
     ## add comp and ilr
-    
     bn <- colnames(subd) %sin% names(mcomp)
     tn <- colnames(subd) %sin% names(newcomp)
     
@@ -102,26 +101,24 @@ wsub <- function(data, substitute, minute = 60) {
     bilr <- ilr(bcomp, V = psi) 
     wilr <- ilr(wcomp, V = psi) 
     
-    names(bilr) <- c(paste0("bilr", 1:ncol(bilr)))
-    names(wilr) <- c(paste0("wilr", 1:ncol(wilr)))
-    
-    subd <- cbind(subd, bilr, wilr)
-    subd$ID <- ID
-    
+    colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
+    colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+
+    subd <- cbind(subd, bilr, wilr, ID)
+
     ## dataset for no change
     woilr <- matrix(0, nrow = nrow(subd), ncol = ncol(wilr))
     woilr <- as.data.table(woilr)
-    names(woilr) <- c(paste0("wilr", 1:ncol(wilr)))
+    colnames(woilr) <- paste0("wilr", seq_len(ncol(wilr)))
     
-    samed <- cbind(bilr, woilr)
-    samed$ID <- ID
-    
+    samed <- cbind(bilr, woilr, ID)
+
     # prediction
     ## substitution
-    predsub <- as.data.table(fitted(data$Results, newdata = subd, re.form = NA, summary = FALSE))
+    predsub <- as.data.table(fitted(tmp$BrmModel, newdata = subd, re.form = NA, summary = FALSE))
     
     ## no change
-    predsame <- as.data.table(fitted(data$Results, newdata = samed, re.form = NA, summary = FALSE))
+    predsame <- as.data.table(fitted(tmp$BrmModel, newdata = samed, re.form = NA, summary = FALSE))
     
     # difference between substitution and no change
     preddif <- predsub - predsame

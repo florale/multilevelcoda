@@ -13,7 +13,7 @@
 #' @importFrom extraoperators %snin% %sin%
 #' @export
 #' @examples
-#' bsubmarginstest <- bsubmargins(data = brmcodatest, substitute = posubtest, minute = 10)
+#' bsubmarginstest <- bsubmargins(data = mcm, substitute = posubtest, minute = 10)
 bsubmargins <- function (data, substitute, minute = 60) {
 
   if(isFALSE(missing(minute))) {
@@ -27,8 +27,9 @@ bsubmargins <- function (data, substitute, minute = 60) {
     minute <- 60L
   }
   
+  tmp <- copy(data)
   # Compute between-person composition
-  b <- data$CompIlr$BetweenComp
+  b <- tmp$CompIlr$BetweenComp
   b <- clo(b, total = 1440)
   b <- as.data.table(b)
   b <- unique(b)
@@ -36,15 +37,14 @@ bsubmargins <- function (data, substitute, minute = 60) {
   
   ID <- 1 # why re.form = NA but still needs this?
   min <- as.integer(minute)
-  psi <- data$CompIlr$psi
+  psi <- tmp$CompIlr$psi
   
   # generate possible substitution
-  vn <- colnames(substitute) 
-  
+
   # list to store final output
   allout <- list()
   
-  for(i in vn) {
+  for(i in colnames(substitute)) {
     posub <- copy(substitute)
     posub <- as.data.table(posub)
     posub <- posub[(get(i) != 0)]
@@ -64,15 +64,14 @@ bsubmargins <- function (data, substitute, minute = 60) {
     comp <- vector('list', length = nrow(b))
     sub <- NULL
     
-    for (j in 1:min) {
+    for (j in seq_len(min)) {
       sub <- posub * j
-      for (k in 1:nrow(sub)) {
-        for (l in 1:nrow(b)) {
+      for (k in seq_len(nrow(sub))) {
+        for (l in seq_len(nrow(b))) {
           newcomp <- b[l, ] + sub[k, ]
           names(newcomp) <- paste0(names(substitute))
           misub <- sub[k, get(i)]
           comp[[l]] <- cbind(b[l, ], newcomp, misub)
-          # fix
         }
         subd <- as.data.table(do.call(rbind, comp))
 
@@ -105,9 +104,9 @@ bsubmargins <- function (data, substitute, minute = 60) {
         wilr <- matrix(0, nrow = nrow(subd), ncol = ncol(bilr))
         wilr <- as.data.table(wilr)
         
-        names(bilr) <- c(paste0("bilr", 1:ncol(bilr)))
-        names(tilr) <- c(paste0("bilr", 1:ncol(tilr)))
-        names(wilr) <- c(paste0("wilr", 1:ncol(wilr)))
+        colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
+        colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+        colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
         
         ## substitution dataset
         subd <- cbind(subd, tilr, wilr)
@@ -119,10 +118,10 @@ bsubmargins <- function (data, substitute, minute = 60) {
         
         # prediction
         ## substitution
-        predsub <- as.data.table(fitted(data$Results, newdata = subd, re.form = NA, summary = FALSE))
+        predsub <- as.data.table(fitted(tmp$BrmModel, newdata = subd, re.form = NA, summary = FALSE))
         
         ## no change
-        predsame <- as.data.table(fitted(data$Results, newdata = samed, re.form = NA, summary = FALSE))
+        predsame <- as.data.table(fitted(tmp$BrmModel, newdata = samed, re.form = NA, summary = FALSE))
 
         # calculate difference between substitution and no change
         preddif <- predsub - predsame

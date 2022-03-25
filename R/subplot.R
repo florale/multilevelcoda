@@ -21,7 +21,7 @@
 #' ## TODO
 #' 
 #' data(mcompd)
-#' plotsub(data = wsubtest$MVPA, iv = "sleep", dv = "stress")
+#' plotsub(data = bsubctest$TST, iv = "sleep", dv = "stress")
 #' 
 plotsub <- function(data, iv, dv, font = "Times New Roman") {
   

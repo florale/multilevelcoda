@@ -1,15 +1,18 @@
-#' Computing brms model for compostion predicting an outcome
+#' Computing brms model for between-person and within-person multilevel compositional data analysis,
+#' with composition as the predictor.
 #' 
 #' @param formula A object of class \code{formula}, \code{brmsformula}:
-#' @param formula A symbolic description of the model to be fitted.
-#' @param compilr A object of class \code{compilr} containing composition, ILR coordinates,
-#' @param compilr used in the model.
-#' @param data An object of class \code{data.frame} (or one that can be coerced to that class) 
-#' @param data containing data of all variables other than ILR coordinates used in the model. 
+#' A symbolic description of the model to be fitted.
+#' @param compilr A \code{compilr} object containing composition, ILR coordinates,
+#' used in the model.
+#' @param ... Further arguments passed to \code{\link{brm}}.
+#' 
 #' @return A list with two elements
 #' \itemize{
 #'   \item{\code{CompIlr}}{ A object of class \code{compilr} used in the \code{brm} model. }
-#'   \item{\code{Results}}{ An object of class \code{brmsfit}, which contains the posterior draws along with many other useful information about the model.}
+#'   \item{\code{Results}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   along with many other useful information about the model.}
+#'   
 #' @importFrom brms brm
 #' @export
 #' @examples
@@ -17,30 +20,31 @@
 #' data(sbp)
 #'
 #' ## compute compositions and ILR coordinates
-#' compilrtest <- compilr(data = mcompd[, 1:6], sbp = sbp, idvar = "ID")
-#'
+#' cilr <- compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' 
+#' ## inspect names of ILR coordinates bfore passing to 'brm' model
+#' names(cilr$BetweenILR)
+#' names(cilr$WithinILR)
+#' 
 #' ## run brmcoda model
-#' brmcodatest <- brmcoda(data = mcompd, compilr = compilrtest, 
-#' formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID))
-#'
+#' mcm <- brmcoda(compilr = cilr, 
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + Age + (1 | ID), 
+#'                core = 8, chain = 4)
+#' 
+#' print(mcm$BrmModel)
+#' 
 #' ## clean-up
-#' rm(mcompd, sbp, compilrtest, brmcodatest)
-brmcoda <- function (compilr, formula, data) {
+#' rm(mcompd, sbp, cilr, mcm)
+brmcoda <- function (formula, compilr, ...) {
+
+  tmp <- cbind(compilr$data, compilr$BetweenILR, compilr$WithinILR)
   
-  bilr <- compilr$BetweenILR
-  wilr <- compilr$WithinILR
-  
-  names(bilr) <- c(paste0("bilr", 1:ncol(bilr)))
-  names(wilr) <- c(paste0("wilr", 1:ncol(wilr)))
-  
-  copyd <- cbind(data, bilr, wilr)
-  
-  m <- brm(eval(formula),
-           data = copyd,
-           chain = 4, core = 8)
+  m <- brm(formula,
+           data = tmp,
+           ...)
   
   out <- list(
     CompIlr = compilr,
-    Results = m)
+    BrmModel = m)
 
 }
