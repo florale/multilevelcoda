@@ -24,5 +24,5 @@ at within-person level.
 }
 \examples{
 ## TODO
-wsubtest <- wsub(data = brmcodatest, substitute = posubtest, minute = 10)
+wsubtest <- wsub(data = mcm, substitute = posubtest, minute = 10)
 }

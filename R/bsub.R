@@ -13,7 +13,7 @@ utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstit
 #' @param minute A integer or numeric value specifying the minute that 
 #' compositional variable are substituted to/from. Default is \code{60L}.
 #' 
-#' @return A list
+#' @return A list of results from substitution models for all compositional variables.
 #' @importFrom data.table as.data.table copy := 
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom extraoperators %snin% %sin%
@@ -25,7 +25,7 @@ utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstit
 #' 
 #' data(mcompd)
 #' data(sbp)
-#' posubtest <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+#' ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' 
 #' bsubtest <- bsub(data = mcm, substitute = posubtest, minute = 10)
 #' 
@@ -63,7 +63,7 @@ bsub <- function(data, substitute, minute = 60L) {
   # Compute compositional mean
   b <- tmp$CompIlr$BetweenComp
   
-  mcomp <- mean.acomp(b)
+  mcomp <- mean(b, robust = TRUE)
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
   names(mcomp) <- paste0("B", names(mcomp))

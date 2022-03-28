@@ -35,8 +35,7 @@
 #' ## Example 1 - Dataset with no 0
 #' data(mcompd)
 #' data(sbp)
-#' cilr1 <- compilr(data = mcompd, sbp = sbp, 
-#'                  composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' cilr1 <- compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' ## Example 2 - Dataset with 0s
 #' ## Impute a 0 in 'mcompd'
@@ -63,9 +62,8 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
                  ncol(sbp)))
   }
 
-  tmp <- copy(data)
-  tmp <- as.data.table(tmp)
-  
+  tmp <- as.data.table(data)
+
   psi <- gsi.buildilrBase(t(sbp))
   
   ## 0 imputation
@@ -74,7 +72,7 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
                   "It is now imputed using the Log-ratio EM algorithm.",
                   "For more details, please see ?zCompositions::lrEM",
                   "If you would like to deal with zeros using other methods,",
-                  "please do so before using 'compilr'.",
+                  "please do so before running 'compilr'.",
                   sep = "\n"))
     
     dl1 <- rep(1440, length(composition))
@@ -109,8 +107,11 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
   
-  if(any(c(colnames(bilr), colnames(wilr), colnames(tilr))) %in% colnames(data)) {
-    stop(sprintf("data should not have any column names starting with 'bilr', 'wilr', or 'ilr'."))
+  if(any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
+    stop(paste("data should not have any column names starting with 'bilr', 'wilr', or 'ilr'",
+               "as these variables will be used in subsequent models.",
+               "Please rename them before running 'compilr'.",
+               sep = "\n"))
   }
   
   out <- list(

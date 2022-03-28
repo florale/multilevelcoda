@@ -7,7 +7,4 @@
 #' #' @importFrom 
 #' #' @export
 #' #' @examples
-#' noneg <- function(x){
-#'   res <- ifelse(x < 0, NA, x)
-#'   return(res)
 #' }

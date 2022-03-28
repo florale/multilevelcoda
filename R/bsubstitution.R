@@ -1,7 +1,8 @@
 ## make Rcmd check happy
 utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstituted"))
-#' Between-person Substitution Model (from sample's compositional mean)
+#' @title Between-person Substitution Model (from sample's compositional mean)
 #'
+#' @description 
 #' Estimate the difference in outcomes
 #' when compositional variables are substituted for a specific time period.
 #' at between-person level.
@@ -18,40 +19,41 @@ utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstit
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom insight find_predictors
+#' @importFrom emmeans ref_grid
 #' @export
 #' @examples
 #'
 #' data(mcompd)
 #' data(sbp)
-#' ps <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+#' ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #'
-#' bsubctest2 <- bsubc(data = mcm, substitute = ps, minute = 10)
+#' bsubctest2 <- bsubc(data = mcmc, substitute = ps, minute = 10)
 #'
 #' ## cleanup
 #' rm(bsubtest, mcompd, sbp, ps)
 bsubc <- function(data, substitute, minute = 60L) {
 
-  if(isFALSE(missing(minute))) {
+  if (isFALSE(missing(minute))) {
     if (isFALSE(is.integer(minute))) {
       if (isFALSE(is.numeric(minute))) {
         stop(sprintf("'minute' must be an integer or a numeric value > 0."))
       }
     }
 
-  } else if (isTRUE(missing(minute))) {
+  } else {
     minute <- 60L
   }
 
   if (isFALSE(identical(ncol(substitute), length(data$CompIlr$composition)))) {
-    stop(sprintf("The number of columns in substitute (%d) must be the
-                 same as the compositional variables in composition (%d).",
+    stop(sprintf("The number of columns in 'substitute' (%d) must be the
+  same as the compositional variables in 'composition' (%d).",
                  ncol(substitute),
                  length(data$CompIlr$composition)))
   }
 
   if (isFALSE(identical(colnames(substitute), data$CompIlr$composition))) {
     stop(sprintf("The names of compositional variables must be the same
-                 in substitute (%s) and composition (%s).",
+  in 'substitute' (%s) and 'composition' (%s).",
                  colnames(substitute),
                  data$CompIlr$composition))
   }
@@ -59,19 +61,14 @@ bsubc <- function(data, substitute, minute = 60L) {
   tmp <- copy(data)
 
   # Compute compositional mean
-  b <- tmp$CompIlr$BetweenComp
-
-  mcomp <- mean.acomp(b)
-  mcomp <- clo(mcomp, total = 1440)
-  mcomp <- as.data.table(t(mcomp))
-  names(mcomp) <- paste0("B", names(mcomp))
-
+  mcomp <- .get.mcomp(tmp)
+  
   # input for substitution model
   ID <- 1
   min <- as.integer(minute)
   psi <- tmp$CompIlr$psi
   
-  out <- list()
+  iout <- vector("list")
   
   # deal with covariates
   ilrn <- c(names(tmp$CompIlr$BetweenILR), names(tmp$CompIlr$WithinILR))
@@ -89,20 +86,22 @@ bsubc <- function(data, substitute, minute = 60L) {
       iv <- i # central compositional variable
       
       # lists to store results - TODO
-      nd <- NULL
-      newd <- vector("list")
+      kout <- vector("list", length = nrow(posub)) # a list to store all possible pairwise substitution for 1 specific period
+      newd <- vector("list", length = min) # # a list to store all possible pairwise substitution for all period as specified by user 
       
       # Generate substitution dataset for predictions
-      for (j in seq_len(min)) {
+      for (j in seq_len(min)) { # time level
         sub <- posub * j
-        for (k in seq_len(nrow(sub))) {
+        for (k in seq_len(nrow(sub))) { # substitution level
           newcomp <- mcomp + sub[k, ]
-          names(newcomp) <- paste0(names(substitute))
-          nd[[k]] <- cbind(mcomp, newcomp, sub[k, ][[i]])
+          names(newcomp) <- colnames(substitute)
+
+          kout[[k]] <- cbind(mcomp, newcomp, sub[k, ][[i]])
         }
-        newd[[j]] <- do.call(rbind, nd)
+        newd[[j]] <- do.call(rbind, kout)
       }
-      newd <- as.data.table(do.call(rbind, newd))
+      # Here is a dataset of all possible substitution from sample's mean across all periods
+      newd <- as.data.table(do.call(rbind, newd)) 
       
       # Add more useful information to the final output
       colnames(newd)[ncol(newd)] <- "MinSubstituted"
@@ -120,13 +119,9 @@ bsubc <- function(data, substitute, minute = 60L) {
       newd[, (cols) := lapply(.SD, noneg), .SDcols = cols]
       newd <- newd[complete.cases(newd), ]
       
-      # Add comp and ilr for predictions
-      
-      bn <- colnames(newd) %sin% names(mcomp)
-      tn <- colnames(newd) %sin% names(newcomp)
-      
-      bcomp <- acomp(newd[, bn, with = FALSE]) 
-      tcomp <- acomp(newd[, tn, with = FALSE])
+      # Add comp and ilr for predictions      
+      bcomp <- acomp(newd[, colnames(tmp$CompIlr$BetweenComp), with = FALSE]) 
+      tcomp <- acomp(newd[, tmp$CompIlr$composition, with = FALSE])
       
       bilr <- ilr(bcomp, V = psi) 
       tilr <- ilr(tcomp, V = psi) 
@@ -148,30 +143,30 @@ bsubc <- function(data, substitute, minute = 60L) {
       ysame <- as.data.table(fitted(tmp$BrmModel, newdata = samed, re.form = NA, summary = FALSE))
       
       # Difference between substitution and no change
-      ydiff <- ysub - ysame
-      ydiff <- as.data.table(describe_posterior(ydiff, centrality = "mean",
-                                                  ci = 0.95, ci_method = "eti"))
-      ydiff <- ydiff[, .(Mean, CI_low, CI_high)]
+      yd <- ysub - ysame
+      yd <- as.data.table(describe_posterior(yd, centrality = "mean",
+                                              ci = 0.95, ci_method = "eti"))
+      yd <- yd[, .(Mean, CI_low, CI_high)]
       
       # Save results
-      result <- do.call(cbind, ydiff)
+      result <- do.call(cbind, yd)
       result <- cbind(result, newd[, c("MinSubstituted", "Substitute", "Predictor")])
       result <- as.data.table(result)
       names(result) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
       
-      ## Final results for entire composition
-      out[[i]] <- result
+      # Final results for entire composition
+      iout[[i]] <- result
     }
-    return(out)
+    return(iout)
     
     } else {
       
-      refcv <- as.data.table(ref_grid(tmp$BrmModel) @grid)
-      cv <- colnames(refcv) %snin% c(ilrn, ".wgt.")
+      refg <- as.data.table(ref_grid(tmp$BrmModel) @grid)
+      cv <- colnames(refg) %snin% c(ilrn, ".wgt.")
       
-      refcv <- refcv[, cv, with = FALSE] # reference grid for covariates
+      refg <- refg[, cv, with = FALSE] # reference grid for covariates
       
-      for(i in colnames(substitute)) {
+      for (i in colnames(substitute)) {
         posub <- copy(substitute)
         posub <- as.data.table(posub)
         posub <- posub[(get(i) != 0)]
@@ -213,12 +208,8 @@ bsubc <- function(data, substitute, minute = 60L) {
         newd <- newd[complete.cases(newd), ]
         
         # Now add composition and ilr for prediction
-        
-        bn <- colnames(newd) %sin% names(mcomp)
-        tn <- colnames(newd) %sin% names(newcomp)
-        
-        bcomp <- acomp(newd[, bn, with = FALSE])
-        tcomp <- acomp(newd[, tn, with = FALSE])
+        bcomp <- acomp(newd[, colnames(tmp$CompIlr$BetweenComp), with = FALSE]) 
+        tcomp <- acomp(newd[, tmp$CompIlr$composition, with = FALSE])
         
         bilr <- ilr(bcomp, V = psi)
         tilr <- ilr(tcomp, V = psi)
@@ -229,42 +220,43 @@ bsubc <- function(data, substitute, minute = 60L) {
         colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
         colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
         
-        ## Loop through covariates to  get AME
-        ylevs <- list()
+        ## Loop through covariates to get AME
+        mout <- vector("list", length = nrow(refg))
         
-        for(m in seq_len(nrow(refcv))) {
-          newd <- cbind(newd, refcv[m, ])
-          
+        for(m in seq_len(nrow(refg))) {
           ## Substitution dataset
-          subd <- cbind(newd, tilr, wilr, ID)
+          subd <- cbind(newd, tilr, wilr, ID, refg[m, ])
           
           ## No change dataset
-          samed <- cbind(newd, bilr, wilr, ID)
+          samed <- cbind(newd, bilr, wilr, ID, refg[m, ])
           
           # Generate prediction
           ysub <- as.data.table(fitted(tmp$BrmModel, newdata = subd, re.form = NA, summary = FALSE))
           ysame <- as.data.table(fitted(tmp$BrmModel, newdata = samed, re.form = NA, summary = FALSE))
           
           # Difference between substitution and no change
-          ydiff <- ysub - ysame
-          ylevs[[m]] <- ydiff
+          yd <- ysub - ysame
+          if (nrow(refg) == 1) {
+            myd <- yd
+            } else {
+              mout[[m]] <- yd
+              myd <- Reduce(`+`, mout) / length(mout)
+            }
           }
-        
         # AME across covariates and posteriors
-        mydiff <- Reduce(`+`, ylevs)/length(ylevs)
-        mydiff <- as.data.table(describe_posterior(mydiff, centrality = "mean",
-                                                  ci = 0.95, ci_method = "eti"))
-        mydiff <- mydiff[, .(Mean, CI_low, CI_high)]
+        myd <- as.data.table(describe_posterior(myd, centrality = "mean",
+                                                ci = 0.95, ci_method = "eti"))
+        myd <- myd[, .(Mean, CI_low, CI_high)]
         
         # Save results
-        result <- do.call(cbind, mydiff)
+        result <- do.call(cbind, myd)
         result <- cbind(result, newd[, c("MinSubstituted", "Substitute", "Predictor")])
         result <- as.data.table(result)
         names(result) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
         
         # Finally, entire composition
-        out[[i]] <- result
+        iout[[i]] <- result
         }
-      return(out)
+      return(iout)
     }
   }

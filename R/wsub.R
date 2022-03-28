@@ -35,7 +35,7 @@ wsub <- function(data, substitute, minute = 60) {
   # Compute compositional mean
   b <- tmp$CompIlr$BetweenComp
   
-  mcomp <- mean.acomp(b)
+  mcomp <- mean(b, robust = TRUE)
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
   names(mcomp) <- paste0("B", names(mcomp))

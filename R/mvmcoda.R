@@ -1,11 +1,17 @@
-#' A series of functions for multilevel compositional data analysis with
-#' composition as the outcome.
+#' Fit Bayesian generalised (non-)linear multivariate multilevel compositional model 
+#' via full Bayesian inference using Stan,
+#' when composition is the outcome.
 #'
-#' This provides a few sentence description about the example function.
 #'
+#' This function utilises 
+#' @param formula A object of class \code{\link{brmsformula}}, \code{\link{mvbrmsformula}}:
+#' A symbolic description of the model to be fitted. 
+#' Details of the model specification can be found in \code{\link{mvbrmsformula}}.
+#' @param compilr A \code{compilr} object containing data of composition, ILR coordinates,
+#' and other variables used in the model.
 #' @param ... Further arguments passed to \code{\link{brm}}.
+#' 
 #' @return 
-#' @importFrom compositions acomp
 #' @importFrom reshape2 melt
 #' @importFrom brms brm
 #' @export
@@ -13,7 +19,12 @@
 #' data(mcompd)
 #' cilr <- compilr(data = mcompd, sbp = sbp, idvar = "ID")
 #' 
-#' mvm1 <- mvmcoda(compilr = cilr, formula = value ~ variable + variable:STRESS - 1 + (variable -1| ID))
+#' ## inspect names of ILR coordinates bfore passing to 'brm' model
+#' names(cilr$TotalILR)
+#' 
+#' ## run mvmcoda
+#' mvm1 <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID))
+#' 
 mvmcoda <- function(compilr, formula, ...) {
   
   message("Please be patient! 'mvmcoda' is working hard...")
@@ -23,14 +34,8 @@ mvmcoda <- function(compilr, formula, ...) {
 
   tmpd <- cbind(data, tilr)
   
-  vn <- colnames(tmpd) %snin% names(tilr)
-  ilrn <- colnames(tmpd) %sin% names(tilr)
-  
-  sd <- melt(tmpd, id.vars = vn,
-             measure.vars = ilrn)
-  
   m <- brm(eval(formula),
-           data = sd,
+           data = tmpd,
            ...)
   
   out <- list(

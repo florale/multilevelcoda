@@ -4,17 +4,21 @@
 \alias{compilr}
 \title{Compute Between-person, Within-person, and Total Composition and Isometric log ratio transform of a (dataset of) composition(s)}
 \usage{
-compilr(data, sbp, idvar = "ID")
+compilr(data, sbp, composition, idvar = "ID")
 }
 \arguments{
-\item{data}{A composition or dataset of composition. Required.}
+\item{data}{A \code{data.frame} or \code{data.table}
+containing data of all variables used in the analysis.
+It must include a composition, a ID variable, and others. Required.}
 
 \item{sbp}{A signary matrix indicating sequential binary partition. Required.}
 
-\item{idvar}{A character string indicating the name of the variable containing IDs.}
+\item{composition}{A character vector specifying the names of compositional variables. Required.}
+
+\item{idvar}{A character string specifying the name of the variable containing IDs. Default is \code{ID.}}
 }
 \value{
-A list with ten elements.
+A list with eleven elements.
 \itemize{
 \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
@@ -25,9 +29,10 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
 \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
 \item{\code{TotalILR}}{ Isometric log ratio transform of total composition.}
-\item{\code{data}}{ The user's dataset.}
+\item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
-\item{\code{sbp}}{ The user-defined sequential binary partition matrix. }
+\item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
+\item{\code{composition}}{ Names of compositional variables.}
 \item{\code{idvar}}{ Name of the variable containing IDs.}
 }
 }
@@ -36,11 +41,19 @@ This function is designed to help calculate sets of compositions and IRLs
 for Multilevel Compositional Data models
 }
 \examples{
-
+## Example 1 - Dataset with no 0
 data(mcompd)
-compilrtest <- compilr(data = mcompd[, 1:6], sbp = sbp, idvar = "ID")
-str(compilrtest)
+data(sbp)
+cilr1 <- compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+
+## Example 2 - Dataset with 0s
+## Impute a 0 in 'mcompd'
+mcompd[3, 1] <- 0
+cilr2 <- compilr(data = mcompd, sbp = sbp, 
+                 composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+
+str(cilr1)
+
 ## cleanup
-rm(compilrtest, mcompd)
-##TODO - check for 0 in data - ask users to check
+rm(cilr1, cilr2, mcompd, sbp)
 }

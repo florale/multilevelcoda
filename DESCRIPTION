@@ -28,15 +28,16 @@ Imports:
     stats,
     data.table (>= 1.12.0),
     compositions,
+    zCompositions,
+    bayestestR,
+    brms,
     extraoperators,
     ggplot2,
     cowplot,
-    dplyr,
     ggsci,
-    bayestestR,
-    brms,
     reshape2,
-    zCompositions
+    emmeans,
+    insight
 Suggests: 
     testthat (>= 3.0.0),
     covr,

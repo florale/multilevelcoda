@@ -13,13 +13,13 @@
 #' 
 #' data(mcompd)
 #' 
-#' s1 <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-#' s2 <- possub(data = mcompd, composition = c("WAKE", "MVPA", "LPA", "SB"))
+#' ps1 <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' ps2 <- possub(data = mcompd, composition = c("WAKE", "MVPA", "LPA", "SB"))
 #' 
 #' print(s2)
 #' 
 #' ## cleanup
-#' rm(mcompd, s1, s2)
+#' rm(mcompd, ps1, ps2)
 possub <- function(data, composition) {
   
   count <- length(composition)
@@ -47,3 +47,4 @@ possub <- function(data, composition) {
   
   return(possub)
 }
+

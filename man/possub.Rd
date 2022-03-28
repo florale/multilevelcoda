@@ -4,14 +4,13 @@
 \alias{possub}
 \title{Possible Pairwise Substitution}
 \usage{
-possub(count, data, idvar)
+possub(data, composition)
 }
 \arguments{
-\item{count}{A numeric value indicating the number of variables within the composition.}
+\item{data}{A \code{data.frame} or \code{data.table}
+containing the composition used in the analysis. Required.}
 
-\item{data}{A dataset of composition and IDs. Ideally ID is the last column. Required.}
-
-\item{idvar}{A string character indicating the name of the ID variable. Default is ID.}
+\item{composition}{A character vector specifying the names of compositional variables. Required.}
 }
 \value{
 A data table of all possible pairwise substitution.
@@ -23,10 +22,11 @@ This function generate a dataset of all possible pairwise substitution of a comp
 
 data(mcompd)
 
-posubtest <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+ps1 <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+ps2 <- possub(data = mcompd, composition = c("WAKE", "MVPA", "LPA", "SB"))
 
-str(posubtest)
+print(s2)
 
 ## cleanup
-rm(mcompd, posubtest)
+rm(mcompd, ps1, ps2)
 }

@@ -2,21 +2,50 @@
 % Please edit documentation in R/subcoda.R
 \name{subcoda}
 \alias{subcoda}
-\title{A series of functions for single level models}
+\title{A series of functions for single level compositional models}
 \usage{
-subcoda(compilr)
+subcoda(data, composition, sbp, formula, minute, substitute, ...)
 }
 \arguments{
-\item{x}{A vector.}
+\item{data}{A composition or dataset of composition. Required.}
+
+\item{composition}{A string character indicating the names of compositional variables in \code{data}.}
+
+\item{sbp}{A signary matrix indicating sequential binary partition. Required.}
+
+\item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
-The vector coerced to numeric vector in a data table.
+
 }
 \description{
-This provides a few sentence description about the example function.
+The \code{\link{subcoda}} function wraps a series of
+The workflows is as follow:
+It firstly compute composition and ILR coordinates,
+}
+\details{
+It fit a Bayesian single-level compositional model to compositional predictors
+and users' choices of outcomes and other covariates.
 }
 \examples{
 
-# just use total comp for this
+data(mcompd)
+data(sbp)
 
+davg <- mcompd[, .(SB = mean(SB, na.rm = TRUE),
+                   LPA = mean(LPA, na.rm = TRUE),
+                   MVPA = mean(MVPA, na.rm = TRUE),
+                   TST = mean(TST, na.rm = TRUE),
+                   WAKE = mean(WAKE, na.rm = TRUE),
+                   TRESS = mean(STRESS, na.rm = TRUE),
+                   Age = mean (Age, na.rm = TRUE),
+                   Female = na.omit(Female)[1]),
+                   by = .(ID)]
+
+scoda <- subcoda(data = davg, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                       sbp = sbp, minute = 10, substitute = posubtest,
+                       formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4)
+ 
+ ## cleanup
+ rm(mcompd, sbp, davg, scoda)
 }
