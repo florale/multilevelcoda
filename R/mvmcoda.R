@@ -12,27 +12,25 @@
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return 
-#' @importFrom reshape2 melt
 #' @importFrom brms brm
 #' @export
 #' @examples
 #' data(mcompd)
-#' cilr <- compilr(data = mcompd, sbp = sbp, idvar = "ID")
+#' data(sbp)
+#' cilr <- compilr(data = mcompd, sbp = sbp)
 #' 
 #' ## inspect names of ILR coordinates bfore passing to 'brm' model
 #' names(cilr$TotalILR)
 #' 
 #' ## run mvmcoda
-#' mvm1 <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID))
+#' mvm <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+#'                 chains = 4, cores = 8)
 #' 
 mvmcoda <- function(compilr, formula, ...) {
   
-  message("Please be patient! 'mvmcoda' is working hard...")
-  start_time <- Sys.time()
-  
-  tilr <- compilr$TotalILR
+  message("Please be patient, mvmcoda is working hard...")
 
-  tmpd <- cbind(data, tilr)
+  tmpd <- cbind(compilr$data, compilr$TotalILR)
   
   m <- brm(eval(formula),
            data = tmpd,
@@ -42,13 +40,5 @@ mvmcoda <- function(compilr, formula, ...) {
     CompIlr = compilr,
     BrmModel = m)
   
-  end_time <- Sys.time()
-  
-  message(paste(
-  sprintf("'mvmcoda' took %d to do hard work.", end_time - start_time),
-          "If you would like to run our model faster,",
-          "consider using parallelisation with 'brm'",
-          "See ?brms::brm for details.",
-  sep = "\n"))
-  
+  return(out)
 }

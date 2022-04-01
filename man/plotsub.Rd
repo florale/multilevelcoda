@@ -4,20 +4,20 @@
 \alias{plotsub}
 \title{Generate substitution plot}
 \usage{
-plotsub(data, iv, dv, font = "Times New Roman", ...)
+plotsub(data, x, y, font = "Times New Roman", ...)
 }
 \arguments{
 \item{data}{A dataset to use for plot.
 It must be a component of a list resulted from one of the following functions:
-\code{wsub}, \code{bsub}, \code{wsubmargins}, \code{bsubmargins}.}
+\code{\link{wsub}}, \code{\link{bsub}}, \code{\link{wsubmargins}}, \code{\link{bsubmargins}}.}
 
-\item{iv}{A character string indicating name of the compostional predictor variable.}
+\item{x}{A character string specifying name of the compostional predictor variable.}
 
-\item{dv}{A character string indicating the name of the outcome variable.}
+\item{y}{A character string specifying the name of the outcome variable.}
 
-\item{font}{A character string indicating the name of user's preferred font. Default is \code{Times New Roman}.}
+\item{font}{A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.}
 
-\item{...}{Further arguments passed to \code{ggplot}.}
+\item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }
 \value{
 A ggplot graph object showing the estimated difference in outcome when
@@ -31,6 +31,6 @@ are substituted for a specific period of time.
 \examples{
 
 data(mcompd)
-plotsub(data = bsubctest2$TST, iv = "sleep", dv = "stress")
+plotsub(data = bsubmarginstest$TST, x = "sleep", y = "stress")
 
 }

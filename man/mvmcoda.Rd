@@ -29,9 +29,10 @@ data(mcompd)
 cilr <- compilr(data = mcompd, sbp = sbp, idvar = "ID")
 
 ## inspect names of ILR coordinates bfore passing to 'brm' model
-names(cilr$BetweenILR)
+names(cilr$TotalILR)
 
 ## run mvmcoda
-mvm1 <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID))
+mvm1 <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+                chains = 4, cores = 8)
 
 }

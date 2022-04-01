@@ -27,7 +27,7 @@ along with many other useful information about the model.}
 }
 \description{
 This function fits a \code{brm} model to
-between-person and within-person ILR coordinates as predictor
+between-person and within-person ILR coordinates as predictor.
 }
 \examples{
 data(mcompd)
@@ -42,9 +42,12 @@ names(cilr$WithinILR)
 
 ## run brmcoda model
 mcm <- brmcoda(compilr = cilr, 
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + Age + (1 | ID), 
+               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
                core = 8, chain = 4)
 
+mcmc <- brmcoda(compilr = cilr, 
+               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
+               core = 8, chain = 4)
 print(mcm$BrmModel)
 
 ## clean-up

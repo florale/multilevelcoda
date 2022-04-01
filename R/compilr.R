@@ -5,7 +5,7 @@
 #'
 #' @param data A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
-#' It must include a composition, a ID variable, and others. Required.
+#' It must include a composition and a ID variable. Required.
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' @param composition A character vector specifying the names of compositional variables. Required.
 #' @param idvar A character string specifying the name of the variable containing IDs. Default is \code{ID.}
@@ -108,8 +108,8 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
   colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
   
   if(any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
-    stop(paste("data should not have any column names starting with 'bilr', 'wilr', or 'ilr'",
-               "as these variables will be used in subsequent models.",
+    stop(paste("data should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
+               "these variables will be used in subsequent models.",
                "Please rename them before running 'compilr'.",
                sep = "\n"))
   }

@@ -6,11 +6,11 @@
 #'
 #' @param data A dataset to use for plot. 
 #' It must be a component of a list resulted from one of the following functions:
-#' \code{wsub}, \code{bsub}, \code{wsubmargins}, \code{bsubmargins}.
-#' @param iv A character string indicating name of the compostional predictor variable.
-#' @param dv A character string indicating the name of the outcome variable.
-#' @param font A character string indicating the name of user's preferred font. Default is \code{Times New Roman}.
-#' @param ... Further arguments passed to \code{ggplot}.
+#' \code{\link{wsub}}, \code{\link{bsub}}, \code{\link{wsubmargins}}, \code{\link{bsubmargins}}.
+#' @param x A character string specifying name of the compostional predictor variable.
+#' @param y A character string specifying the name of the outcome variable.
+#' @param font A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.
+#' @param ... Further arguments passed to \code{\link{ggplot}}.
 #' 
 #' @return A ggplot graph object showing the estimated difference in outcome when 
 #' each pair of compositional variables are substituted for a specific time.
@@ -22,9 +22,9 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = bsubmarginstest$TST, iv = "sleep", dv = "stress")
+#' plotsub(data = bsubmarginstest$TST, x = "sleep", y = "stress")
 #' 
-plotsub <- function(data, iv, dv, font = "Times New Roman", ...) {
+plotsub <- function(data, x, y, font = "Times New Roman") {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame")))) {
     stop("data must be a data table or data frame")
@@ -41,40 +41,48 @@ plotsub <- function(data, iv, dv, font = "Times New Roman", ...) {
                 alpha = 1 / 10, size = 1 / 10) +
     scale_color_simpsons() + # overwrite this to specify colour
     facet_grid(~ Substitute) +
-    xlab(paste("Change in", eval(iv), sep = " ")) +
-    ylab(paste("Change in", eval(dv), sep = " ")) +
+    xlab(paste("Change in", eval(x), sep = " ")) +
+    ylab(paste("Change in", eval(y), sep = " ")) +
     theme_cowplot(font_family = eval(font), font_size = 12, line_size = 0)
   
   return(niceplot)
 }
 
-#' #' Generate marginal effects of composition plot
-#' #'
-#' #' This function is useful for visualising the
-#' #' estimated changes in compositional outcome variable
-#' #' associated with a specific change in some independent variable.
-#' #'
-#' #' @param data A dataset to use for plot. 
-#' #' It must be a \code{\link{mvmcoda}} or \code{\link{mvcoda}} object 
-#' #' @param compilr A \code{compilr} object containing data of composition, ILR coordinates,
-#' #' and other variables used for plot.
-#' #' @param iv A character string indicating name of the predictor variable.
-#' #' @param dv A character string indicating the name of the compositional outcome variable.
-#' #' @param font A character string indicating the name of user's preferred font. Default is \code{Times New Roman}.
-#' #' @param ... Further arguments passed to \code{ggplot}.
-#' #' 
-#' #' @return A ggplot graph object showing the estimated difference in outcome when 
-#' #' each pair of compositional variables are substituted for a specific time.
-#' #' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_ribbon facet_grid xlab ylab
-#' #' @importFrom cowplot theme_cowplot
-#' #' @importFrom ggsci scale_color_simpsons
-#' #' @importFrom data.table copy
-#' #' @export
-#' #' @examples
-#' #' 
-#' #' data(mcompd)
-#' #' plotsub(data = bsubctest2$TST, iv = "sleep")
-#' plotcoda <- function(data, iv) {
-#'   psi <- mvcoda$psi
-#' 
-#' }
+#' Generate marginal effects of composition plot
+#'
+#' This function is useful for visualising the
+#' estimated changes in compositional outcome variable
+#' associated with a specific change in some independent variable.
+#'
+#' @param data A \code{\link{emmcoda}} object to use for plot.
+#' @param x A character string specifying name of the predictor variable.
+#' @param y A character string specifying the name of the compositional outcome variable.
+#' @param font A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.
+#' @param ... Further arguments passed to \code{\link{ggplot}}.
+#'
+#' @return A ggplot graph object showing the estimated change in compositional outcome associated with changes in predictor.
+#' @importFrom ggplot2 ggplot aes geom_area xlab ylab
+#' @importFrom cowplot theme_cowplot
+#' @importFrom ggsci scale_fill_simpsons
+#' @importFrom data.table copy
+#' @export
+#' @examples
+#'
+#' data(mcompd)
+#' p <- plotemmc(data = emtest, x = "stress", y = "behaviours")
+plotemmc <- function(data, x, y, font = "Times New Roman") {
+
+  tmp <- copy(data)
+  specs <- tmp$Predictor
+    
+  niceplot <- ggplot(tmp$emmLong, aes(get(specs), value, fill = variable)) +
+    geom_area(alpha = .9, size = 1.5, colour = "white") +
+    scale_fill_simpsons()+
+    xlab(paste("Change in", eval(x), sep = " ")) +
+    ylab(paste("Change in", eval(y), sep = " ")) +
+    guides(colour = guide_legend(eval(y))) + 
+    theme_cowplot(font_family = eval(font), font_size = 12, line_size = .25)
+  
+  niceplot
+}
+

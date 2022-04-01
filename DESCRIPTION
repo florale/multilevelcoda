@@ -37,7 +37,9 @@ Imports:
     ggsci,
     reshape2,
     emmeans,
-    insight
+    insight,
+    tidyr,
+    hrbrthemes
 Suggests: 
     testthat (>= 3.0.0),
     covr,

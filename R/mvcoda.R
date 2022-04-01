@@ -3,29 +3,30 @@
 #' Fit Bayesian generalised (non-)linear multivariate compositional model 
 #' via full Bayesian inference using Stan,
 #' when composition is the outcome.
-#'
+#' 
+#' @param data A \code{data.frame} or \code{data.table}
+#' containing data of all variables used in the analysis. 
+#' It must include a composition and a ID variable. Required.
 #' @param formula A object of class \code{\link{brmsformula}}, \code{\link{mvbrmsformula}}:
 #' A symbolic description of the model to be fitted. 
+#' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' Details of the model specification can be found in \code{\link{mvbrmsformula}}.
-#' @param compilr A \code{compilr} object containing data of composition, ILR coordinates,
-#' and other variables used in the model.
+#' @param composition A character vector specifying the names of compositional variables. Required.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return 
+#' @importFrom compositions ilr acomp gsi.buildilrBase
+#' @importFrom data.table copy as.data.table :=
 #' @importFrom reshape2 melt
 #' @importFrom brms brm
 #' @export
 #' @examples
 #' data(mcompd)
-#' cilr <- compilr(data = mcompd, sbp = sbp, idvar = "ID")
-#' 
-#' ## inspect names of ILR coordinates bfore passing to 'brm' model
-#' names(cilr$BetweenILR)
-#' 
+#' data(sbp)
 #' ## run mvcoda
-#' mv1 <- mvcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female)
+#' mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female, sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' 
-mvcoda <- function(data, composition, sbp, formula, ...) {
+mvcoda <- function(data, formula, sbp, composition, ...) {
 
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("'data' must be a data table, data frame or matrix.")
@@ -49,6 +50,13 @@ mvcoda <- function(data, composition, sbp, formula, ...) {
   ilr <- ilr(comp, V = psi)
   
   colnames(ilr) <- paste0("ilr", seq_len(ncol(ilr)))
+  
+  if(any(c(colnames(ilr)) %in% colnames(tmp))) {
+    stop(paste("data should not have any column names starting with 'ilr';",
+               "because these variables will be used in subsequent models.",
+               "Please rename them before running 'mvcoda'.",
+               sep = "\n"))
+  }
   
   tmp <- cbind(tmp, ilr)
   

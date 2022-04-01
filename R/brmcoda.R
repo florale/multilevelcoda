@@ -15,7 +15,7 @@
 #' @return A list with two elements
 #' \itemize{
 #'   \item{\code{CompIlr}}{ A object of class \code{compilr} used in the \code{brm} model. }
-#'   \item{\code{Results}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   \item{\code{BrmModel}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
 #'   
 #' @importFrom brms brm
@@ -32,17 +32,19 @@
 #' names(cilr$WithinILR)
 #' 
 #' ## run brmcoda model
+#' # unadjusted model
 #' mcm <- brmcoda(compilr = cilr, 
 #'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'                core = 8, chain = 4)
 #' 
+#' # adjusted model
 #' mcmc <- brmcoda(compilr = cilr, 
 #'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
 #'                core = 8, chain = 4)
 #' print(mcm$BrmModel)
 #' 
 #' ## clean-up
-#' rm(mcompd, sbp, cilr, mcm)
+#' rm(mcompd, sbp, cilr, mcm, mcmc)
 brmcoda <- function (formula, compilr, ...) {
 
   tmp <- cbind(compilr$data, compilr$BetweenILR, compilr$WithinILR)
@@ -54,5 +56,7 @@ brmcoda <- function (formula, compilr, ...) {
   out <- list(
     CompIlr = compilr,
     BrmModel = m)
+  
+  out
 
 }

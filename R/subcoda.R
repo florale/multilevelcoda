@@ -11,7 +11,18 @@
 #' @param composition A string character indicating the names of compositional variables in `data`.
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' @param ... Further arguments passed to \code{\link{brm}}.
-#' @return 
+#' @return A list with seven elements.
+#' \itemize{
+#'   \item{\code{BrmsModel}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   along with many other useful information about the model.}
+#'   \item{\code{SubstitutionResults}}{ A list containing the result of isotemporal substitution model
+#'   for each compositional variable.}
+#'   \item{\code{ILR}}{ Isometric log ratio transform of composition.}
+#'   \item{\code{Comp}}{A vector of class \code{acomp} representing one composition
+#'   or a matrix of class \code{acomp} representing multiple closed compositions each in one row.}
+#'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
+#'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
+#'   \item{\code{composition}}{ Names of compositional variables.}
 #' @importFrom compositions acomp ilr gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
 #' @importFrom zCompositions lrEM
@@ -165,10 +176,13 @@ subcoda <- function(data, composition, sbp, formula, minute, substitute, ...) {
   
   }
   
-  allout <- list(SubstitutionResults = out,
-                      BrmsResults = m,
-                      ILR = ilr,
-                      Comp = comp)
+  allout <- list(BrmsModel = m,
+                 SubstitutionResults = out,
+                 ILR = ilr,
+                 Comp = comp,
+                 data = data,
+                 sbp = sbp,
+                 composition = composition)
   
   return(allout)
 }
