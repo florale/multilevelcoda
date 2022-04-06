@@ -1,5 +1,6 @@
 ## make Rcmd check happy
 utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstituted"))
+
 #' Between-person Substitution Model (from sample's compositional mean)
 #'
 #' Estimate the difference in outcomes
@@ -39,7 +40,7 @@ bsub <- function(data, substitute, minute = 60L) {
         stop(sprintf("'minute' must be an integer or a numeric value > 0."))
       }
     }
-    
+
   } else if (isTRUE(missing(minute))) {
     minute <- 60L
   }
@@ -67,7 +68,7 @@ bsub <- function(data, substitute, minute = 60L) {
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
   names(mcomp) <- paste0("B", names(mcomp))
-  
+
   # generate input for substitution model
   ID <- 1
   min <- as.integer(minute)
@@ -80,11 +81,11 @@ bsub <- function(data, substitute, minute = 60L) {
     posub <- as.data.table(posub)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
-    
+
     # Get substitution variable name for substitution model
     subvar <- colnames(posub) %snin% eval(i)
     iv <- i
-    
+
     # lists to store results - TODO
     result <- NULL
     newcomp <- vector('list')
@@ -103,21 +104,14 @@ bsub <- function(data, substitute, minute = 60L) {
     newd <- as.data.table(do.call(rbind, result))
     
     # add names
-    colnames(newd)[ncol(newd)] <- "MinSubstituted"
-    newd[, Substitute := rep(subvar, length.out = nrow(newd))]
-    newd$Predictor <- iv
-    
-    # ## remove impossible reallocation that result in negative values - TODO
-    cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
-    
-    noneg <- function(x){
-      res <- ifelse(x < 0, NA, x)
-      return(res)
-    }
-    
-    newd[, (cols) := lapply(.SD, noneg), .SDcols = cols]
-    newd <- newd[complete.cases(newd), ]
-    
+    colnames(subd)[ncol(subd)] <- "MinSubstituted"
+    subd[, Substitute := rep(subvar, length.out = nrow(subd))]
+    subd$Predictor <- iv
+
+    ## remove impossible reallocation that result in negative values
+    cols <- colnames(subd) %snin% c("MinSubstituted", "Substitute", "Predictor")
+    subd <- subd[rowSums(subd[, ..cols] < 0) == 0]
+
     ## add comp and ilr
     
     bn <- colnames(newd) %sin% names(mcomp)
@@ -153,15 +147,16 @@ bsub <- function(data, substitute, minute = 60L) {
     preddif <- as.data.table(describe_posterior(preddif, centrality = "mean",
                                                 ci = 0.95, ci_method = "eti"))
     preddif <- preddif[, .(Mean, CI_low, CI_high)]
-    
+
     # save results
     out <- do.call(cbind, preddif)
     out <- cbind(out, subd[, c("MinSubstituted", "Substitute", "Predictor")])
     out <- as.data.table(out)
     names(out) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
-    
+
     ## final results for entire composition
     allout[[i]] <- out
-  }  
+  }
+  
   return(allout)
 }
