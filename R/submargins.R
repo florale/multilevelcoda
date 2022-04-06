@@ -1,0 +1,1 @@
+#' Placeholder for a function calculating the marginal single-level substituion model.

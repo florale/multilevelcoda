@@ -4,7 +4,7 @@
 \alias{plotsub}
 \title{Generate substitution plot}
 \usage{
-plotsub(data, x, y, font = "Times New Roman", ...)
+plotsub(data, x, y, font = "Times New Roman")
 }
 \arguments{
 \item{data}{A dataset to use for plot.
@@ -31,6 +31,6 @@ are substituted for a specific period of time.
 \examples{
 
 data(mcompd)
-plotsub(data = bsubmarginstest$TST, x = "sleep", y = "stress")
+plotsub(data = bsmtestc$TST, x = "sleep", y = "stress")
 
 }

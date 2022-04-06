@@ -39,7 +39,7 @@
 #' 
 #' # adjusted model
 #' mcmc <- brmcoda(compilr = cilr, 
-#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Age + (1 | ID), 
 #'                core = 8, chain = 4)
 #' print(mcm$BrmModel)
 #' 

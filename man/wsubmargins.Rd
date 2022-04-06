@@ -28,9 +28,9 @@ at within-person level.
 data(sbp)
 data (mcompd)
 
-posubtest <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+ps <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
 
 ## add object - change name to data
 
-wsubmarginstest <- wsubmargins(data = mcm, substitute = posubtest, minute = 10)
+wsubmarginstest <- wsubmargins(data = mcm, substitute = ps, minute = 10)
 }

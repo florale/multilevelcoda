@@ -4,7 +4,7 @@
 \alias{plotemmc}
 \title{Generate marginal effects of composition plot}
 \usage{
-plotemmc(data, x, y, font = "Times New Roman", ...)
+plotemmc(data, x, y, font = "Times New Roman")
 }
 \arguments{
 \item{data}{A \code{\link{emmcoda}} object to use for plot.}
@@ -18,8 +18,7 @@ plotemmc(data, x, y, font = "Times New Roman", ...)
 \item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }
 \value{
-A ggplot graph object showing the estimated difference in outcome when
-each pair of compositional variables are substituted for a specific time.
+A ggplot graph object showing the estimated change in compositional outcome associated with changes in predictor.
 }
 \description{
 This function is useful for visualising the
@@ -29,5 +28,5 @@ associated with a specific change in some independent variable.
 \examples{
 
 data(mcompd)
-plotemmc(data = emtest, x = "stress", y = "behaviours")
+p <- plotemmc(data = emtest, x = "stress", y = "behaviours")
 }

@@ -4,17 +4,22 @@
 \alias{mvcoda}
 \title{A series of functions for single level multivariate compositional models}
 \usage{
-mvcoda(data, composition, sbp, formula, ...)
+mvcoda(data, formula, sbp, composition, ...)
 }
 \arguments{
+\item{data}{A \code{data.frame} or \code{data.table}
+containing data of all variables used in the analysis.
+It must include a composition and a ID variable. Required.}
+
 \item{formula}{A object of class \code{\link{brmsformula}}, \code{\link{mvbrmsformula}}:
-A symbolic description of the model to be fitted.
+A symbolic description of the model to be fitted.}
+
+\item{sbp}{A signary matrix indicating sequential binary partition. Required.
 Details of the model specification can be found in \code{\link{mvbrmsformula}}.}
 
-\item{...}{Further arguments passed to \code{\link{brm}}.}
+\item{composition}{A character vector specifying the names of compositional variables. Required.}
 
-\item{compilr}{A \code{compilr} object containing data of composition, ILR coordinates,
-and other variables used in the model.}
+\item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
 
@@ -26,12 +31,8 @@ when composition is the outcome.
 }
 \examples{
 data(mcompd)
-cilr <- compilr(data = mcompd, sbp = sbp, idvar = "ID")
-
-## inspect names of ILR coordinates bfore passing to 'brm' model
-names(cilr$BetweenILR)
-
+data(sbp)
 ## run mvcoda
-mv1 <- mvcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female)
+mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female, sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
 }

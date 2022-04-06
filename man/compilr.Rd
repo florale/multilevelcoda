@@ -9,7 +9,7 @@ compilr(data, sbp, composition, idvar = "ID")
 \arguments{
 \item{data}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.
-It must include a composition, a ID variable, and others. Required.}
+It must include a composition and a ID variable. Required.}
 
 \item{sbp}{A signary matrix indicating sequential binary partition. Required.}
 
@@ -37,8 +37,8 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 }
 }
 \description{
-This function is designed to help calculate sets of compositions and IRLs
-for Multilevel Compositional Data models
+This function calculates sets of compositions and IRLs
+for Multilevel Compositional Data models.
 }
 \examples{
 ## Example 1 - Dataset with no 0

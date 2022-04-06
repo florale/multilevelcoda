@@ -16,7 +16,7 @@ emmcoda(object, specs, at, ...)
 \item{data}{A fitted \code{\link{mvmcoda}} model data. Required.}
 }
 \value{
-
+A list with four elements.
 }
 \description{
 This function obtains estimated marginal means (EMMs) of models

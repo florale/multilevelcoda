@@ -1,11 +1,12 @@
-#' A series of functions for single level compositional models
+#' @title A series of functions for single level compositional models
 #'
+#' @description 
 #' The \code{\link{subcoda}} function wraps a series of 
 #' The workflows is as follow:
-#' It firstly compute composition and ILR coordinates, 
-#' 
-#' It fit a Bayesian single-level compositional model to compositional predictors
-#' and users' choices of outcomes and other covariates.
+#' The function firstly compute composition and ILR coordinates,
+#' then fit a Bayesian single-level compositional model to compositional predictors
+#' and users' choices of outcomes and other covariates. Finally, it computes the
+#' isotemporal compositional substitution model according to the user's desired time period.
 #'
 #' @param data A composition or dataset of composition. Required.
 #' @param composition A string character indicating the names of compositional variables in `data`.

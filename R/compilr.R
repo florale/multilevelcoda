@@ -1,7 +1,8 @@
-#' Compute Between-person, Within-person, and Total Composition and Isometric log ratio transform of a (dataset of) composition(s)
+#' @title Compute Between-person, Within-person, and Total Composition and Isometric log ratio transform of a (dataset of) composition(s)
 #'
-#' This function is designed to help calculate sets of compositions and IRLs
-#' for Multilevel Compositional Data models
+#' @description
+#' This function calculates sets of compositions and IRLs
+#' for Multilevel Compositional Data models. 
 #'
 #' @param data A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 

@@ -16,7 +16,7 @@
 #' @export
 #' @examples
 #' ## TODO
-#' wsubtest <- wsub(data = mcm, substitute = posubtest, minute = 10)
+#' wsubtest <- wsub(data = mcm, substitute = ps, minute = 10)
 wsub <- function(data, substitute, minute = 60) { 
   
   if(isFALSE(missing(minute))) {

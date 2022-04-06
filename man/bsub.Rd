@@ -32,7 +32,7 @@ data(mcompd)
 data(sbp)
 ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
-bsubtest <- bsub(data = mcm, substitute = posubtest, minute = 10)
+bsubtest <- bsub(data = mcm, substitute = ps, minute = 10)
 
 ## cleanup
 rm(bsubtest, mcompd)

@@ -1,5 +1,6 @@
-#' Generate substitution plot
+#' @title Substitution plot
 #'
+#' @description 
 #' This function is useful for visualising the
 #' estimated differences in outcomes when compositional variables
 #' are substituted for a specific period of time.
@@ -22,12 +23,13 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = bsubmarginstest$TST, x = "sleep", y = "stress")
+#' plotsub(data = bsmtest$TST, x = "sleep", y = "stress")
 #' 
 plotsub <- function(data, x, y, font = "Times New Roman") {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame")))) {
-    stop("data must be a data table or data frame")
+    stop("data must be a data table or data frame,",
+         "It should be an element of a wsub, bsub, wsubmargins, bsubmargins object.")
   }
   
   tmp <- copy(data)
@@ -61,7 +63,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
 #' @return A ggplot graph object showing the estimated change in compositional outcome associated with changes in predictor.
-#' @importFrom ggplot2 ggplot aes geom_area xlab ylab
+#' @importFrom ggplot2 ggplot aes geom_area xlab ylab guides
 #' @importFrom cowplot theme_cowplot
 #' @importFrom ggsci scale_fill_simpsons
 #' @importFrom data.table copy
