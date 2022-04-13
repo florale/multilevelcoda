@@ -3,7 +3,7 @@ pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   example-longrun-vignette: example-longrun-vignette.html
-last_built: 2022-04-03T20:11Z
+last_built: 2022-04-13T08:26Z
 urls:
   reference: https://florale.github.io/multilevelcoda/reference
   article: https://florale.github.io/multilevelcoda/articles

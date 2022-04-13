@@ -87,12 +87,13 @@ Fitted values extracted from the object object. Mean and intervals.</p>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sbp</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span> <span class="op">(</span><span class="va">mcompd</span><span class="op">)</span></span>
 <span class="r-in"></span>
-<span class="r-in"><span class="va">posubtest</span> <span class="op">&lt;-</span> <span class="fu"><a href="possub.html">possub</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fl">5</span>, data <span class="op">=</span> <span class="va">mcompd</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">ps</span> <span class="op">&lt;-</span> <span class="fu"><a href="possub.html">possub</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fl">5</span>, data <span class="op">=</span> <span class="va">mcompd</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in possub(count = 5, data = mcompd[, 1:6], idvar = "ID"):</span> unused arguments (count = 5, idvar = "ID")</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## add object - change name to data</span></span>
 <span class="r-in"></span>
-<span class="r-in"><span class="va">wsubmarginstest</span> <span class="op">&lt;-</span> <span class="fu">wsubmargins</span><span class="op">(</span>data <span class="op">=</span> <span class="va">brmcodatest</span>, substitute <span class="op">=</span> <span class="va">posubtest</span>, minute <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in wsubmargins(data = brmcodatest, substitute = posubtest, minute = 10):</span> object 'brmcodatest' not found</span>
+<span class="r-in"><span class="va">wsubmarginstest</span> <span class="op">&lt;-</span> <span class="fu">wsubmargins</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcm</span>, substitute <span class="op">=</span> <span class="va">ps</span>, minute <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in copy(data):</span> object 'mcm' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
