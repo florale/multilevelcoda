@@ -32,11 +32,10 @@ or a matrix of class \code{acomp} representing multiple closed compositions each
 \description{
 The \code{\link{subcoda}} function wraps a series of
 The workflows is as follow:
-It firstly compute composition and ILR coordinates,
-}
-\details{
-It fit a Bayesian single-level compositional model to compositional predictors
-and users' choices of outcomes and other covariates.
+The function firstly compute composition and ILR coordinates,
+then fit a Bayesian single-level compositional model to compositional predictors
+and users' choices of outcomes and other covariates. Finally, it computes the
+isotemporal compositional substitution model according to the user's desired time period.
 }
 \examples{
 

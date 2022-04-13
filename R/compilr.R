@@ -115,18 +115,20 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
                sep = "\n"))
   }
   
-  out <- list(
-    BetweenComp = bcomp,
-    WithinComp = wcomp,
-    TotalComp = tcomp,
-    BetweenILR = bilr,
-    WithinILR = wilr,
-    TotalILR = tilr,
-    data = tmp,
-    psi = psi,
-    sbp = sbp,
-    composition = composition,
-    idvar = idvar)
-
+  out <- structure(
+    list(
+      BetweenComp = bcomp,
+      WithinComp = wcomp,
+      TotalComp = tcomp,
+      BetweenILR = bilr,
+      WithinILR = wilr,
+      TotalILR = tilr,
+      data = tmp,
+      psi = psi,
+      sbp = sbp,
+      composition = composition,
+      idvar = idvar),
+    class = "compilr")
+  
   return(out)
 }

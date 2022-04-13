@@ -25,8 +25,6 @@ when compositional variables are substituted for a specific time period.
 at between-person level.
 }
 \examples{
-## TODO
-
 
 data(mcompd)
 data(sbp)

@@ -33,29 +33,33 @@
 #' 
 #' ## run brmcoda model
 #' # unadjusted model
-#' mcm <- brmcoda(compilr = cilr, 
+#' brmcodatest <- brmcoda(compilr = cilr, 
 #'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'                core = 8, chain = 4)
 #' 
 #' # adjusted model
-#' mcmc <- brmcoda(compilr = cilr, 
-#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Age + (1 | ID), 
+#' adjbrmcodatest <- brmcoda(compilr = cilr, 
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
 #'                core = 8, chain = 4)
 #' print(mcm$BrmModel)
 #' 
 #' ## clean-up
 #' rm(mcompd, sbp, cilr, mcm, mcmc)
 brmcoda <- function (formula, compilr, ...) {
-
+  if (isFALSE(inherits(compilr, "compilr"))) {
+    stop("compilr must be an object of class compilr.")
+  }
   tmp <- cbind(compilr$data, compilr$BetweenILR, compilr$WithinILR)
   
   m <- brm(formula,
            data = tmp,
            ...)
   
-  out <- list(
-    CompIlr = compilr,
-    BrmModel = m)
+  out <- structure(
+    list(
+      CompIlr = compilr,
+      BrmModel = m),
+    class = "brmcoda")
   
   out
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotcoda.R
 \name{plotsub}
 \alias{plotsub}
-\title{Generate substitution plot}
+\title{Substitution plot}
 \usage{
 plotsub(data, x, y, font = "Times New Roman")
 }

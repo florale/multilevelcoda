@@ -21,8 +21,6 @@ utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstit
 #' @importFrom insight find_predictors
 #' @export
 #' @examples
-#' ## TODO
-#' 
 #' 
 #' data(mcompd)
 #' data(sbp)
@@ -104,13 +102,13 @@ bsub <- function(data, substitute, minute = 60L) {
     newd <- as.data.table(do.call(rbind, result))
     
     # add names
-    colnames(subd)[ncol(subd)] <- "MinSubstituted"
-    subd[, Substitute := rep(subvar, length.out = nrow(subd))]
-    subd$Predictor <- iv
+    colnames(newd)[ncol(dsub)] <- "MinSubstituted"
+    newd[, Substitute := rep(subvar, length.out = nrow(newd))]
+    newd$Predictor <- iv
 
     ## remove impossible reallocation that result in negative values
-    cols <- colnames(subd) %snin% c("MinSubstituted", "Substitute", "Predictor")
-    subd <- subd[rowSums(subd[, ..cols] < 0) == 0]
+    cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
+    newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
 
     ## add comp and ilr
     
@@ -130,17 +128,17 @@ bsub <- function(data, substitute, minute = 60L) {
     colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
     
     ## substitution dataset
-    subd <- cbind(newd, tilr, wilr, ID)
+    dsub <- cbind(newd, tilr, wilr, ID)
 
     ## no change dataset
-    samed <- cbind(newd, bilr, wilr, ID)
+    dsame <- cbind(newd, bilr, wilr, ID)
 
     # prediction
     ## substitution
-    predsub <- as.data.table(fitted(tmp$BrmModel, newdata = subd, re.form = NA, summary = FALSE))
+    predsub <- as.data.table(fitted(tmp$BrmModel, newdata = dsub, re.form = NA, summary = FALSE))
     
     ## no change
-    predsame <- as.data.table(fitted(tmp$BrmModel, newdata = samed, re.form = NA, summary = FALSE))
+    predsame <- as.data.table(fitted(tmp$BrmModel, newdata = dsame, re.form = NA, summary = FALSE))
     
     # difference between substitution and no change
     preddif <- predsub - predsame
@@ -150,7 +148,7 @@ bsub <- function(data, substitute, minute = 60L) {
 
     # save results
     out <- do.call(cbind, preddif)
-    out <- cbind(out, subd[, c("MinSubstituted", "Substitute", "Predictor")])
+    out <- cbind(out, dsub[, c("MinSubstituted", "Substitute", "Predictor")])
     out <- as.data.table(out)
     names(out) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
 
