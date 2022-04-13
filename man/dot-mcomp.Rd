@@ -2,10 +2,11 @@
 % Please edit documentation in R/internal.R
 \name{.mcomp}
 \alias{.mcomp}
-\title{Get compositional mean}
+\title{Functions used only internally}
 \usage{
 .mcomp(data)
 }
 \description{
-Get compositional mean
+Functions used only internally
 }
+\keyword{internal}

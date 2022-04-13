@@ -23,13 +23,13 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = bsmtest$TST, x = "sleep", y = "stress")
+#' plotsub(data = bsmtest1$SB, x = "sleep", y = "stress")
 #' 
 plotsub <- function(data, x, y, font = "Times New Roman") {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame")))) {
     stop("data must be a data table or data frame,",
-         "It should be an element of a wsub, bsub, wsubmargins, bsubmargins object.")
+         "and is an element of a wsub, bsub, wsubmargins, bsubmargins object.")
   }
   
   tmp <- copy(data)
@@ -63,7 +63,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
 #' @return A ggplot graph object showing the estimated change in compositional outcome associated with changes in predictor.
-#' @importFrom ggplot2 ggplot aes geom_area xlab ylab guides
+#' @importFrom ggplot2 ggplot aes geom_area xlab ylab guides guide_legend
 #' @importFrom cowplot theme_cowplot
 #' @importFrom ggsci scale_fill_simpsons
 #' @importFrom data.table copy
@@ -71,7 +71,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
 #' @examples
 #'
 #' data(mcompd)
-#' p <- plotemmc(data = emtest, x = "stress", y = "behaviours")
+#' plotemmc(data = emtest, x = "stress", y = "behaviours")
 plotemmc <- function(data, x, y, font = "Times New Roman") {
 
   tmp <- copy(data)

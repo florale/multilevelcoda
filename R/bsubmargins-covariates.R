@@ -24,7 +24,7 @@
 #' @examples
 #' ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #'
-#' bsmtest <- bsubmargins(data = mcm, substitute = ps, minute = 10)
+#' system.time(bsmtest1 <- bsubmargins(data = adjbrmcodatest, substitute = ps, minute = 3))
 bsubmargins <- function (data, substitute, minute = 60L) {
 
   if(isFALSE(missing(minute))) {
@@ -51,130 +51,65 @@ bsubmargins <- function (data, substitute, minute = 60L) {
 
   tmp <- copy(data)
 
-  # Compute between-person composition
-  b <- tmp$CompIlr$BetweenComp
-  b <- clo(b, total = 1440)
-  n <- unique(b) # check with JW
-  b <- as.data.table(b)
+  # Get between-person composition
+  b <- tmp$CompIlr$BetweenComp[tmp$CompIlr$data[, which(!duplicated(get(tmp$CompIlr$idvar)))], ]
+  b <- as.data.table(clo(b, total = 1440))
 
-  ID <- 1 # why re.form = NA but still needs this?
+  ID <- 1 # to make fitted() happy
   psi <- tmp$CompIlr$psi
   min <- as.integer(minute)
 
-  # list to store final output
-  iout <- vector("list")
+  # Set up model for no change
+  bilr <- tmp$CompIlr$BetweenILR[tmp$CompIlr$data[, which(!duplicated(get(tmp$CompIlr$idvar)))], ]
+  wilr <- matrix(0, nrow = nrow(bilr), ncol = ncol(bilr))
+  wilr <- as.data.table(wilr)
+  colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+  colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
 
-  # deal with covariates
-  ilrn <- c(names(tmp$CompIlr$BetweenILR), names(tmp$CompIlr$WithinILR)) # get ilr names from model
-  vn <- do.call(rbind, find_predictors(tmp$BrmModel)) # get all varnames from model
+  # check covariates
+  ilrn <- c(names(tmp$CompIlr$BetweenILR), names(tmp$CompIlr$WithinILR)) # get ilr names in brm model
+  vn <- do.call(rbind, find_predictors(tmp$BrmModel)) # get all varnames in brm model
 
-  # if there is no covariates (number of variables in the model = number of ilr coordinates)
+  # if there is no covariates
+  # number of variables in the brm model = number of ilr coordinates
   # run unadj subsitution model
   if (isTRUE(identical(length(vn), length(ilrn)))) {
-    iout <- .unadj.subm(substitute = substitute,
+    dsame <- cbind(bilr, wilr, ID)
+    ysame <- fitted(tmp$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
+    ysame <- rowMeans(ysame) # emmeans across participants when there is no change
+
+    iout <- .get.bsubm(substitute = substitute,
                         b = b, tmp = tmp,
-                        min = min, psi = psi)
-    } else {
-      #get covariates
-    refg <- as.data.table(ref_grid(tmp$BrmModel) @grid)
-    cv <- colnames(refg) %snin% c(ilrn, ".wgt.")
-    refg <- refg[, cv, with = FALSE] # reference grid for covariates
+                        min = min, psi = psi,
+                        ysame = ysame)
+    } else { # run adjusted model
+      # Get reference grid containing covariates
+      refg <- as.data.table(ref_grid(tmp$BrmModel) @grid)
+      cv <- colnames(refg) %snin% c(ilrn, ".wgt.")
+      refg <- refg[, cv, with = FALSE]
 
-    for(i in colnames(substitute)) { # compostion level
-      posub <- copy(substitute)
-      posub <- as.data.table(posub)
-      posub <- posub[(get(i) != 0)]
-      posub <- posub[order(-rank(get(i)))]
-
-      # add substitution variable name
-      subvar <- colnames(posub) %snin% eval(i) # substitute compositional variables
-      iv <- i # central compositional variable
-
-      # lists to store results - TODO
-      kout <- vector("list", length = nrow(substitute))
-      jout <- vector("list", length = minute)
-      lout <- vector("list", length = nrow(refg))
-
-      for (j in seq_len(min)) { # time level
-        sub <- posub * j
-        for (k in seq_len(nrow(sub))) { # substitution level
-          for(l in seq_len(nrow(refg))) {
-            # participant level
-            subk <- sub[k, ]
-            subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
-            newcomp <- b + subk
-            names(newcomp) <- colnames(substitute)
-            
-            newd <- cbind(b, newcomp, refg[l, ], sub[k, get(i)])
-            
-            # Here is a dataset 1 possible substitution per 1 min for the entire sample
-            # nrow = nrow(b), ncol = 10
-            
-            # Add more useful information to the final output
-            colnames(newd)[ncol(newd)] <- "MinSubstituted"
-            newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
-            newd$Predictor <- iv
-            newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
-            
-            ## remove impossible reallocation that result in negative values - TODO
-            cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
-            
-            noneg <- function(x){
-              res <- ifelse(x < 0, NA, x)
-              return(res)
-            }
-            newd[, (cols) := lapply(.SD, noneg), .SDcols = cols]
-            newd <- newd[complete.cases(newd), ]
-            
-            # Add comp and ilr for predictions
-            bcomp <- acomp(newd[, colnames(tmp$CompIlr$BetweenComp), with = FALSE])
-            tcomp <- acomp(newd[, tmp$CompIlr$composition, with = FALSE])
-            
-            bilr <- ilr(bcomp, V = psi)
-            tilr <- ilr(tcomp, V = psi)
-            wilr <- matrix(0, nrow = nrow(newd), ncol = ncol(bilr))
-            wilr <- as.data.table(wilr)
-            
-            colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
-            colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
-            colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-            
-            ## Substitution dataset
-            subd <- cbind(newd, tilr, wilr, ID)
-            
-            ## No change dataset
-            samed <- cbind(newd, bilr, wilr, ID)
-            
-            # Generate prediction
-            ysub <- fitted(tmp$BrmModel, newdata = subd, re.form = NA, summary = FALSE)
-            ysame <- fitted(tmp$BrmModel, newdata = samed, re.form = NA, summary = FALSE)
-            
-            # Difference between substitution and no change
-            yd <- ysub - ysame
-            yd <- rowMeans(yd) # ame of 1 substiution at participant level
-            # nrow(yd) = posterior draws, ncol = 1
-            lout[[l]] <- yd
+      hout <- vector("list", length = nrow(refg))
+      if (isFALSE(nrow(refg) == 1)) {
+        for (h in seq_len(nrow(refg))) {
+          refgbase <- refg[h, ]
+          refgbase <- refgbase[rep(seq_len(nrow(refgbase)), nrow(b)), ]
+          hout[[h]] <- refgbase
           }
-          myd <- unlist(ifelse(nrow(refg) == 1, lout, Reduce(`+`, lout) / length(lout)))
-          myd <- as.data.table(describe_posterior(myd, centrality = "mean",
-                                                  ci = 0.95, ci_method = "eti"))
-          myd <- myd[, .(Mean, CI_low, CI_high)]
-          myd$MinSubstituted <- sub[k, get(i)]
-
-          kout[[k]] <- myd # ame at substitution level
-        }
-        # Save results
-        jout[[j]] <- rbindlist(kout)
-        # nrow(jout) = nrow(posub), ncol() = 4
+        refg <- do.call(rbind, hout)
+        h <- h
+        } else {
+          refg <- refg
+          h <- 1
+          }
+      bilr <- bilr[rep(seq_len(nrow(bilr)), h), ]
+      wilr <- wilr[rep(seq_len(nrow(wilr)), h), ]
+      dsame <- cbind(bilr, wilr, ID, refg)
+      ysame <- fitted(tmp$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
+      ysame <- rowMeans(ysame) # emmeans across participants when there is no change for all refg
+      # look into weighted mean
+      iout <- .get.bsubm(substitute = substitute,
+                         b = b, tmp = tmp,
+                         min = min, psi = psi,
+                         ysame = ysame, refg = refg, h = h)
       }
-      jout <- rbindlist(jout)
-      jout[, Substitute := rep(subvar, length.out = nrow(jout))]
-      jout$Predictor <- iv
-      names(jout) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
-
-      # Final results for entire composition
-      iout[[i]] <- jout
-    }
-  }
-  return(iout)
 }
