@@ -20,8 +20,8 @@
 
 #' # Unadjusted  substitution model
 .get.bsubm <- function(substitute, b, tmp, 
-                      min, psi, ID = 1,
-                      ysame, refg = NULL, h = 0) {
+                      min, psi, ysame) {
+  
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
     posub <- copy(substitute)
@@ -46,18 +46,12 @@
         MinSubstituted <- subk[, get(i)]
         names(newcomp) <- colnames(substitute)
         
-        newd <- cbind(b, newcomp, MinSubstituted)
+        newd <- cbind(b, newcomp, tmp$CompIlr$data, MinSubstituted)
 
-        if(h == 0) {
-          newd <- newd
-        } else {
-          newd <- newd[rep(seq_len(nrow(newd)), h), ]
-        }
         # Add more useful information to the final output
         newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
         newd$Predictor <- iv
         newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
-        newd <- cbind(newd, refg)
         
         ## remove impossible reallocation that result in negative values 
         cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
@@ -77,7 +71,7 @@
         colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
         
         ## Substitution dataset
-        dsub <- cbind(newd, tilr, wilr, ID)
+        dsub <- cbind(newd, tilr, wilr)
         
         # Generate prediction
         ysub <- fitted(tmp$BrmModel, newdata = dsub, re.form = NA, summary = FALSE)
@@ -99,7 +93,7 @@
     jout[, Substitute := rep(subvar, length.out = nrow(jout))]
     jout$Predictor <- iv
     names(jout) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
-    
+
     # Final results for entire composition
     jout <- list(jout)
     names(jout) <- i
@@ -109,10 +103,11 @@
   }
 
 .get.bsubm2 <- function(substitute, b, tmp, 
-                      min, psi, ID = 1,
-                      ysame, refg = NULL, h = 0) {
+                      min, psi, ysame) {
+  
   # list to store final output
   iout <- vector("list")
+  
   for(i in colnames(substitute)) { # compostion level
     posub <- copy(substitute)
     posub <- as.data.table(posub)
@@ -136,25 +131,19 @@
         MinSubstituted <- subk[, get(i)]
         names(newcomp) <- colnames(substitute)
 
-        newd <- cbind(b, newcomp, MinSubstituted)
+        newd <- cbind(b, newcomp, tmp$CompIlr$data, MinSubstituted)
 
-        if(h == 0) {
-          newd <- newd
-        } else {
-          newd <- newd[rep(seq_len(nrow(newd)), h), ]
-        }
         # Add more useful information to the final output
         newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
         newd$Predictor <- iv
         newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
-        newd <- cbind(newd, refg)
 
         kout[[k]] <- newd
       }
       newd <- as.data.table(do.call(rbind, kout))
-        ## remove impossible reallocation that result in negative values - TODO
-        cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
-        newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+      
+      cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
+      newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
 
         # Add comp and ilr for predictions
         tcomp <- acomp(newd[, tmp$CompIlr$composition, with = FALSE])
@@ -167,7 +156,7 @@
         colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
 
         ## Substitution dataset
-        dsub <- cbind(newd, tilr, wilr, ID)
+        dsub <- cbind(newd, tilr, wilr)
         # Generate prediction
         ysub <- fitted(tmp$BrmModel, newdata = dsub, re.form = NA, summary = FALSE)
         ysub <- cbind(newd[, .(MinSubstituted, Substitute, Predictor)], as.data.table(t(ysub)))
