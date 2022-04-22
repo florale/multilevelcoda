@@ -1,17 +1,17 @@
 #' @title A series of functions for single level compositional models
 #'
 #' @description 
-#' The \code{\link{subcoda}} function wraps a series of 
-#' The workflows is as follow:
-#' The function firstly compute composition and ILR coordinates,
-#' then fit a Bayesian single-level compositional model to compositional predictors
-#' and users' choices of outcomes and other covariates. Finally, it computes the
-#' isotemporal compositional substitution model according to the user's desired time period.
+#' Computes composition and ILR coordinates,
+#' Fit a Bayesian single-level compositional model to compositional predictors
+#' and users' choices of outcomes and other covariates
+#' Computes the isotemporal compositional substitution model.
 #'
-#' @param data A composition or dataset of composition. Required.
-#' @param composition A string character indicating the names of compositional variables in `data`.
+#' @param data A \code{data.frame} or \code{data.table}
+#' containing data of all variables used in the analysis. 
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
+#' @param parts A character vector specifying the names of compositional variables. Required.
 #' @param ... Further arguments passed to \code{\link{brm}}.
+#' 
 #' @return A list with seven elements.
 #' \itemize{
 #'   \item{\code{BrmsModel}}{ An object of class \code{brmsfit}, which contains the posterior draws 
@@ -44,36 +44,34 @@
 #'                    Female = na.omit(Female)[1]),
 #'                    by = .(ID)]
 #'
-#' scoda <- subcoda(data = davg, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#' scoda <- subcoda(data = davg, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
 #'                        sbp = sbp, minute = 10, substitute = posubtest,
 #'                        formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4)
 #'  
 #'  ## cleanup
 #'  rm(mcompd, sbp, davg, scoda)
-subcoda <- function(data, composition, sbp, formula, minute, substitute, ...) {
-
-    if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
+subcoda <- function(data, sbp, parts, 
+                    formula, minute, substitute, ...) {
+  
+  if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
   }
   if (isFALSE(inherits(sbp, "matrix"))) {
     stop(sprintf("sbp is a '%s' but must be a matrix.",
                  paste(class(sbp), collapse = ";")))
   }
-  if (isFALSE(identical(length(composition), ncol(sbp)))) {
-    stop(sprintf("The number of compositional variables in composition (%d) 
+  if (isFALSE(identical(length(parts), ncol(sbp)))) {
+    stop(sprintf("The number of compositional variables in parts (%d) 
                  must be the same as in sbp (%d).",
-                 length(composition),
+                 length(parts),
                  ncol(sbp)))
   }
 
   # compilr
   psi <- gsi.buildilrBase(t(sbp))
-  
-  comp <- acomp(data[, composition, with = FALSE])
+  comp <- acomp(data[, parts, with = FALSE])
   ilr <- ilr(comp, V = psi)
-  
   colnames(ilr) <- paste0("ilr", seq_len(ncol(ilr)))
-  
   tmpd <- cbind(data, ilr)
   
   # brm model
@@ -82,13 +80,13 @@ subcoda <- function(data, composition, sbp, formula, minute, substitute, ...) {
            ...)
   
   # Substitution model
-  # compute compositional mean
+  # compositional mean
   mcomp <- mean(comp, robust = TRUE)
   mcomp <- clo(mcomp, total = 1440)
   mcomp <- as.data.table(t(mcomp))
   names(mcomp) <- paste0("M", names(mcomp))
   
-  # generate input for substitution model
+  # input for substitution model
   min <- as.integer(paste0(minute))
 
   out <- list()
@@ -136,7 +134,7 @@ subcoda <- function(data, composition, sbp, formula, minute, substitute, ...) {
 
   ## add comp and ilr
   oldvar <- colnames(newd) %sin% names(mcomp)
-  newvar <- colnames(newd) %sin% composition
+  newvar <- colnames(newd) %sin% parts
 
   oldcomp <- acomp(newd[, oldvar, with = FALSE])
   newcomp <- acomp(newd[, newvar, with = FALSE])
@@ -183,7 +181,7 @@ subcoda <- function(data, composition, sbp, formula, minute, substitute, ...) {
                  Comp = comp,
                  data = data,
                  sbp = sbp,
-                 composition = composition)
+                 parts = parts)
   
   return(allout)
 }

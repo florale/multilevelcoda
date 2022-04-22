@@ -25,7 +25,7 @@
 #' data(sbp)
 #'
 #' ## compute compositions and ILR coordinates
-#' cilr <- compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' cilr <- compilr(data = mcompd, sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' ## inspect names of ILR coordinates bfore passing to 'brm' model
 #' names(cilr$BetweenILR)

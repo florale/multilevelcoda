@@ -39,7 +39,7 @@ Imports:
     emmeans,
     insight,
     tidyr,
-    hrbrthemes
+    foreach
 Suggests: 
     testthat (>= 3.0.0),
     covr,

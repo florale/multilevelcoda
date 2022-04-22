@@ -22,13 +22,13 @@
 #' #' @importFrom emmeans ref_grid
 #' #' @export
 #' #' @examples
-#' #' ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' #' ps <- possub(c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' #'
 #' #' library(doFuture)
 #' #' registerDoFuture()
 #' #' plan(multisession, workers = 5)
 #' #' system.time(bsmtest2 <- bsubmargins(data = adjbrmcodatest, substitute = ps, minute = 5))
-#' bsubmargins <- function (data, substitute, minute = 60L) {
+#' .bsubmargins <- function (data, substitute, minute = 60L) {
 #' 
 #'   if(isFALSE(missing(minute))) {
 #'     if (isFALSE(is.integer(minute))) {
@@ -39,17 +39,17 @@
 #'   } else {
 #'     minute <- 60L
 #'   }
-#'   if (isFALSE(identical(ncol(substitute), length(data$CompIlr$composition)))) {
+#'   if (isFALSE(identical(ncol(substitute), length(data$CompIlr$parts)))) {
 #'     stop(sprintf("The number of columns in 'substitute' (%d) must be the same
-#'   as the compositional variables in 'composition' (%d).",
+#'   as the compositional variables in 'parts' (%d).",
 #'                  ncol(substitute),
-#'                  length(data$CompIlr$composition)))
+#'                  length(data$CompIlr$parts)))
 #'   }
-#'   if (isFALSE(identical(colnames(substitute), data$CompIlr$composition))) {
+#'   if (isFALSE(identical(colnames(substitute), data$CompIlr$parts))) {
 #'     stop(sprintf("The names of compositional variables must be the same
-#'   in 'substitute' (%s) and 'composition' (%s).",
+#'   in 'substitute' (%s) and 'parts' (%s).",
 #'                  colnames(substitute),
-#'                  data$CompIlr$composition))
+#'                  data$CompIlr$parts))
 #'   }
 #' 
 #'   tmp <- copy(data)
@@ -72,11 +72,11 @@
 #'   # prediction
 #'   dsame <- cbind(bilr, wilr, tmp$CompIlr$data)
 #'   ysame <- fitted(tmp$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
-#'   ysame <- rowMeans(ysame) # emmeans across participants when there is no change
+#'   ysame <- rowMeans(ysame) # average across participants when there is no change
 #' 
-#'   iout <- .get.bsubm2(substitute = substitute,
-#'                       b = b, tmp = tmp,
-#'                       min = min, psi = psi,
-#'                       ysame = ysame)
+#'   iout <- .get.bsubmargins.(substitute = substitute,
+#'                             b = b, tmp = tmp,
+#'                             min = min, psi = psi,
+#'                             ysame = ysame)
 #' 
 #' }

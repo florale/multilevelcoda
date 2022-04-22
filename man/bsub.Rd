@@ -4,17 +4,26 @@
 \alias{bsub}
 \title{Between-person Substitution Model (from sample's compositional mean)}
 \usage{
-bsub(data, substitute, minute = 60L)
+bsub(object, substitute, minute = 60L, regrid = NULL, summary = TRUE, ...)
 }
 \arguments{
-\item{data}{A \code{brmcoda} object that contains results of a fitted \code{brm} model and
-relevant inputs of substitution model from \code{compilr}.}
+\item{object}{A \code{\link{brmcoda}} object.}
 
 \item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
 
 \item{minute}{A integer or numeric value specifying the minute that
 compositional variable are substituted to/from. Default is \code{60L}.}
+
+\item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consists
+of combinations of covariates over which predictions are made.
+If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
+
+\item{summary}{A logical value.}
+
+\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.
+Should estimated marginal means at each level of the reference grid (\code{FALSE})
+or the marginal averages thereof (\code{TRUE}) be returned? Default is TRUE.}
 }
 \value{
 A list of results from substitution models for all compositional variables.
@@ -30,7 +39,7 @@ data(mcompd)
 data(sbp)
 ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
-bsubtest <- bsub(data = mcm, substitute = ps, minute = 10)
+bsubtest <- bsub(object = adjbrmcodatest, substitute = ps, minute = 2)
 
 ## cleanup
 rm(bsubtest, mcompd)

@@ -4,15 +4,26 @@
 #' when compositional variables are substituted for a specific time period
 #' at within-person level.
 #'
-#' @param data A list resulted from \code{brmcoda} that contains (1) results of a fitted  \code{brm} model and 
-#' @param data (2) relevant inputs for substitution model.
-#' @param substitute A data frame or data table indicating the possible substitution of variables. This dataset can be computed using \code{possub}. Required.
-#' @param minute A integer or numeric value indicating the minute that compositional variable are substituted to/from. Default is 60L.
+#' @param object A \code{\link{brmcoda}} object.
+#' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+#' This dataset can be computed using function \code{possub}. Required.
+#' @param minute A integer or numeric value indicating the maximum minute for which substitution model is desired.
+#' Default to \code{60L} (i.e., the model loops through 1:60L minutes).
+#' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consists 
+#' of combinations of covariates over which predictions are made.
+#' If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.
+#' @param summary A logical value. 
+#' Should estimated marginal means at each level of the reference grid (\code{FALSE}) 
+#' or the marginal averages thereof (\code{TRUE}) be returned? Default is FALSE
+#' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
-#' @return ## TODO
+#' @return A list of results from substitution models for all compositional variables.
 #' @importFrom data.table as.data.table copy :=
-#' @importFrom compositions acomp ilr clo
+#' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom extraoperators %snin% %sin%
+#' @importFrom insight find_predictors
+#' @importFrom emmeans ref_grid
+#' @importFrom foreach %dopar%
 #' @export
 #' @examples
 #' ## TODO

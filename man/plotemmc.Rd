@@ -28,5 +28,5 @@ associated with a specific change in some independent variable.
 \examples{
 
 data(mcompd)
-p <- plotemmc(data = emtest, x = "stress", y = "behaviours")
+plotemmc(data = emtest, x = "stress", y = "behaviours")
 }
