@@ -2,26 +2,31 @@
 % Please edit documentation in R/wsubmargins.R
 \name{wsubmargins}
 \alias{wsubmargins}
-\title{Margianl Effects of Within-person Substitution}
+\title{Estimating Average Marginal Effects for Within-person Isotemporal Substitution Model.}
 \usage{
-wsubmargins(data, substitute, minute = 60)
+wsubmargins(object, substitute, minute = 60, ...)
 }
 \arguments{
-\item{data}{A fitted \code{brms} model object. Required.}
+\item{object}{A \code{\link{brmcoda}} object. Required.}
 
-\item{substitute}{This dataset can be computed using \code{possub}. Required.}
+\item{substitute}{A data frame or data table indicating the possible substitution of variables.
+This dataset can be computed using \code{possub}. Required.}
 
-\item{minute}{are substituted to/from. Default is 60L.}
+\item{minute}{A integer or numeric value indicating the maximum minute for which substitution model is desired.
+Default to 60L. In this case, the model loops through 1:60L minutes.}
+
+\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list of outputs from substitution model.
-
-Fitted values extracted from the object object. Mean and intervals.
+A list containing the result of isotemporal multilevel substitution model.
+Each elements of the list is the substitution estimation for a compositional variable.
 }
 \description{
-Estimate the difference in outcomes
-when compositional variables are substituted for a specific time period
-at within-person level.
+Using a fitted model object, estimates the difference in outcomes
+when compositional variables are substituted for a specific period
+at within-person level. The resulting \code{bsubmargins} encapsulates
+substitution estimation across all compositional variables present
+in the \code{\link{brmcoda}} object.
 }
 \examples{
 
@@ -32,5 +37,5 @@ ps <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
 
 ## add object - change name to data
 
-wsubmarginstest <- wsubmargins(data = mcm, substitute = ps, minute = 10)
+wsubmarginstest <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 10)
 }

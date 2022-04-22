@@ -8,10 +8,12 @@
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and a ID variable. Required.
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
-#' @param composition A character vector specifying the names of compositional variables. Required.
-#' @param idvar A character string specifying the name of the variable containing IDs. Default is \code{ID.}
+#' @param parts A character vector specifying the names of compositional variables to be used. Required.
+#' @param idvar A character string specifying the name of the variable containing IDs. Default to \code{ID}.
+#' @param total A numeric value of the total amount to which the compositions should be closed.
+#' Default to \code{1440}.
 #'
-#' @return A list with eleven elements.
+#' @return A list with twelve elements.
 #' \itemize{
 #'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
@@ -25,8 +27,9 @@
 #'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 #'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
 #'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
-#'   \item{\code{composition}}{ Names of compositional variables.}
+#'   \item{\code{parts}}{ Names of compositional variables.}
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
+#'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' }
 #' @importFrom compositions ilr acomp gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
@@ -36,19 +39,19 @@
 #' ## Example 1 - Dataset with no 0
 #' data(mcompd)
 #' data(sbp)
-#' cilr1 <- compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' cilr1 <- compilr(data = mcompd, sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' ## Example 2 - Dataset with 0s
 #' ## Impute a 0 in 'mcompd'
 #' mcompd[3, 1] <- 0
 #' cilr2 <- compilr(data = mcompd, sbp = sbp, 
-#'                  composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #'
 #' str(cilr1)
 #' 
 #' ## cleanup
 #' rm(cilr1, cilr2, mcompd, sbp)
-compilr <- function(data, sbp, composition, idvar = "ID") {
+compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
   }
@@ -56,19 +59,17 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
     stop(sprintf("sbp is a '%s' but must be a matrix.",
                  paste(class(sbp), collapse = ";")))
   }
-  if (isFALSE(identical(length(composition), ncol(sbp)))) {
-    stop(sprintf("The number of compositional variables in composition (%d) 
+  if (isFALSE(identical(length(parts), ncol(sbp)))) {
+    stop(sprintf("The number of compositional variables in parts (%d) 
                  must be the same as in sbp (%d).",
-                 length(composition),
+                 length(parts),
                  ncol(sbp)))
   }
-
   tmp <- as.data.table(data)
-
   psi <- gsi.buildilrBase(t(sbp))
   
-  ## 0 imputation
-  if (isTRUE(any(apply(tmp[, composition, with = FALSE], 2, function(x) x == 0)))) {
+  # deal with 0s - imputation
+  if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) x == 0)))) {
     message(paste("This dataset of composition contains zero(s);",
                   "It is now imputed using the Log-ratio EM algorithm.",
                   "For more details, please see ?zCompositions::lrEM",
@@ -76,34 +77,32 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
                   "please do so before running 'compilr'.",
                   sep = "\n"))
     
-    dl1 <- rep(1440, length(composition))
-    impd <- lrEM(tmp[, composition, with = FALSE], label = 0, dl = dl1, ini.cov = "multRepl")
-    names(impd) <- composition
-    
-    tmp <- as.data.table(cbind(impd, tmp[, !composition, with = FALSE]))
-    
+    dl1 <- rep(eval(total), length(parts))
+    impd <- lrEM(tmp[, parts, with = FALSE], label = 0, dl = dl1, ini.cov = "multRepl")
+    names(impd) <- parts
+    tmp <- as.data.table(cbind(impd, tmp[, !parts, with = FALSE]))
   }
   
-  ## Total composition
-  tcomp <- acomp(tmp[, composition, with = FALSE])
+  ## Composition and ILRs
+  # total
+  tcomp <- acomp(tmp[, parts, with = FALSE])
   tilr <- ilr(tcomp, V = psi)
   
-  ## Between-person composition
-  for (v in composition) {
+  # between-person
+  for (v in parts) {
     tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
   }
-  
-  bcomp <- acomp(tmp[, composition, with = FALSE])
+  bcomp <- acomp(tmp[, parts, with = FALSE])
   bilr <- ilr(bcomp, V = psi)
 
-  ## Within-person composition
+  # within-person 
   wcomp <- tcomp - bcomp
   wilr <- ilr(wcomp, V = psi)
 
-  colnames(bcomp) <- paste0("B", composition)
-  colnames(wcomp) <- paste0("W", composition)
-  colnames(tcomp) <- composition
-  
+  # name them for later use
+  colnames(bcomp) <- paste0("B", parts)
+  colnames(wcomp) <- paste0("W", parts)
+  colnames(tcomp) <- parts
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
@@ -126,8 +125,9 @@ compilr <- function(data, sbp, composition, idvar = "ID") {
       data = tmp,
       psi = psi,
       sbp = sbp,
-      composition = composition,
-      idvar = idvar),
+      parts = parts,
+      idvar = idvar,
+      total = total),
     class = "compilr")
   
   return(out)

@@ -4,7 +4,7 @@
 \alias{.mcomp}
 \title{Functions used only internally}
 \usage{
-.mcomp(data)
+.mcomp(object)
 }
 \description{
 Functions used only internally

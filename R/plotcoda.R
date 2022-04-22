@@ -23,7 +23,7 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = bsmtest1$SB, x = "sleep", y = "stress")
+#' plotsub(data = bsubtest$TST, x = "sleep", y = "stress")
 #' 
 plotsub <- function(data, x, y, font = "Times New Roman") {
   
@@ -34,7 +34,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
   
   tmp <- copy(data)
   
-  niceplot <- ggplot(tmp, aes(x = MinSubstituted, y = Mean, colour = Substitute)) +
+  plot <- ggplot(tmp, aes(x = MinSubstituted, y = Mean, colour = Substitute)) +
     geom_hline(yintercept = 0, size = 0.2, linetype = 2) +
     geom_vline(xintercept = 0, size = 0.2, linetype = 2) +
     geom_line(aes(colour = Substitute), size = 1) +
@@ -46,8 +46,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
     xlab(paste("Change in", eval(x), sep = " ")) +
     ylab(paste("Change in", eval(y), sep = " ")) +
     theme_cowplot(font_family = eval(font), font_size = 12, line_size = 0)
-  
-  return(niceplot)
+  plot
 }
 
 #' Generate marginal effects of composition plot
@@ -77,7 +76,7 @@ plotemmc <- function(data, x, y, font = "Times New Roman") {
   tmp <- copy(data)
   specs <- tmp$Predictor
     
-  niceplot <- ggplot(tmp$emmLong, aes(get(specs), value, fill = variable)) +
+  plot <- ggplot(tmp$emmLong, aes(get(specs), value, fill = variable)) +
     geom_area(alpha = .9, size = 1.5, colour = "white") +
     scale_fill_simpsons()+
     xlab(paste("Change in", eval(x), sep = " ")) +
@@ -85,6 +84,6 @@ plotemmc <- function(data, x, y, font = "Times New Roman") {
     guides(colour = guide_legend(eval(y))) + 
     theme_cowplot(font_family = eval(font), font_size = 12, line_size = .25)
   
-  niceplot
+  plot
 }
 

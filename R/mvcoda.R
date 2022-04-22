@@ -11,7 +11,7 @@
 #' A symbolic description of the model to be fitted. 
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' Details of the model specification can be found in \code{\link{mvbrmsformula}}.
-#' @param composition A character vector specifying the names of compositional variables. Required.
+#' @param parts A character vector specifying the names of compositional variables. Required.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return 
@@ -26,7 +26,7 @@
 #' ## run mvcoda
 #' mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female, sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' 
-mvcoda <- function(data, formula, sbp, composition, ...) {
+mvcoda <- function(data, formula, sbp, parts, ...) {
 
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("'data' must be a data table, data frame or matrix.")
@@ -35,10 +35,10 @@ mvcoda <- function(data, formula, sbp, composition, ...) {
     stop(sprintf("'sbp' is a '%s' but must be a matrix.",
                  paste(class(sbp), collapse = ";")))
   }
-  if (isFALSE(identical(length(composition), ncol(sbp)))) {
-    stop(sprintf("The number of compositional variables in 'composition' (%d) 
+  if (isFALSE(identical(length(parts), ncol(sbp)))) {
+    stop(sprintf("The number of compositional variables in 'parts' (%d) 
                  must be the same as in 'sbp' (%d).",
-                 length(composition),
+                 length(parts),
                  ncol(sbp)))
   }
 
@@ -46,7 +46,7 @@ mvcoda <- function(data, formula, sbp, composition, ...) {
   tmp <- as.data.table(data)
   psi <- gsi.buildilrBase(t(sbp))
   
-  comp <- acomp(tmp[, composition, with = FALSE])
+  comp <- acomp(tmp[, parts, with = FALSE])
   ilr <- ilr(comp, V = psi)
   
   colnames(ilr) <- paste0("ilr", seq_len(ncol(ilr)))
@@ -71,7 +71,7 @@ mvcoda <- function(data, formula, sbp, composition, ...) {
               data = tmp,
               psi = psi,
               sbp = sbp,
-              composition = composition)
+              parts = parts)
   
   return(out)
 }
