@@ -3,10 +3,13 @@
 #' @description 
 #' Estimate the difference in outcomes
 #' when compositional variables are substituted for a specific time period
-#' at `within-person` level. 
-#' The resulting \code{wsub} encapsulates 
+#' at `within-person` level. The resulting \code{wsub} encapsulates 
 #' substitution estimation across all compositional variables 
 #' present in the \code{\link{brmcoda}} object.
+#' 
+#' Notes: The reference composition for substitution model 
+#' is the compositional mean of the dataset provided. 
+#' For average marginal effect, consider using \code{\link{wsubmargins}}.
 #'
 #' @param object A \code{\link{brmcoda}} object.
 #' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
@@ -28,36 +31,75 @@
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom insight find_predictors
 #' @importFrom emmeans ref_grid
-#' @importFrom foreach %dopar%
+#' @importFrom foreach foreach %dopar%
 #' @export
 #' @examples
-#' ## TODO
-#' testws <- wsub(object = adjbrmcodatest, substitute = ps, minute = 5)
+#' ## Please see ?multilevelcoda::bsub for an example.
+#' testws <- wsub(object = brmcodatest, substitute = ps, minute = 5, regrid = rg)
 wsub <- function(object, substitute, minute = 60L, 
                  regrid = NULL, summary = FALSE, 
                  ...) {
 
+  if (isTRUE(missing(object))) {
+    stop(paste(
+      "'object' is a required argument and cannot be missing;",
+      " it should be an object of class brmcoda.", 
+      " See ?multilevelcoda::brmcoda for details.",
+      sep = "\n"))
+  }
+  
+  if (isFALSE(inherits(object, "brmcoda"))) {
+    stop(paste(
+      "'object' should be a fitted brmcoda object",
+      " See ?multilevelcoda::brmcoda for details.",
+      sep = "\n"))
+  }
+  
+  if (isTRUE(missing(substitute))) {
+    stop(paste(
+      "'substitute' is a required argument and cannot be missing;",
+      " it should be a dataset of possible substitution", 
+      " and can be computed using multilevelcoda::possub.", 
+      " See ?multilevelcoda::possub for details.",
+      sep = "\n"))
+  }
+  
   if(isFALSE(missing(minute))) {
     if (isFALSE(is.integer(minute))) {
-      if (isFALSE(is.numeric(minute))) {
-        stop("'minute' must be an integer or a numeric value > 0.")
+      if (isFALSE(minute > 0)) {
+        stop("'minute' must be an positive integer value.")
       }
     }
   } else {
     minute <- 60L
   }
+  
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
     stop(sprintf("The number of columns in 'substitute' (%d) must be the same
   as the compositional variables in 'parts' (%d).",
                  ncol(substitute),
                  length(object$CompIlr$parts)))
   }
+  
   if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
-    stop(sprintf("The names of compositional variables must be the same
-  in 'substitute' (%s) and 'parts' (%s).",
+    stop(sprintf("The names of compositional variables must be the 
+    same in 'substitute' (%s) and 'parts' (%s).",
                  colnames(substitute),
                  object$CompIlr$parts))
   }
+  
+  if (isFALSE(is.null(regrid))) {
+    if(any(c(colnames(object$CompIlr$BetweenILR), colnames(object$CompIlr$WithinILR))
+             %in% c(colnames(regrid)))) {
+      stop(paste(
+        "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
+        "   It should contain information about the covariates used in 'brmcoda'.",
+        "   These variables are used for subsequent substitution model.",
+        "   Please provide a different reference grid.",
+        sep = "\n"))
+    }
+  }
+  
   # compositional mean
   b <- object$CompIlr$BetweenComp
   
@@ -67,16 +109,14 @@ wsub <- function(object, substitute, minute = 60L,
 
   # input for substitution model
   ID <- 1 # to make fitted() happy
-  psi <- object$CompIlr$psi
   min <- as.integer(minute)
   
   # model for no change
-  bilr <- ilr(mcomp, V = psi)
+  bilr <- ilr(mcomp, V = object$CompIlr$psi)
   bilr <- as.data.table(t(bilr))
   wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
-
 
   # check covariates
   ilrn <- c(names(object$CompIlr$BetweenILR), names(object$CompIlr$WithinILR)) # get ilr names in brm model
@@ -85,25 +125,41 @@ wsub <- function(object, substitute, minute = 60L,
   # if there is no covariates
   # number of variables in the brm model = number of ilr coordinates
   if (isTRUE(identical(length(vn), length(ilrn)))) { # unadj subsitution model
+    if (isFALSE(is.null(regrid))) {
+      warning(paste(
+        "This is an unadjusted model, but a reference grid was provided.",
+        "  Please note that the covariates provided in the reference grid",
+        "  need to be present in 'brmcoda' model object.",
+        "  Unadjusted substitution model was estimated.",
+        sep = "\n"))
+    }
+    
     dsame <- cbind(bilr, wilr, ID)
     ysame <- fitted(object$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
     
     # substitution model
-    iout <- get.wsub(object = object, b = b,
-                     substitute = substitute,
-                     mcomp = mcomp,
-                     min = min, psi = psi, 
-                     ysame = ysame)
+    out <- get.wsub(object = object, b = b,
+                    substitute = substitute,
+                    mcomp = mcomp,
+                    min = min,
+                    ysame = ysame)
     } else { # adj subsitution model
+      # reference grid containing covariates
+      rg <- as.data.table(ref_grid(object$BrmModel) @grid)
+      cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
       
-    # reference grid containing covariates
-      if (isFALSE(missing(regrid))) {
-        refg <- regrid
+      if (isFALSE(is.null(regrid))) { # check reference grid
+        if(isFALSE(identical(colnames(regrid), cv))) {
+          stop(paste(
+            "Please provide a reference grid that contains information about",
+            "  all covariates in 'brmcoda' model to estimate the substitution model.",
+            sep = "\n"))
+          } else {
+            refg <- regrid
+            }
         } else {
-          refg <- as.data.table(ref_grid(object$BrmModel) @grid)
-          cv <- colnames(refg) %snin% c(ilrn, ".wgt.")
-          refg <- refg[, cv, with = FALSE]
-        }
+          refg <- rg[, cv, with = FALSE]
+          }
       
       hout <- vector("list", length = nrow(refg))
       if (isFALSE(nrow(refg) == 1)) {
@@ -116,15 +172,14 @@ wsub <- function(object, substitute, minute = 60L,
         } else {
           refg <- refg
           dsame <- cbind(bilr, wilr, ID, refg)
-        }
-      
+          }
       ysame <- fitted(object$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
       
       # substitution model
-      iout <- get.wsub(object = object,
+      out <- get.wsub(object = object,
                        substitute = substitute,
                        mcomp = mcomp, 
-                       min = min, psi = psi,
+                       min = min,
                        ysame = ysame, 
                        summary = summary,
                        cv = cv, refg = refg)

@@ -4,7 +4,7 @@
 \alias{mvcoda}
 \title{A series of functions for single level multivariate compositional models}
 \usage{
-mvcoda(data, formula, sbp, composition, ...)
+mvcoda(data, formula, sbp, parts, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} or \code{data.table}
@@ -17,7 +17,7 @@ A symbolic description of the model to be fitted.}
 \item{sbp}{A signary matrix indicating sequential binary partition. Required.
 Details of the model specification can be found in \code{\link{mvbrmsformula}}.}
 
-\item{composition}{A character vector specifying the names of compositional variables. Required.}
+\item{parts}{A character vector specifying the names of compositional variables. Required.}
 
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
@@ -33,6 +33,7 @@ when composition is the outcome.
 data(mcompd)
 data(sbp)
 ## run mvcoda
-mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female, sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
+mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female,
+              sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
 }

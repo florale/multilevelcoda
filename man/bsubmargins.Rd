@@ -9,18 +9,18 @@ bsubmargins(object, substitute, minute = 60L, ...)
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object. Required.}
 
-\item{substitute}{A data frame or data table indicating the possible substitution of variables.
-This dataset can be computed using \code{possub}. Required.}
+\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+This dataset can be computed using function \code{possub}. Required.}
 
 \item{minute}{A integer or numeric value indicating the maximum minute for which substitution model is desired.
-Default to 60L. In this case, the model loops through 1:60L minutes.}
+Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
 A list containing the result of isotemporal multilevel substitution model.
 Each elements of the list is the substitution estimation for a compositional variables,
-which include six or seven elements.
+which include at least six core items.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
@@ -30,17 +30,27 @@ which include six or seven elements.
 }
 }
 \description{
-Using a fitted model object, estimates the difference in outcomes
-when compositional variables are substituted for a specific period
-at between-person level. The resulting \code{bsubmargins} encapsulates
+Using a fitted model object, estimates the average marginal difference
+in outcomes when compositional variables are substituted for a specific period
+at \code{between-person} level. The resulting \code{bsubmargins} encapsulates
 substitution estimation across all compositional variables present
 in the \code{\link{brmcoda}} object.
 }
 \examples{
-ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+data(psub)
+\dontrun{
+cilr <- compilr(data = mcompd, sbp = sbp, 
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+
+m <- brmcoda(compilr = cilr, 
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
+             wilr2 + wilr3 + wilr4 + Female + (1 | ID))
+               
+testbs <- bsub(object = m, substitute = psub, minute = 5)
 
 library(doFuture)
 registerDoFuture()
 plan(multisession, workers = 5)
-system.time(bsmtest2 <- bsubmargins(object = adjbrmcodatest, substitute = ps, minute = 5))
+system.time(testbsm <- bsubmargins(object = m, substitute = psub, minute = 5))
+}
 }

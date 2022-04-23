@@ -33,11 +33,11 @@ Imports:
     brms,
     extraoperators,
     ggplot2,
+    emmeans,
+    insight,
     cowplot,
     ggsci,
     reshape2,
-    emmeans,
-    insight,
     tidyr,
     foreach
 Suggests: 
@@ -45,7 +45,8 @@ Suggests:
     covr,
     withr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    doFuture
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 VignetteBuilder: knitr

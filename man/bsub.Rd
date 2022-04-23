@@ -2,9 +2,9 @@
 % Please edit documentation in R/bsub.R
 \name{bsub}
 \alias{bsub}
-\title{Between-person Substitution Model (from sample's compositional mean)}
+\title{Between-person Substitution Model.}
 \usage{
-bsub(object, substitute, minute = 60L, regrid = NULL, summary = TRUE, ...)
+bsub(object, substitute, minute = 60L, regrid = NULL, summary = FALSE, ...)
 }
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object.}
@@ -12,35 +12,48 @@ bsub(object, substitute, minute = 60L, regrid = NULL, summary = TRUE, ...)
 \item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
 
-\item{minute}{A integer or numeric value specifying the minute that
-compositional variable are substituted to/from. Default is \code{60L}.}
+\item{minute}{A integer or numeric value indicating the maximum minute
+for which substitution model is desired.
+Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
 
-\item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consists
+\item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consisting
 of combinations of covariates over which predictions are made.
-If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
+Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.}
 
-\item{summary}{A logical value.}
-
-\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.
+\item{summary}{A logical value.
 Should estimated marginal means at each level of the reference grid (\code{FALSE})
-or the marginal averages thereof (\code{TRUE}) be returned? Default is TRUE.}
+or the marginal averages thereof (\code{TRUE}) be returned? Default to \code{FALSE}.}
+
+\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
 A list of results from substitution models for all compositional variables.
 }
 \description{
 Estimate the difference in outcomes
-when compositional variables are substituted for a specific time period.
-at between-person level.
+when compositional variables are substituted for a specific time period
+at \code{within-person} level. The resulting \code{bsub} encapsulates
+substitution estimation across all compositional variables
+present in the \code{\link{brmcoda}} object.
+
+Notes: The reference composition for substitution model
+is the compositional mean of the dataset provided.
+For average marginal effect, consider using \code{\link{bsubmargins}}.
 }
 \examples{
-
 data(mcompd)
 data(sbp)
-ps <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+data(psub)
+\donttest{
+cilr <- compilr(data = mcompd, sbp = sbp, 
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
-bsubtest <- bsub(object = adjbrmcodatest, substitute = ps, minute = 2)
-
+m <- brmcoda(compilr = cilr, 
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
+             wilr2 + wilr3 + wilr4 + Female + (1 | ID))
+               
+testbs <- bsub(object = m, substitute = psub, minute = 5)
+}
 ## cleanup
 rm(bsubtest, mcompd)
 }

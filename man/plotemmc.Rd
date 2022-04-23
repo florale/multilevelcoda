@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotcoda.R
 \name{plotemmc}
 \alias{plotemmc}
-\title{Generate marginal effects of composition plot}
+\title{Marginal effects of composition plot}
 \usage{
 plotemmc(data, x, y, font = "Times New Roman")
 }

@@ -32,26 +32,17 @@ between-person and within-person ILR coordinates as predictor.
 \examples{
 data(mcompd)
 data(sbp)
+cilr <- compilr(data = mcompd, sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
-## compute compositions and ILR coordinates
-cilr <- compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-
-## inspect names of ILR coordinates bfore passing to 'brm' model
 names(cilr$BetweenILR)
 names(cilr$WithinILR)
 
-## run brmcoda model
-# unadjusted model
 brmcodatest <- brmcoda(compilr = cilr, 
                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
                core = 8, chain = 4)
-
-# adjusted model
 adjbrmcodatest <- brmcoda(compilr = cilr, 
                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
                core = 8, chain = 4)
-print(mcm$BrmModel)
-
-## clean-up
+print(adjbrmcodatest$BrmModel)
 rm(mcompd, sbp, cilr, mcm, mcmc)
 }

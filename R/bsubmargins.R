@@ -33,31 +33,65 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-#'
+#' data(psub)
+#' \dontrun{
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' 
+#' m <- brmcoda(compilr = cilr, 
+#'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
+#'              wilr2 + wilr3 + wilr4 + Female + (1 | ID))
+#'                
+#' testbs <- bsub(object = m, substitute = psub, minute = 5)
+#' 
 #' library(doFuture)
 #' registerDoFuture()
 #' plan(multisession, workers = 5)
-#' system.time(testbsm <- bsubmargins(object = adjbrmcodatest, substitute = ps, minute = 5))
+#' system.time(testbsm <- bsubmargins(object = m, substitute = psub, minute = 5))
+#' }
 bsubmargins <- function (object, substitute, minute = 60L, ...) {
-  if (isFALSE(inherits(object, "brmcoda"))) {
-    stop("object must be fitted brmcoda object")
+  
+  if (isTRUE(missing(object))) {
+    stop(paste(
+      "'object' is a required argument and cannot be missing;",
+      " it should be an object of class brmcoda.", 
+      " See ?multilevelcoda::brmcoda for details.",
+      sep = "\n"))
   }
+  
+  if (isFALSE(inherits(object, "brmcoda"))) {
+    stop(paste(
+      "'object' should be a fitted brmcoda object",
+      " See ?multilevelcoda::brmcoda for details.",
+      sep = "\n"))
+  }
+  
+  if (isTRUE(missing(substitute))) {
+    stop(paste(
+      "'substitute' is a required argument and cannot be missing;",
+      " it should be a dataset of possible substitution", 
+      " and can be computed using multilevelcoda::possub.", 
+      " See ?multilevelcoda::possub for details.",
+      sep = "\n"))
+  }
+  
   if(isFALSE(missing(minute))) {
     if (isFALSE(is.integer(minute))) {
-      if (isFALSE(is.numeric(minute))) {
-        stop("'minute' must be an integer or a numeric value > 0.")
+        if (isFALSE(minute > 0)) {
+          stop("'minute' must be an positive integer value.")
       }
     }
   } else {
     minute <- 60L
   }
+  
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
     stop(sprintf("The number of columns in 'substitute' (%d) must be the same
   as the compositional variables in 'parts' (%d).",
                  ncol(substitute),
                  length(object$CompIlr$parts)))
   }
+  
   if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
     stop(sprintf("The names of compositional variables must be the same
   in 'substitute' (%s) and 'parts' (%s).",
@@ -69,7 +103,6 @@ bsubmargins <- function (object, substitute, minute = 60L, ...) {
   b <- object$CompIlr$BetweenComp
   b <- as.data.table(clo(b, total = object$CompIlr$total))
 
-  psi <- object$CompIlr$psi
   min <- as.integer(minute)
   
   # model for no change
@@ -84,9 +117,9 @@ bsubmargins <- function (object, substitute, minute = 60L, ...) {
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model
-  iout <- .get.bsubmargins(object = object, b = b,
+  out <- .get.bsubmargins(object = object, b = b,
                            substitute = substitute,
-                           ysame = ysame, min = min, psi = psi)
+                           ysame = ysame, min = min)
   
 }
 

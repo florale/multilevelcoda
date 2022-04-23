@@ -34,37 +34,61 @@
 #' library(doFuture)
 #' registerDoFuture()
 #' plan(multisession, workers = 5)
-#' system.time(testwsm <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 5))
+#' system.time(testwsm <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 2))
 wsubmargins <- function (object, substitute, minute = 60, ...) {
-  if (isFALSE(inherits(object, "brmcoda"))) {
-    stop("object must be fitted brmcoda object")
+  
+  if (isTRUE(missing(object))) {
+    stop(paste(
+      "'object' is a required argument and cannot be missing;",
+      " it should be an object of class brmcoda.", 
+      " See ?multilevelcoda::brmcoda for details.",
+      sep = "\n"))
   }
+  
+  if (isFALSE(inherits(object, "brmcoda"))) {
+    stop(paste(
+      "'object' should be a fitted brmcoda object",
+      " See ?multilevelcoda::brmcoda for details.",
+      sep = "\n"))
+  }
+  
+  if (isTRUE(missing(substitute))) {
+    stop(paste(
+      "'substitute' is a required argument and cannot be missing;",
+      " it should be a dataset of possible substitution", 
+      " and can be computed using multilevelcoda::possub.", 
+      " See ?multilevelcoda::possub for details.",
+      sep = "\n"))
+  }
+  
   if(isFALSE(missing(minute))) {
     if (isFALSE(is.integer(minute))) {
-      if (isFALSE(is.numeric(minute))) {
-        stop("'minute' must be an integer or a numeric value > 0.")
+      if (isFALSE(minute > 0)) {
+        stop("'minute' must be an positive integer value.")
       }
     }
   } else {
     minute <- 60L
   }
+  
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
     stop(sprintf("The number of columns in 'substitute' (%d) must be the same
   as the compositional variables in 'parts' (%d).",
                  ncol(substitute),
                  length(object$CompIlr$parts)))
   }
+  
   if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
     stop(sprintf("The names of compositional variables must be the same
   in 'substitute' (%s) and 'parts' (%s).",
                  colnames(substitute),
                  object$CompIlr$parts))
   }
+  
   # between-person composition
   b <- object$CompIlr$BetweenComp
   b <- as.data.table(clo(b, total = object$CompIlr$total))
   
-  psi <- object$CompIlr$psi
   min <- as.integer(minute)
   
   # model for no change
@@ -79,7 +103,7 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model
-  iout <- .get.wsubmargins(object = object, b = b,
+  out <- .get.wsubmargins(object = object, b = b,
                            substitute = substitute,
-                           ysame = ysame, min = min, psi = psi)
+                           ysame = ysame, min = min)
 }

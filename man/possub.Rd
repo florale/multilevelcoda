@@ -4,28 +4,25 @@
 \alias{possub}
 \title{Possible Pairwise Substitution}
 \usage{
-possub(data, composition)
+possub(parts)
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{data.table}
-containing the composition used in the analysis. Required.}
-
-\item{composition}{A character vector specifying the names of compositional variables. Required.}
+\item{parts}{A character vector specifying the names of compositional variables to be used.}
 }
 \value{
 A data table of all possible pairwise substitution.
 }
 \description{
-This function generate a dataset of all possible pairwise substitution of a composition.
+Makes a dataset of all possible pairwise substitution of a composition.
 }
 \examples{
 
 data(mcompd)
 
-ps1 <- possub(data = mcompd, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-ps2 <- possub(data = mcompd, composition = c("WAKE", "MVPA", "LPA", "SB"))
+ps1 <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+ps2 <- possub(c("WAKE", "MVPA", "LPA", "SB"))
 
-print(s2)
+print(ps2)
 
 ## cleanup
 rm(mcompd, ps1, ps2)

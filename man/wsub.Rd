@@ -2,27 +2,45 @@
 % Please edit documentation in R/wsub.R
 \name{wsub}
 \alias{wsub}
-\title{Within-person Substitution (from sample's compositional mean)}
+\title{Within-person Substitution Model}
 \usage{
-wsub(data, substitute, minute = 60)
+wsub(object, substitute, minute = 60L, regrid = NULL, summary = FALSE, ...)
 }
 \arguments{
-\item{data}{(2) relevant inputs for substitution model.}
+\item{object}{A \code{\link{brmcoda}} object.}
 
-\item{substitute}{A data frame or data table indicating the possible substitution of variables. This dataset can be computed using \code{possub}. Required.}
+\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+This dataset can be computed using function \code{possub}. Required.}
 
-\item{minute}{A integer or numeric value indicating the minute that compositional variable are substituted to/from. Default is 60L.}
+\item{minute}{A integer or numeric value indicating the maximum minute
+for which substitution model is desired.
+Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
+
+\item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consisting
+of combinations of covariates over which predictions are made.
+Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.}
+
+\item{summary}{A logical value.
+Should estimated marginal means at each level of the reference grid (\code{FALSE})
+or the marginal averages thereof (\code{TRUE}) be returned? Default to \code{FALSE}.}
+
+\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-\subsection{TODO}{
-}
+A list of results from substitution models for all compositional variables.
 }
 \description{
 Estimate the difference in outcomes
 when compositional variables are substituted for a specific time period
-at within-person level.
+at \code{within-person} level. The resulting \code{wsub} encapsulates
+substitution estimation across all compositional variables
+present in the \code{\link{brmcoda}} object.
+
+Notes: The reference composition for substitution model
+is the compositional mean of the dataset provided.
+For average marginal effect, consider using \code{\link{wsubmargins}}.
 }
 \examples{
-## TODO
-wsubtest <- wsub(data = mcm, substitute = ps, minute = 10)
+## Please see ?multilevelcoda::bsub for an example.
+testws <- wsub(object = brmcodatest, substitute = ps, minute = 5, regrid = rg)
 }

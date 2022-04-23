@@ -31,6 +31,6 @@ are substituted for a specific period of time.
 \examples{
 
 data(mcompd)
-plotsub(data = bsubtest$TST, x = "sleep", y = "stress")
+plotsub(data = testbs2$TST, x = "sleep", y = "stress")
 
 }

@@ -23,7 +23,7 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = testws$TST, x = "sleep", y = "stress")
+#' plotsub(data = testbs2$TST, x = "sleep", y = "stress")
 #' 
 plotsub <- function(data, x, y, font = "Times New Roman") {
   
@@ -49,7 +49,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
   plot
 }
 
-#' Generate marginal effects of composition plot
+#' Marginal effects of composition plot
 #'
 #' This function is useful for visualising the
 #' estimated changes in compositional outcome variable

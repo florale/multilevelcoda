@@ -9,11 +9,11 @@ wsubmargins(object, substitute, minute = 60, ...)
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object. Required.}
 
-\item{substitute}{A data frame or data table indicating the possible substitution of variables.
-This dataset can be computed using \code{possub}. Required.}
+\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+This dataset can be computed using function \code{possub}. Required.}
 
 \item{minute}{A integer or numeric value indicating the maximum minute for which substitution model is desired.
-Default to 60L. In this case, the model loops through 1:60L minutes.}
+Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
@@ -22,9 +22,9 @@ A list containing the result of isotemporal multilevel substitution model.
 Each elements of the list is the substitution estimation for a compositional variable.
 }
 \description{
-Using a fitted model object, estimates the difference in outcomes
-when compositional variables are substituted for a specific period
-at within-person level. The resulting \code{bsubmargins} encapsulates
+Using a fitted model object, estimates the the average marginal difference
+in outcomes when compositional variables are substituted for a specific period
+at \code{within-person} level. The resulting \code{wsubmargins} encapsulates
 substitution estimation across all compositional variables present
 in the \code{\link{brmcoda}} object.
 }
@@ -33,9 +33,10 @@ in the \code{\link{brmcoda}} object.
 data(sbp)
 data (mcompd)
 
-ps <- possub(count = 5, data = mcompd[, 1:6], idvar = "ID")
+ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
-## add object - change name to data
-
-wsubmarginstest <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 10)
+library(doFuture)
+registerDoFuture()
+plan(multisession, workers = 5)
+system.time(testwsm <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 2))
 }

@@ -4,14 +4,26 @@
 \alias{subcoda}
 \title{A series of functions for single level compositional models}
 \usage{
-subcoda(data, composition, sbp, formula, minute, substitute, ...)
+subcoda(data, sbp, parts, substitute, formula, minute = 60, total = 1440, ...)
 }
 \arguments{
-\item{data}{A composition or dataset of composition. Required.}
+\item{data}{A \code{data.frame} or \code{data.table}
+containing data of all variables used in the analysis.}
 
-\item{composition}{A string character indicating the names of compositional variables in \code{data}.}
+\item{sbp}{A signary matrix indicating sequential binary partition.}
 
-\item{sbp}{A signary matrix indicating sequential binary partition. Required.}
+\item{parts}{A character vector specifying the names of compositional variables.}
+
+\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+This dataset can be computed using function \code{possub}.}
+
+\item{formula}{A object of class \code{formula}, \code{brmsformula}:
+A symbolic description of the model to be fitted.}
+
+\item{minute}{A integer or numeric value indicating the maximum minute for which substitution model is desired.
+Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
+
+\item{total}{A numeric value of the total amount to which the compositions should be closed. Default to \code{1440}.}
 
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
@@ -20,22 +32,20 @@ A list with seven elements.
 \itemize{
 \item{\code{BrmsModel}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
-\item{\code{SubstitutionResults}}{ A list containing the result of isotemporal substitution model
-for each compositional variable.}
+\item{\code{SubstitutionResults}}{ A list containing the result of isotemporal substitution model.}
 \item{\code{ILR}}{ Isometric log ratio transform of composition.}
 \item{\code{Comp}}{A vector of class \code{acomp} representing one composition
 or a matrix of class \code{acomp} representing multiple closed compositions each in one row.}
 \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
-\item{\code{composition}}{ Names of compositional variables.}
+\item{\code{parts}}{ Names of compositional variables.}
 }
 \description{
-The \code{\link{subcoda}} function wraps a series of
-The workflows is as follow:
-The function firstly compute composition and ILR coordinates,
-then fit a Bayesian single-level compositional model to compositional predictors
-and users' choices of outcomes and other covariates. Finally, it computes the
-isotemporal compositional substitution model according to the user's desired time period.
+This function first computes composition and ILR coordinates,
+then fits a Bayesian single-level compositional model to compositional predictors
+and users' choices of outcomes and covariates,
+and finally estimates the average marginal effects of
+isotemporal compositional substitution model.
 }
 \examples{
 
@@ -47,15 +57,15 @@ davg <- mcompd[, .(SB = mean(SB, na.rm = TRUE),
                    MVPA = mean(MVPA, na.rm = TRUE),
                    TST = mean(TST, na.rm = TRUE),
                    WAKE = mean(WAKE, na.rm = TRUE),
-                   TRESS = mean(STRESS, na.rm = TRUE),
+                   STRESS = mean(STRESS, na.rm = TRUE),
                    Age = mean (Age, na.rm = TRUE),
                    Female = na.omit(Female)[1]),
                    by = .(ID)]
+ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB")
 
-scoda <- subcoda(data = davg, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-                       sbp = sbp, minute = 10, substitute = posubtest,
+scoda <- subcoda(data = davg, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                       sbp = sbp, minute = 10, substitute = ps,
                        formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4)
  
- ## cleanup
  rm(mcompd, sbp, davg, scoda)
 }

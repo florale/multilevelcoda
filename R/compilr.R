@@ -1,7 +1,7 @@
 #' @title Compute Between-person, Within-person, and Total Composition and Isometric log ratio transform of a (dataset of) composition(s)
 #'
 #' @description
-#' This function calculates sets of compositions and IRLs
+#' Computes sets of compositions and IRLs
 #' for Multilevel Compositional Data models. 
 #'
 #' @param data A \code{data.frame} or \code{data.table}
@@ -39,7 +39,8 @@
 #' ## Example 1 - Dataset with no 0
 #' data(mcompd)
 #' data(sbp)
-#' cilr1 <- compilr(data = mcompd, sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' cilr1 <- compilr(data = mcompd, sbp = sbp, 
+#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' ## Example 2 - Dataset with 0s
 #' ## Impute a 0 in 'mcompd'
@@ -81,7 +82,7 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
     impd <- lrEM(tmp[, parts, with = FALSE], label = 0, dl = dl1, ini.cov = "multRepl")
     names(impd) <- parts
     tmp <- as.data.table(cbind(impd, tmp[, !parts, with = FALSE]))
-  }
+    }
   
   ## Composition and ILRs
   # total
@@ -91,7 +92,7 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   # between-person
   for (v in parts) {
     tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
-  }
+    }
   bcomp <- acomp(tmp[, parts, with = FALSE])
   bilr <- ilr(bcomp, V = psi)
 
@@ -108,12 +109,11 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
   
   if(any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
-    stop(paste("data should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
-               "these variables will be used in subsequent models.",
-               "Please rename them before running 'compilr'.",
+    stop(paste("'data' should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
+               " these variables will be used in subsequent models.",
+               " Please rename them before running 'compilr'.",
                sep = "\n"))
   }
-  
   out <- structure(
     list(
       BetweenComp = bcomp,
@@ -129,6 +129,5 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
       idvar = idvar,
       total = total),
     class = "compilr")
-  
-  return(out)
+  out
 }

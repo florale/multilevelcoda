@@ -28,4 +28,18 @@
 #'   \item{V4}{fourth compositional variable}
 #'   \item{V5}{fifth compositional variable}
 #' }
-"pcomp"
+"psub"
+
+#' Sequential Binary Partition
+#'
+#' A matrix of sequential binary partition.
+#'
+#' @format A matrix with 5 columns and 4 rows.
+#' \describe{
+#'   \item{V1}{first compositional variable}
+#'   \item{V2}{second compositional variable}
+#'   \item{V3}{third compositional variable}
+#'   \item{V4}{fourth compositional variable}
+#'   \item{V5}{fifth compositional variable}
+#' }
+"sbp"
