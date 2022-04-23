@@ -19,13 +19,9 @@
 }
 
 #' # AME for Between-person Substitution model
-.get.bsubmargins <- function(object, substitute,
-                             min, ysame, ...) {
-  # between-person composition
-  b <- object$CompIlr$BetweenComp
-  b <- as.data.table(clo(b, total = 1440))
-  psi <- object$CompIlr$psi
-  
+.get.bsubmargins <- function(object, b, substitute,
+                             ysame, min, psi, ...) {
+
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
     # possible susbstituion of 1 compositional variable
@@ -52,19 +48,21 @@
         
         newd <- cbind(b, newcomp, object$CompIlr$data, MinSubstituted)
 
-        # useful information to the final results
+        # useful information for the final results
         newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
         newd$Predictor <- iv
         newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
         
-        ## remove impossible reallocation that result in negative values 
+        # remove impossible reallocation that result in negative values 
         cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
+        bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
         tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-        
+        bilr <- ilr(bcomp, V = psi)
         tilr <- ilr(tcomp, V = psi)
+
         wilr <- matrix(0, nrow = nrow(tilr), ncol = ncol(tilr))
         wilr <- as.data.table(wilr)
         
@@ -103,13 +101,9 @@
 #' # Alternative model estimating AME for between-person substitution 
 #' # which binds k level results for fitted()
 #' # currently slower than fitting k level separately
-.get.bsubmargins. <- function(object, substitute, 
-                              min, ysame, ...) {
-  # between-person composition
-  b <- object$CompIlr$BetweenComp
-  b <- as.data.table(clo(b, total = 1440))
-  psi <- object$CompIlr$psi
-  
+.get.bsubmargins. <- function(object, b, substitute,
+                              ysame, min, psi, ...) {
+
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     posub <- copy(substitute)
     posub <- as.data.table(posub)
@@ -134,7 +128,7 @@
 
         newd <- cbind(b, newcomp, object$CompIlr$data, MinSubstituted)
 
-        # useful information to the final output
+        # useful information for the final output
         newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
         newd$Predictor <- iv
         newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
@@ -148,9 +142,11 @@
       newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
 
         # comp and ilr for predictions
+        bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
         tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-
+        bilr <- ilr(bcomp, V = psi)
         tilr <- ilr(tcomp, V = psi)
+
         wilr <- matrix(0, nrow = nrow(tilr), ncol = ncol(tilr))
         wilr <- as.data.table(wilr)
 
@@ -190,14 +186,9 @@
 }
 
 #' # AME for Within-person substitution model
-.get.wsubmargins <- function(object, substitute,
-                             min, ysame, ...) {
-  # between-person composition
-  b <- object$CompIlr$BetweenComp
-  b <- as.data.table(clo(b, total = 1440))
-  
-  psi <- object$CompIlr$psi
-  
+.get.wsubmargins <- function(object, b, substitute,
+                             ysame, min, psi, ...) {
+
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
     posub <- copy(substitute)
@@ -223,7 +214,7 @@
         
         newd <- cbind(b, newcomp, object$CompIlr$data, MinSubstituted)
         
-        # useful information to the final output
+        # useful information for the final output
         newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
         newd$Predictor <- iv
         newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
@@ -235,9 +226,9 @@
         # compositions and ilr for predictions
         bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
         tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-        
         bilr <- ilr(bcomp, V = psi)
         tilr <- ilr(tcomp, V = psi)
+
         wilr <- tilr - bilr 
         
         colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
@@ -277,9 +268,9 @@
 
 #' # Between-person Substitution model
 get.bsub <- function(object, substitute,
-                     mcomp, ysame, min, 
+                     mcomp, ysame, min, psi,
                      summary = summary,
-                     psi, ID = 1, cv = NULL,
+                     ID = 1, cv = NULL,
                      refg = NULL, ...) {
   
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
@@ -309,18 +300,21 @@ get.bsub <- function(object, substitute,
     }
     newd <- as.data.table(do.call(rbind, jout))
 
-    # useful information to the final results
+    # useful information for the final results
     newd[, Substitute := rep(subvar, length.out = nrow(newd))]
     newd$Predictor <- iv
     newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
     
-    ## remove impossible reallocation that result in negative values 
+    # remove impossible reallocation that result in negative values 
     cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
-    
+
     # compositions and ilrs for predictions
+    bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
     tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
+    bilr <- ilr(bcomp, V = psi)
     tilr <- ilr(tcomp, V = psi)
+
     wilr <- matrix(0, nrow = nrow(tilr), ncol = ncol(tilr))
     wilr <- as.data.table(wilr)
     
@@ -338,7 +332,7 @@ get.bsub <- function(object, substitute,
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
-          if(isTRUE(summary)) { # averaging across covariates
+          if(isTRUE(summary)) { # averaging over reference grid
             for (h in seq_len(nrow(refg))) {
               subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
               ysub <- fitted(object$BrmModel, newdata = subd, re.form = NA, summary = FALSE)
@@ -355,6 +349,108 @@ get.bsub <- function(object, substitute,
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
                 subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
+                ysub <- fitted(object$BrmModel, newdata = subd, re.form = NA, summary = FALSE)
+                ydiff <- ysub - ysame[, h]
+                ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+                ymean <- rbindlist(ymean)
+                ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
+                               subd[, c("MinSubstituted", "Substitute", "Predictor", cv), with = FALSE])
+                
+                hout[[h]] <- ymean
+                }
+              ymean <- rbindlist(hout)
+            }
+        }
+    # final results for entire composition
+    out <- list(ymean)
+    names(out) <- i
+    out
+    }
+  iout
+}
+
+#' # Within-person Substitution model
+get.wsub <- function(object, substitute,
+                     mcomp, ysame, min, psi,
+                     summary = summary,
+                     ID = 1, cv = NULL,
+                     refg = NULL, ...) {
+  
+  iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
+    
+    # possible susbstituion of 1 compositional variable
+    posub <- copy(substitute)
+    posub <- as.data.table(posub)
+    posub <- posub[(get(i) != 0)]
+    posub <- posub[order(-rank(get(i)))]
+    
+    # substitution variable names
+    subvar <- colnames(posub) %snin% eval(i)
+    iv <- i
+  
+    kout <- vector("list", length = nrow(posub))
+    jout <- vector("list", length = min)
+    
+    for (j in seq_len(min)) { # time level
+      sub <- posub * j
+      for (k in seq_len(nrow(sub))) {
+        newcomp <- mcomp + sub[k, ]
+        names(newcomp) <- object$CompIlr$parts
+        MinSubstituted <- sub[k, get(i)]
+        kout[[k]] <- cbind(mcomp, newcomp, MinSubstituted)
+      }
+      jout[[j]] <- do.call(rbind, kout)
+    }
+    newd <- as.data.table(do.call(rbind, jout))
+
+    # useful information for the final results
+    newd[, Substitute := rep(subvar, length.out = nrow(newd))]
+    newd$Predictor <- iv
+    newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
+    
+    # remove impossible reallocation that result in negative values 
+    cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
+    newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+    
+    # compositions and ilrs for predictions
+    bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
+    tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
+    bilr <- ilr(bcomp, V = psi)
+    tilr <- ilr(tcomp, V = psi)
+
+    wilr <- tilr - bilr 
+    
+    colnames(bilr) <- paste0("bilr", seq_len(ncol(tilr)))
+    colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+    
+    # prediction
+    if(is.null(refg)) { # unadjusted
+      subd <- cbind(newd, bilr, wilr, ID)
+      ysub <- fitted(object$BrmModel, newdata = subd, re.form = NA, summary = FALSE)
+      ydiff <- ysub - ysame
+      ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+      ymean <- rbindlist(ymean)
+      ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], subd[, .(MinSubstituted, Substitute, Predictor)])
+      
+      } else { # adjusted
+        hout <- vector("list", length = nrow(refg))
+          if(isTRUE(summary)) { # averaging over reference grid
+            for (h in seq_len(nrow(refg))) {
+              subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
+              ysub <- fitted(object$BrmModel, newdata = subd, re.form = NA, summary = FALSE)
+              
+              ydiff <- ysub - ysame[, h]
+              hout[[h]] <- ydiff
+              }
+            ymean <- Reduce(`+`, hout) / length(hout)
+            ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+            ymean <- rbindlist(ymean)
+            ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
+                           subd[, c("MinSubstituted", "Substitute", "Predictor"), with = FALSE])
+            
+            } else { # keeping prediction at each level of reference grid
+              for (h in seq_len(nrow(refg))) {
+                subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
                 ysub <- fitted(object$BrmModel, newdata = subd, re.form = NA, summary = FALSE)
                 ydiff <- ysub - ysame[, h]
                 ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})

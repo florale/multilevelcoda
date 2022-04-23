@@ -43,9 +43,10 @@
 #'                    Age = mean (Age, na.rm = TRUE),
 #'                    Female = na.omit(Female)[1]),
 #'                    by = .(ID)]
-#'
+#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB")
+#' 
 #' scoda <- subcoda(data = davg, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                        sbp = sbp, minute = 10, substitute = posubtest,
+#'                        sbp = sbp, minute = 10, substitute = ps,
 #'                        formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4)
 #'  
 #'  ## cleanup
@@ -67,14 +68,14 @@ subcoda <- function(data, sbp, parts,
                  ncol(sbp)))
   }
 
-  # compilr
+  # Compilr
   psi <- gsi.buildilrBase(t(sbp))
   comp <- acomp(data[, parts, with = FALSE])
   ilr <- ilr(comp, V = psi)
   colnames(ilr) <- paste0("ilr", seq_len(ncol(ilr)))
   tmpd <- cbind(data, ilr)
   
-  # brm model
+  # Brm model
   m <- brm(eval(formula),
            data = tmpd,
            ...)
@@ -100,40 +101,30 @@ subcoda <- function(data, sbp, parts,
   subvar <- colnames(posub) %snin% eval(i)
   iv <- i
 
-  # lists to store results - TODO
-  nd <- NULL
-  newd <- vector("list")
-
-  # substitution dataset
-    for (j in seq_len(min)) {
-      sub <- posub * j
-      for (k in seq_len(nrow(sub))) {
-        new <- mcomp + sub[k, ]
-        names(new) <- paste0(names(substitute))
-        newd[[k]] <- cbind(mcomp, new, sub[k, ][[i]])
-        }
-        nd[[j]] <- do.call(rbind, newd)
-        }
-        newd <- as.data.table(do.call(rbind, nd))
-
-  # add names
-  colnames(newd)[ncol(newd)] <- "MinSubstituted"
-  newd[, Substitute := rep(subvar, length.out = nrow(newd))]
+  kout <- vector("list", length = nrow(posub))
+  jout <- vector("list", length = min)
+  for (j in seq_len(min)) {
+    sub <- posub * j
+    for (k in seq_len(nrow(sub))) {
+      newcomp <- mcomp + sub[k, ]
+      names(newcomp) <- colnames(substitute)
+      MinSubstituted <- subk[, get(i)]
+      kout[[k]] <- cbind(mcomp, newcomp, MinSubstituted)
+      }
+    jout[[j]] <- do.call(rbind, kout)
+    }
+  newd <- as.data.table(do.call(rbind, jout))
+  
+  # useful information for the final results
+  newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
   newd$Predictor <- iv
 
-  # ## remove impossible reallocation that result in negative values - TODO
-  cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
-
-  noneg <- function(x){
-    res <- ifelse(x < 0, NA, x)
-    return(res)
-  }
-
-  newd[, (cols) := lapply(.SD, noneg), .SDcols = cols]
-  newd <- newd[complete.cases(newd), ]
-
-  ## add comp and ilr
-  oldvar <- colnames(newd) %sin% names(mcomp)
+  # remove impossible reallocation that result in negative values 
+  cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
+  newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+  
+  # comp and ilr
+  oldvar <- colnames(newd) %sin% colnames(mcomp)
   newvar <- colnames(newd) %sin% parts
 
   oldcomp <- acomp(newd[, oldvar, with = FALSE])
@@ -161,14 +152,12 @@ subcoda <- function(data, sbp, parts,
   # difference between substitution and no change
   ydiff <- ysub - ysame
   ydiff <- as.data.table(describe_posterior(ydiff, centrality = "mean",
-                                              ci = 0.95, ci_method = "eti"))
+                                            ci = 0.95, ci_method = "eti"))
   ydiff <- ydiff[, .(Mean, CI_low, CI_high)]
 
   # save results
-  result <- do.call(cbind, ydiff)
-  result <- cbind(result, newd[, c("MinSubstituted", "Substitute", "Predictor")])
-  result <- as.data.table(result)
-  names(result) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
+  ydiff <- cbind(ydiff, newd[, c("MinSubstituted", "Substitute", "Predictor")])
+  result <- as.data.table(ydiff)
 
   ## final results for entire composition
   out[[i]] <- result

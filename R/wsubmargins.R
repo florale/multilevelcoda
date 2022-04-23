@@ -1,9 +1,9 @@
 #' @title Estimating Average Marginal Effects for Within-person Isotemporal Substitution Model.
 #'
 #' @description
-#' Using a fitted model object, estimates the difference in outcomes
-#' when compositional variables are substituted for a specific period
-#' at within-person level. The resulting \code{bsubmargins} encapsulates 
+#' Using a fitted model object, estimates the the average marginal difference 
+#' in outcomes when compositional variables are substituted for a specific period
+#' at `within-person` level. The resulting \code{wsubmargins} encapsulates 
 #' substitution estimation across all compositional variables present
 #' in the \code{\link{brmcoda}} object.
 #'
@@ -29,11 +29,12 @@
 #' data(sbp)
 #' data (mcompd)
 #' 
-#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB")
+#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' 
-#' ## add object - change name to data
-#' 
-#' wsubmarginstest <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 10)
+#' library(doFuture)
+#' registerDoFuture()
+#' plan(multisession, workers = 5)
+#' system.time(testwsm <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 5))
 wsubmargins <- function (object, substitute, minute = 60, ...) {
   if (isFALSE(inherits(object, "brmcoda"))) {
     stop("object must be fitted brmcoda object")
@@ -59,6 +60,11 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
                  colnames(substitute),
                  object$CompIlr$parts))
   }
+  # between-person composition
+  b <- object$CompIlr$BetweenComp
+  b <- as.data.table(clo(b, total = object$CompIlr$total))
+  
+  psi <- object$CompIlr$psi
   min <- as.integer(minute)
   
   # model for no change
@@ -73,7 +79,7 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model
-  iout <- .get.wsubmargins(object = object,
+  iout <- .get.wsubmargins(object = object, b = b,
                            substitute = substitute,
-                           min = min, ysame = ysame)
+                           ysame = ysame, min = min, psi = psi)
 }

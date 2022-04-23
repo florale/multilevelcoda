@@ -23,7 +23,7 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = bsubtest$TST, x = "sleep", y = "stress")
+#' plotsub(data = testws$TST, x = "sleep", y = "stress")
 #' 
 plotsub <- function(data, x, y, font = "Times New Roman") {
   

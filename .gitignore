@@ -5,6 +5,8 @@ desktop.ini
 .Rhistory
 R/.Rhistory
 .RData
+.Rprof.out
+.Rproj
 *~
 [#]*[#]
 # artifacts of R CMD check/build

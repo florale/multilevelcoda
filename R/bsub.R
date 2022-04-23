@@ -1,23 +1,28 @@
 ## make Rcmd check happy
 utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstituted"))
 
-#' Between-person Substitution Model.
-#'
+#' @title Between-person Substitution Model.
+#' 
+#' @description 
 #' Estimates the difference in outcomes
 #' when compositional variables are substituted for a specific time period.
-#' at between-person level.
+#' at `between-person` level. 
+#' The resulting \code{bsub} encapsulates 
+#' substitution estimation across all compositional variables 
+#' present in the \code{\link{brmcoda}} object.
 #'
 #' @param object A \code{\link{brmcoda}} object.
 #' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
-#' @param minute A integer or numeric value indicating the maximum minute for which substitution model is desired.
+#' @param minute A integer or numeric value indicating the maximum minute 
+#' for which substitution model is desired.
 #' Default to \code{60L} (i.e., the model loops through 1:60L minutes).
-#' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consists 
+#' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
 #' of combinations of covariates over which predictions are made.
-#' If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.
+#' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should estimated marginal means at each level of the reference grid (\code{FALSE}) 
-#' or the marginal averages thereof (\code{TRUE}) be returned? Default is FALSE
+#' or the marginal averages thereof (\code{TRUE}) be returned? Default to \code{FALSE}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list of results from substitution models for all compositional variables.
@@ -32,9 +37,11 @@ utils::globalVariables(c("Mean",  "CI_low", "CI_high", "Substitute", "MinSubstit
 #'
 #' data(mcompd)
 #' data(sbp)
-#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB")
+#' 
+#' ## get a dataset with all possible substitution
+#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #'
-#' bsubtest <- bsub(object = adjbrmcodatest, substitute = ps, minute = 10)
+#' testbs <- bsub(object = adjbrmcodatest, substitute = ps, minute = 5)
 #'
 #' ## cleanup
 #' rm(bsubtest, mcompd)
@@ -64,13 +71,12 @@ bsub <- function(object, substitute, minute = 60L,
                  object$CompIlr$parts))
   }
 
-  # Compute compositional mean
+  # compositional mean
   b <- object$CompIlr$BetweenComp
 
   mcomp <- mean(b, robust = TRUE)
-  mcomp <- clo(mcomp, total = 1440)
+  mcomp <- clo(mcomp, total = object$CompIlr$total)
   mcomp <- as.data.table(t(mcomp))
-  names(mcomp) <- paste0("B", names(mcomp))
 
   # input for substitution model
   ID <- 1 # to make fitted() happy
@@ -123,7 +129,7 @@ bsub <- function(object, substitute, minute = 60L,
           refg <- refg
           dsame <- cbind(bilr, wilr, ID, refg)
         }
-      
+
       ysame <- fitted(object$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
       
       # substitution model
