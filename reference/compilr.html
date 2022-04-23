@@ -100,80 +100,22 @@ or a matrix of class <code>acomp</code> representing multiple closed total compo
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcompd</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sbp</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">cilr1</span> <span class="op">&lt;-</span> <span class="fu">compilr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, composition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE",     "MVPA", "LPA", "SB"), idvar = "ID"):</span> unused argument (composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Example 2 - Dataset with 0s</span></span>
 <span class="r-in"><span class="co">## Impute a 0 in 'mcompd'</span></span>
 <span class="r-in"><span class="va">mcompd</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span class="r-in"><span class="va">cilr2</span> <span class="op">&lt;-</span> <span class="fu">compilr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span>
 <span class="r-in">                 composition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This dataset of composition contains zero(s);</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> It is now imputed using the Log-ratio EM algorithm.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> For more details, please see ?zCompositions::lrEM</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> If you would like to deal with zeros using other methods,</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> please do so before running 'compilr'.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No. iterations to converge:  2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in compilr(data = mcompd, sbp = sbp, composition = c("TST", "WAKE",     "MVPA", "LPA", "SB"), idvar = "ID"):</span> unused argument (composition = c("TST", "WAKE", "MVPA", "LPA", "SB"))</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr1</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ BetweenComp: 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0501 0.0501 0.0501 0.0501 0.0501 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "BTST" "BWAKE" "BMVPA" "BLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ WithinComp : 'acomp' num [1:3540, 1:5] 0.2231 0.1962 0.1234 0.195 0.2578 0.2787 0.1449 0.1284 0.192 0.2333 0.2426 0.0996 0.4416 0.1903 0.0878 0.1856 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "WTST" "WWAKE" "WMVPA" "WLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ TotalComp  : 'acomp' num [1:3540, 1:5] 0.3766 0.3181 0.1879 0.3649 0.452 0.0687 0.0343 0.0286 0.0525 0.0598 0.2066 0.0814 0.3394 0.1796 0.0776 0.3194 0.| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ BetweenILR : 'rmult' num [1:3540, 1:4] -0.684 -0.684 -0.684 -0.684 -0.684 0.747 0.747 0.747 0.747 0.747 -1.299 -1.299 -1.299 -1.299 -1.299 -0.498 -0.498| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0501 0.0501 0.0501 0.0501 0.0501 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] -0.224 -0.224 -0.224 -0.224 0.894 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "bilr1" "bilr2" "bilr3" "bilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ WithinILR  : 'rmult' num [1:3540, 1:4] -1.0655 0.4788 -1.8293 0.392 0.3351 -0.0353 0.1866 -0.6156 0.0974 0.4607 0.2225 -0.1072 -0.8221 0.1184 0.5294 0.1| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.2231 0.1962 0.1234 0.195 0.2578 0.2787 0.1449 0.1284 0.192 0.2333 0.2426 0.0996 0.4416 0.1903 0.0878 0.1856 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] -0.224 -0.224 -0.224 -0.224 0.894 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "wilr1" "wilr2" "wilr3" "wilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ TotalILR   : 'rmult' num [1:3540, 1:4] -1.749 -0.205 -2.513 -0.292 -0.349 0.712 0.934 0.132 0.845 1.208 -1.077 -1.406 -2.121 -1.181 -0.77 -0.308 -1.214 | __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3766 0.3181 0.1879 0.3649 0.452 0.0687 0.0343 0.0286 0.0525 0.0598 0.2066 0.0814 0.3394 0.1796 0.0776 0.3194 0.| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] -0.224 -0.224 -0.224 -0.224 0.894 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "ilr1" "ilr2" "ilr3" "ilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data       :Classes ‘data.table’ and 'data.frame':	3540 obs. of  9 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 494 494 494 494 494 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 249 249 249 249 249 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 504 504 504 504 504 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 120 120 120 120 120 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : int [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 29.7 29.7 29.7 29.7 29.7 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ STRESS: num [1:3540] 3.67 7.21 2.84 1.51 7.75 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ psi        : num [1:5, 1:4] -0.224 -0.224 -0.224 -0.224 0.894 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp        : num [1:4, 1:5] -1 1 0 0 -1 -1 1 0 -1 -1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ composition: chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar      : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "compilr"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in str(cilr1):</span> object 'cilr1' not found</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## cleanup</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">cilr1</span>, <span class="va">cilr2</span>, <span class="va">mcompd</span>, <span class="va">sbp</span><span class="op">)</span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>object 'cilr1' not found</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>object 'cilr2' not found</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>object 'sbp' not found</span>
 </code></pre></div>
     </div>

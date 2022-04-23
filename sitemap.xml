@@ -28,22 +28,28 @@
     <loc>https://florale.github.io/multilevelcoda/reference/bsub.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/bsubc.html</loc>
-  </url>
-  <url>
     <loc>https://florale.github.io/multilevelcoda/reference/bsubmargins.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.subm.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.bsubmargins..html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.bsubmargins.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.wsubmargins.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/dot-mcomp.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/emmcoda.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/get.bsub.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/index.html</loc>
