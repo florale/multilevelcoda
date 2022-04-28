@@ -22,6 +22,12 @@
     <loc>https://florale.github.io/multilevelcoda/news/index.html</loc>
   </url>
   <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/adjm.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/adjmvm.html</loc>
+  </url>
+  <url>
     <loc>https://florale.github.io/multilevelcoda/reference/brmcoda.html</loc>
   </url>
   <url>
@@ -34,25 +40,13 @@
     <loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.bsubmargins..html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.bsubmargins.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/dot-get.wsubmargins.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/dot-mcomp.html</loc>
-  </url>
-  <url>
     <loc>https://florale.github.io/multilevelcoda/reference/emmcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/get.bsub.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/index.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/m.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/mcompd.html</loc>
@@ -61,10 +55,10 @@
     <loc>https://florale.github.io/multilevelcoda/reference/mvcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/mvmcoda.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/mvm.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/pcomp.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/mvmcoda.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/plotemmc.html</loc>
@@ -74,6 +68,12 @@
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/possub.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/psub.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/sbp.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/subcoda.html</loc>

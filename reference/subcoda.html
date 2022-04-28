@@ -56,17 +56,29 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">subcoda</span><span class="op">(</span><span class="va">data</span>, <span class="va">composition</span>, <span class="va">sbp</span>, <span class="va">formula</span>, <span class="va">minute</span>, <span class="va">substitute</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">subcoda</span><span class="op">(</span><span class="va">data</span>, <span class="va">sbp</span>, <span class="va">parts</span>, <span class="va">substitute</span>, <span class="va">formula</span>, minute <span class="op">=</span> <span class="fl">60</span>, total <span class="op">=</span> <span class="fl">1440</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd><p>A composition or dataset of composition. Required.</p></dd>
-<dt>composition</dt>
-<dd><p>A string character indicating the names of compositional variables in <code>data</code>.</p></dd>
+<dd><p>A <code>data.frame</code> or <code>data.table</code>
+containing data of all variables used in the analysis.</p></dd>
 <dt>sbp</dt>
-<dd><p>A signary matrix indicating sequential binary partition. Required.</p></dd>
+<dd><p>A signary matrix indicating sequential binary partition.</p></dd>
+<dt>parts</dt>
+<dd><p>A character vector specifying the names of compositional variables.</p></dd>
+<dt>substitute</dt>
+<dd><p>A <code>data.frame</code> or <code>data.table</code> of the possible substitution of variables.
+This dataset can be computed using function <code>possub</code>.</p></dd>
+<dt>formula</dt>
+<dd><p>A object of class <code>formula</code>, <code>brmsformula</code>:
+A symbolic description of the model to be fitted.</p></dd>
+<dt>minute</dt>
+<dd><p>A integer or numeric value indicating the maximum minute for which substitution model is desired.
+Default to <code>60L</code> (i.e., the model loops through 1:60L minutes).</p></dd>
+<dt>total</dt>
+<dd><p>A numeric value of the total amount to which the compositions should be closed. Default to <code>1440</code>.</p></dd>
 <dt>...</dt>
 <dd><p>Further arguments passed to <code>brm</code>.</p></dd>
 </dl></div>
@@ -74,33 +86,31 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with seven elements.</p><ul><li><p><code>BrmsModel</code> An object of class <code>brmsfit</code>, which contains the posterior draws
 along with many other useful information about the model.</p></li>
-<li><p><code>SubstitutionResults</code> A list containing the result of isotemporal substitution model
-for each compositional variable.</p></li>
+<li><p><code>SubstitutionResults</code> A list containing the result of isotemporal substitution model.</p></li>
 <li><p><code>ILR</code> Isometric log ratio transform of composition.</p></li>
 <li><p><code>Comp</code>A vector of class <code>acomp</code> representing one composition
 or a matrix of class <code>acomp</code> representing multiple closed compositions each in one row.</p></li>
 <li><p><code>data</code> The user's dataset or imputed dataset if the input data contains zeros.</p></li>
 <li><p><code>sbp</code> The user-defined sequential binary partition matrix.</p></li>
-<li><p><code>composition</code> Names of compositional variables.</p></li>
-</ul><p>The <code>subcoda</code> function wraps a series of
-The workflows is as follow:
-The function firstly compute composition and ILR coordinates,
-then fit a Bayesian single-level compositional model to compositional predictors
-and users' choices of outcomes and other covariates. Finally, it computes the
-isotemporal compositional substitution model according to the user's desired time period.
+<li><p><code>parts</code> Names of compositional variables.</p></li>
+</ul><p>This function first computes composition and ILR coordinates,
+then fits a Bayesian single-level compositional model to compositional predictors
+and users' choices of outcomes and covariates,
+and finally estimates the average marginal effects of
+isotemporal compositional substitution model.
 data(mcompd)
 data(sbp)davg &lt;- mcompd[, .(SB = mean(SB, na.rm = TRUE),
                    LPA = mean(LPA, na.rm = TRUE),
                    MVPA = mean(MVPA, na.rm = TRUE),
                    TST = mean(TST, na.rm = TRUE),
                    WAKE = mean(WAKE, na.rm = TRUE),
-                   TRESS = mean(STRESS, na.rm = TRUE),
+                   STRESS = mean(STRESS, na.rm = TRUE),
                    Age = mean (Age, na.rm = TRUE),
                    Female = na.omit(Female)[1]),
-                   by = .(ID)]scoda &lt;- subcoda(data = davg, composition = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-                       sbp = sbp, minute = 10, substitute = posubtest,
-                       formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4) ## cleanup
- rm(mcompd, sbp, davg, scoda)</p>
+                   by = .(ID)]
+ps &lt;- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB")scoda &lt;- subcoda(data = davg, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                       sbp = sbp, minute = 10, substitute = ps,
+                       formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4) rm(mcompd, sbp, davg, scoda)</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -112,7 +122,7 @@ data(sbp)davg &lt;- mcompd[, .(SB = mean(SB, na.rm = TRUE),
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
     </footer></div>
