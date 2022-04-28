@@ -4,7 +4,7 @@
 \alias{plotemmc}
 \title{Marginal effects of composition plot}
 \usage{
-plotemmc(data, x, y, font = "Times New Roman")
+plotemmc(data, x, y, font = "Times New Roman", ...)
 }
 \arguments{
 \item{data}{A \code{\link{emmcoda}} object to use for plot.}
@@ -28,5 +28,4 @@ associated with a specific change in some independent variable.
 \examples{
 
 data(mcompd)
-plotemmc(data = emtest, x = "stress", y = "behaviours")
 }

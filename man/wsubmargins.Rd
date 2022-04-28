@@ -38,5 +38,5 @@ ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 library(doFuture)
 registerDoFuture()
 plan(multisession, workers = 5)
-system.time(testwsm <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 2))
+system.time(testwsm <- wsubmargins(object = adjm, substitute = ps, minute = 2))
 }

@@ -34,22 +34,23 @@
 #' library(doFuture)
 #' registerDoFuture()
 #' plan(multisession, workers = 5)
-#' system.time(testwsm <- wsubmargins(object = adjbrmcodatest, substitute = ps, minute = 2))
+#' system.time(testwsm <- wsubmargins(object = adjm, substitute = ps, minute = 2))
 wsubmargins <- function (object, substitute, minute = 60, ...) {
   
   if (isTRUE(missing(object))) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
-      " it should be an object of class brmcoda.", 
-      " See ?multilevelcoda::brmcoda for details.",
+      " it should be an object of class 'brmcoda'.", 
+      " See ?wsubmargins for details.",
       sep = "\n"))
   }
   
   if (isFALSE(inherits(object, "brmcoda"))) {
-    stop(paste(
-      "'object' should be a fitted brmcoda object",
-      " See ?multilevelcoda::brmcoda for details.",
-      sep = "\n"))
+    stop(sprintf(
+    "Can't handle an object of class (%s) 
+  It should be a fitted 'brmcoda' object
+  See ?bsub for details.",
+                 class(object)))
   }
   
   if (isTRUE(missing(substitute))) {
@@ -57,7 +58,7 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
       "'substitute' is a required argument and cannot be missing;",
       " it should be a dataset of possible substitution", 
       " and can be computed using multilevelcoda::possub.", 
-      " See ?multilevelcoda::possub for details.",
+      " See ?wsubmargins for details.",
       sep = "\n"))
   }
   
@@ -72,14 +73,16 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
   }
   
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
-    stop(sprintf("The number of columns in 'substitute' (%d) must be the same
+    stop(sprintf(
+    "The number of columns in 'substitute' (%d) must be the same
   as the compositional variables in 'parts' (%d).",
                  ncol(substitute),
                  length(object$CompIlr$parts)))
   }
   
   if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
-    stop(sprintf("The names of compositional variables must be the same
+    stop(sprintf(
+    "The names of compositional variables must be the same
   in 'substitute' (%s) and 'parts' (%s).",
                  colnames(substitute),
                  object$CompIlr$parts))
@@ -104,6 +107,6 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
   
   # substitution model
   out <- .get.wsubmargins(object = object, b = b,
-                           substitute = substitute,
-                           ysame = ysame, min = min)
+                          substitute = substitute,
+                          ysame = ysame, min = min)
 }

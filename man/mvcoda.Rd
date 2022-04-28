@@ -33,7 +33,7 @@ when composition is the outcome.
 data(mcompd)
 data(sbp)
 ## run mvcoda
-mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female,
+mv <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female,
               sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
 }

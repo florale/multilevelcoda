@@ -22,7 +22,7 @@
 #' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should estimated marginal means at each level of the reference grid (\code{FALSE}) 
-#' or the marginal averages thereof (\code{TRUE}) be returned? Default to \code{FALSE}.
+#' or their average (\code{TRUE}) be returned? Default to \code{FALSE}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list of results from substitution models for all compositional variables.
@@ -32,10 +32,11 @@
 #' @importFrom insight find_predictors
 #' @importFrom emmeans ref_grid
 #' @importFrom foreach foreach %dopar%
+#' @importFrom stats fitted
 #' @export
 #' @examples
 #' ## Please see ?multilevelcoda::bsub for an example.
-#' testws <- wsub(object = brmcodatest, substitute = ps, minute = 5, regrid = rg)
+#' #testws <- wsub(substitute = ps, minute = 5)
 wsub <- function(object, substitute, minute = 60L, 
                  regrid = NULL, summary = FALSE, 
                  ...) {
@@ -43,24 +44,25 @@ wsub <- function(object, substitute, minute = 60L,
   if (isTRUE(missing(object))) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
-      " it should be an object of class brmcoda.", 
-      " See ?multilevelcoda::brmcoda for details.",
+      "  it should be an object of class 'brmcoda'.", 
+      "  See ?wsub for details.",
       sep = "\n"))
   }
   
   if (isFALSE(inherits(object, "brmcoda"))) {
-    stop(paste(
-      "'object' should be a fitted brmcoda object",
-      " See ?multilevelcoda::brmcoda for details.",
-      sep = "\n"))
+    stop(sprintf(
+    "Can't handle an object of class (%s) 
+  It should be a fitted 'brmcoda' object
+  See ?bsub for details.",
+                 class(object)))
   }
   
   if (isTRUE(missing(substitute))) {
     stop(paste(
       "'substitute' is a required argument and cannot be missing;",
-      " it should be a dataset of possible substitution", 
-      " and can be computed using multilevelcoda::possub.", 
-      " See ?multilevelcoda::possub for details.",
+      "  it should be a dataset of possible substitution", 
+      "  and can be computed using multilevelcoda::possub.", 
+      "  See ?wsub for details.",
       sep = "\n"))
   }
   
@@ -75,15 +77,17 @@ wsub <- function(object, substitute, minute = 60L,
   }
   
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
-    stop(sprintf("The number of columns in 'substitute' (%d) must be the same
+    stop(sprintf(
+    "The number of columns in 'substitute' (%d) must be the same
   as the compositional variables in 'parts' (%d).",
                  ncol(substitute),
                  length(object$CompIlr$parts)))
   }
   
   if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
-    stop(sprintf("The names of compositional variables must be the 
-    same in 'substitute' (%s) and 'parts' (%s).",
+    stop(sprintf(
+    "The names of compositional variables must be the 
+  same in 'substitute' (%s) and 'parts' (%s).",
                  colnames(substitute),
                  object$CompIlr$parts))
   }
@@ -93,9 +97,9 @@ wsub <- function(object, substitute, minute = 60L,
              %in% c(colnames(regrid)))) {
       stop(paste(
         "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
-        "   It should contain information about the covariates used in 'brmcoda'.",
-        "   These variables are used for subsequent substitution model.",
-        "   Please provide a different reference grid.",
+        "  It should contain information about the covariates used in 'brmcoda'.",
+        "  These variables are used for subsequent substitution model.",
+        "  Please provide a different reference grid.",
         sep = "\n"))
     }
   }
@@ -120,7 +124,7 @@ wsub <- function(object, substitute, minute = 60L,
 
   # check covariates
   ilrn <- c(names(object$CompIlr$BetweenILR), names(object$CompIlr$WithinILR)) # get ilr names in brm model
-  vn <- do.call(rbind, find_predictors(object$BrmModel)) # get all varnames in brm model
+  vn <- do.call(rbind, find_predictors(object$Model)) # get all varnames in brm model
 
   # if there is no covariates
   # number of variables in the brm model = number of ilr coordinates
@@ -135,17 +139,15 @@ wsub <- function(object, substitute, minute = 60L,
     }
     
     dsame <- cbind(bilr, wilr, ID)
-    ysame <- fitted(object$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
+    ysame <- fitted(object$Model, newdata = dsame, re.form = NA, summary = FALSE)
     
     # substitution model
-    out <- get.wsub(object = object, b = b,
-                    substitute = substitute,
-                    mcomp = mcomp,
-                    min = min,
-                    ysame = ysame)
+    out <- get.wsub(object = object, substitute = substitute,
+                    mcomp = mcomp, min = min, ysame = ysame)
+    
     } else { # adj subsitution model
       # reference grid containing covariates
-      rg <- as.data.table(ref_grid(object$BrmModel) @grid)
+      rg <- as.data.table(ref_grid(object$Model) @grid)
       cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
       
       if (isFALSE(is.null(regrid))) { # check reference grid
@@ -159,29 +161,14 @@ wsub <- function(object, substitute, minute = 60L,
             }
         } else {
           refg <- rg[, cv, with = FALSE]
-          }
+        }
       
-      hout <- vector("list", length = nrow(refg))
-      if (isFALSE(nrow(refg) == 1)) {
-        for (h in seq_len(nrow(refg))) {
-          refgbase <- refg[h, ]
-          dsame <- cbind(bilr, wilr, ID, refgbase)
-          hout[[h]] <- dsame
-          }
-        dsame <- do.call(rbind, hout)
-        } else {
-          refg <- refg
-          dsame <- cbind(bilr, wilr, ID, refg)
-          }
-      ysame <- fitted(object$BrmModel, newdata = dsame, re.form = NA, summary = FALSE)
+      dsame <- cbind(bilr, wilr, ID, refg)
+      ysame <- fitted(object$Model, newdata = dsame, re.form = NA, summary = FALSE)
       
       # substitution model
-      out <- get.wsub(object = object,
-                       substitute = substitute,
-                       mcomp = mcomp, 
-                       min = min,
-                       ysame = ysame, 
-                       summary = summary,
-                       cv = cv, refg = refg)
+      out <- get.wsub(object = object, substitute = substitute,
+                      mcomp = mcomp, min = min, ysame = ysame,
+                      summary = summary, cv = cv, refg = refg)
   }
 }

@@ -9,7 +9,12 @@
 #' ILR coordinates, and other variables used in the model.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
-#' @return 
+#' @return A list with two elements
+#' \itemize{
+#'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+#'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   along with many other useful information about the model.}
+#'  
 #' @importFrom brms brm
 #' @export
 #' @examples
@@ -25,33 +30,37 @@
 #' ## run mvmcoda
 #' mvm <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
 #'                cores = 8, chain = 4)
+#'                
+#' adjmvm <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
+#'                cores = 9, chain = 4)
 #' }
 mvmcoda <- function(compilr, formula, ...) {
   
   if (isTRUE(missing(compilr))) {
     stop(paste(
       "'compilr' is a required argument and cannot be missing;",
-      " it should be an object of class compilr.", 
-      " See ?multilevelcoda::compilr for details.",
+      "  it should be an object of class compilr.", 
+      "  See ?multilevelcoda::compilr for details.",
       sep = "\n"))
   }
   
   if (isFALSE(inherits(compilr, "compilr"))) {
     stop(paste(
       "compilr must be an object of class compilr.",
-      " See ?multilevelcoda::compilr for details.",
+      "  See ?multilevelcoda::compilr for details.",
       sep = "\n"))
   }
   message("Please be patient, 'mvmcoda' is working hard...")
 
   tmpd <- cbind(compilr$data, compilr$TotalILR)
+  
   m <- brm(formula,
            data = tmpd,
            ...)
   
   out <- structure(
     list(CompIlr = compilr,
-         BrmModel = m),
+         Model = m),
     class = "mvmcoda")
   out
 }

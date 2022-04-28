@@ -43,3 +43,47 @@
 #'   \item{V5}{fifth compositional variable}
 #' }
 "sbp"
+
+#' A fitted Bayesian multilevel compositional model using 'brmcoda'
+#' An example of adjusted 'brmcoda' object
+#' 
+#' @format A list with 2 elemets.
+#' \describe{
+#'   \item{CompILR}{A 'compilr' object}
+#'   \item{Model}{Fitted brm multivariate multilevel 
+#'   mmodel with compositional outcome}
+#'   }
+"adjm"
+
+#' A fitted Bayesian multivariate multilevel compositional model using 'brmcoda'
+#' An example of unadjusted 'brmcoda' object
+#' 
+#' @format A list with 2 elemets.
+#' \describe{
+#'   \item{CompILR}{A 'compilr' object}
+#'   \item{Model}{Fitted brm multivariate multilevel 
+#'   mmodel with compositional outcome}
+#'   }
+"m"
+
+#' A fitted Bayesian multivariate multilevel compositional model using 'mvmcoda'
+#' An example of adjusted 'mvmcoda' object
+#' 
+#' @format A list with 2 elemets.
+#' \describe{
+#'   \item{CompILR}{A 'compilr' object}
+#'   \item{Model}{Fitted brm multivariate multilevel 
+#'   mmodel with compositional outcome}
+#'   }
+"adjmvm"
+
+#' A fitted Bayesian multivariate multilevel compositional model using 'mvmcoda'
+#' An example of unadjusted 'mvmcoda' object
+#' 
+#' @format A list with 2 elemets.
+#' \describe{
+#'   \item{CompILR}{A 'compilr' object}
+#'   \item{Model}{Fitted brm multivariate multilevel 
+#'   mmodel with compositional outcome}
+#'   }
+"mvm"

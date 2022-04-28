@@ -3,7 +3,7 @@
 \name{brmcoda}
 \alias{brmcoda}
 \title{Fit Bayesian generalised (non-)linear multilevel compositional model
-via full Bayesian inference using Stan,
+via full Bayesian inference using brms,
 when composition is the predictor.}
 \usage{
 brmcoda(formula, compilr, ...)
@@ -13,16 +13,16 @@ brmcoda(formula, compilr, ...)
 A symbolic description of the model to be fitted.
 Details of the model specification can be found in \code{\link{brmsformula}}.}
 
-\item{compilr}{A \code{compilr} object containing data of composition, ILR coordinates,
-and other variables used in the model.}
+\item{compilr}{A \code{\link{compilr}} object containing data of composition,
+ILR coordinates, and other variables used in the model.}
 
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
 A list with two elements
 \itemize{
-\item{\code{CompIlr}}{ A object of class \code{compilr} used in the \code{brm} model. }
-\item{\code{BrmModel}}{ An object of class \code{brmsfit}, which contains the posterior draws
+\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+\item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
 \description{
@@ -30,19 +30,21 @@ This function fits a \code{brm} model to
 between-person and within-person ILR coordinates as predictor.
 }
 \examples{
+\dontrun{
 data(mcompd)
 data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
+# inspects ILRs before passing to brmcoda
 names(cilr$BetweenILR)
 names(cilr$WithinILR)
 
-brmcodatest <- brmcoda(compilr = cilr, 
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-               core = 8, chain = 4)
-adjbrmcodatest <- brmcoda(compilr = cilr, 
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
-               core = 8, chain = 4)
-print(adjbrmcodatest$BrmModel)
-rm(mcompd, sbp, cilr, mcm, mcmc)
+m <- brmcoda(compilr = cilr, 
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+             core = 8)
+               
+adjm <- brmcoda(compilr = cilr, 
+               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + Age + (1 | ID), 
+               core = 8)
+}
 }

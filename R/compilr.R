@@ -61,8 +61,9 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
                  paste(class(sbp), collapse = ";")))
   }
   if (isFALSE(identical(length(parts), ncol(sbp)))) {
-    stop(sprintf("The number of compositional variables in parts (%d) 
-                 must be the same as in sbp (%d).",
+    stop(sprintf(
+    "The number of compositional variables in parts (%d) 
+  must be the same as in sbp (%d).",
                  length(parts),
                  ncol(sbp)))
   }
@@ -71,11 +72,12 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   
   # deal with 0s - imputation
   if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) x == 0)))) {
-    message(paste("This dataset of composition contains zero(s);",
-                  "It is now imputed using the Log-ratio EM algorithm.",
-                  "For more details, please see ?zCompositions::lrEM",
-                  "If you would like to deal with zeros using other methods,",
-                  "please do so before running 'compilr'.",
+    message(paste(
+      "This dataset of composition contains zero(s);",
+      "  It is now imputed using the Log-ratio EM algorithm.",
+      "  For more details, please see ?zCompositions::lrEM",
+      "  If you would like to deal with zeros using other methods,",
+      "  please do so before running 'compilr'.",
                   sep = "\n"))
     
     dl1 <- rep(eval(total), length(parts))
@@ -109,9 +111,10 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
   
   if(any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
-    stop(paste("'data' should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
-               " these variables will be used in subsequent models.",
-               " Please rename them before running 'compilr'.",
+    stop(paste(
+      "'data' should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
+      "  these variables will be used in subsequent models.",
+      "  Please rename them before running 'compilr'.",
                sep = "\n"))
   }
   out <- structure(

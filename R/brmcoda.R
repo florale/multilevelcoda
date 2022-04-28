@@ -2,8 +2,7 @@
 #' via full Bayesian inference using brms,
 #' when composition is the predictor.
 #' 
-#' @description 
-#' This function fits a \code{brm} model to
+#' @description This function fits a `brm` model to
 #' between-person and within-person ILR coordinates as predictor.
 #' 
 #' @param formula A object of class \code{formula}, \code{brmsformula}:
@@ -15,8 +14,8 @@
 #' 
 #' @return A list with two elements
 #' \itemize{
-#'   \item{\code{CompIlr}}{ A object of class \code{compilr} used in the \code{brm} model. }
-#'   \item{\code{BrmModel}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+#'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
 #'   
 #' @importFrom brms brm
@@ -31,19 +30,28 @@
 #' names(cilr$BetweenILR)
 #' names(cilr$WithinILR)
 #' 
-#' unadjm <- brmcoda(compilr = cilr, 
-#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'                core = 8)
+#' m <- brmcoda(compilr = cilr, 
+#'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'              core = 8)
 #'                
 #' adjm <- brmcoda(compilr = cilr, 
-#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + Age + (1 | ID), 
 #'                core = 8)
-#' print(adjm$BrmModel)
-#' rm(mcompd, sbp, cilr, unadjm, adjm)
 #' }
 brmcoda <- function (formula, compilr, ...) {
+
+  if (isTRUE(missing(compilr))) {
+    stop(paste(
+      "'compilr' is a required argument and cannot be missing;",
+      "  it should be an object of class compilr.", 
+      "  See ?multilevelcoda::compilr for details.",
+      sep = "\n"))
+  }
   if (isFALSE(inherits(compilr, "compilr"))) {
-    stop("compilr must be an object of class compilr.")
+    stop(paste(
+      "compilr must be an object of class compilr.",
+      "  See ?multilevelcoda::compilr for details.",
+      sep = "\n"))
   }
   tmp <- cbind(compilr$data, compilr$BetweenILR, 
                compilr$WithinILR, compilr$TotalILR)
@@ -54,7 +62,7 @@ brmcoda <- function (formula, compilr, ...) {
   
   out <- structure(
     list(CompIlr = compilr,
-         BrmModel = m),
+         Model = m),
     class = "brmcoda")
   out
 }

@@ -114,7 +114,7 @@ emmcoda <- function (object, x = NULL, at = NULL, ...) {
     comp <- lapply(ilr, function(x) {
       x <- ilrInv(x, V = object$CompIlr$psi)
       x <- as.data.table(clo(x, total = object$CompIlr$total))
-      x <- setNames(x, object$CompIlr$parts)
+      names(x) <- object$CompIlr$parts
       x <- describe_posterior(x, centrality = "mean")})
     ilr <- lapply(ilr, function(x) {describe_posterior(x, centrality = "mean")})
     

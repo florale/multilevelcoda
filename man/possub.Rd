@@ -19,7 +19,7 @@ Makes a dataset of all possible pairwise substitution of a composition.
 
 data(mcompd)
 
-ps1 <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 ps2 <- possub(c("WAKE", "MVPA", "LPA", "SB"))
 
 print(ps2)

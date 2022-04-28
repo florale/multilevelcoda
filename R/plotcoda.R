@@ -23,9 +23,9 @@
 #' @examples
 #' 
 #' data(mcompd)
-#' plotsub(data = testbs2$TST, x = "sleep", y = "stress")
+#' plotsub(data = testbs$TST, x = "sleep", y = "stress")
 #' 
-plotsub <- function(data, x, y, font = "Times New Roman") {
+plotsub <- function(data, x, y, font = "Times New Roman", ...) {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame")))) {
     stop("data must be a data table or data frame,",
@@ -70,8 +70,7 @@ plotsub <- function(data, x, y, font = "Times New Roman") {
 #' @examples
 #'
 #' data(mcompd)
-#' plotemmc(data = emtest, x = "stress", y = "behaviours")
-plotemmc <- function(data, x, y, font = "Times New Roman") {
+plotemmc <- function(data, x, y, font = "Times New Roman", ...) {
 
   tmp <- copy(data)
   specs <- tmp$Predictor

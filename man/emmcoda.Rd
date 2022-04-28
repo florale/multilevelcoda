@@ -4,16 +4,18 @@
 \alias{emmcoda}
 \title{Estimated marginal means of composition.}
 \usage{
-emmcoda(object, specs, at, ...)
+emmcoda(object, x = NULL, at = NULL, ...)
 }
 \arguments{
-\item{specs}{A character vector specifying the names of the predictors over which EMMs are desired.}
+\item{object}{A fitted \code{\link{mvmcoda}} model data. Required.}
 
-\item{at}{A numeric vector passed to \code{\link{ref_grid}} specifying the predictor's values for EMMs.}
+\item{x}{A character vector specifying the names of the predictors over which EMMs are desired.
+If \code{NULL}, the average of all predictionu is returned. Default to \code{NULL}.}
 
-\item{...}{Further arguments passed to \code{\link{emmeans}}.}
+\item{at}{A numeric value, vector or list passed to \code{\link{ref_grid}}
+specifying the predictor's values for EMMs.}
 
-\item{data}{A fitted \code{\link{mvmcoda}} model data. Required.}
+\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
 A list with four elements.
@@ -21,9 +23,10 @@ A list with four elements.
 \description{
 This function obtains estimated marginal means (EMMs) of models
 containing composition as the outcome
+A sample from the posterior distribution of the regression coefficients.
 }
 \examples{
+data("unadjusted-mvmcoda")
 
-emtest <- emmcoda(object = mvm1, specs = "STRESS", at = c(1:10))
-
+# emtest <- emmcoda(object = mvm, x = "STRESS", at = 2)
 }

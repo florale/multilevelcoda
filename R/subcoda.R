@@ -60,10 +60,8 @@
 #'                        formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4)
 #'  
 #'  rm(mcompd, sbp, davg, scoda)
-subcoda <- function(data, sbp, parts, 
-                    substitute, formula, 
-                    minute = 60,
-                    total = 1440, ...) {
+subcoda <- function(data, sbp, parts, substitute, formula, 
+                    minute = 60, total = 1440, ...) {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
@@ -124,7 +122,8 @@ subcoda <- function(data, sbp, parts,
   samed <- tmpd
   ysame <- as.data.table(fitted(m, newdata = samed, re.form = NA, summary = FALSE))
   ysame <- rowMeans(ysame)
-
+  
+  # Substitution model
   iout <- vector("list")
   for(i in colnames(substitute)) {
     posub <- copy(substitute)

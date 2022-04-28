@@ -24,7 +24,8 @@
 #' data(mcompd)
 #' data(sbp)
 #' ## run mvcoda
-#' mv1 <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female, sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' mv <- mvcoda(mcompd, mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Age + Female,
+#'               sbp, c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' 
 mvcoda <- function(data, formula, sbp, parts, ...) {
 

@@ -22,7 +22,7 @@ Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.}
 
 \item{summary}{A logical value.
 Should estimated marginal means at each level of the reference grid (\code{FALSE})
-or the marginal averages thereof (\code{TRUE}) be returned? Default to \code{FALSE}.}
+or their average (\code{TRUE}) be returned? Default to \code{FALSE}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
@@ -42,5 +42,5 @@ For average marginal effect, consider using \code{\link{wsubmargins}}.
 }
 \examples{
 ## Please see ?multilevelcoda::bsub for an example.
-testws <- wsub(object = brmcodatest, substitute = ps, minute = 5, regrid = rg)
+#testws <- wsub(substitute = ps, minute = 5)
 }

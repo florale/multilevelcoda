@@ -7,7 +7,7 @@
 bsub(object, substitute, minute = 60L, regrid = NULL, summary = FALSE, ...)
 }
 \arguments{
-\item{object}{A \code{\link{brmcoda}} object.}
+\item{object}{A fitted \code{\link{brmcoda}} object.}
 
 \item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
@@ -22,12 +22,12 @@ Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.}
 
 \item{summary}{A logical value.
 Should estimated marginal means at each level of the reference grid (\code{FALSE})
-or the marginal averages thereof (\code{TRUE}) be returned? Default to \code{FALSE}.}
+or their average (\code{TRUE}) be returned? Default to \code{FALSE}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list of results from substitution models for all compositional variables.
+A list of results from each
 }
 \description{
 Estimate the difference in outcomes
@@ -41,18 +41,16 @@ is the compositional mean of the dataset provided.
 For average marginal effect, consider using \code{\link{bsubmargins}}.
 }
 \examples{
+\donttest{
 data(mcompd)
 data(sbp)
 data(psub)
-\donttest{
+data("adjusted-brmcoda")
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
-m <- brmcoda(compilr = cilr, 
-             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
-             wilr2 + wilr3 + wilr4 + Female + (1 | ID))
                
-testbs <- bsub(object = m, substitute = psub, minute = 5)
+testbs <- bsub(object = adjm, substitute = psub, minute = 5)
 }
 ## cleanup
 rm(bsubtest, mcompd)

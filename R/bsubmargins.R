@@ -54,24 +54,25 @@ bsubmargins <- function (object, substitute, minute = 60L, ...) {
   if (isTRUE(missing(object))) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
-      " it should be an object of class brmcoda.", 
-      " See ?multilevelcoda::brmcoda for details.",
+      "  it should be an object of class 'brmcoda'.", 
+      "  See ?bsubmargins for details.",
       sep = "\n"))
   }
   
   if (isFALSE(inherits(object, "brmcoda"))) {
-    stop(paste(
-      "'object' should be a fitted brmcoda object",
-      " See ?multilevelcoda::brmcoda for details.",
-      sep = "\n"))
+    stop(sprintf(
+    "Can't handle an object of class (%s) 
+  It should be a fitted 'brmcoda' object
+  See ?bsub for details.",
+                 class(object)))
   }
   
   if (isTRUE(missing(substitute))) {
     stop(paste(
       "'substitute' is a required argument and cannot be missing;",
-      " it should be a dataset of possible substitution", 
-      " and can be computed using multilevelcoda::possub.", 
-      " See ?multilevelcoda::possub for details.",
+      "  it should be a dataset of possible substitution", 
+      "  and can be computed using multilevelcoda::possub.", 
+      "  See ?bsubmargins for details.",
       sep = "\n"))
   }
   
@@ -86,14 +87,16 @@ bsubmargins <- function (object, substitute, minute = 60L, ...) {
   }
   
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
-    stop(sprintf("The number of columns in 'substitute' (%d) must be the same
+    stop(sprintf(
+    "The number of columns in 'substitute' (%d) must be the same
   as the compositional variables in 'parts' (%d).",
                  ncol(substitute),
                  length(object$CompIlr$parts)))
   }
   
   if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
-    stop(sprintf("The names of compositional variables must be the same
+    stop(sprintf(
+    "The names of compositional variables must be the same
   in 'substitute' (%s) and 'parts' (%s).",
                  colnames(substitute),
                  object$CompIlr$parts))
@@ -113,13 +116,13 @@ bsubmargins <- function (object, substitute, minute = 60L, ...) {
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
   
   samed <- cbind(bilr, wilr, object$CompIlr$data)
-  ysame <- fitted(object$BrmModel, newdata = samed, re.form = NA, summary = FALSE)
+  ysame <- fitted(object$Model, newdata = samed, re.form = NA, summary = FALSE)
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model
   out <- .get.bsubmargins(object = object, b = b,
-                           substitute = substitute,
-                           ysame = ysame, min = min)
+                          substitute = substitute,
+                          ysame = ysame, min = min)
   
 }
 

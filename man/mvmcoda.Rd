@@ -3,14 +3,14 @@
 \name{mvmcoda}
 \alias{mvmcoda}
 \title{Fit Bayesian generalised (non-)linear multivariate multilevel compositional model
-via full Bayesian inference using Stan,
+via full Bayesian inference using brms,
 when composition is the outcome.}
 \usage{
 mvmcoda(compilr, formula, ...)
 }
 \arguments{
-\item{compilr}{A \code{compilr} object containing data of composition, ILR coordinates,
-and other variables used in the model.}
+\item{compilr}{A \code{\link{compilr}} object containing data of composition,
+ILR coordinates, and other variables used in the model.}
 
 \item{formula}{A object of class \code{\link{brmsformula}}, \code{\link{mvbrmsformula}}:
 A symbolic description of the model to be fitted.
@@ -19,21 +19,32 @@ Details of the model specification can be found in \code{\link{mvbrmsformula}}.}
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
-
+A list with two elements
+\itemize{
+\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+\item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
+along with many other useful information about the model.}
 }
 \description{
-This function utilises
+Fit Bayesian generalised (non-)linear multivariate multilevel compositional model
+via full Bayesian inference using brms,
+when composition is the outcome.
 }
 \examples{
+\donttest{
 data(mcompd)
 data(sbp)
-cilr <- compilr(data = mcompd, sbp = sbp)
+cilr <- compilr(data = mcompd, sbp = sbp, idvar = "ID",
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 
 ## inspect names of ILR coordinates bfore passing to 'brm' model
 names(cilr$TotalILR)
 
 ## run mvmcoda
 mvm <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
-                chains = 4, cores = 8)
-
+               cores = 8, chain = 4)
+               
+adjmvm <- mvmcoda(compilr = cilr, formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
+               cores = 9, chain = 4)
+}
 }
