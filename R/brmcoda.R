@@ -1,9 +1,7 @@
-#' @title Fit Bayesian generalised (non-)linear multilevel compositional model 
+#' Fit Bayesian generalised (non-)linear multilevel compositional model 
 #' via full Bayesian inference using brms,
-#' when composition is the predictor.
 #' 
-#' @description This function fits a `brm` model to
-#' between-person and within-person ILR coordinates as predictor.
+#' This function fits a \code{brm} model with multilevel ILR coordinates.
 #' 
 #' @param formula A object of class \code{formula}, \code{brmsformula}:
 #' A symbolic description of the model to be fitted. 
@@ -17,7 +15,7 @@
 #'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
 #'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
-#'   
+#'   }
 #' @importFrom brms brm
 #' @export
 #' @examples
@@ -29,14 +27,18 @@
 #' # inspects ILRs before passing to brmcoda
 #' names(cilr$BetweenILR)
 #' names(cilr$WithinILR)
+#' names(cilr$TotalILR)
 #' 
-#' m <- brmcoda(compilr = cilr, 
+#' # model with compositional predictor at between and within-person levels
+#' m1 <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'              core = 8)
+#'              chain = 1, iter = 500)
+#'
+#' # model with compositional outcome  
+#' m2 <- brmcoda(compilr = cilr, 
+#'               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
+#'              chain = 1, iter = 500) 
 #'                
-#' adjm <- brmcoda(compilr = cilr, 
-#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + Age + (1 | ID), 
-#'                core = 8)
 #' }
 brmcoda <- function (formula, compilr, ...) {
 
