@@ -17,7 +17,8 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
 #make: *** [/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpcRAlDr/model-15dc2cb19f7a] Error 1
 #Error: An error occured during compilation! See the message above for more information.
 
-####################################################################################################
+# Model
+#---------------------------------------------------------------------------------------------------
 data(mcompd)
 data(sbp)
 data(psub)
@@ -33,6 +34,8 @@ foreach::registerDoSEQ()
 
 x <- wsub(object = m, substitute = psub, minute = 2)
 
+# Testing
+#---------------------------------------------------------------------------------------------------
 test_that("wsub errors for invalid input", {
   
   ## check errors for missing object
@@ -145,7 +148,7 @@ test_that("wsub gives results in expected direction and magnitude", {
   }
 })
 
-# ####################################################################################################
+# #---------------------------------------------------------------------------------------------------
 # # Check the results from substitution model align with brm model 
 # # using results from pairwise substitution
 # ## Estimates should be in the direction between pairwise coordinates and  pairwise substitution 
@@ -393,7 +396,7 @@ test_that("wsub gives results in expected direction and magnitude", {
 #   
 # })
 # 
-####################################################################################################
+#---------------------------------------------------------------------------------------------------
 # Test 2-component composition for consistency between brm model and substitution model
 ## TST vs WAKE
 sbp <- as.matrix(data.table(1, -1))

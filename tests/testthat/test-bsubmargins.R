@@ -10,8 +10,8 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
     backend <- "cmdstanr"
   }
 }
-
-####################################################################################################
+# Model
+#---------------------------------------------------------------------------------------------------
 data(mcompd)
 data(sbp)
 data(psub)
@@ -27,6 +27,8 @@ foreach::registerDoSEQ()
 
 x <- bsubmargins(object = m, substitute = psub, minute = 2)
 
+# Testing
+#---------------------------------------------------------------------------------------------------
 test_that("bsubmargins errors for invalid input", {
   
   ## check errors for missing object
@@ -135,7 +137,7 @@ test_that("bsubmargins gives results in expected direction and magnitude", {
   }
 })
 
-####################################################################################################
+#---------------------------------------------------------------------------------------------------
 # Test 2-component composition for consistency between brm model and substitution model
 # using results from pairwise substitution
 ## Estimates should be in the direction between pairwise coordinates and  pairwise substitution 
@@ -151,7 +153,7 @@ suppressWarnings(m <- brmcoda(compilr = cilr,
                               chain = 1, iter = 500, seed = 123))
 a <- bsubmargins(object = m, substitute = psub, minute = 2)
 
-test_that("bsubmargins's results matches with brm model for 2-component composition (TST vs WAKE)", {
+test_that("bsubmargins's results matches with brm for 2-component composition (TST vs WAKE)", {
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -180,7 +182,7 @@ suppressWarnings(m <- brmcoda(compilr = cilr,
                               chain = 1, iter = 500, seed = 123))
 b <- bsubmargins(object = m, substitute = psub, minute = 2)
 
-test_that("bsubmargins's results matches with brm model for 2-component composition (TST vs MVPA)", {
+test_that("bsubmargins's results matches with brm for 2-component composition (TST vs MVPA)", {
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -268,7 +270,7 @@ suppressWarnings(m <- brmcoda(compilr = cilr,
                               chain = 1, iter = 500, seed = 123))
 e <- bsubmargins(object = m, substitute = psub, minute = 2)
 
-test_that("bsubmargins's results matches with brm model for 2-component composition (WAKE vs MVPA)", {
+test_that("bsubmargins's results matches with brm for 2-component composition (WAKE vs MVPA)", {
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -297,7 +299,7 @@ suppressWarnings(m <- brmcoda(compilr = cilr,
                               chain = 1, iter = 500, seed = 123))
 f <- bsubmargins(object = m, substitute = psub, minute = 2)
 
-test_that("bsubmargins's results matches with brm model for 2-component composition (WAKE vs LPA)", {
+test_that("bsubmargins's results matches with brm for 2-component composition (WAKE vs LPA)", {
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -355,7 +357,7 @@ suppressWarnings(m <- brmcoda(compilr = cilr,
                               chain = 1, iter = 500, seed = 123))
 h <- bsubmargins(object = m, substitute = psub, minute = 2)
 
-test_that("bsubmargins's results matches with brm model for 2-component composition (MVPA vs LPA)", {
+test_that("bsubmargins's results matches with brm for 2-component composition (MVPA vs LPA)", {
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
