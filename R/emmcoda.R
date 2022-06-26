@@ -19,10 +19,6 @@
 #' @importFrom reshape2 dcast
 #' @importFrom stats predict
 #' @export
-#' @examples
-#' data("unadjusted-mvmcoda")
-#' 
-#' # emtest <- emmcoda(object = mvm, x = "STRESS", at = 2)
 emmcoda <- function (object, x = NULL, at = NULL, ...) {
   
   if(isTRUE(missing(object))) {
@@ -60,7 +56,7 @@ emmcoda <- function (object, x = NULL, at = NULL, ...) {
           if(isFALSE(x %in% colnames(rg))) { # check name
             stop("'x' is not a predictor in 'mvmcoda' object")
           } else {
-            cv <- colnames(rg) %snin% c("rep.meas", ".wgt.", x) # get cov names, without x
+            cv <- colnames(rg) %snin% c("rep.meas", ".wgt.")
             rg <- rg[, cv, with = FALSE]
             rg <- unique(rg)
             newd <- rg[, ID := 1]
@@ -69,7 +65,7 @@ emmcoda <- function (object, x = NULL, at = NULL, ...) {
           } else { # both x and at are provided
             if(isFALSE(x %in% colnames(rg))) { 
               stop("'x' is not a predictor in 'mvmcoda' object")
-            } else if (isFALSE(identical(class(at), class(rg[, get(x)])))) {
+            } else if (isFALSE(is(class(at), class(x)))) {
               stop(sprintf(
                 "at (%s) must be values of x (%s)",
                 class(at),
@@ -92,15 +88,16 @@ emmcoda <- function (object, x = NULL, at = NULL, ...) {
                 }
               }
           }
-
-  yhat <- as.data.table(predict(object$Model, newdata = newd, re.form = NA, summary = FALSE))
-  yhat <- dcast(yhat, V1 + V2 ~ V3, value.var = "value") # V1 - posterior draws, V2 - row in newd, V3 - ilr
-  yhat <- yhat[order(yhat$V2),] # yhat should have already been sorted by newd, but just to be sure
   
+  yhat <- as.data.table(fitted(object$Model, newdata = newd, re.form = NA, summary = FALSE))
+  yhat <- dcast(yhat, V1 + V2 ~ V3, value.var = "value") 
+  # V1 - posterior draws of each row in newd, V2 - row in newd, V3 - ilr
+  yhat <- yhat[order(yhat$V2),]
+  # check yhat with JW
   # inverse ilr to get composition
   ilr <- yhat[, -c(1:2)]
   
-  if(is.null(x)) { # average all prediction
+  if(is.null(at)) { # average all prediction
     comp <- ilrInv(ilr, V = object$CompIlr$psi)
     comp <- as.data.table(clo(comp, total = object$CompIlr$total))
     names(comp) <- object$CompIlr$parts
@@ -115,7 +112,7 @@ emmcoda <- function (object, x = NULL, at = NULL, ...) {
       x <- ilrInv(x, V = object$CompIlr$psi)
       x <- as.data.table(clo(x, total = object$CompIlr$total))
       names(x) <- object$CompIlr$parts
-      x <- describe_posterior(x, centrality = "mean")})
+      x <- describe_posterior(x, centrality = "mean")}) # if want to use ROPE, need to manually specify
     ilr <- lapply(ilr, function(x) {describe_posterior(x, centrality = "mean")})
     
     d <- split(newd, rep(1:nrow(newd), each = 1))
@@ -126,8 +123,8 @@ emmcoda <- function (object, x = NULL, at = NULL, ...) {
     comp <- Map(cbind, comp, dcomp)
     ilr <- Map(cbind, ilr, dilr)
     
-    names(comp) <- paste0(x, "-", at)
-    names(ilr) <- paste0(x, "-", at)
+    names(comp) <- paste0(x, at)
+    names(ilr) <- paste0(x, at)
   }
   out <- list(comp, ilr)
   names(out) <- c("Composition", "ILR")

@@ -1,16 +1,16 @@
-#' @title Estimating Average Marginal Effects for Between-person Isotemporal Substitution Model.
+#' Estimating Average Marginal Effects for Between-person Isotemporal Substitution Model.
 #'
-#' @description
 #' Using a fitted model object, estimates the average marginal difference 
 #' in outcomes when compositional variables are substituted for a specific period
 #' at `between-person` level. The resulting \code{bsubmargins} encapsulates 
 #' substitution estimation across all compositional variables present
 #' in the \code{\link{brmcoda}} object.
 #'
-#' @param object A \code{\link{brmcoda}} object. Required.
-#' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+#' @param object A \code{\link{brmcoda}} object.
+#' @param substitute A \code{data.frame} or \code{data.table} of possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
-#' @param minute A integer or numeric value indicating the maximum minute for which substitution model is desired.
+#' @param minute A integer or numeric value indicating the maximum minute 
+#' for which substitution model is desired.
 #' Default to \code{60L} (i.e., the model loops through 1:60L minutes).
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
@@ -33,21 +33,18 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' data(psub)
 #' \dontrun{
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#' data(psub)
+#' data(mcompd)
+#' data(psub)
+#' cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
-#'              wilr2 + wilr3 + wilr4 + Female + (1 | ID))
+#'              wilr2 + wilr3 + wilr4 + Female + (1 | ID), chains = 1, iter = 500)
 #'                
-#' testbs <- bsub(object = m, substitute = psub, minute = 5)
-#' 
-#' library(doFuture)
-#' registerDoFuture()
-#' plan(multisession, workers = 5)
-#' system.time(testbsm <- bsubmargins(object = m, substitute = psub, minute = 5))
+#' x <- bsubmargins(object = m, substitute = psub, minute = 5)
 #' }
 bsubmargins <- function (object, substitute, minute = 60L, ...) {
   
@@ -125,4 +122,3 @@ bsubmargins <- function (object, substitute, minute = 60L, ...) {
                           ysame = ysame, min = min)
   
 }
-

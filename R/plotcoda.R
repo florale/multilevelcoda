@@ -10,7 +10,8 @@
 #' \code{\link{wsub}}, \code{\link{bsub}}, \code{\link{wsubmargins}}, \code{\link{bsubmargins}}.
 #' @param x A character string specifying name of the compostional predictor variable.
 #' @param y A character string specifying the name of the outcome variable.
-#' @param font A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.
+#' @param font A character string specifying the name of user's preferred font. 
+#' Default is \code{Times New Roman}.
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #' 
 #' @return A ggplot graph object showing the estimated difference in outcome when 
@@ -20,10 +21,6 @@
 #' @importFrom ggsci scale_color_simpsons
 #' @importFrom data.table copy
 #' @export
-#' @examples
-#' 
-#' data(mcompd)
-#' plotsub(data = testbs$TST, x = "sleep", y = "stress")
 #' 
 plotsub <- function(data, x, y, font = "Times New Roman", ...) {
   
@@ -58,10 +55,12 @@ plotsub <- function(data, x, y, font = "Times New Roman", ...) {
 #' @param data A \code{\link{emmcoda}} object to use for plot.
 #' @param x A character string specifying name of the predictor variable.
 #' @param y A character string specifying the name of the compositional outcome variable.
-#' @param font A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.
+#' @param font A character string specifying the name of user's preferred font. 
+#' Default is \code{Times New Roman}.
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
-#' @return A ggplot graph object showing the estimated change in compositional outcome associated with changes in predictor.
+#' @return A ggplot graph object showing the estimated change in compositional outcome 
+#' associated with changes in predictor.
 #' @importFrom ggplot2 ggplot aes geom_area xlab ylab guides guide_legend
 #' @importFrom cowplot theme_cowplot
 #' @importFrom ggsci scale_fill_simpsons

@@ -16,3 +16,7 @@ Rplots.pdf
 inst/doc
 docs
 internal.md
+data/unadjusted-brmcoda.RData
+data/adjusted-brmcoda.RData
+data/unadjusted-mvmcoda.RData
+data/adjusted-mvmcoda.RData

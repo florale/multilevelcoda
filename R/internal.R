@@ -327,7 +327,8 @@ get.bsub <- function(object, substitute, mcomp,
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
-      ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], subd[, .(MinSubstituted, Substitute, Predictor)])
+      ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
+                     subd[, .(MinSubstituted, Substitute, Predictor)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -350,10 +351,11 @@ get.bsub <- function(object, substitute, mcomp,
                 subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
                 ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
                 ydiff <- ysub - ysame[, h]
-                ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+                ymean <- apply(ydiff, 2, 
+                               function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("MinSubstituted", "Substitute", "Predictor", cv), with = FALSE])
+                               subd[, c("MinSubstituted", "Substitute", "Predictor", cv),with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
@@ -411,14 +413,15 @@ get.wsub <- function(object, substitute, mcomp,
     # compositions and ilrs for predictions
     bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
     tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
+    wcomp <- tcomp - bcomp 
+    
     bilr <- ilr(bcomp, V = object$CompIlr$psi)
     tilr <- ilr(tcomp, V = object$CompIlr$psi)
-
-    wilr <- tilr - bilr 
+    wilr <- ilr(wcomp, V = object$CompIlr$psi)
     
-    colnames(bilr) <- paste0("bilr", seq_len(ncol(tilr)))
+    colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
     colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-    
+
     # prediction
     if(is.null(refg)) { # unadjusted
       subd <- cbind(newd, bilr, wilr, ID)
@@ -427,7 +430,8 @@ get.wsub <- function(object, substitute, mcomp,
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
-      ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], subd[, .(MinSubstituted, Substitute, Predictor)])
+      ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
+                     subd[, .(MinSubstituted, Substitute, Predictor)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -450,7 +454,8 @@ get.wsub <- function(object, substitute, mcomp,
                 subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
                 ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
                 ydiff <- ysub - ysame[, h]
-                ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+                ymean <- apply(ydiff, 2, 
+                               function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
                                subd[, c("MinSubstituted", "Substitute", "Predictor", cv), with = FALSE])
@@ -459,7 +464,7 @@ get.wsub <- function(object, substitute, mcomp,
                 }
               ymean <- rbindlist(hout)
             }
-        }
+        } 
     # final results for entire composition
     out <- list(ymean)
     names(out) <- i

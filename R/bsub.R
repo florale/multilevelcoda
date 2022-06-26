@@ -12,7 +12,7 @@
 #' For average marginal effect, consider using \code{\link{bsubmargins}}.
 #'
 #' @param object A fitted \code{\link{brmcoda}} object.
-#' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+#' @param substitute A \code{data.frame} or \code{data.table} of possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
 #' @param minute A integer or numeric value indicating the maximum minute 
 #' for which substitution model is desired.
@@ -45,9 +45,10 @@
 #' 
 #'                
 #' testbs <- bsub(object = adjm, substitute = psub, minute = 5)
-#' }
+#' 
 #' ## cleanup
 #' rm(bsubtest, mcompd)
+#' }
 bsub <- function(object, substitute, minute = 60L, 
                  regrid = NULL, summary = FALSE, 
                  ...) {

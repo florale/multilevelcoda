@@ -39,18 +39,13 @@ in the \code{\link{brmcoda}} object.
 \examples{
 data(psub)
 \dontrun{
-cilr <- compilr(data = mcompd, sbp = sbp, 
+cilr <- compilr(data = mcompd[ID \%in\% 1:10, .SD[1:3], by = ID], sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
-             wilr2 + wilr3 + wilr4 + Female + (1 | ID))
+             wilr2 + wilr3 + wilr4 + Female + (1 | ID), chains = 1, iter = 500)
                
-testbs <- bsub(object = m, substitute = psub, minute = 5)
-
-library(doFuture)
-registerDoFuture()
-plan(multisession, workers = 5)
-system.time(testbsm <- bsubmargins(object = m, substitute = psub, minute = 5))
+testbsm <- bsubmargins(object = m, substitute = psub, minute = 5)
 }
 }

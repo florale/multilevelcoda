@@ -1,6 +1,5 @@
-#' @title A series of functions for single level compositional models
+#' A series of functions for single level compositional models
 #'
-#' @description 
 #' This function first computes composition and ILR coordinates,
 #' then fits a Bayesian single-level compositional model to compositional predictors
 #' and users' choices of outcomes and covariates,
@@ -31,7 +30,7 @@
 #'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 #'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
 #'   \item{\code{parts}}{ Names of compositional variables.}
-#'   
+#'   }
 #' @importFrom compositions acomp ilr gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
 #' @importFrom zCompositions lrEM

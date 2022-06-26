@@ -25,6 +25,7 @@ A list with two elements
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
+}
 \description{
 This function fits a \code{brm} model to
 between-person and within-person ILR coordinates as predictor.

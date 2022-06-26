@@ -25,6 +25,7 @@ A list with two elements
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
+}
 \description{
 Fit Bayesian generalised (non-)linear multivariate multilevel compositional model
 via full Bayesian inference using brms,

@@ -40,6 +40,7 @@ or a matrix of class \code{acomp} representing multiple closed compositions each
 \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
 \item{\code{parts}}{ Names of compositional variables.}
 }
+}
 \description{
 This function first computes composition and ILR coordinates,
 then fits a Bayesian single-level compositional model to compositional predictors

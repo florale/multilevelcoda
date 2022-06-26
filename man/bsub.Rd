@@ -51,7 +51,8 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 
                
 testbs <- bsub(object = adjm, substitute = psub, minute = 5)
-}
+
 ## cleanup
 rm(bsubtest, mcompd)
+}
 }
