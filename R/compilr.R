@@ -1,6 +1,6 @@
-#' @title Compute Between-person, Within-person, and Total Composition and Isometric log ratio transform of a (dataset of) composition(s)
+#' Compute Between-person, Within-person, and Total Composition 
+#' and Isometric log ratio transform of a (dataset of) composition(s)
 #'
-#' @description
 #' Computes sets of compositions and IRLs
 #' for Multilevel Compositional Data models. 
 #'
@@ -8,8 +8,9 @@
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and a ID variable. Required.
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
-#' @param parts A character vector specifying the names of compositional variables to be used. Required.
-#' @param idvar A character string specifying the name of the variable containing IDs. Default to \code{ID}.
+#' @param parts A character vector specifying the names of compositional variables to be used.
+#' @param idvar A character string specifying the name of the variable containing IDs. 
+#' Default to \code{ID}.
 #' @param total A numeric value of the total amount to which the compositions should be closed.
 #' Default to \code{1440}.
 #'
@@ -69,22 +70,6 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   }
   tmp <- as.data.table(data)
   psi <- gsi.buildilrBase(t(sbp))
-  
-  # deal with 0s - imputation
-  if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) x == 0)))) {
-    message(paste(
-      "This dataset of composition contains zero(s);",
-      "  It is now imputed using the Log-ratio EM algorithm.",
-      "  For more details, please see ?zCompositions::lrEM",
-      "  If you would like to deal with zeros using other methods,",
-      "  please do so before running 'compilr'.",
-                  sep = "\n"))
-    
-    dl1 <- rep(eval(total), length(parts))
-    impd <- lrEM(tmp[, parts, with = FALSE], label = 0, dl = dl1, ini.cov = "multRepl")
-    names(impd) <- parts
-    tmp <- as.data.table(cbind(impd, tmp[, !parts, with = FALSE]))
-    }
   
   ## Composition and ILRs
   # total
