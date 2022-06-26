@@ -1,0 +1,68 @@
+---
+title: "Estimating Multilevel Models with Compositionl predictors using multilevelcoda"
+output: html_document
+---
+
+In this vignette, we discuss how to specify multilevel models with compositional predictor using multilevelcoda. 
+
+Consider the following example. 
+
+```{r}
+library(multilevelcoda)
+library(brms)
+library(bayestestR)
+library(doFuture)
+
+data("mcompd") # dataset with compositional variables
+data("psub") # base possible substitution data
+sbp("sbp") # sequential binary partitition
+```
+
+## Getting compositions and isometric log ratio (ILR) coordinates. 
+`compilr` 
+The coordinates are used in the subsequent model as the predictors
+
+```{r}
+
+cilr <- compilr(data = mcompd, sbp = sbp,
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+
+```
+
+
+## Multilevel model with compositional predictors
+
+We now will use output from the `compilr` function for our `brm` model. 
+```{r}
+
+m <- brmcoda(compilr = cilr,
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+             chain = 10, cores = 8, iter = 8000, seed = 123, save_pars = save_pars(all = TRUE))
+
+summary(m$Model)
+
+comparison <- bayesfactor_models(m1$Model,
+                                 denominator = m0$Model)
+comparison
+
+```
+
+## Substitution model
+
+
+```{r}
+# Within-person substitution
+registerDoFuture()
+plan(multisession, workers = 5)
+wsubm <- wsub(objec = m, substitute = psub, minute = 5, summary = TRUE)
+wsubm$TST
+plotsub(data = wsubm$TST, x = "stress", y = "sleep")
+
+bsubm <- bsub(objec = m, substitute = psub, minute = 5, summary = TRUE)
+bsubm$TST
+plotsub(data = bsubm$TST, x = "stress", y = "sleep")
+
+
+```
+
