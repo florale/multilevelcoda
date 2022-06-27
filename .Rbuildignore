@@ -10,6 +10,7 @@ LICENSE
 ^\.travis\.yml$
 ^codecov\.yml$
 ^vignettes/.\.Rmd\.orig$
+^vignettes/precompile.R$
 \.Rhistory
 \.gitignore
 ^\.github$
