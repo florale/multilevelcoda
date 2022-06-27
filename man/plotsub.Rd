@@ -4,7 +4,7 @@
 \alias{plotsub}
 \title{Substitution plot}
 \usage{
-plotsub(data, x, y, font = "Times New Roman", ...)
+plotsub(data, x, y, font = "serif", ...)
 }
 \arguments{
 \item{data}{A dataset to use for plot.
@@ -15,7 +15,8 @@ It must be a component of a list resulted from one of the following functions:
 
 \item{y}{A character string specifying the name of the outcome variable.}
 
-\item{font}{A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.}
+\item{font}{A character string specifying the name of user's preferred font.
+Default is \code{serif} which will choose a serif font available on the system.}
 
 \item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }
@@ -27,10 +28,4 @@ each pair of compositional variables are substituted for a specific time.
 This function is useful for visualising the
 estimated differences in outcomes when compositional variables
 are substituted for a specific period of time.
-}
-\examples{
-
-data(mcompd)
-plotsub(data = testbs$TST, x = "sleep", y = "stress")
-
 }

@@ -9,7 +9,7 @@ bsub(object, substitute, minute = 60L, regrid = NULL, summary = FALSE, ...)
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
 
-\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+\item{substitute}{A \code{data.frame} or \code{data.table} of possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
 
 \item{minute}{A integer or numeric value indicating the maximum minute

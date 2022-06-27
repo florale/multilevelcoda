@@ -1,4 +1,26 @@
 url: https://florale.github.io/multilevelcoda/
-template:
-  bootstrap: 5
 
+home:
+  title: multilevelcoda
+  description: Estimate and present multilevel compositional data analysis (CoDA)
+
+authors:
+  Flora Le:
+    href: https://github.com/florale
+
+destination: docs
+
+articles:
+- title: Vignettes
+  navbar: ~
+  contents:
+  - multilevel-coda
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
+
+template:
+  package: preferably
+  bootstrap: 5

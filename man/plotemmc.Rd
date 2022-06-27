@@ -4,7 +4,7 @@
 \alias{plotemmc}
 \title{Marginal effects of composition plot}
 \usage{
-plotemmc(data, x, y, font = "Times New Roman", ...)
+plotemmc(data, x, y, font = "serif", ...)
 }
 \arguments{
 \item{data}{A \code{\link{emmcoda}} object to use for plot.}
@@ -13,12 +13,14 @@ plotemmc(data, x, y, font = "Times New Roman", ...)
 
 \item{y}{A character string specifying the name of the compositional outcome variable.}
 
-\item{font}{A character string specifying the name of user's preferred font. Default is \code{Times New Roman}.}
+\item{font}{A character string specifying the name of user's preferred font.
+Default is \code{serif} which will choose a serif font available on the system.}
 
 \item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }
 \value{
-A ggplot graph object showing the estimated change in compositional outcome associated with changes in predictor.
+A ggplot graph object showing the estimated change in compositional outcome
+associated with changes in predictor.
 }
 \description{
 This function is useful for visualising the

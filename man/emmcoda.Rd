@@ -25,8 +25,3 @@ This function obtains estimated marginal means (EMMs) of models
 containing composition as the outcome
 A sample from the posterior distribution of the regression coefficients.
 }
-\examples{
-data("unadjusted-mvmcoda")
-
-# emtest <- emmcoda(object = mvm, x = "STRESS", at = 2)
-}

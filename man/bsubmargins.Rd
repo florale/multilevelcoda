@@ -7,12 +7,13 @@
 bsubmargins(object, substitute, minute = 60L, ...)
 }
 \arguments{
-\item{object}{A \code{\link{brmcoda}} object. Required.}
+\item{object}{A \code{\link{brmcoda}} object.}
 
-\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+\item{substitute}{A \code{data.frame} or \code{data.table} of possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
 
-\item{minute}{A integer or numeric value indicating the maximum minute for which substitution model is desired.
+\item{minute}{A integer or numeric value indicating the maximum minute
+for which substitution model is desired.
 Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
@@ -37,8 +38,10 @@ substitution estimation across all compositional variables present
 in the \code{\link{brmcoda}} object.
 }
 \examples{
-data(psub)
 \dontrun{
+data(psub)
+data(mcompd)
+data(psub)
 cilr <- compilr(data = mcompd[ID \%in\% 1:10, .SD[1:3], by = ID], sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
@@ -46,6 +49,6 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
              wilr2 + wilr3 + wilr4 + Female + (1 | ID), chains = 1, iter = 500)
                
-testbsm <- bsubmargins(object = m, substitute = psub, minute = 5)
+x <- bsubmargins(object = m, substitute = psub, minute = 5)
 }
 }

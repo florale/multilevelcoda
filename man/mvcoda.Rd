@@ -22,7 +22,7 @@ Details of the model specification can be found in \code{\link{mvbrmsformula}}.}
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
-
+A list of results. TODO
 }
 \description{
 Fit Bayesian generalised (non-)linear multivariate compositional model
