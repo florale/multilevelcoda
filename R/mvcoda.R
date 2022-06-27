@@ -14,7 +14,7 @@
 #' @param parts A character vector specifying the names of compositional variables. Required.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
-#' @return 
+#' @return A list of results. TODO
 #' @importFrom compositions ilr acomp gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
 #' @importFrom reshape2 melt
