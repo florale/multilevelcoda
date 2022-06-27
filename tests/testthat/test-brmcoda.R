@@ -1,3 +1,16 @@
+skip_on_cran()
+
+if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+  backend <- "rstan"
+  ## if using rstan backend, models can crash on Windows
+  ## so skip if on windows and cannot use cmdstanr
+  skip_on_os("windows")
+} else {
+  if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
+    backend <- "cmdstanr"
+  }
+}
+
 ## Check prediction using a simulated dataset
 nGrps <- 100
 k <- 3
@@ -22,9 +35,11 @@ sbp <- as.matrix(data.table(1, -1))
 cilr <- compilr(data = daydata, sbp = sbp,
                 parts = c("TST", "Wake"), idvar = "ID")
 psub <- possub(c("TST", "Wake"))
-suppressWarnings(m <- brmcoda(compilr = cilr,
-                              formula = PA ~ wilr1 + (1 | ID),
-                              chain = 1, iter = 500, seed = 123))
+suppressWarnings(
+  m <- brmcoda(compilr = cilr,
+               formula = PA ~ wilr1 + (1 | ID),
+               chain = 1, iter = 500, seed = 123,
+               backend = backend))
 daydata2 <- cbind(daydata, fitted(m$Model))
 
 test_that("wilr from brmcoda gives expected predictions", {

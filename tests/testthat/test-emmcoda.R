@@ -1,5 +1,16 @@
 skip_on_cran()
 
+if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+  backend <- "rstan"
+  ## if using rstan backend, models can crash on Windows
+  ## so skip if on windows and cannot use cmdstanr
+  skip_on_os("windows")
+} else {
+  if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
+    backend <- "cmdstanr"
+  }
+}
+
 data(mcompd)
 data(sbp)
 data(psub)
@@ -7,9 +18,11 @@ data(psub)
 cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
-suppressWarnings(m <- mvmcoda(compilr = cilr, 
-                              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
-                              chain = 1, iter = 500, cores = 8))
+suppressWarnings(
+  m <- mvmcoda(compilr = cilr, 
+               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+               chain = 1, iter = 500, cores = 8,
+               backend = backend))
 
 test_that("emmcoda gives errors for invalid input", {
 
