@@ -19,7 +19,7 @@ cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 suppressWarnings(
-  m <- mvmcoda(compilr = cilr, 
+  m <- brmcoda(compilr = cilr, 
                formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
                chain = 1, iter = 500, cores = 8,
                backend = backend))
