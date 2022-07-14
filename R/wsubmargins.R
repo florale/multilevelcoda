@@ -1,4 +1,4 @@
-#' @title Estimating Average Marginal Effects for Within-person Isotemporal Substitution Model.
+#' @title Estimating Average Marginal Effects for Within-person Substitution Model.
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 

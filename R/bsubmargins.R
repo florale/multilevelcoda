@@ -1,4 +1,4 @@
-#' Estimating Average Marginal Effects for Between-person Isotemporal Substitution Model.
+#' Estimating Average Marginal Effects for Between-person Substitution Model.
 #'
 #' Using a fitted model object, estimates the average marginal difference 
 #' in outcomes when compositional variables are substituted for a specific period
