@@ -1,0 +1,220 @@
+---
+title: "Estimating Compositional Multilevel Modelling with multilevelcoda"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Estimating Compositional Multilevel Modelling with multilevelcoda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dev = "CairoPNG", dpi = 150, fig.path = "mlmcoda-"
+)
+```
+
+In this vignette, we discuss how to specify multilevel models with compositional data using `multilevelcoda`.
+
+In addition to `multilevelcoda`, we will use `brms` package (to fit models) and
+`bayestestR` package (to compute useful indices and compare models).
+
+```{r setup}
+library(multilevelcoda)
+library(brms)
+library(bayestestR)
+
+options(digits = 3) # reduce number of digits shown
+```
+
+We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables) 
+and `sbp` (sequential binary partition).
+
+```{r data}
+data("mcompd") 
+data("sbp") 
+```
+
+## Getting compositions and isometric log ratio (ILR) coordinates. 
+
+Compositional data are often expressed as a set of ILR coordinates in regression models (cite).
+Using the `compilr()` function, we can get ILR coordinates 
+that are used in the subsequent model as the predictors or outcomes.
+
+```{r}
+cilr <- compilr(data = mcompd, sbp = sbp,
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+```
+
+## Multilevel model with compositional predictors
+
+We now will use output from the `compilr()` function to fit our `brms` model,
+using the `brmcoda()` function. Here is a model predicting \code{STRESS}
+from between- and within-person sleep-wake behaviours (expressed as ILR coordinates).
+
+Note: make sure you pass the correct names of the ILR coordinates to `brms` model.
+
+```{r, results = "hide"}
+m <- brmcoda(compilr = cilr,
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+             cores = 8, seed = 123, backend = "cmdstanr")
+```
+
+Here is a `summary()` of the model results.
+
+```{r}
+summary(m$Model)
+```
+
+The interpretation of these outputs depends on how you construct your sequential binary partition.
+For the built-in sequential binary partition `sbp`, TODO add a table to show partition.
+
+Thus, results show that the first and forth within-person ILR coordinate was associated with stress.
+Due to the nature of within-person ILR coordinates, it can be a pain interpreting these results in great details.
+For example,  the significant coefficient for wilr1 shows that the within-person change in sleep behaviours
+(sleep duration and time awake in bed combined), relative to wake behaviours (moderate to vigorous
+physical activity, light physical activity, and sedentary behaviour) on a given day, was associated 
+with stress. However, as there are several behaviours involved in this coordinate, we don't know the
+within-person change in which of them drives the association. It could be the change in sleep, such 
+that people sleep more than their own average on a given day, but it could also be the change in time 
+awake. Further, we don't know about the specific changes in time spent across behaviours. That is, 
+if people slept more, what behaviour did they spend less time in?
+
+So how do we understand these results? `multilevelcoda` offers post-hoc analyses to gain further 
+insights about these relationship, which is discussed `here`.
+
+## Multilevel model with compositional outcomes.
+
+A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,
+each of which is predicted by a set of predictors. 
+As usual, the ILR coordinates outcomes can be calculated using the `compilr()` functions.
+
+```{r}
+head(cilr$TotalILR)
+```
+
+Our `brms` model can be then fitted using the `brmcoda()` function.
+
+```{r, results = "hide"}
+mv <- brmcoda(compilr = cilr,
+              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+              cores = 8, seed = 123, backend = "cmdstanr")
+```
+
+Here is a `summary()` of the model.
+
+```{r}
+summary(mv$Model)
+```
+
+We can see that stress significantly predicted `ilr1` and `ilr2`. 
+
+## Bayes factor for compositional multilevel modelling
+
+Bayes Factors (BFs) are indices of relative evidence of one “model” over another. 
+In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:
+- testing single parameters within a model - check with JW
+- comparing models
+
+We can utilize Bayes factors to answer the following question:
+
+*"Which model is more likely to have produced the observed data?"*
+
+In the frequentist approach, we usually compare the fits of models using \code{anova}.
+In Bayesian, this can be done by comparing the marginal likelihoods of two models.
+
+*Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
+\code{save_pars = save_pars(all = TRUE)}.
+
+### Comparing models with compositional predictors with Bayesfactor
+
+Let's fit a series of model with \code{brmcoda} to predict \code{STRESS} from sleep-wake composition.
+For precise Bayes factors, we will use 40,000 posterior draws for each model.
+
+```{r, results = "hide"}
+# intercept only model
+m0 <- brmcoda(compilr = cilr,
+             formula = STRESS ~ 1 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+
+# between-person composition only model
+m1 <- brmcoda(compilr = cilr,
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+
+# within-person composition only model
+m2 <- brmcoda(compilr = cilr,
+             formula = STRESS ~ wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+
+# full model
+m <- brmcoda(compilr = cilr,
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+```
+
+We can now compare these models with the `bayesfactor_models()` function, using the intercept-only 
+model as reference.
+
+```{r}
+comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
+comparison
+```
+We can see that model with only within-person composition is the best model - with 𝐵𝐹 = 11.86 compared to the null (intercept only).
+
+Let's compare these models against the full model.
+
+```{r}
+update(comparison, reference = 1)
+```
+Again, our data favours the within-person composition only model over the full model, giving 2.93 times 
+more support.
+
+### Comparing models with compositional outcomes with Bayesfactor
+
+We are often interested in whether a predictor significantly predict not only the compositional component,
+but also the overall composition. This can be done by comparing that model against the null, using 
+Bayes factor. Let's examine whether stress predicts the overall sleep-wake composition.
+
+```{r}
+# intercept only
+mv0 <- brmcoda(compilr = cilr,
+               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),
+               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+# full model
+mv <- brmcoda(compilr = cilr,
+              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+```
+
+```{r}
+bayesfactor_models(mv$Model, denominator = mv0$Model)
+```
+
+With a  𝐵𝐹 of 1.87e-04 < 1, our data favours the intercept only model, showing that there is 
+insufficient evidence for stress predicting the overall sleep-wake composition.
+
+Bayes factors provide a intuitive measure of the strength of evidence of one model over the other
+or among different models. Check out the `bayestestR` packages for several other useful functions related to BFs.
+
+## References
+
+Dumuid, D., Pedišić, Ž., Stanford, T. E., Martín-Fernández, J. A., Hron, K., Maher, C. A., ... & Olds, T. (2019). The compositional isotemporal substitution model: a method for estimating changes in a health outcome for reallocation of time between sleep, physical activity and sedentary behaviour. Statistical methods in medical research, 28(3), 846-857.
+
+Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., & Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.
+
