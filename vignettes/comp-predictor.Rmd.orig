@@ -1,5 +1,5 @@
 ---
-title: "Estimating Compositional Multilevel Modelling with multilevelcoda"
+title: "Multilevel Model with Compositional predictors"
 output:
   html_document:
     toc: true
@@ -8,7 +8,7 @@ output:
       smooth_scroll: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Estimating Compositional Multilevel Modelling with multilevelcoda}
+  %\VignetteIndexEntry{Multilevel Model with Compositional predictors}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,29 +23,31 @@ knitr::opts_chunk$set(
 
 In this vignette, we discuss how to specify multilevel models with compositional data using `multilevelcoda`.
 
-In addition to `multilevelcoda`, we will use `brms` package (to fit models) and
-`bayestestR` package (to compute useful indices and compare models).
+In addition to `multilevelcoda` package, we will use `brms` (to fit models) and
+`bayestestR` (to compute useful indices and compare models), and
+`doFuture` (to parallel models).
 
 ```{r setup}
 library(multilevelcoda)
 library(brms)
 library(bayestestR)
+library(doFuture)
 
 options(digits = 3) # reduce number of digits shown
 ```
 
-We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables) 
-and `sbp` (sequential binary partition).
+We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables)  `sbp` (sequential binary partition), and `psub` (base possible substitution).
 
 ```{r data}
 data("mcompd") 
-data("sbp") 
+data("sbp")
+data("psub")
 ```
 
 ## Getting compositions and isometric log ratio (ILR) coordinates. 
 
 Compositional data are often expressed as a set of ILR coordinates in regression models (cite).
-Using the `compilr()` function, we can get ILR coordinates 
+Using the `compilr()`, we can get ILR coordinates 
 that are used in the subsequent model as the predictors or outcomes.
 
 ```{r}
@@ -55,8 +57,8 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 
 ## Multilevel model with compositional predictors
 
-We now will use output from the `compilr()` function to fit our `brms` model,
-using the `brmcoda()` function. Here is a model predicting \code{STRESS}
+We now will use output from the `compilr()` to fit our `brms` model,
+using the `brmcoda()`. Here is a model predicting `STRESS`
 from between- and within-person sleep-wake behaviours (expressed as ILR coordinates).
 
 Note: make sure you pass the correct names of the ILR coordinates to `brms` model.
@@ -91,52 +93,24 @@ if people slept more, what behaviour did they spend less time in?
 So how do we understand these results? `multilevelcoda` offers post-hoc analyses to gain further 
 insights about these relationship, which is discussed `here`.
 
-## Multilevel model with compositional outcomes.
-
-A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,
-each of which is predicted by a set of predictors. 
-As usual, the ILR coordinates outcomes can be calculated using the `compilr()` functions.
-
-```{r}
-head(cilr$TotalILR)
-```
-
-Our `brms` model can be then fitted using the `brmcoda()` function.
-
-```{r, results = "hide"}
-mv <- brmcoda(compilr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
-              cores = 8, seed = 123, backend = "cmdstanr")
-```
-
-Here is a `summary()` of the model.
-
-```{r}
-summary(mv$Model)
-```
-
-We can see that stress significantly predicted `ilr1` and `ilr2`. 
-
 ## Bayes factor for compositional multilevel modelling
 
-Bayes Factors (BFs) are indices of relative evidence of one “model” over another. 
+In the frequentist approach, we usually compare the fits of models using `anova()`.
+In Bayesian, this can be done by comparing the marginal likelihoods of two models.
+
+Bayes Factors (BFs) are indices of relative evidence of one model over another. 
 In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:
-- testing single parameters within a model - check with JW
+- testing single parameters within a model
 - comparing models
 
 We can utilize Bayes factors to answer the following question:
 
 *"Which model is more likely to have produced the observed data?"*
 
-In the frequentist approach, we usually compare the fits of models using \code{anova}.
-In Bayesian, this can be done by comparing the marginal likelihoods of two models.
-
 *Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
-\code{save_pars = save_pars(all = TRUE)}.
+`save_pars = save_pars(all = TRUE)`.
 
-### Comparing models with compositional predictors with Bayesfactor
-
-Let's fit a series of model with \code{brmcoda} to predict \code{STRESS} from sleep-wake composition.
+Let's fit a series of model with `brmcoda()` to predict `STRESS` from sleep-wake composition.
 For precise Bayes factors, we will use 40,000 posterior draws for each model.
 
 ```{r, results = "hide"}
@@ -173,44 +147,80 @@ model as reference.
 comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
 comparison
 ```
-We can see that model with only within-person composition is the best model - with 𝐵𝐹 = 11.86 compared to the null (intercept only).
+We can see that model with only within-person composition is the best model - with $BF$ = 11.86 compared to the null (intercept only).
 
 Let's compare these models against the full model.
 
 ```{r}
 update(comparison, reference = 1)
 ```
-Again, our data favours the within-person composition only model over the full model, giving 2.93 times 
-more support.
-
-### Comparing models with compositional outcomes with Bayesfactor
-
-We are often interested in whether a predictor significantly predict not only the compositional component,
-but also the overall composition. This can be done by comparing that model against the null, using 
-Bayes factor. Let's examine whether stress predicts the overall sleep-wake composition.
-
-```{r}
-# intercept only
-mv0 <- brmcoda(compilr = cilr,
-               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),
-               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
-# full model
-mv <- brmcoda(compilr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
-              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
-```
-
-```{r}
-bayesfactor_models(mv$Model, denominator = mv0$Model)
-```
-
-With a  𝐵𝐹 of 1.87e-04 < 1, our data favours the intercept only model, showing that there is 
-insufficient evidence for stress predicting the overall sleep-wake composition.
+Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.
 
 Bayes factors provide a intuitive measure of the strength of evidence of one model over the other
 or among different models. Check out the `bayestestR` packages for several other useful functions related to BFs.
+
+## Between-person substitution models
+We often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
+from one behaviour to another, while the other behaviours remain constant. Substitution models is a useful post-hoc analysis for regression models with compositional predictors.
+
+Between-person substitution model can be computed using the `bsub()` function. The below example 
+examines the changes in stress for different pairwise substitution of sleep-wake behaviours
+for a period of 1 to 5 minutes, at between-person level. 
+
+
+```{r}
+bsubm1 <- bsub(objec = m, substitute = psub, minute = 5)
+```
+
+Output from `bsub()` contains multiple dataset of results for all available compositional component. 
+Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes for both 
+males (Female = 0) and females (Female = 1). For ease of presentation, we only show the $\pm5$ minute 
+substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
+
+```{r, results = "asis"}
+knitr::kable(bsubm1$TST[abs(MinSubstituted) == 5])
+```
+
+None of them are significant, given that the credible intervals did not cross 0, showing that 
+increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress.
+
+These results can be plotted to see the patterns more easily using the `plotsub()` function.
+
+```{r mlmcoda-bstresstst, fig.width = 9, fig.height = 6}
+plotsub(data = bsubm1$TST, x = "sleep", y = "stress")
+```
+
+### Within-person substitution model
+
+Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
+substituted for a period of 1 to 5 minutes, at within-person level. 
+
+```{r}
+# Within-person substitution
+wsubm1 <- wsub(objec = m, substitute = psub, minute = 5, summary = TRUE)
+``` 
+
+Results for 5 minute substitution.
+
+```{r, results = "asis"}
+knitr::kable(wsubm1$TST[abs(MinSubstituted) == 5])
+```
+
+At within-person level, we got some significant results for substitution of sleep (TST) and time 
+awake in bed (WAKE) for 5 minutes, but not other behaviours. Increasing sleep at the expense of time spent awake 
+in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
+more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]). Notice there is no 
+column indicating the levels of convariates, indicating that these results have been averaged. 
+
+Let's also plot theses results.
+
+```{r mlmcoda-wstresstst, fig.width = 9, fig.height = 6}
+plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
+``` 
+
+
+### More about interesting substitution models
+
 
 ## References
 

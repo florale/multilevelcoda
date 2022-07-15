@@ -42,6 +42,7 @@ library(doFuture)
 
 data("mcompd") 
 data("sbp")
+data("psub")
 
 options(digits = 3) # reduce number of digits shown
 ```
@@ -68,7 +69,7 @@ summary(m$Model)
 ```
 
 We can see that the first and forth within-person ILR coordinates were both associated with stress. 
-Multilevel ILR coordinates are often a pain to interpret. For example,  the significant coefficient 
+Multilevel ILR coordinates are sometimes a pain to interpret. For example,  the significant coefficient 
 for wilr1 shows that the within-person change in sleep behaviours (sleep duration and time awake in 
 bed combined), relative to wake behaviours (moderate to vigorous physical activity, light physical 
 activity, and sedentary behaviour) on a given day, was associated with stress. However, as there are
@@ -79,10 +80,10 @@ about the specific changes in time spent across behaviours. That is, if people s
 behaviour did they spend less time in?
 
 This is common issue when working with multilevel compositional data as ILR coordinates often 
-contains information about multiple behaviours. It is further inconvenient in the case of 
-within-person ILR coordinates, as they represent the changes in time spent in behaviours on a given 
-day. To gain further insights into these associations and help with interpretation, let's explore 
-substitution models from our `multilevel` package.
+contains information about multiple compositional components. It is further inconvenient in the case of 
+within-person ILR coordinates, as they represent the deviation from the mean (between-person) ILR 
+coordinates. To gain further insights into these associations and help with interpretation, let's 
+explore substitution models from our `multilevel` package.
 
 ## Substitution models
 
@@ -96,7 +97,7 @@ Average marginal substitution model
 - Average Marginal Effects for between-person substitution model
 - Average Marginal Effects for within-person substitution model
 
-Tips: Substitution models are often computationally demanding tasks. You can speed up the models using 
+*Tips*: Substitution models are often computationally demanding tasks. You can speed up the models using 
 parallelisation, for example, using `doFuture` package.
 
 ### Basic substitution model
@@ -106,8 +107,8 @@ examines the changes in stress for different pairwise substitution of sleep-wake
 for a period of 1 to 5 minutes, at between-person level. As we have sex as covariate, `bsub()`
 returns results for both males and females as the default. 
 
-Tips: You can choose to average the results across sexes by specifying \code{summary = TRUE},
-see next section.
+*Tips*: You can choose to average the results across sexes by specifying \code{summary = TRUE},
+see next section for an example.
 
 ```{r}
 bsubm1 <- bsub(objec = m, substitute = psub, minute = 5)
@@ -155,7 +156,7 @@ in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Convers
 more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]). Notice there is no 
 column indicating the levels of convariates, indicating that these results have been averaged. 
 
-Let's also plot them results
+Let's also plot theses results.
 
 ```{r mlmcoda-wstresstst, fig.width = 9, fig.height = 6}
 plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
@@ -167,8 +168,8 @@ Average marginal effect is (Josh help...)
 
 `bsubmargins()` and `wsubmargins()` computes the changes in an outcome when 
 
-Both of these models are generally more computationally expensive than
-their basic . Let's take a look at how we can parallel them in the following examples.
+Both of these models are generally more computationally expensive
+. We can run our models faster in shorter walltime using parallelisation.
 
 #### Estimating average marginal effect for between-person substitution
 
