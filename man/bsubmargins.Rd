@@ -2,7 +2,7 @@
 % Please edit documentation in R/bsubmargins.R
 \name{bsubmargins}
 \alias{bsubmargins}
-\title{Estimating Average Marginal Effects for Between-person Isotemporal Substitution Model.}
+\title{Estimating Average Marginal Effects for Between-person Substitution Model.}
 \usage{
 bsubmargins(object, substitute, minute = 60L, ...)
 }

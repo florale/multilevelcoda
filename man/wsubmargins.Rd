@@ -2,7 +2,7 @@
 % Please edit documentation in R/wsubmargins.R
 \name{wsubmargins}
 \alias{wsubmargins}
-\title{Estimating Average Marginal Effects for Within-person Isotemporal Substitution Model.}
+\title{Estimating Average Marginal Effects for Within-person Substitution Model.}
 \usage{
 wsubmargins(object, substitute, minute = 60, ...)
 }

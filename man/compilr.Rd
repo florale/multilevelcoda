@@ -2,8 +2,7 @@
 % Please edit documentation in R/compilr.R
 \name{compilr}
 \alias{compilr}
-\title{Compute Between-person, Within-person, and Total Composition
-and Isometric log ratio transform of a (dataset of) composition(s)}
+\title{Compute useful indices from a (dataset of) multilevel composition(s)}
 \usage{
 compilr(data, sbp, parts, total = 1440, idvar = "ID")
 }
@@ -43,8 +42,7 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 }
 }
 \description{
-Computes sets of compositions and IRLs
-for Multilevel Compositional Data models.
+Computes sets of compositions and IRLs for Multilevel Compositional Data models.
 }
 \examples{
 ## Example 1 - Dataset with no 0
@@ -52,15 +50,8 @@ data(mcompd)
 data(sbp)
 cilr1 <- compilr(data = mcompd, sbp = sbp, 
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-
-## Example 2 - Dataset with 0s
-## Impute a 0 in 'mcompd'
-mcompd[3, 1] <- 0
-cilr2 <- compilr(data = mcompd, sbp = sbp, 
-                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-
 str(cilr1)
 
 ## cleanup
-rm(cilr1, cilr2, mcompd, sbp)
+rm(cilr1, mcompd, sbp)
 }
