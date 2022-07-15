@@ -1,8 +1,6 @@
-#' Compute Between-person, Within-person, and Total Composition 
-#' and Isometric log ratio transform of a (dataset of) composition(s)
+#' Compute useful indices from a (dataset of) multilevel composition(s)
 #'
-#' Computes sets of compositions and IRLs
-#' for Multilevel Compositional Data models. 
+#' Computes sets of compositions and IRLs for Multilevel Compositional Data models. 
 #'
 #' @param data A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
@@ -42,17 +40,10 @@
 #' data(sbp)
 #' cilr1 <- compilr(data = mcompd, sbp = sbp, 
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-#' 
-#' ## Example 2 - Dataset with 0s
-#' ## Impute a 0 in 'mcompd'
-#' mcompd[3, 1] <- 0
-#' cilr2 <- compilr(data = mcompd, sbp = sbp, 
-#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-#'
 #' str(cilr1)
 #' 
 #' ## cleanup
-#' rm(cilr1, cilr2, mcompd, sbp)
+#' rm(cilr1, mcompd, sbp)
 compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
@@ -118,4 +109,52 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
       total = total),
     class = "compilr")
   out
+}
+
+
+#' Compute useful indices from a (dataset of) single-level composition(s)
+#' 
+tinycompilr <- function(data, sbp, parts, total = 1440) {
+  if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
+    stop("data must be a data table, data frame or matrix.")
+  }
+  if (isFALSE(inherits(sbp, "matrix"))) {
+    stop(sprintf("sbp is a '%s' but must be a matrix.",
+                 paste(class(sbp), collapse = ";")))
+  }
+  if (isFALSE(identical(length(parts), ncol(sbp)))) {
+    stop(sprintf(
+      "The number of compositional variables in parts (%d) 
+  must be the same as in sbp (%d).",
+      length(parts),
+      ncol(sbp)))
+  }
+  tmp <- as.data.table(data)
+  psi <- gsi.buildilrBase(t(sbp))
+  
+  ## Composition and ILRs
+  comp <- acomp(tmp[, parts, with = FALSE])
+  ilr <- ilr(comp, V = psi)
+
+  colnames(comp) <- parts
+  colnames(ilr) <- paste0("ilr", seq_len(ncol(ilr)))
+
+  if(any(colnames(ilr) %in% colnames(tmp))) {
+    stop(paste(
+      "'data' should not have any column names starting with ilr';",
+      "  these variables will be used in subsequent models.",
+      "  Please rename them before running 'tinycompilr'.",
+      sep = "\n"))
+    }
+out <- structure(
+  list(
+    Comp = comp,
+    ILR = ilr,
+    data = tmp,
+    psi = psi,
+    sbp = sbp,
+    parts = parts,
+    total = total),
+  class = "compilr")
+out
 }
