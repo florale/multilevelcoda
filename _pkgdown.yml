@@ -14,7 +14,10 @@ articles:
 - title: Vignettes
   navbar: ~
   contents:
-  - multilevel-coda
+  - introduction
+  - comp-outcome
+  - comp-predictor
+  - substitution-model
 
 footer:
   structure:
