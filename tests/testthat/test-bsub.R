@@ -11,6 +11,14 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
   }
 }
 
+# Packages
+library(testthat)
+library(data.table)
+library(multilevelcoda)
+library(extraoperators)
+library(brms)
+library(lme4)
+
 # Model
 #---------------------------------------------------------------------------------------------------
 data(mcompd)
@@ -35,21 +43,129 @@ x <- bsub(object = m, substitute = psub, minute = 2)
 
 test_that("bsub errors for invalid input", {
   
-  ## check errors for missing object
+  ## missing object
   expect_error(x <- bsub(substitute = psub, minute = 2))
 
-  ## check errors for missing substitute
-  expect_error(x <- bsub(objetc = m, minute = 2))
-
-  ## check errors when reference grid has matching names with ILRs
+  ## missing substitute
+  expect_error(x <- bsub(object = m, minute = 2))
+  
+  ## not brmcoda model
+  m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
+  expect_error(x <- bsub(object = m1, substitute = psub, minute = 2))
+  
+  ## invalid minute
+  expect_error(x <- bsub(object = m, substitute = psub, minute = -10))
+  expect_error(x <- bsub(object = m, substitute = psub, minute = 1:10))
+  
+  ## default minute is 60
+  x1 <- bsub(object = m, substitute = psub)
+  x2 <- bsub(object = m, substitute = psub, minute = 60)
+  expect_identical(x1, x2)
+  
+  ## substitute does not have the same components as parts in cilr
+  ps <- possub(c("WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- bsub(object = m, substitute = ps, minute = 2))
+  
+  ## substitute does have the same names as parts in cilr
+  ps <- possub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- bsub(object = m, substitute = ps, minute = 2))
+  
+  ## reference grid is provided for unadjusted model
+  suppressWarnings(
+    m2 <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                   wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))  
+  rg <- data.table(Age = 1)
+  expect_warning(x <- bsub(object = m2, substitute = psub, minute = 2, regrid = rg))
+  
+  ## incorect reference grid 1
+  rg <- data.table(Age = 1)
+  expect_error(x <- bsub(object = m, substitute = psub, minute = 2, regrid = rg))
+  
+  ## reference grid has matching names with ILRs
   rg <- data.table(bilr1 = 1)
   expect_error(x <- bsub(object = m, substitute = psub, minute = 2, regrid = rg))
+  
+  ## incorect reference grid 2
+  rg <- data.table(bilr1 = 1, Age = 1)
+  expect_error(x <- bsub(object = m, substitute = psub, minute = 2, regrid = rg))
+  
+})
 
+test_that("bsub works as expected for adjusted/unadjusted model", {
+  
+  ## function knows to use correct user's specified reference grid
+  rg <- data.table(Female = 1)
+  x3 <- bsub(object = m, substitute = psub, minute = 2, regrid = rg)
+  expect_true(all(x3$TST$Female == 1))
+  expect_true(all(x3$WAKE$Female == 1))
+  expect_true(all(x3$MVPA$Female == 1))
+  expect_true(all(x3$LPA$Female == 1))
+  expect_true(all(x$SB$Female == 1))
+  
+  expect_true(all(x3$TST$Female != 0))
+  expect_true(all(x3$WAKE$Female != 0))
+  expect_true(all(x3$MVPA$Female != 0))
+  expect_true(all(x3$LPA$Female != 0))
+  expect_true(all(x3$SB$Female != 0))
+  
+  ## model with unspecified reference grid works as expected
+  expect_equal(x$TST$Female, NULL)
+  expect_equal(x$WAKE$Female, NULL)
+  expect_equal(x$MVPA$Female, NULL)
+  expect_equal(x$LPA$Female, NULL)
+  expect_equal(x$SB$Female, NULL)
+  
+  ## model with unspecified reference grid works as expected
+  expect_true("Female" %nin% colnames(x$TST))
+  expect_true("Female" %nin% colnames(x$WAKE))
+  expect_true("Female" %nin% colnames(x$MVPA))
+  expect_true("Female" %nin% colnames(x$LPA))
+  expect_true("Female" %nin% colnames(x$SB))
+  
+  ## average across reference grid as default
+  x4 <- bsub(object = m, substitute = psub, minute = 2, summary = TRUE)
+  x5 <- bsub(object = m, substitute = psub, minute = 2)
+  expect_equal(x4, x5)
+  
+  ## keep prediction at each level of refrence grid 
+  cilr <- compilr(data = mcompd[ID %in% c(1:5, 185:190), .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+  
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                   wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  
+  x6 <- bsub(object = m, substitute = psub, minute = 2, summary = FALSE)
+  
+  expect_equal(nrow(x6$TST), nrow(x5$TST) * 2)
+  expect_equal(nrow(x6$WAKE), nrow(x5$WAKE) * 2)
+  expect_equal(nrow(x6$MVPA), nrow(x5$MVPA) * 2)
+  expect_equal(nrow(x6$LPA), nrow(x5$LPA) * 2)
+  expect_equal(nrow(x6$SB), nrow(x5$SB) * 2)
+  
+  expect_true("Female" %in% colnames(x6$TST))
+  expect_true("Female" %in% colnames(x6$WAKE))
+  expect_true("Female" %in% colnames(x6$MVPA))
+  expect_true("Female" %in% colnames(x6$LPA))
+  expect_true("Female" %in% colnames(x6$SB))
+  
+  expect_true(all(x6$TST$Female %in% c(0, 1)))
+  expect_true(all(x6$WAKE$Female %in% c(0, 1)))
+  expect_true(all(x6$MVPA$Female %in% c(0, 1)))
+  expect_true(all(x6$LPA$Female %in% c(0, 1)))
+  expect_true(all(x6$SB$Female %in% c(0, 1)))
+  
 })
 
 test_that("bsub outputs what expected", {
   
-  ## check types
+  ## types
   expect_type(x, "list")
   expect_equal(length(x), length(m$CompIlr$parts))
   expect_s3_class(x$TST, "data.table")
@@ -109,7 +225,7 @@ test_that("bsub outputs what expected", {
 
 test_that("bsub gives results in sensible range", {
   
-  ## check values of difference in outcome
+  ## difference in outcome
   expect_true(x$TST$Mean %ae% "[-0.5, 0) | (0, 0.5]")
   expect_true(x$WAKE$Mean %ae% "[-0.5, 0) | (0, 0.5]")
   expect_true(x$MVPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
@@ -132,18 +248,19 @@ test_that("bsub gives results in sensible range", {
 
 test_that("bsub gives results in expected direction and magnitude", {
     
-  ## check that values are opposite sign for opposite substitution
+  ## values are opposite sign for opposite substitution
   for (i in seq_along(x)) {
     expect_true(all(x[[i]][, sign(Mean[sign(MinSubstituted) == 1]) 
                            %a!=% sign(Mean[sign(MinSubstituted) == -1]), by = Substitute]$V1))
   }
   
-  ## check that results for 1 min have smaller magnitude than 2 mins
+  ## results for 1 min have smaller magnitude than 2 mins
   for (i in seq_along(x)) {
     expect_true(all(x[[i]][, abs(Mean[abs(MinSubstituted) == 1]) 
                            < abs(Mean[abs(MinSubstituted) == 2])]))
   }
 })
+
 #---------------------------------------------------------------------------------------------------
 # Test 2-component composition for consistency between brm model and substitution model
 ## TST vs WAKE

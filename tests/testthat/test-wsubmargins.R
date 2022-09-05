@@ -10,6 +10,15 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
     backend <- "cmdstanr"
   }
 }
+
+# Packages
+library(testthat)
+library(data.table)
+library(multilevelcoda)
+library(extraoperators)
+library(brms)
+library(lme4)
+
 # Model
 #---------------------------------------------------------------------------------------------------
 data(mcompd)
@@ -34,17 +43,37 @@ x <- wsubmargins(object = m, substitute = psub, minute = 2)
 
 test_that("wsubmargins errors for invalid input", {
   
-  ## check errors for missing object
+  ## missing object
   expect_error(x <- wsubmargins(substitute = psub, minute = 2))
   
-  ## check errors for missing substitute
-  expect_error(x <- wsubmargins(objetc = m, minute = 2))
+  ## missing substitute
+  expect_error(x <- wsubmargins(object = m, minute = 2))
   
+  ## not brmcoda model
+  m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
+  expect_error(x <- wsubmargins(object = m1, substitute = psub, minute = 2))
+  
+  ## invalid minute
+  expect_error(x <- wsubmargins(object = m, substitute = psub, minute = -10))
+  expect_error(x <- wsubmargins(object = m, substitute = psub, minute = 1:10))
+  
+  ## default minute is 60
+  x1 <- wsubmargins(object = m, substitute = psub)
+  x2 <- wsubmargins(object = m, substitute = psub, minute = 60)
+  expect_identical(x1, x2)
+  
+  ## substitute has the same components as parts in cilr
+  ps <- possub(c("WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- wsubmargins(object = m, substitute = ps, minute = 2))
+  
+  ## substitute has the same names as parts in cilr
+  ps <- possub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- wsubmargins(object = m, substitute = ps, minute = 2))
 })
 
 test_that("wsubmargins outputs what expected", {
   
-  ## check types
+  ## types
   expect_type(x, "list")
   expect_equal(length(x), length(m$CompIlr$parts))
   expect_s3_class(x$TST, "data.table")
@@ -104,7 +133,7 @@ test_that("wsubmargins outputs what expected", {
 
 test_that("wsubmargins gives results in sensible range", {
   
-  ## check values of difference in outcome
+  ## difference in outcome
   expect_true(x$TST$Mean %ae% "[-0.5, 0) | (0, 0.5]")
   expect_true(x$WAKE$Mean %ae% "[-0.5, 0) | (0, 0.5]")
   expect_true(x$MVPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
@@ -127,13 +156,13 @@ test_that("wsubmargins gives results in sensible range", {
 
 test_that("wsubmargins gives results in expected direction and magnitude", {
   
-  ## check that values are opposite sign for opposite substitution
+  ## values are opposite sign for opposite substitution
   for (i in seq_along(x)) {
     expect_true(all(x[[i]][, sign(Mean[sign(MinSubstituted) == 1]) 
                            %a!=% sign(Mean[sign(MinSubstituted) == -1]), by = Substitute]$V1))
   }
   
-  ## check that results for 1 min have smaller magnitude than 2 mins
+  ## results for 1 min have smaller magnitude than 2 mins
   for (i in seq_along(x)) {
     expect_true(all(x[[i]][, abs(Mean[abs(MinSubstituted) == 1]) 
                            < abs(Mean[abs(MinSubstituted) == 2])]))
