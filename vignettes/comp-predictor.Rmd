@@ -13,21 +13,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  dev = "CairoPNG", dpi = 150, fig.path = "mlmcoda-"
-)
 
-library(ggsci)
-library(ggthemr)
-fcol <- sample(c("#FAF7F3", "#D2E0EA", "#3C5C76", "#ADC7DA", "#CE7870"))
-flora <- define_palette(swatch = fcol,
-  gradient = c(lower = fcol[1L], upper = fcol[2L])
-)
-ggthemr(flora)
-```
 
 In this vignette, we discuss how to specify multilevel models with compositional data using `multilevelcoda`.
 
@@ -35,7 +21,8 @@ In addition to `multilevelcoda` package, we will use `brms` (to fit models) and
 `bayestestR` (to compute useful indices and compare models), and
 `doFuture` (to parallel models).
 
-```{r setup}
+
+```r
 library(multilevelcoda)
 library(brms)
 library(bayestestR)
@@ -46,7 +33,8 @@ options(digits = 3) # reduce number of digits shown
 
 We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables)  `sbp` (sequential binary partition), and `psub` (base possible substitution).
 
-```{r data}
+
+```r
 data("mcompd") 
 data("sbp")
 data("psub")
@@ -59,7 +47,8 @@ Compositional data are often expressed as a set of ILR coordinates in regression
 Using the `compilr()`, we can get ILR coordinates 
 that are used in the subsequent model as the predictors or outcomes.
 
-```{r}
+
+```r
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 ```
@@ -72,17 +61,52 @@ from between- and within-person sleep-wake behaviours (expressed as ILR coordina
 
 Note: make sure you pass the correct names of the ILR coordinates to `brms` model.
 
-```{r, results = "hide"}
+
+```r
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
+#> Compiling Stan program...
+#> Start sampling
 ```
 
 Here is a `summary()` of the model results.
 
-```{r}
+
+```r
 summary(m$Model)
+#>  Family: gaussian 
+#>   Links: mu = identity; sigma = identity 
+#> Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID) 
+#>    Data: tmp (Number of observations: 3540) 
+#>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 4000
+#> 
+#> Group-Level Effects: 
+#> ~ID (Number of levels: 266) 
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     1.00      0.06     0.88     1.13 1.00     1370     2369
+#> 
+#> Population-Level Effects: 
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.56      0.49     1.64     3.50 1.00     1011     1819
+#> bilr1         0.17      0.33    -0.49     0.82 1.00      987     1601
+#> bilr2         0.41      0.35    -0.28     1.08 1.00      964     2099
+#> bilr3         0.12      0.21    -0.29     0.54 1.00     1091     1861
+#> bilr4        -0.04      0.29    -0.59     0.52 1.00     1001     1775
+#> wilr1        -0.34      0.12    -0.58    -0.10 1.00     3280     3276
+#> wilr2         0.04      0.13    -0.21     0.29 1.00     3576     3033
+#> wilr3        -0.11      0.08    -0.25     0.04 1.00     3196     2789
+#> wilr4         0.24      0.10     0.05     0.43 1.00     3769     2893
+#> 
+#> Family Specific Parameters: 
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     2.37      0.03     2.31     2.42 1.00     5037     3013
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 Results show that the first and forth within-person ILR coordinate was associated with stress.
@@ -134,24 +158,31 @@ We can utilize Bayes factors to answer the following question:
 Let's fit a series of model with `brmcoda()` to predict `STRESS` from sleep-wake composition.
 For precise Bayes factors, we will use 40,000 posterior draws for each model.
 
-```{r, results = "hide"}
+
+```r
 # intercept only model
 m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Compiling Stan program...
+#> Start sampling
 
 # between-person composition only model
 m1 <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Compiling Stan program...
+#> Start sampling
 
 # within-person composition only model
 m2 <- brmcoda(compilr = cilr,
              formula = STRESS ~ wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Compiling Stan program...
+#> Start sampling
 
 # full model
 m <- brmcoda(compilr = cilr,
@@ -159,22 +190,53 @@ m <- brmcoda(compilr = cilr,
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Compiling Stan program...
+#> Start sampling
 ```
 
 We can now compare these models with the `bayesfactor_models()` function, using the intercept-only 
 model as reference.
 
-```{r}
+
+```r
 comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
+#> Computation of Bayes factors: estimating marginal likelihood, please wait...
+#> Recompiling the model with 'rstan'
+#> Recompilation done
+#> Recompiling the model with 'rstan'
+#> Recompilation done
+#> Recompiling the model with 'rstan'
+#> Recompilation done
+#> Recompiling the model with 'rstan'
+#> Recompilation done
 comparison
+#> Bayes Factors for Model Comparison
+#> 
+#>     Model                                                                       BF
+#> [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.04
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.339
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 12.00
+#> 
+#> * Against Denominator: [4] 1 + (1 | ID)
+#> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 
 We can see that model with only within-person composition is the best model - with $BF$ = 11.86 compared to the null (intercept only).
 
 Let's compare these models against the full model.
 
-```{r}
+
+```r
 update(comparison, reference = 1)
+#> Bayes Factors for Model Comparison
+#> 
+#>     Model                                       BF
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.084
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  2.97
+#> [4] 1 + (1 | ID)                             0.248
+#> 
+#> * Against Denominator: [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)
+#> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 
 Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.
@@ -193,7 +255,8 @@ Between-person substitution model can be computed using the `bsub()` function. T
 examines the changes in stress for different pairwise substitution of sleep-wake behaviours
 for a period of 1 to 5 minutes, at between-person level. 
 
-```{r}
+
+```r
 bsubm <- bsub(objec = m, substitute = psub, minute = 5)
 ```
 
@@ -201,36 +264,68 @@ Output from `bsub()` contains multiple dataset of results for all available comp
 Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. For ease of presentation, we only show the $\pm5$ minute 
 substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
-```{r, results = "asis"}
+
+```r
 knitr::kable(bsubm$TST[abs(MinSubstituted) == 5])
 ```
+
+
+
+|   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor |
+|------:|------:|-------:|--------------:|:----------|:---------|
+|  0.021| -0.011|   0.053|              5|WAKE       |TST       |
+|  0.003| -0.014|   0.019|              5|MVPA       |TST       |
+|  0.005| -0.007|   0.018|              5|LPA        |TST       |
+|  0.006| -0.008|   0.021|              5|SB         |TST       |
+| -0.020| -0.049|   0.010|             -5|WAKE       |TST       |
+| -0.003| -0.019|   0.014|             -5|MVPA       |TST       |
+| -0.005| -0.018|   0.007|             -5|LPA        |TST       |
+| -0.006| -0.021|   0.008|             -5|SB         |TST       |
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress.
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-```{r mlmcoda-plotbsubm2, fig.width = 9, fig.height = 6}
+
+```r
 plotsub(data = bsubm$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco()
 ```
+
+![plot of chunk mlmcoda-plotbsubm2](mlmcoda-mlmcoda-plotbsubm2-1.png)
 
 ### Within-person substitution model
 
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
 substituted for a period of 1 to 5 minutes, at within-person level. 
 
-```{r}
+
+```r
 # Within-person substitution
 wsubm <- wsub(objec = m, substitute = psub, minute = 5, summary = TRUE)
-``` 
+```
 
 Results for 5 minute substitution.
 
-```{r, results = "asis"}
+
+```r
 knitr::kable(wsubm$TST[abs(MinSubstituted) == 5])
 ```
+
+
+
+|   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor |
+|------:|------:|-------:|--------------:|:----------|:---------|
+|  0.017|  0.002|   0.032|              5|WAKE       |TST       |
+| -0.003| -0.009|   0.003|              5|MVPA       |TST       |
+| -0.005| -0.009|   0.000|              5|LPA        |TST       |
+| -0.002| -0.007|   0.003|              5|SB         |TST       |
+| -0.016| -0.029|  -0.002|             -5|WAKE       |TST       |
+|  0.003| -0.003|   0.009|             -5|MVPA       |TST       |
+|  0.005|  0.000|   0.009|             -5|LPA        |TST       |
+|  0.002| -0.003|   0.007|             -5|SB         |TST       |
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. Increasing sleep at the expense of time spent awake 
@@ -240,11 +335,14 @@ column indicating the levels of convariates, indicating that these results have 
 
 Let's also plot theses results.
 
-```{r mlmcoda-plotwsubm2, fig.width = 9, fig.height = 6}
+
+```r
 plotsub(data = wsubm$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco()
-``` 
+```
+
+![plot of chunk mlmcoda-plotwsubm2](mlmcoda-mlmcoda-plotwsubm2-1.png)
 
 
 ### More about interesting substitution models

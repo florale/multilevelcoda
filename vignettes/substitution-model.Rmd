@@ -13,21 +13,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  dev = "CairoPNG", dpi = 150, fig.path = "mlmcoda-"
-)
 
-library(ggsci)
-library(ggthemr)
-fcol <- sample(c("#FAF7F3", "#D2E0EA", "#3C5C76", "#ADC7DA", "#CE7870"))
-flora <- define_palette(swatch = fcol,
-  gradient = c(lower = fcol[1L], upper = fcol[2L])
-)
-ggthemr(flora)
-```
 
 Substitution models is a useful post-hoc analysis for regression models with compositional predictors. 
 Results from our main `brms`model tell us how each behaviour is associated with an outcome. However,
@@ -42,7 +28,8 @@ doFuture (for parallelisation),
 and datasets `mcompd` (simulated compositional sleep and wake variables),
 `sbp` (sequential binary partition), and `psub` (base possible substitution).
 
-```{r setup}
+
+```r
 library(multilevelcoda)
 library(brms)
 library(doFuture)
@@ -58,7 +45,8 @@ Let's fit our main `brms` model predicting \code{STRESS} from both between and w
 sleep-wake behaviours (represented by isometric log ratio coordinates), with sex as a covariate, 
 using the `brmcoda()` function. We can compute ILR coordinate predictors using `compilr()` function.
 
-```{r, results = "hide"}
+
+```r
 
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
@@ -67,12 +55,47 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
+#> Compiling Stan program...
+#> Start sampling
 ```
 
 A `summary()` of the model results.
 
-```{r}
+
+```r
 summary(m$Model)
+#>  Family: gaussian 
+#>   Links: mu = identity; sigma = identity 
+#> Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) 
+#>    Data: tmp (Number of observations: 3540) 
+#>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 4000
+#> 
+#> Group-Level Effects: 
+#> ~ID (Number of levels: 266) 
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574     2552
+#> 
+#> Population-Level Effects: 
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.62      0.49     1.66     3.58 1.00     1345     2241
+#> bilr1         0.11      0.31    -0.48     0.73 1.00     1126     2074
+#> bilr2         0.52      0.33    -0.13     1.20 1.00     1366     1982
+#> bilr3         0.13      0.22    -0.30     0.55 1.00     1126     1436
+#> bilr4         0.02      0.28    -0.54     0.55 1.00      922     1831
+#> wilr1        -0.34      0.12    -0.58    -0.11 1.00     3041     2537
+#> wilr2         0.05      0.13    -0.21     0.30 1.00     3208     3224
+#> wilr3        -0.11      0.08    -0.26     0.05 1.00     3269     3139
+#> wilr4         0.24      0.10     0.04     0.44 1.00     3279     2873
+#> Female       -0.39      0.17    -0.71    -0.06 1.00     1515     2370
+#> 
+#> Family Specific Parameters: 
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     2.37      0.03     2.31     2.43 1.00     5233     2780
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 We can see that the first and forth within-person ILR coordinates were both associated with stress. 
@@ -114,7 +137,8 @@ examines the changes in stress for different pairwise substitution of sleep-wake
 for a period of 1 to 5 minutes, at between-person level. If your model contains covariates, `bsub()` 
 will average predictions across levels of covariates as the default.
 
-```{r}
+
+```r
 bsubm1 <- bsub(objec = m, substitute = psub, minute = 5)
 ```
 
@@ -122,9 +146,23 @@ Output from `bsub()` contains multiple dataset of results for all available comp
 Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes. For ease of presentation, we only show the $\pm5$ minute 
 substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
-```{r, results = "asis"}
+
+```r
 knitr::kable(bsubm1$TST[abs(MinSubstituted) == 5])
 ```
+
+
+
+|   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor |
+|------:|------:|-------:|--------------:|:----------|:---------|
+|  0.031| -0.001|   0.065|              5|WAKE       |TST       |
+|  0.003| -0.014|   0.019|              5|MVPA       |TST       |
+|  0.006| -0.007|   0.017|              5|LPA        |TST       |
+|  0.007| -0.007|   0.021|              5|SB         |TST       |
+| -0.029| -0.060|   0.001|             -5|WAKE       |TST       |
+| -0.003| -0.019|   0.013|             -5|MVPA       |TST       |
+| -0.006| -0.018|   0.007|             -5|LPA        |TST       |
+| -0.007| -0.021|   0.007|             -5|SB         |TST       |
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
@@ -132,11 +170,14 @@ in changes in stress at between-person level.
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-```{r mlmcoda-plotbsubm1, fig.width = 9, fig.height = 6}
+
+```r
 plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco()
 ```
+
+![plot of chunk mlmcoda-plotbsubm1](mlmcoda-mlmcoda-plotbsubm1-1.png)
 
 ### Within-person substitution model
 
@@ -145,16 +186,39 @@ substituted for a period of 1 to 5 minutes, at within-person level.
 What if we want predictions for both Males and Females? Let's do that by adding 
 an additional argument \code{summary = FALSE} to `wsub()`.
 
-```{r}
+
+```r
 # Within-person substitution
 wsubm1 <- wsub(objec = m, substitute = psub, minute = 5, summary = FALSE)
-``` 
+```
 
 Results for 5 minute substitution for both, separated by sex.
 
-```{r, results = "asis"}
+
+```r
 knitr::kable(wsubm1$TST[abs(MinSubstituted) == 5])
 ```
+
+
+
+|   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor | Female|
+|------:|------:|-------:|--------------:|:----------|:---------|------:|
+|  0.017|  0.003|   0.032|              5|WAKE       |TST       |      0|
+| -0.003| -0.009|   0.003|              5|MVPA       |TST       |      0|
+| -0.005| -0.009|   0.000|              5|LPA        |TST       |      0|
+| -0.002| -0.007|   0.003|              5|SB         |TST       |      0|
+| -0.016| -0.029|  -0.003|             -5|WAKE       |TST       |      0|
+|  0.003| -0.003|   0.009|             -5|MVPA       |TST       |      0|
+|  0.005|  0.000|   0.009|             -5|LPA        |TST       |      0|
+|  0.002| -0.003|   0.007|             -5|SB         |TST       |      0|
+|  0.017|  0.003|   0.032|              5|WAKE       |TST       |      1|
+| -0.003| -0.009|   0.003|              5|MVPA       |TST       |      1|
+| -0.005| -0.009|   0.000|              5|LPA        |TST       |      1|
+| -0.002| -0.007|   0.003|              5|SB         |TST       |      1|
+| -0.016| -0.029|  -0.003|             -5|WAKE       |TST       |      1|
+|  0.003| -0.003|   0.009|             -5|MVPA       |TST       |      1|
+|  0.005|  0.000|   0.009|             -5|LPA        |TST       |      1|
+|  0.002| -0.003|   0.007|             -5|SB         |TST       |      1|
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes for both males and females, but not other behaviours. Increasing sleep at the expense of time spent awake 
@@ -164,11 +228,14 @@ column indicating the levels of convariates, indicating that these results have 
 
 Let's also plot theses results.
 
-```{r mlmcoda-plotwsubm1, fig.width = 9, fig.height = 6}
+
+```r
 plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco()
-``` 
+```
+
+![plot of chunk mlmcoda-plotwsubm1](mlmcoda-mlmcoda-plotwsubm1-1.png)
 
 ### Average Marginal Substitution Effects 
 
@@ -189,21 +256,53 @@ substitution models for 5 sleep-wake behaviours, so we will parallel them across
 
 *Note*: parallelisation is highly recommended, but optional.
 
-```{r}
+
+```r
 registerDoFuture()
 plan(multisession, workers = 5)
 ```
 
-```{r}
+
+```r
 bsubm2 <- bsubmargins(object = m, substitute = psub, minute = 5)
 knitr::kable(bsubm2$TST[abs(MinSubstituted) == 5])
 ```
 
+
+
+|   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor |
+|------:|------:|-------:|--------------:|:----------|:---------|
+|  0.036| -0.002|   0.075|              5|WAKE       |TST       |
+|  0.002| -0.016|   0.021|              5|MVPA       |TST       |
+|  0.006| -0.007|   0.018|              5|LPA        |TST       |
+|  0.008| -0.007|   0.023|              5|SB         |TST       |
+| -0.033| -0.068|   0.001|             -5|WAKE       |TST       |
+| -0.003| -0.020|   0.015|             -5|MVPA       |TST       |
+| -0.006| -0.018|   0.007|             -5|LPA        |TST       |
+| -0.008| -0.023|   0.007|             -5|SB         |TST       |
+
 #### Estimating average marginal effect for within-person substitution
 
-```{r}
+
+```r
 wsubm2 <- wsubmargins(object = m, substitute = psub, minute = 5)
 knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5])
+```
+
+
+
+|   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor |
+|------:|------:|-------:|--------------:|:----------|:---------|
+|  0.021|  0.004|   0.038|              5|WAKE       |TST       |
+| -0.003| -0.010|   0.003|              5|MVPA       |TST       |
+| -0.005| -0.010|   0.000|              5|LPA        |TST       |
+| -0.002| -0.007|   0.003|              5|SB         |TST       |
+| -0.018| -0.033|  -0.003|             -5|WAKE       |TST       |
+|  0.003| -0.003|   0.010|             -5|MVPA       |TST       |
+|  0.005|  0.000|   0.010|             -5|LPA        |TST       |
+|  0.002| -0.003|   0.007|             -5|SB         |TST       |
+
+```r
 
 registerDoSEQ()
 ```
@@ -211,7 +310,8 @@ registerDoSEQ()
 A comparison between between- and within-person substitution model of sleep on stress, 
 plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
-```{r, mlmcoda-submargins, fig.width = 10, fig.height = 7}
+
+```r
 library(ggpubr)
 p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +
@@ -223,3 +323,5 @@ p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress") +
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
 ```
+
+![plot of chunk mlmcoda-submargins](mlmcoda-mlmcoda-submargins-1.png)

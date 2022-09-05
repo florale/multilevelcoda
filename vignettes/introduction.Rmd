@@ -13,19 +13,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  dev = "CairoPNG", dpi = 150, fig.path = "mlmcoda-"
-)
-```
-
 The `multilevelcoda` package implements Bayesian multilevel models for compositional data in R,
 by combining the principles of the two well-known analyses, Multilevel Modelling and Compositional Data Analysis.
 Formula syntax is built using package brms and is similar to package lme4, which allows for 
-different modelling options in a multilevel framework. The package also provides several useful functions 
-for post-hoc analyses and visualisation of final results.
+different modelling options in a multilevel framework. The package also provides several useful functions for post-hoc analyses and visualisation of final results.
 
 ## Compositional Data Analysis
 
@@ -41,30 +32,21 @@ sleep-wake behaviours during the 24-hour day).
 
 Compositional data can be non-independent and repeated measures data. For example, sleep-wake 
 behaviours are often measured across multiple time points (e.g., across several consecutive days). 
-Thus, different people have different means
 
- regression coefficients that are identical for everyone (fixed effects) and regression coefficients that vary randomly for each person (random effects).
-
-As compositional data are multilevel, we can decompose them into two sources of variability:
+Therefore, we often use multilevel models to include both fixed effects (regression coefficients that are identical for everyone) and random effects (regression coefficients that vary randomly for each person). In addition, we can also decompose these data into two sources of variability:
 between-person (differences between individuals) and within-person (differences within individuals).
 
-### multilevelcoda package
+In `multilevelcoda` package, we implements Compositional Multilevel Model to model compositional data 
+in amultilevel framework. `mulitlevelcoda` includes functions to compute Isometric log ratio (ILR) for 
+between and within-person levels, fit Baysian multilevel model, 
+and conduct post-hoc analyses that are susbtitution models. 
+See below for some useful vignettes:
 
-Current methods for estimating regression models for compositional data have not allowed for the
-multilevel nature of some types of compositional data, such as sleep-wake behaviours.
-We propose the Compositional Multilevel Model, which applies multilevel modelling to compositional data.
-
-Our `multilevelcoda` package provides a intuitive way to handle compositional multilevel data
-
-### But why Bayesian?
-Why was `multilevelcoda` built in Bayesian and not the traditional frequentist approach, you may ask. 
-For a detailed discussion, please see (my future paper). 
+* Fitting Multilevel Model with Compositional predictors:
+* Fitting Multilevel Model with Compositional outcomes:
+* Fitting Compositional Multilevel Substitution Model:
 
 ## References
 Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1–28. https://doi.org/10.18637/jss.v080.i01
 
 Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., & Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.
-
-
-
-

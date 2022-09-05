@@ -6,5 +6,11 @@
 
 library(knitr)
 knit(
-  "vignettes/multilevel-coda.Rmd.orig",
-  "vignettes/multilevel-coda.Rmd")
+  "vignettes/comp-outcome.Rmd.orig",
+  "vignettes/comp-outcome.Rmd")
+knit(
+  "vignettes/comp-predictor.Rmd.orig",
+  "vignettes/comp-predictor.Rmd")
+knit(
+  "vignettes/substitution-model.Rmd.orig",
+  "vignettes/substitution-model.Rmd")

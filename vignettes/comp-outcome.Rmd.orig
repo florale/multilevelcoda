@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this vignette, we discuss how to specify multilevel models with compositional data using `multilevelcoda`.
+In this vignette, we discuss how to specify multilevel models with compositional outcomes using `multilevelcoda`.
 
 In addition to `multilevelcoda`, we will use `brms` package (to fit models) and
 `bayestestR` package (to compute useful indices and compare models).
@@ -31,7 +31,7 @@ library(multilevelcoda)
 library(brms)
 library(bayestestR)
 
-options(digits = 3) # reduce number of digits shown
+options(digits = 3)
 ```
 
 We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables) 
@@ -81,8 +81,7 @@ We can see that stress significantly predicted `ilr1` and `ilr2`.
 
 ## Bayes factor for compositional multilevel modelling
 
-
-We are often interested in whether a predictor significantly predict not only the compositional component, but also the overall composition. This can be done by comparing that model against the null, using Bayes factor. Let's examine whether stress predicts the overall sleep-wake composition.
+We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. This can be done by comparing that model against the null, using Bayes factor. Let's examine whether stress predicts the overall sleep-wake composition.
 
 In the frequentist approach, we usually compare the fits of models using \code{anova}.
 In Bayesian, this can be done by comparing the marginal likelihoods of two models.
