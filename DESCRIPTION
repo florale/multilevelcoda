@@ -20,11 +20,10 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Depends:
     R (>= 4.0.0)
 Imports: 
-    methods,
     stats,
     data.table (>= 1.12.0),
     compositions,
@@ -35,10 +34,7 @@ Imports:
     ggplot2,
     emmeans,
     insight,
-    cowplot,
     ggsci,
-    reshape2,
-    tidyr,
     foreach
 Suggests: 
     testthat (>= 3.0.0),
@@ -46,7 +42,8 @@ Suggests:
     withr,
     knitr,
     rmarkdown,
-    doFuture
+    doFuture,
+    lme4
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 VignetteBuilder: knitr

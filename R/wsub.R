@@ -22,7 +22,7 @@
 #' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should estimated marginal means at each level of the reference grid (\code{FALSE}) 
-#' or their average (\code{TRUE}) be returned? Default to \code{FALSE}.
+#' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list of results from substitution models for all compositional variables.
@@ -35,10 +35,23 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' ## Please see ?multilevelcoda::bsub for an example.
-#' #testws <- wsub(substitute = ps, minute = 5)
+#' \dontrun{
+#' data(mcompd)
+#' data(sbp)
+#' data(psub)
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' 
+#' # model with compositional predictor at between and within-person levels
+#' m <- brmcoda(compilr = cilr, 
+#'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
+#'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'              chain = 1, iter = 500)
+#'              
+#' subm <- wsub(object = m, substitute = psub, minute = 5)
+#' }
 wsub <- function(object, substitute, minute = 60L, 
-                 regrid = NULL, summary = FALSE, 
+                 regrid = NULL, summary = TRUE, 
                  ...) {
 
   if (isTRUE(missing(object))) {
@@ -97,8 +110,8 @@ wsub <- function(object, substitute, minute = 60L,
              %in% c(colnames(regrid)))) {
       stop(paste(
         "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
-        "  It should contain information about the covariates used in 'brmcoda'.",
-        "  These variables are used for subsequent substitution model.",
+        "  These variables will be calculated by substitution model.",
+        "  Reference grid should contain information about the covariates used in 'brmcoda'.",
         "  Please provide a different reference grid.",
         sep = "\n"))
     }
@@ -150,18 +163,21 @@ wsub <- function(object, substitute, minute = 60L,
       rg <- as.data.table(ref_grid(object$Model) @grid)
       cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
       
-      if (isFALSE(is.null(regrid))) { # check reference grid
-        if(isFALSE(identical(colnames(regrid), cv))) {
+      if (isFALSE(is.null(regrid))) { # check user's specified reference grid
+        if(isFALSE(identical(colnames(regrid), cv))) { # ensure all covs are provided
           stop(paste(
-            "Please provide a reference grid that contains information about",
-            "  all covariates in 'brmcoda' model to estimate the substitution model.",
+            "'regrid' should contains information about",
+            "  the covariates in 'brmcoda' model to estimate the substitution model.",
+            "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
+            "  as these variables will be calculated by substitution model.",
+            "  Please provide a different reference grid.",
             sep = "\n"))
           } else {
             refg <- regrid
             }
-        } else {
+        } else { # use default rg
           refg <- rg[, cv, with = FALSE]
-        }
+          }
       
       dsame <- cbind(bilr, wilr, ID, refg)
       ysame <- fitted(object$Model, newdata = dsame, re.form = NA, summary = FALSE)

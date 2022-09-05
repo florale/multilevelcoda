@@ -16,3 +16,4 @@ LICENSE
 ^\.github$
 ^docs$
 internal.md
+^\.RData

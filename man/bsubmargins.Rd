@@ -49,6 +49,6 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
              wilr2 + wilr3 + wilr4 + Female + (1 | ID), chains = 1, iter = 500)
                
-x <- bsubmargins(object = m, substitute = psub, minute = 5)
+subm <- bsubmargins(object = m, substitute = psub, minute = 5)
 }
 }

@@ -25,16 +25,24 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' 
+#' \dontrun{
+#' data(mcompd)
 #' data(sbp)
-#' data (mcompd)
-#' 
-#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-#' 
+#' data(psub)
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'                 
 #' library(doFuture)
 #' registerDoFuture()
 #' plan(multisession, workers = 5)
-#' system.time(testwsm <- wsubmargins(object = adjm, substitute = ps, minute = 2))
+#' 
+#' # model with compositional predictor at between and within-person levels
+#' m <- brmcoda(compilr = cilr, 
+#'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
+#'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'              chain = 1, iter = 500)             
+#' subm <- wsubmargins(object = m, substitute = psub, minute = 5)
+#' }
 wsubmargins <- function (object, substitute, minute = 60, ...) {
   
   if (isTRUE(missing(object))) {

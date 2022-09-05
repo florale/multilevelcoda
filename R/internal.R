@@ -10,19 +10,6 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
 #' @importFrom foreach foreach %dopar%
 #' @importFrom stats fitted
 #' @noRd
-# Support Substitution Model
-# Get the compositional mean of a compositional dataset.
-.mcomp <- function(object) {
-  
-  b <- object$CompIlr$BetweenComp
-  mcomp <- mean(b, robust = TRUE)
-  mcomp <- clo(mcomp, total = 1440)
-  mcomp <- as.data.table(t(mcomp))
-  colnames(mcomp) <- colnames(b)
-  
-  mcomp
-}
-
 # AME for Between-person Substitution model
 .get.bsubmargins <- function(object, substitute, b, 
                              ysame, min, ...) {
@@ -98,92 +85,6 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
     names(jout) <- i
     jout
   }
-  iout
-}
-
-# Alternative model estimating AME for between-person substitution 
-# which binds k level results for fitted()
-# currently slower than fitting k level separately
-.get.bsubmargins. <- function(object, substitute, b,
-                              ysame, min, ...) {
-
-  iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
-    posub <- as.data.table(substitute)
-    posub <- posub[(get(i) != 0)]
-    posub <- posub[order(-rank(get(i)))]
-
-    # substitution variable names
-    subvar <- colnames(posub) %snin% eval(i)
-    iv <- i
-
-    kout <- vector("list", length = nrow(posub))
-    jout <- vector("list", length = min)
-
-    for (j in seq_len(min)) { # time level
-      sub <- posub * j
-      for (k in seq_len(nrow(sub))) {
-        subk <- sub[k, ]
-        subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
-        newcomp <- b + subk
-        MinSubstituted <- subk[, get(i)]
-        names(newcomp) <- colnames(substitute)
-
-        newd <- cbind(b, newcomp, object$CompIlr$data, MinSubstituted)
-
-        # useful information for the final output
-        newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
-        newd$Predictor <- iv
-        newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
-        
-        # dataset with all possible substitution for a single time point
-        kout[[k]] <- newd 
-      }
-      newd <- setDT(do.call(rbind, kout))
-      
-      cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
-      newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
-      
-      # comp and ilr for predictions
-      bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
-      tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-      bilr <- ilr(bcomp, V = object$CompIlr$psi)
-      tilr <- ilr(tcomp, V = object$CompIlr$psi)
-      
-      wilr <- as.data.table(matrix(0, nrow = nrow(tilr), ncol = ncol(tilr)))
-
-      colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
-      colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-      
-      # substitution dataset
-      subd <- cbind(newd, tilr, wilr)
-      
-      # prediction
-      ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
-      ysub <- cbind(subd[, .(MinSubstituted, Substitute, Predictor)], as.data.table(t(ysub)))
-      ysub <- ysub[, lapply(.SD, mean), by = c("MinSubstituted", "Substitute", "Predictor")]
-      suppl <- ysub[, .(MinSubstituted, Substitute, Predictor)]
-      ysub <- ysub[, -c(1:3)]
-      
-      # difference between substitution and no change
-      ydiff <- t(ysub) - ysame
-      
-      # posterior means and intervals
-      ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
-      ymean <- rbindlist(ymean)
-      ymean <- ymean[, .(Mean, CI_low, CI_high)]
-      ymean <- cbind(ymean, suppl)
-      
-      # Save results
-      jout[[j]] <- ymean
-      }
-    jout <- setDT(do.call(rbind, jout))
-    names(jout) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
-
-    # final results for entire composition
-    jout <- list(jout)
-    names(jout) <- i
-    jout
-    }
   iout
 }
 

@@ -4,7 +4,7 @@
 \alias{bsub}
 \title{Between-person Substitution Model.}
 \usage{
-bsub(object, substitute, minute = 60L, regrid = NULL, summary = FALSE, ...)
+bsub(object, substitute, minute = 60L, regrid = NULL, summary = TRUE, ...)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
@@ -22,7 +22,7 @@ Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.}
 
 \item{summary}{A logical value.
 Should estimated marginal means at each level of the reference grid (\code{FALSE})
-or their average (\code{TRUE}) be returned? Default to \code{FALSE}.}
+or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
@@ -41,18 +41,19 @@ is the compositional mean of the dataset provided.
 For average marginal effect, consider using \code{\link{bsubmargins}}.
 }
 \examples{
-\donttest{
+\dontrun{
 data(mcompd)
 data(sbp)
 data(psub)
-data("adjusted-brmcoda")
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
-               
-testbs <- bsub(object = adjm, substitute = psub, minute = 5)
-
-## cleanup
-rm(bsubtest, mcompd)
+# model with compositional predictor at between and within-person levels
+m <- brmcoda(compilr = cilr, 
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
+                                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+             chain = 1, iter = 500)
+             
+subm <- bsub(object = m, substitute = psub, minute = 5)
 }
 }

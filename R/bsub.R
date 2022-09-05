@@ -22,7 +22,7 @@
 #' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should estimated marginal means at each level of the reference grid (\code{FALSE}) 
-#' or their average (\code{TRUE}) be returned? Default to \code{FALSE}.
+#' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list of results from each 
@@ -35,22 +35,23 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
-#' data("adjusted-brmcoda")
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
-#'                
-#' testbs <- bsub(object = adjm, substitute = psub, minute = 5)
-#' 
-#' ## cleanup
-#' rm(bsubtest, mcompd)
+#' # model with compositional predictor at between and within-person levels
+#' m <- brmcoda(compilr = cilr, 
+#'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
+#'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'              chain = 1, iter = 500)
+#'              
+#' subm <- bsub(object = m, substitute = psub, minute = 5)
 #' }
 bsub <- function(object, substitute, minute = 60L, 
-                 regrid = NULL, summary = FALSE, 
+                 regrid = NULL, summary = TRUE, 
                  ...) {
 
   if (isTRUE(missing(object))) {
@@ -82,11 +83,11 @@ bsub <- function(object, substitute, minute = 60L,
     if (isFALSE(is.integer(minute))) {
       if (isFALSE(minute > 0)) {
         stop(" 'minute' must be an positive integer value.")
+        }
       }
+    } else {
+      minute <- 60L
     }
-  } else {
-    minute <- 60L
-  }
   
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
     stop(sprintf(
@@ -109,9 +110,9 @@ bsub <- function(object, substitute, minute = 60L,
            %in% c(colnames(regrid)))) {
       stop(paste(
         "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
-        "   It should contain information about the covariates used in 'brmcoda'.",
-        "   These variables are used for subsequent substitution model.",
-        "   Please provide a different reference grid.",
+        "  These variables will be calculated by substitution model.",
+        "  Reference grid should contain information about the covariates used in 'brmcoda'.",
+        "  Please provide a different reference grid.",
         sep = "\n"))
     }
   }
@@ -165,17 +166,15 @@ bsub <- function(object, substitute, minute = 60L,
       if (isFALSE(is.null(regrid))) { # check user's specified reference grid
         if(isFALSE(identical(colnames(regrid), cv))) { # ensure all covs are provided
           stop(paste(
-            "Please provide a reference grid that contains information about",
-            "  all covariates in 'brmcoda' model to estimate the substitution model.",
+            "'regrid' should contains information about",
+            "  the covariates in 'brmcoda' model to estimate the substitution model.",
+            "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
+            "  as these variables will be calculated by substitution model.",
+            "  Please provide a different reference grid.",
             sep = "\n"))
-          } else if (any(ilrn %in% colnames(regrid))) { # ensure no ilr names
-              stop(paste(
-                "'regrid' should not have any column names starting with 'bilr' and 'wilr';",
-                "  these variables will be used in subsequent models.",
-                sep = "\n"))
-            } else {
-              refg <- regrid
-              }
+          } else {
+            refg <- regrid
+          }
         } else { # use default rg
           refg <- rg[, cv, with = FALSE]
           }

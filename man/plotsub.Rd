@@ -4,7 +4,7 @@
 \alias{plotsub}
 \title{Substitution plot}
 \usage{
-plotsub(data, x, y, font = "serif", ...)
+plotsub(data, x, y, ...)
 }
 \arguments{
 \item{data}{A dataset to use for plot.
@@ -14,9 +14,6 @@ It must be a component of a list resulted from one of the following functions:
 \item{x}{A character string specifying name of the compostional predictor variable.}
 
 \item{y}{A character string specifying the name of the outcome variable.}
-
-\item{font}{A character string specifying the name of user's preferred font.
-Default is \code{serif} which will choose a serif font available on the system.}
 
 \item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }
