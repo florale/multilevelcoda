@@ -1,9 +1,12 @@
 pandoc: 2.7.3
-pkgdown: 2.0.5
+pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
-  multilevel-coda: multilevel-coda.html
-last_built: 2022-07-15T03:29Z
+  comp-outcome: comp-outcome.html
+  comp-predictor: comp-predictor.html
+  introduction: introduction.html
+  substitution-model: substitution-model.html
+last_built: 2022-09-05T13:26Z
 urls:
   reference: https://florale.github.io/multilevelcoda/reference
   article: https://florale.github.io/multilevelcoda/articles
