@@ -40,11 +40,11 @@ In `multilevelcoda` package, we implements Compositional Multilevel Model to mod
 in amultilevel framework. `mulitlevelcoda` includes functions to compute Isometric log ratio (ILR) for 
 between and within-person levels, fit Baysian multilevel model, 
 and conduct post-hoc analyses that are susbtitution models. 
-See below for some useful vignettes:
+See below for vignettes:
 
-* Fitting Multilevel Model with Compositional predictors:
-* Fitting Multilevel Model with Compositional outcomes:
-* Fitting Compositional Multilevel Substitution Model:
+- [Multilevel Model with Compositional Predictors](https://florale.github.io/multilevelcoda/articles/comp-predictor.html)
+- [Multilevel Model with Compositional Outcomes](https://florale.github.io/multilevelcoda/articles/comp-outcome.html)
+- [Compositional Multilevel Substitution Model](https://florale.github.io/multilevelcoda/articles/substitution-model.html)
 
 ## References
 Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1–28. https://doi.org/10.18637/jss.v080.i01

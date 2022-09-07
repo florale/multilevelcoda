@@ -1,5 +1,5 @@
 ---
-title: "Multilevel Model with Compositional predictors"
+title: "Multilevel Model with Compositional Predictors"
 output:
   html_document:
     toc: true
@@ -8,7 +8,7 @@ output:
       smooth_scroll: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Multilevel Model with Compositional predictors}
+  %\VignetteIndexEntry{Multilevel Model with Compositional Predictors}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -134,7 +134,7 @@ We can utilize Bayes factors to answer the following question:
 Let's fit a series of model with `brmcoda()` to predict `STRESS` from sleep-wake composition.
 For precise Bayes factors, we will use 40,000 posterior draws for each model.
 
-```{r, results = "hide"}
+```{r, message=FALSE, warning=FALSE}
 # intercept only model
 m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),

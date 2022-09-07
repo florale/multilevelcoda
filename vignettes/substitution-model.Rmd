@@ -15,7 +15,7 @@ vignette: >
 
 
 
-Substitution models is a useful post-hoc analysis for regression models with compositional predictors. 
+Substitution model is a useful post-hoc analysis for regression models with compositional predictors. 
 Results from our main `brms`model tell us how each behaviour is associated with an outcome. However,
 we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
 from one behaviour to another, while the other behaviours remain constant.
