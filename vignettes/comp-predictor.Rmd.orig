@@ -1,5 +1,5 @@
 ---
-title: "Multilevel Model with Compositional Predictors"
+title: "Multilevel Models with Compositional Predictors"
 output:
   html_document:
     toc: true
@@ -8,7 +8,7 @@ output:
       smooth_scroll: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Multilevel Model with Compositional Predictors}
+  %\VignetteIndexEntry{Multilevel Models with Compositional Predictors}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,16 +17,12 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  dev = "CairoPNG", dpi = 150, fig.path = "mlmcoda-"
+  dev = "CairoPNG", dpi = 150, 
+  fig.path = "mlmcoda-", fig.align = "center"
 )
 
 library(ggsci)
-library(ggthemr)
-fcol <- sample(c("#FAF7F3", "#D2E0EA", "#3C5C76", "#ADC7DA", "#CE7870"))
-flora <- define_palette(swatch = fcol,
-  gradient = c(lower = fcol[1L], upper = fcol[2L])
-)
-ggthemr(flora)
+library(cowplot)
 ```
 
 In this vignette, we discuss how to specify multilevel models with compositional data using `multilevelcoda`.
@@ -51,8 +47,8 @@ data("mcompd")
 data("sbp")
 data("psub")
 ```
-
-# Getting compositions and isometric log ratio (ILR) coordinates. 
+# Multilevel model with compositional predictors
+## Compositions and isometric log ratio (ILR) coordinates. 
 
 Compositional data are often expressed as a set of ILR coordinates in regression models 
 (Egozcue et al., 2003).
@@ -64,8 +60,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 ```
 
-# Multilevel model with compositional predictors
-
+## Fitting model
 We now will use output from the `compilr()` to fit our `brms` model,
 using the `brmcoda()`. Here is a model predicting `STRESS`
 from between- and within-person sleep-wake behaviours (expressed as ILR coordinates).
@@ -114,7 +109,7 @@ if people slept more, what behaviour did they spend less time in?
 One approach to gain further insights into these relationships, and the changes in outcomes associated with changes in specific time across behaviours is the substitution model. 
 We will discuss the substitution model later in this vignette.
 
-## Bayes factor for compositional multilevel modelling
+## Bayes Factor for significance testing
 
 In the frequentist approach, we usually compare the fits of models using `anova()`.
 In Bayesian, this can be done by comparing the marginal likelihoods of two models.
@@ -128,13 +123,13 @@ We can utilize Bayes factors to answer the following question:
 
 *"Which model is more likely to have produced the observed data?"*
 
-*Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
-`save_pars = save_pars(all = TRUE)`.
-
 Let's fit a series of model with `brmcoda()` to predict `STRESS` from sleep-wake composition.
 For precise Bayes factors, we will use 40,000 posterior draws for each model.
 
-```{r, message=FALSE, warning=FALSE}
+*Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
+`save_pars = save_pars(all = TRUE)`.
+
+```{r, results = "hide"}
 # intercept only model
 m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
@@ -164,8 +159,11 @@ m <- brmcoda(compilr = cilr,
 We can now compare these models with the `bayesfactor_models()` function, using the intercept-only 
 model as reference.
 
-```{r}
+```{r, results='hide'}
 comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
+```
+
+```{r}
 comparison
 ```
 
@@ -210,14 +208,18 @@ increasing sleep (TST) at the expense of any other behaviours was not associated
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-```{r mlmcoda-plotbsubm2, fig.width = 9, fig.height = 6}
+```{r eval = FALSE}
+plotsub(data = bsubm$TST, x = "sleep", y = "stress")
+``` 
+
+```{r mlmcoda-plotbsubm2, fig.width = 9, fig.height = 6, fig.cap = "Example of Between-person Substitution Model"}
 plotsub(data = bsubm$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
-  scale_fill_jco()
-```
+  scale_fill_jco() + 
+  theme_cowplot()
+``` 
 
 ### Within-person substitution model
-
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
 substituted for a period of 1 to 5 minutes, at within-person level. 
 
@@ -240,15 +242,22 @@ column indicating the levels of convariates, indicating that these results have 
 
 Let's also plot theses results.
 
-```{r mlmcoda-plotwsubm2, fig.width = 9, fig.height = 6}
+```{r eval = FALSE}
+plotsub(data = wsubm$TST, x = "sleep", y = "stress")
+``` 
+
+
+```{r mlmcoda-plotwsubm2, fig.width = 9, fig.height = 6, fig.cap = "Example of Within-person Substitution Model"}
 plotsub(data = wsubm$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
-  scale_fill_jco()
+  scale_fill_jco() + 
+  theme_cowplot()
 ``` 
 
 
 ### More about interesting substitution models
-If you are interested in conducting substitution models, we recommend LINK TO SUB MODEL ViGNETTES.
+You can learn more about different types of substitution models at  
+[Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/substitution-model.html).
 
 ## References
 

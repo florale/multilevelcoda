@@ -17,16 +17,12 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  dev = "CairoPNG", dpi = 150, fig.path = "mlmcoda-"
+  dev = "CairoPNG", dpi = 150, 
+  fig.path = "mlmcoda-", fig.align = "center"
 )
 
 library(ggsci)
-library(ggthemr)
-fcol <- sample(c("#FAF7F3", "#D2E0EA", "#3C5C76", "#ADC7DA", "#CE7870"))
-flora <- define_palette(swatch = fcol,
-  gradient = c(lower = fcol[1L], upper = fcol[2L])
-)
-ggthemr(flora)
+library(cowplot)
 ```
 
 Substitution model is a useful post-hoc analysis for regression models with compositional predictors. 
@@ -132,10 +128,16 @@ in changes in stress at between-person level.
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-```{r mlmcoda-plotbsubm1, fig.width = 9, fig.height = 6}
+```{r, eval=FALSE}
+plotsub(data = bsubm1$TST, x = "sleep", y = "stress")
+```
+
+
+```{r mlmcoda-plotbsubm1, fig.width = 9, fig.height = 6, fig.cap = "Example of Between-person Substitution Model"}
 plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
-  scale_fill_jco()
+  scale_fill_jco() +
+  theme_cowplot()
 ```
 
 ### Within-person substitution model
@@ -164,10 +166,16 @@ column indicating the levels of convariates, indicating that these results have 
 
 Let's also plot theses results.
 
-```{r mlmcoda-plotwsubm1, fig.width = 9, fig.height = 6}
+```{r eval=FALSE}
+plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
+``` 
+
+
+```{r mlmcoda-plotwsubm1, fig.width = 9, fig.height = 6, fig.cap = "Example of Within-person Substitution Model"}
 plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
-  scale_fill_jco()
+  scale_fill_jco() +
+  theme_cowplot()
 ``` 
 
 ### Average Marginal Substitution Effects 
@@ -204,21 +212,32 @@ knitr::kable(bsubm2$TST[abs(MinSubstituted) == 5])
 ```{r}
 wsubm2 <- wsubmargins(object = m, substitute = psub, minute = 5)
 knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5])
-
 registerDoSEQ()
 ```
 
 A comparison between between- and within-person substitution model of sleep on stress, 
 plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
-```{r, mlmcoda-submargins, fig.width = 10, fig.height = 7}
+```{r, eval=FALSE}
+library(ggpubr)
+p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress")
+p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress")
+
+ggarrange(p1, p2, 
+          ncol = 1, nrow = 2)
+```
+
+
+```{r, mlmcoda-submargins, fig.width = 10, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
 library(ggpubr)
 p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +
-  scale_fill_jco()
+  scale_fill_jco() +
+  theme_cowplot()
 p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress") +
   scale_color_jco() +
-  scale_fill_jco()
+  scale_fill_jco() +
+  theme_cowplot()
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)

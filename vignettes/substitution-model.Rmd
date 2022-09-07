@@ -155,7 +155,7 @@ knitr::kable(bsubm1$TST[abs(MinSubstituted) == 5])
 
 |   Mean| CI_low| CI_high| MinSubstituted|Substitute |Predictor |
 |------:|------:|-------:|--------------:|:----------|:---------|
-|  0.031| -0.001|   0.065|              5|WAKE       |TST       |
+|  0.031| -0.001|   0.064|              5|WAKE       |TST       |
 |  0.003| -0.014|   0.019|              5|MVPA       |TST       |
 |  0.006| -0.007|   0.017|              5|LPA        |TST       |
 |  0.007| -0.007|   0.021|              5|SB         |TST       |
@@ -172,12 +172,19 @@ These results can be plotted to see the patterns more easily using the `plotsub(
 
 
 ```r
-plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco()
+plotsub(data = bsubm1$TST, x = "sleep", y = "stress")
 ```
 
-![plot of chunk mlmcoda-plotbsubm1](mlmcoda-mlmcoda-plotbsubm1-1.png)
+
+
+```r
+plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
+  scale_color_jco() +
+  scale_fill_jco() +
+  theme_cowplot()
+```
+
+<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;" />
 
 ### Within-person substitution model
 
@@ -230,12 +237,19 @@ Let's also plot theses results.
 
 
 ```r
-plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco()
+plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
 ```
 
-![plot of chunk mlmcoda-plotwsubm1](mlmcoda-mlmcoda-plotwsubm1-1.png)
+
+
+```r
+plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
+  scale_color_jco() +
+  scale_fill_jco() +
+  theme_cowplot()
+```
+
+<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;" />
 
 ### Average Marginal Substitution Effects 
 
@@ -303,7 +317,6 @@ knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5])
 |  0.002| -0.003|   0.007|             -5|SB         |TST       |
 
 ```r
-
 registerDoSEQ()
 ```
 
@@ -313,15 +326,12 @@ plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
 ```r
 library(ggpubr)
-p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco()
-p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco()
+p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress")
+p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress")
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
 ```
 
-![plot of chunk mlmcoda-submargins](mlmcoda-mlmcoda-submargins-1.png)
+
+<img src="mlmcoda-mlmcoda-submargins-1.png" title="Example of Average Marginal Substitution Model" alt="Example of Average Marginal Substitution Model" style="display: block; margin: auto;" />

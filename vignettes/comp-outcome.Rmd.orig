@@ -42,9 +42,10 @@ data("mcompd")
 data("sbp") 
 ```
 
-## Getting compositions and isometric log ratio (ILR) coordinates. 
+# Multilevel model with compositional outcomes.
+## Computing compositions and isometric log ratio coordinates. 
 
-Compositional data are often expressed as a set of ILR coordinates in regression models (cite).
+Compositional data are often expressed as a set of ILR coordinates in regression models.
 Using the `compilr()` function, we can get ILR coordinates 
 that are used in the subsequent model as the predictors or outcomes.
 
@@ -53,8 +54,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 ```
 
-## Multilevel model with compositional outcomes.
-
+## Fitting model
 A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,
 each of which is predicted by a set of predictors. 
 As usual, the ILR coordinates outcomes can be calculated using the `compilr()` functions.
@@ -71,21 +71,19 @@ mv <- brmcoda(compilr = cilr,
               cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
-Here is a `summary()` of the model.
+Here is a `summary()` of the model. 
+We can see that stress significantly predicted `ilr1` and `ilr2`. 
 
 ```{r}
 summary(mv$Model)
 ```
 
-We can see that stress significantly predicted `ilr1` and `ilr2`. 
-
-## Bayes factor for compositional multilevel modelling
+# Bayes Factor for compositional multilevel modelling
 
 We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. This can be done by comparing that model against the null, using Bayes factor. Let's examine whether stress predicts the overall sleep-wake composition.
 
-In the frequentist approach, we usually compare the fits of models using \code{anova}.
-In Bayesian, this can be done by comparing the marginal likelihoods of two models.
-
+In the frequentist approach, we usually compare the fits of models using `anova()` function.
+In Bayesian, this can be done by comparing the marginal likelihoods of two models. 
 Bayes Factors (BFs) are indices of relative evidence of one model over another. 
 In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:
 - testing single parameters within a model
@@ -96,9 +94,9 @@ We can utilize Bayes factors to answer the following question:
 *"Which model is more likely to have produced the observed data?"*
 
 *Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
-\code{save_pars = save_pars(all = TRUE)}.
+`save_pars = save_pars(all = TRUE)`.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, results = "hide"}
 # intercept only
 mv0 <- brmcoda(compilr = cilr,
                formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),
@@ -113,8 +111,13 @@ mv <- brmcoda(compilr = cilr,
 
 We can now compare these models with the `bayesfactor_models()` function
 
+```{r, results='hide'}
+comparison <- bayesfactor_models(mv$Model, denominator = mv0$Model)
+```
+
+
 ```{r}
-bayesfactor_models(mv$Model, denominator = mv0$Model)
+comparison
 ```
 
 With a $BF$ of 1.87e-04 < 1, our data favours the intercept only model, showing that there is 
@@ -123,7 +126,7 @@ insufficient evidence for stress predicting the overall sleep-wake composition.
 Bayes factors provide a intuitive measure of the strength of evidence of one model over the other
 or among different models. Check out the `bayestestR` packages for several other useful functions related to BFs.
 
-## References
+# References
 
 Dumuid, D., Pedišić, Ž., Stanford, T. E., Martín-Fernández, J. A., Hron, K., Maher, C. A., ... & Olds, T. (2019). The compositional isotemporal substitution model: a method for estimating changes in a health outcome for reallocation of time between sleep, physical activity and sedentary behaviour. Statistical methods in medical research, 28(3), 846-857.
 
