@@ -59,8 +59,8 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/introduction.html">Introduction to Compositional Multilevel Modelling</a>
-    <a class="dropdown-item" href="../articles/comp-outcome.html">Multilevel Model with Compositional outcomes</a>
-    <a class="dropdown-item" href="../articles/comp-predictor.html">Multilevel Model with Compositional predictors</a>
+    <a class="dropdown-item" href="../articles/comp-outcome.html">Multilevel Model with Compositional Outcomes</a>
+    <a class="dropdown-item" href="../articles/comp-predictor.html">Multilevel Model with Compositional Predictors</a>
     <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Model</a>
   </div>
 </li>
@@ -103,7 +103,7 @@
 
     
     
-<p>Substitution models is a useful post-hoc analysis for regression models with compositional predictors. Results from our main <code>brms</code>model tell us how each behaviour is associated with an outcome. However, we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated from one behaviour to another, while the other behaviours remain constant.</p>
+<p>Substitution model is a useful post-hoc analysis for regression models with compositional predictors. Results from our main <code>brms</code>model tell us how each behaviour is associated with an outcome. However, we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated from one behaviour to another, while the other behaviours remain constant.</p>
 <p>The Compositional Isotemporal Substitution Model (Dumuid et al., 2019) can be used to estimate this change. The <code>multilevelcoda</code> package implements this method in a multilevel framework and offers functions for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.</p>
 <p>We will begin by loading necessary packages, <code>multilevelcoda</code>, <code>brms</code> (for models fitting), doFuture (for parallelisation), and datasets <code>mcompd</code> (simulated compositional sleep and wake variables), <code>sbp</code> (sequential binary partition), and <code>psub</code> (base possible substitution).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
