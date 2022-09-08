@@ -61,7 +61,7 @@
     <a class="dropdown-item" href="../articles/introduction.html">Introduction to Compositional Multilevel Modelling</a>
     <a class="dropdown-item" href="../articles/comp-outcome.html">Multilevel Model with Compositional Outcomes</a>
     <a class="dropdown-item" href="../articles/comp-predictor.html">Multilevel Models with Compositional Predictors</a>
-    <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Model</a>
+    <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -123,7 +123,7 @@
 <div class="section level3">
 <h3 id="compositions-and-isometric-log-ratio-ilr-coordinates-">Compositions and isometric log ratio (ILR) coordinates.<a class="anchor" aria-label="anchor" href="#compositions-and-isometric-log-ratio-ilr-coordinates-"></a>
 </h3>
-<p>Compositional data are often expressed as a set of ILR coordinates in regression models (Egozcue et al., 2003). Using the <code><a href="../reference/compilr.html">compilr()</a></code>, we can get ILR coordinates that are used in the subsequent model as the predictors or outcomes.</p>
+<p>Compositional data are often expressed as a set of ILR coordinates in regression models. Using the <code><a href="../reference/compilr.html">compilr()</a></code>, we can get ILR coordinates that are used in the subsequent model as the predictors or outcomes.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compilr.html">compilr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
 <span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></code></pre></div>
@@ -216,17 +216,19 @@
 </tbody>
 </table>
 <p>Due to the nature of within-person ILR coordinates, it is often challenging to interpret these results in great details. For example, the significant coefficient for wilr1 shows that the within-person change in sleep behaviours (sleep duration and time awake in bed combined), relative to wake behaviours (moderate to vigorous physical activity, light physical activity, and sedentary behaviour) on a given day, was associated with stress. However, as there are several behaviours involved in this coordinate, we don’t know the within-person change in which of them drives the association. It could be the change in sleep, such that people sleep more than their own average on a given day, but it could also be the change in time awake. Further, we don’t know about the specific changes in time spent across behaviours. That is, if people slept more, what behaviour did they spend less time in?</p>
-<p>One approach to gain further insights into these relationships, and the changes in outcomes associated with changes in specific time across behaviours is the substitution model. We will discuss the substitution model later in this vignette.</p>
+<p>One approach to gain further insights into these relationships, and the changes in outcomes associated with changes in specific time across compositionl components is the substitution model. We will discuss the substitution model later in this vignette.</p>
 </div>
 <div class="section level3">
 <h3 id="bayes-factor-for-significance-testing">Bayes Factor for significance testing<a class="anchor" aria-label="anchor" href="#bayes-factor-for-significance-testing"></a>
 </h3>
-<p>In the frequentist approach, we usually compare the fits of models using <code><a href="https://rdrr.io/r/stats/anova.html" class="external-link">anova()</a></code>. In Bayesian, this can be done by comparing the marginal likelihoods of two models.</p>
-<p>Bayes Factors (BFs) are indices of relative evidence of one model over another. In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions: - testing single parameters within a model - comparing models</p>
-<p>We can utilize Bayes factors to answer the following question:</p>
-<p><em>“Which model is more likely to have produced the observed data?”</em></p>
+<p>In the frequentist approach, we usually compare the fits of models using <code><a href="https://rdrr.io/r/stats/anova.html" class="external-link">anova()</a></code>. In Bayesian, this can be done by comparing the marginal likelihoods of two models. Bayes Factors (BFs) are indices of relative evidence of one model over another. In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:</p>
+<ul>
+<li>Testing single parameters within a model</li>
+<li>Comparing models</li>
+</ul>
+<p>We can utilize Bayes factors to answer the following question: <em>“Which model is more likely to have produced the observed data?”</em></p>
 <p>Let’s fit a series of model with <code><a href="../reference/brmcoda.html">brmcoda()</a></code> to predict <code>STRESS</code> from sleep-wake composition. For precise Bayes factors, we will use 40,000 posterior draws for each model.</p>
-<p><em>Note</em>: To use Bayes factors, <code>brmsfit</code> models must be fitted with an additional non-default argument <code>save_pars = save_pars(all = TRUE)</code>.</p>
+<p><em>Notes</em> : To use Bayes factors, <code>brmsfit</code> models must be fitted with an additional non-default argument <code>save_pars = save_pars(all = TRUE)</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># intercept only model</span></span>
 <span><span class="va">m0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
@@ -262,24 +264,15 @@
 <span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
 <p>We can now compare these models with the <code><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models()</a></code> function, using the intercept-only model as reference.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">Model</span>, <span class="va">m1</span><span class="op">$</span><span class="va">Model</span>, <span class="va">m2</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">m0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Computation of Bayes factors: estimating marginal likelihood, please wait...</span></span>
-<span><span class="co">#&gt; Recompiling the model with 'rstan'</span></span>
-<span><span class="co">#&gt; Recompilation done</span></span>
-<span><span class="co">#&gt; Recompiling the model with 'rstan'</span></span>
-<span><span class="co">#&gt; Recompilation done</span></span>
-<span><span class="co">#&gt; Recompiling the model with 'rstan'</span></span>
-<span><span class="co">#&gt; Recompilation done</span></span>
-<span><span class="co">#&gt; Recompiling the model with 'rstan'</span></span>
-<span><span class="co">#&gt; Recompilation done</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">Model</span>, <span class="va">m1</span><span class="op">$</span><span class="va">Model</span>, <span class="va">m2</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">m0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span></span>
 <span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Model                                                                       BF</span></span>
-<span><span class="co">#&gt; [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.06</span></span>
-<span><span class="co">#&gt; [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.348</span></span>
-<span><span class="co">#&gt; [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 12.09</span></span>
+<span><span class="co">#&gt; [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.90</span></span>
+<span><span class="co">#&gt; [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.339</span></span>
+<span><span class="co">#&gt; [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.94</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * Against Denominator: [4] 1 + (1 | ID)</span></span>
 <span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
@@ -290,27 +283,26 @@
 <span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Model                                       BF</span></span>
-<span><span class="co">#&gt; [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.086</span></span>
-<span><span class="co">#&gt; [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  2.98</span></span>
-<span><span class="co">#&gt; [4] 1 + (1 | ID)                             0.246</span></span>
+<span><span class="co">#&gt; [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.087</span></span>
+<span><span class="co">#&gt; [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.06</span></span>
+<span><span class="co">#&gt; [4] 1 + (1 | ID)                             0.256</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * Against Denominator: [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)</span></span>
 <span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
 <p>Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.</p>
-<p>Bayes factors provide a intuitive measure of the strength of evidence of one model over the other or among different models. Check out the <code>bayestestR</code> packages for several other useful functions related to BFs.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="substitution-model">Substitution model<a class="anchor" aria-label="anchor" href="#substitution-model"></a>
 </h2>
-<p>When examining the relationships between compositional data and an outcome, we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated from one behaviour to another, while the other behaviours remain constant. These changes can be examined using the compositional isotemporal substitution model (Dumuid et a., 2019). In <code>multilevelcoda</code>, we extend this model to multilevel approach to test both between-person and within-person changes.</p>
+<p>When examining the relationships between compositional data and an outcome, we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated from one compositional component to another, while the other components remain constant. These changes can be examined using the compositional isotemporal substitution model. In <code>multilevelcoda</code>, we extend this model to multilevel approach to test both between-person and within-person changes.</p>
 <div class="section level3">
 <h3 id="between-person-substitution-model">Between-person substitution model<a class="anchor" aria-label="anchor" href="#between-person-substitution-model"></a>
 </h3>
 <p>Between-person substitution model can be computed using the <code><a href="../reference/bsub.html">bsub()</a></code> function. The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bsub.html">bsub</a></span><span class="op">(</span>objec <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<p>Output from <code><a href="../reference/bsub.html">bsub()</a></code> contains multiple dataset of results for all available compositional component. Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. For ease of presentation, we only show the <span class="math inline">\(\pm5\)</span> minute substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.</p>
+<p>Output from <code><a href="../reference/bsub.html">bsub()</a></code> contains multiple datasets of results for all compositional components. Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. For ease of presentation, we only show the <span class="math inline">\(\pm5\)</span> minute substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">bsubm</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">MinSubstituted</span><span class="op">)</span> <span class="op">==</span> <span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -389,25 +381,21 @@
 </tr>
 </tbody>
 </table>
-<p>None of the results are significant, given that the credible intervals did not cross 0, showing that increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress.</p>
+<p>None of the results are significant, given that the credible intervals did not cross 0, showing that increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress. Notice there is no column indicating the levels of convariates, indicating that these results have been averaged.</p>
 <p>These results can be plotted to see the patterns more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></code> function.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">bsubm</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">bsubm</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_color_jco</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_fill_jco</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">theme_cowplot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mlmcoda-mlmcoda-plotbsubm2-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;"></p>
-<div class="section level4">
-<h4 id="within-person-substitution-model">Within-person substitution model<a class="anchor" aria-label="anchor" href="#within-person-substitution-model"></a>
-</h4>
+</div>
+<div class="section level3">
+<h3 id="within-person-substitution-model">Within-person substitution model<a class="anchor" aria-label="anchor" href="#within-person-substitution-model"></a>
+</h3>
 <p>Let’s now take a look at how stress changes when different pairwise of sleep-wake behaviours are substituted for a period of 1 to 5 minutes, at within-person level.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Within-person substitution</span></span>
 <span><span class="va">wsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wsub.html">wsub</a></span><span class="op">(</span>objec <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span>, summary <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Results for 5 minute substitution.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">wsubm</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">MinSubstituted</span><span class="op">)</span> <span class="op">==</span> <span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -485,28 +473,15 @@
 </tr>
 </tbody>
 </table>
-<p>At within-person level, we got some significant results for substitution of sleep (TST) and time awake in bed (WAKE) for 5 minutes, but not other behaviours. Increasing sleep at the expense of time spent awake in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03, -0.00]). Notice there is no column indicating the levels of convariates, indicating that these results have been averaged.</p>
-<p>Let’s also plot theses results.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>At within-person level, we got some significant results for substitution of sleep (TST) and time awake in bed (WAKE) for 5 minutes, but not other behaviours. Increasing sleep at the expense of time spent awake in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03, -0.00]). Let’s also plot theses results.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">wsubm</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">wsubm</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_color_jco</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_fill_jco</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">theme_cowplot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mlmcoda-mlmcoda-plotwsubm2-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;"></p>
 </div>
-<div class="section level4">
-<h4 id="more-about-interesting-substitution-models">More about interesting substitution models<a class="anchor" aria-label="anchor" href="#more-about-interesting-substitution-models"></a>
-</h4>
-<p>You can learn more about different types of substitution models at<br><a href="https://florale.github.io/multilevelcoda/articles/substitution-model.html">Compositional Multilevel Substitution Models</a>.</p>
-</div>
-</div>
 <div class="section level3">
-<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h3 id="more-interesting-substitution-models">More interesting substitution models<a class="anchor" aria-label="anchor" href="#more-interesting-substitution-models"></a>
 </h3>
-<p>Dumuid, D., Pedišić, Ž., Stanford, T. E., Martín-Fernández, J. A., Hron, K., Maher, C. A., … &amp; Olds, T. (2019). The compositional isotemporal substitution model: a method for estimating changes in a health outcome for reallocation of time between sleep, physical activity and sedentary behaviour. Statistical methods in medical research, 28(3), 846-857.</p>
-<p>Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., &amp; Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.</p>
+<p>You can learn more about different types of substitution models at<br><a href="https://florale.github.io/multilevelcoda/articles/substitution-model.html">Compositional Multilevel Substitution Models</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

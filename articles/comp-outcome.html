@@ -61,7 +61,7 @@
     <a class="dropdown-item" href="../articles/introduction.html">Introduction to Compositional Multilevel Modelling</a>
     <a class="dropdown-item" href="../articles/comp-outcome.html">Multilevel Model with Compositional Outcomes</a>
     <a class="dropdown-item" href="../articles/comp-predictor.html">Multilevel Models with Compositional Predictors</a>
-    <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Model</a>
+    <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -103,35 +103,28 @@
 
     
     
-<p>In this vignette, we discuss how to specify multilevel models with compositional outcomes using <code>multilevelcoda</code>.</p>
-<p>In addition to <code>multilevelcoda</code>, we will use <code>brms</code> package (to fit models) and <code>bayestestR</code> package (to compute useful indices and compare models).</p>
+<p>In this vignette, we discuss how to specify multilevel models with compositional outcomes using <code>multilevelcoda</code>. In addition to <code>multilevelcoda</code>, we will use <code>brms</code> package (to fit models) and <code>bayestestR</code> package (to compute useful indices and compare models). We will also attach built in datasets <code>mcompd</code> (simulated compositional sleep and wake variables) and <code>sbp</code> (sequential binary partition).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://florale.github.io/multilevelcoda/">multilevelcoda</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://easystats.github.io/bayestestR/" class="external-link">bayestestR</a></span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"mcompd"</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sbp"</span><span class="op">)</span> </span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
-<p>We will also attach built in datasets <code>mcompd</code> (simulated compositional sleep and wake variables) and <code>sbp</code> (sequential binary partition).</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"mcompd"</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sbp"</span><span class="op">)</span> </span></code></pre></div>
 <div class="section level2">
 <h2 id="multilevel-model-with-compositional-outcomes-">Multilevel model with compositional outcomes.<a class="anchor" aria-label="anchor" href="#multilevel-model-with-compositional-outcomes-"></a>
 </h2>
 <div class="section level3">
 <h3 id="computing-compositions-and-isometric-log-ratio-coordinates-">Computing compositions and isometric log ratio coordinates.<a class="anchor" aria-label="anchor" href="#computing-compositions-and-isometric-log-ratio-coordinates-"></a>
 </h3>
-<p>Compositional data are often expressed as a set of ILR coordinates in regression models. Using the <code><a href="../reference/compilr.html">compilr()</a></code> function, we can get ILR coordinates that are used in the subsequent model as the predictors or outcomes.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes, each of which is predicted by a set of predictors. The ILR coordinates outcomes can be calculated using the <code><a href="../reference/compilr.html">compilr()</a></code> functions.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compilr.html">compilr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
-<span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="fitting-model">Fitting model<a class="anchor" aria-label="anchor" href="#fitting-model"></a>
-</h3>
-<p>A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes, each of which is predicted by a set of predictors. As usual, the ILR coordinates outcomes can be calculated using the <code><a href="../reference/compilr.html">compilr()</a></code> functions.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">$</span><span class="va">TotalILR</span><span class="op">)</span></span>
+<span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">$</span><span class="va">TotalILR</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        ilr1 ilr2    ilr3  ilr4</span></span>
 <span><span class="co">#&gt; [1,]  0.287 1.20  0.6270 1.702</span></span>
 <span><span class="co">#&gt; [2,] -0.472 1.57 -0.8336 0.984</span></span>
@@ -139,18 +132,21 @@
 <span><span class="co">#&gt; [4,] -0.316 1.37 -0.0332 0.551</span></span>
 <span><span class="co">#&gt; [5,]  0.205 1.43 -0.6893 0.733</span></span>
 <span><span class="co">#&gt; [6,] -0.446 1.16 -0.0950 0.670</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="fitting-model">Fitting model<a class="anchor" aria-label="anchor" href="#fitting-model"></a>
+</h3>
 <p>Our <code>brms</code> model can be then fitted using the <code><a href="../reference/brmcoda.html">brmcoda()</a></code> function.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">STRESS</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>              cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting 'rescor' to TRUE by default for this model</span></span>
-<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via</span></span>
-<span><span class="co">#&gt; 'set_rescor' instead of using the default.</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
 <span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
 <p>Here is a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model. We can see that stress significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: MV(gaussian, gaussian, gaussian, gaussian) </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = identity</span></span>
@@ -208,20 +204,22 @@
 <div class="section level2">
 <h2 id="bayes-factor-for-compositional-multilevel-modelling">Bayes Factor for compositional multilevel modelling<a class="anchor" aria-label="anchor" href="#bayes-factor-for-compositional-multilevel-modelling"></a>
 </h2>
-<p>We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. This can be done by comparing that model against the null, using Bayes factor. Let’s examine whether stress predicts the overall sleep-wake composition.</p>
-<p>In the frequentist approach, we usually compare the fits of models using <code><a href="https://rdrr.io/r/stats/anova.html" class="external-link">anova()</a></code> function. In Bayesian, this can be done by comparing the marginal likelihoods of two models. Bayes Factors (BFs) are indices of relative evidence of one model over another. In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions: - testing single parameters within a model - comparing models</p>
-<p>We can utilize Bayes factors to answer the following question:</p>
-<p><em>“Which model is more likely to have produced the observed data?”</em></p>
+<p>We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. In Bayesian, this can be done by comparing the marginal likelihoods of two models. Bayes Factors (BFs) are indices of relative evidence of one model over another. In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:</p>
+<ul>
+<li>Testing single parameters within a model</li>
+<li>Comparing models</li>
+</ul>
+<p>We can utilize Bayes factors to answer the following question: <em>“Which model is more likely to have produced the observed data?”</em></p>
+<p>Let’s examine whether stress predicts the overall sleep-wake composition.</p>
 <p><em>Note</em>: To use Bayes factors, <code>brmsfit</code> models must be fitted with an additional non-default argument <code>save_pars = save_pars(all = TRUE)</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># intercept only</span></span>
 <span><span class="va">mv0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>               formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>               iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>               backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting 'rescor' to TRUE by default for this model</span></span>
-<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via</span></span>
-<span><span class="co">#&gt; 'set_rescor' instead of using the default.</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
 <span><span class="co">#&gt; Start sampling</span></span>
 <span><span class="co"># full model</span></span>
@@ -230,35 +228,23 @@
 <span>              iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>              backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Setting 'rescor' to TRUE by default for this model</span></span>
-<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via</span></span>
-<span><span class="co">#&gt; 'set_rescor' instead of using the default.</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
 <span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
 <p>We can now compare these models with the <code><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models()</a></code> function</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Computation of Bayes factors: estimating marginal likelihood, please wait...</span></span>
-<span><span class="co">#&gt; Recompiling the model with 'rstan'</span></span>
-<span><span class="co">#&gt; Recompilation done</span></span>
-<span><span class="co">#&gt; Recompiling the model with 'rstan'</span></span>
-<span><span class="co">#&gt; Recompilation done</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span></span>
 <span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Model       BF</span></span>
-<span><span class="co">#&gt; [1]       1.26e-04</span></span>
+<span><span class="co">#&gt; [1]       1.15e-04</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * Against Denominator: [2]</span></span>
 <span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
-<p>With a <span class="math inline">\(BF\)</span> of 1.87e-04 &lt; 1, our data favours the intercept only model, showing that there is insufficient evidence for stress predicting the overall sleep-wake composition.</p>
+<p>With a <span class="math inline">\(BF\)</span> &lt; 1, our data favours the intercept only model, showing that there is insufficient evidence for stress predicting the overall sleep-wake composition.</p>
 <p>Bayes factors provide a intuitive measure of the strength of evidence of one model over the other or among different models. Check out the <code>bayestestR</code> packages for several other useful functions related to BFs.</p>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p>Dumuid, D., Pedišić, Ž., Stanford, T. E., Martín-Fernández, J. A., Hron, K., Maher, C. A., … &amp; Olds, T. (2019). The compositional isotemporal substitution model: a method for estimating changes in a health outcome for reallocation of time between sleep, physical activity and sedentary behaviour. Statistical methods in medical research, 28(3), 846-857.</p>
-<p>Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., &amp; Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

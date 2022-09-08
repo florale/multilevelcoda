@@ -61,7 +61,7 @@
     <a class="dropdown-item" href="../articles/introduction.html">Introduction to Compositional Multilevel Modelling</a>
     <a class="dropdown-item" href="../articles/comp-outcome.html">Multilevel Model with Compositional Outcomes</a>
     <a class="dropdown-item" href="../articles/comp-predictor.html">Multilevel Models with Compositional Predictors</a>
-    <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Model</a>
+    <a class="dropdown-item" href="../articles/substitution-model.html">Compositional Multilevel Substitution Models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -114,18 +114,12 @@
 </h2>
 <p>Compositional data can be non-independent and repeated measures data. For example, sleep-wake behaviours are often measured across multiple time points (e.g., across several consecutive days).</p>
 <p>Therefore, we often use multilevel models to include both fixed effects (regression coefficients that are identical for everyone) and random effects (regression coefficients that vary randomly for each person). In addition, we can also decompose these data into two sources of variability: between-person (differences between individuals) and within-person (differences within individuals).</p>
-<p>In <code>multilevelcoda</code> package, we implements Compositional Multilevel Model to model compositional data in amultilevel framework. <code>mulitlevelcoda</code> includes functions to compute Isometric log ratio (ILR) for between and within-person levels, fit Baysian multilevel model, and conduct post-hoc analyses that are susbtitution models. See below for vignettes:</p>
+<p>In <code>multilevelcoda</code> package, we implements Compositional Multilevel Model to model compositional data in amultilevel framework. <code>mulitlevelcoda</code> includes functions to compute Isometric log ratio (ILR) for between and within-person levels, fit Baysian multilevel model, and conduct post-hoc analyses such as susbtitution models. See below for vignettes:</p>
 <ul>
 <li><a href="https://florale.github.io/multilevelcoda/articles/comp-predictor.html">Multilevel Model with Compositional Predictors</a></li>
 <li><a href="https://florale.github.io/multilevelcoda/articles/comp-outcome.html">Multilevel Model with Compositional Outcomes</a></li>
-<li><a href="https://florale.github.io/multilevelcoda/articles/substitution-model.html">Compositional Multilevel Substitution Model</a></li>
+<li><a href="https://florale.github.io/multilevelcoda/articles/substitution-model.html">Compositional Multilevel Substitution Models</a></li>
 </ul>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p>Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1–28. <a href="https://doi.org/10.18637/jss.v080.i01" class="external-link uri">https://doi.org/10.18637/jss.v080.i01</a></p>
-<p>Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., &amp; Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
