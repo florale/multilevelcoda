@@ -39,11 +39,11 @@ data("mcompd")
 data("sbp")
 data("psub")
 ```
+
 # Multilevel model with compositional predictors
 ## Compositions and isometric log ratio (ILR) coordinates. 
 
-Compositional data are often expressed as a set of ILR coordinates in regression models 
-(Egozcue et al., 2003).
+Compositional data are often expressed as a set of ILR coordinates in regression models.
 Using the `compilr()`, we can get ILR coordinates 
 that are used in the subsequent model as the predictors or outcomes.
 
@@ -134,27 +134,28 @@ that people sleep more than their own average on a given day, but it could also 
 awake. Further, we don't know about the specific changes in time spent across behaviours. That is, 
 if people slept more, what behaviour did they spend less time in?
 
-One approach to gain further insights into these relationships, and the changes in outcomes associated with changes in specific time across behaviours is the substitution model. 
+One approach to gain further insights into these relationships, 
+and the changes in outcomes associated with changes in specific time across compositionl components 
+is the substitution model. 
 We will discuss the substitution model later in this vignette.
 
 ## Bayes Factor for significance testing
 
 In the frequentist approach, we usually compare the fits of models using `anova()`.
-In Bayesian, this can be done by comparing the marginal likelihoods of two models.
-
+In Bayesian, this can be done by comparing the marginal likelihoods of two models. 
 Bayes Factors (BFs) are indices of relative evidence of one model over another. 
 In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:
-- testing single parameters within a model
-- comparing models
 
-We can utilize Bayes factors to answer the following question:
+- Testing single parameters within a model
+- Comparing models
 
+We can utilize Bayes factors to answer the following question: 
 *"Which model is more likely to have produced the observed data?"*
 
 Let's fit a series of model with `brmcoda()` to predict `STRESS` from sleep-wake composition.
 For precise Bayes factors, we will use 40,000 posterior draws for each model.
 
-*Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
+*Notes* : To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
 `save_pars = save_pars(all = TRUE)`.
 
 
@@ -199,15 +200,6 @@ model as reference.
 
 ```r
 comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
-#> Computation of Bayes factors: estimating marginal likelihood, please wait...
-#> Recompiling the model with 'rstan'
-#> Recompilation done
-#> Recompiling the model with 'rstan'
-#> Recompilation done
-#> Recompiling the model with 'rstan'
-#> Recompilation done
-#> Recompiling the model with 'rstan'
-#> Recompilation done
 ```
 
 
@@ -216,9 +208,9 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                                                       BF
-#> [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.06
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.348
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 12.09
+#> [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.90
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.339
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.94
 #> 
 #> * Against Denominator: [4] 1 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
@@ -234,9 +226,9 @@ update(comparison, reference = 1)
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                       BF
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.086
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  2.98
-#> [4] 1 + (1 | ID)                             0.246
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.087
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.06
+#> [4] 1 + (1 | ID)                             0.256
 #> 
 #> * Against Denominator: [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
@@ -244,16 +236,14 @@ update(comparison, reference = 1)
 
 Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.
 
-Bayes factors provide a intuitive measure of the strength of evidence of one model over the other
-or among different models. Check out the `bayestestR` packages for several other useful functions related to BFs.
-
 # Substitution model
-When examining the relationships between compositional data and an outcome, we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
-from one behaviour to another, while the other behaviours remain constant. These changes can be examined using the compositional isotemporal substitution model (Dumuid et a., 2019). 
+When examining the relationships between compositional data and an outcome, 
+we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
+from one compositional component to another, while the other components remain constant. 
+These changes can be examined using the compositional isotemporal substitution model. 
 In `multilevelcoda`, we extend this model to multilevel approach to test both between-person and within-person changes.
 
 ## Between-person substitution model
-
 Between-person substitution model can be computed using the `bsub()` function. The below example 
 examines the changes in stress for different pairwise substitution of sleep-wake behaviours
 for a period of 1 to 5 minutes, at between-person level. 
@@ -263,8 +253,9 @@ for a period of 1 to 5 minutes, at between-person level.
 bsubm <- bsub(objec = m, substitute = psub, minute = 5)
 ```
 
-Output from `bsub()` contains multiple dataset of results for all available compositional component. 
-Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. For ease of presentation, we only show the $\pm5$ minute 
+Output from `bsub()` contains multiple datasets of results for all compositional components. 
+Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. 
+For ease of presentation, we only show the $\pm5$ minute 
 substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
 
@@ -286,7 +277,9 @@ knitr::kable(bsubm$TST[abs(MinSubstituted) == 5])
 | -0.006| -0.021|   0.008|             -5|SB         |TST       |
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
-increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress.
+increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress. 
+Notice there is no 
+column indicating the levels of convariates, indicating that these results have been averaged.
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
@@ -295,17 +288,9 @@ These results can be plotted to see the patterns more easily using the `plotsub(
 plotsub(data = bsubm$TST, x = "sleep", y = "stress")
 ```
 
-
-```r
-plotsub(data = bsubm$TST, x = "sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco() + 
-  theme_cowplot()
-```
-
 <img src="mlmcoda-mlmcoda-plotbsubm2-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;" />
 
-### Within-person substitution model
+## Within-person substitution model
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
 substituted for a period of 1 to 5 minutes, at within-person level. 
 
@@ -338,9 +323,7 @@ knitr::kable(wsubm$TST[abs(MinSubstituted) == 5])
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. Increasing sleep at the expense of time spent awake 
 in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
-more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]). Notice there is no 
-column indicating the levels of convariates, indicating that these results have been averaged. 
-
+more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]).
 Let's also plot theses results.
 
 
@@ -348,24 +331,8 @@ Let's also plot theses results.
 plotsub(data = wsubm$TST, x = "sleep", y = "stress")
 ```
 
-
-
-```r
-plotsub(data = wsubm$TST, x = "sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco() + 
-  theme_cowplot()
-```
-
 <img src="mlmcoda-mlmcoda-plotwsubm2-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;" />
 
-
-### More about interesting substitution models
+## More interesting substitution models
 You can learn more about different types of substitution models at  
 [Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/substitution-model.html).
-
-## References
-
-Dumuid, D., Pedišić, Ž., Stanford, T. E., Martín-Fernández, J. A., Hron, K., Maher, C. A., ... & Olds, T. (2019). The compositional isotemporal substitution model: a method for estimating changes in a health outcome for reallocation of time between sleep, physical activity and sedentary behaviour. Statistical methods in medical research, 28(3), 846-857.
-
-Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., & Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.

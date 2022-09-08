@@ -39,14 +39,9 @@ between-person (differences between individuals) and within-person (differences 
 In `multilevelcoda` package, we implements Compositional Multilevel Model to model compositional data 
 in amultilevel framework. `mulitlevelcoda` includes functions to compute Isometric log ratio (ILR) for 
 between and within-person levels, fit Baysian multilevel model, 
-and conduct post-hoc analyses that are susbtitution models. 
+and conduct post-hoc analyses such as susbtitution models. 
 See below for vignettes:
 
 - [Multilevel Model with Compositional Predictors](https://florale.github.io/multilevelcoda/articles/comp-predictor.html)
 - [Multilevel Model with Compositional Outcomes](https://florale.github.io/multilevelcoda/articles/comp-outcome.html)
-- [Compositional Multilevel Substitution Model](https://florale.github.io/multilevelcoda/articles/substitution-model.html)
-
-## References
-Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1–28. https://doi.org/10.18637/jss.v080.i01
-
-Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., & Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.
+- [Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/substitution-model.html)

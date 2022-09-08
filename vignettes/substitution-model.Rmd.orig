@@ -1,5 +1,5 @@
 ---
-title: "Compositional Multilevel Substitution Model"
+title: "Compositional Multilevel Substitution Models"
 output:
   html_document:
     toc: true
@@ -8,7 +8,7 @@ output:
       smooth_scroll: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Compositional Multilevel Substitution Model}
+  %\VignetteIndexEntry{Compositional Multilevel Substitution Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,13 +25,16 @@ library(ggsci)
 library(cowplot)
 ```
 
+# Intro
 Substitution model is a useful post-hoc analysis for regression models with compositional predictors. 
-Results from our main `brms`model tell us how each behaviour is associated with an outcome. However,
+Results from our main `brms` model tell us how each compositional predictor (expressed as ILR coordiante) 
+is associated with an outcome. However,
 we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
-from one behaviour to another, while the other behaviours remain constant.
+from one compositional component to another, while the other components remain constant.
 
-The Compositional Isotemporal Substitution Model (Dumuid et al., 2019) can be used to estimate this 
-change. The `multilevelcoda` package implements this method in a multilevel framework and offers functions for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
+The Compositional Isotemporal Substitution Model can be used to estimate this change. 
+The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
+for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
 
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
@@ -50,12 +53,12 @@ data("psub")
 options(digits = 3) # reduce number of digits shown
 ```
 
-Let's fit our main `brms` model predicting \code{STRESS} from both between and within-person
+# Fitting main model
+Let's fit our main `brms` model predicting `STRESS` from both between and within-person
 sleep-wake behaviours (represented by isometric log ratio coordinates), with sex as a covariate, 
 using the `brmcoda()` function. We can compute ILR coordinate predictors using `compilr()` function.
 
 ```{r, results = "hide"}
-
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
@@ -73,14 +76,15 @@ summary(m$Model)
 
 We can see that the first and forth within-person ILR coordinates were both associated with stress. 
 Interpretation for multilevel ILR coordinates can often be less intuitive. 
-For example, the significant coefficient for wilr1 shows that the within-person change in sleep behaviours (sleep duration and time awake in 
-bed combined), relative to wake behaviours (moderate to vigorous physical activity, light physical 
-activity, and sedentary behaviour) on a given day, was associated with stress. However, as there are
+For example, the significant coefficient for wilr1 shows that the within-person change in sleep behaviours 
+(sleep duration and time awake in bed combined), relative to wake behaviours 
+(moderate to vigorous physical activity, light physical activity, and sedentary behaviour) on a given day, 
+is associated with stress. However, as there are
 several behaviours involved in this coordinate, we don't know the within-person change in which of 
 them drives the association. It could be the change in sleep, such that people sleep more than their 
 own average on a given day, but it could also be the change in time awake. Further, we don't know 
-about the specific changes in time spent across behaviours. That is, if people slept more, what 
-behaviour did they spend less time in?
+about the specific changes in time spent across behaviours. That is, if people sleep more, what 
+behaviour do they spend less time in?
 
 This is common issue when working with multilevel compositional data as ILR coordinates often 
 contains information about multiple compositional components. 
@@ -92,19 +96,25 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 
 `multilevelcoda` package provides `4` different functions to compute substitution models.
 
-Basic substitution model
+Basic substitution model:
+
 - Between-person substitution model
 - Within-person substitution model
 
-Average marginal substitution model
-- Average Marginal Effects for between-person substitution model
-- Average Marginal Effects for within-person substitution model
+Average marginal substitution model:
+
+- Average marginal between-person substitution model
+- Average marginal within-person substitution model
 
 *Tips*: Substitution models are often computationally demanding tasks. 
 You can speed up the models using parallelisation, for example, using `doFuture` package.
 
 ### Basic substitution model
+We can calculate the changes in an outcomes when compositional variables are 
+substituted for a specific of time using `bsub()` (between-person level) and `wsub()` (within-person level).
+Both functions use sample's compositional mean as reference (i.e., composition when there is no change).
 
+#### Between-person substitution model
 Between-person substitution model can be computed using the `bsub()` function. The below example 
 examines the changes in stress for different pairwise substitution of sleep-wake behaviours
 for a period of 1 to 5 minutes, at between-person level. If your model contains covariates, `bsub()` 
@@ -115,7 +125,8 @@ bsubm1 <- bsub(objec = m, substitute = psub, minute = 5)
 ```
 
 Output from `bsub()` contains multiple dataset of results for all available compositional component. 
-Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes. For ease of presentation, we only show the $\pm5$ minute 
+Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes. 
+For ease of presentation, we only show the $\pm5$ minute 
 substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
 ```{r, results = "asis"}
@@ -133,62 +144,62 @@ plotsub(data = bsubm1$TST, x = "sleep", y = "stress")
 ```
 
 
-```{r mlmcoda-plotbsubm1, fig.width = 9, fig.height = 6, fig.cap = "Example of Between-person Substitution Model"}
+```{r mlmcoda-plotbsubm1, fig.width = 10, fig.height = 6, echo=FALSE, fig.cap = "Example of Between-person Substitution Model"}
 plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme_cowplot()
 ```
 
-### Within-person substitution model
+#### Within-person substitution model
 
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
 substituted for a period of 1 to 5 minutes, at within-person level. 
-What if we want predictions for both Males and Females? Let's do that by adding 
-an additional argument \code{summary = FALSE} to `wsub()`.
+We can obtain prediction for each level of covariates by adding 
+an argument `summary = FALSE` to `wsub()`.
 
 ```{r}
-# Within-person substitution
 wsubm1 <- wsub(objec = m, substitute = psub, minute = 5, summary = FALSE)
 ``` 
 
-Results for 5 minute substitution for both, separated by sex.
+Results for 5 minute substitution for each level of covariates. In this example, we get separate 
+predictions for males and females.
 
 ```{r, results = "asis"}
 knitr::kable(wsubm1$TST[abs(MinSubstituted) == 5])
 ```
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
-awake in bed (WAKE) for 5 minutes for both males and females, but not other behaviours. Increasing sleep at the expense of time spent awake 
+awake in bed (WAKE) for 5 minutes for both males and females, but not other behaviours. 
+For males (Female = 0), increasing 5 minutes in sleep at the expense of time spent awake 
 in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
-more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]). Notice there is no 
-column indicating the levels of convariates, indicating that these results have been averaged. 
+more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]). 
 
 Let's also plot theses results.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
 ``` 
 
 
-```{r mlmcoda-plotwsubm1, fig.width = 9, fig.height = 6, fig.cap = "Example of Within-person Substitution Model"}
+```{r mlmcoda-plotwsubm1, fig.width = 10, fig.height = 6, echo= FALSE, fig.cap = "Example of Within-person Substitution Model"}
 plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme_cowplot()
 ``` 
 
-### Average Marginal Substitution Effects 
+### Average Marginal Substitution Effects
 
-While `bsub()` and `wsub()` estimate the substitution model from the sample's compositional mean of 
-sleep-wake behaviours, 
-`bsubmargins()` and `wsubmargins()` estimate the substitution model using the average effect of all participant's compositional mean of sleep-wake behaviours. 
+While `bsub()` and `wsub()` estimate the substitution model from the sample's compositional mean, 
+`bsubmargins()` and `wsubmargins()` estimate the substitution model using the average effect of participant's compositional mean. 
 That is, for each participant, `bsubmargins()` and `wsubmargins()` compute the changes in the outcome 
-when a fixed duration of time is reallocated from one behaviour to another, 
-while the other behaviours remain constant and then average across the 
+when a fixed duration of time is reallocated from one compositional component to another, 
+while the other components remain constant and then average across the 
 resulting effect estimates. 
 
-Both `bsubmargins()` and `wsubmargins()`  are generally more computationally expensive than `bsub()` and `wsub()` models. All models can be run faster in  shorter walltime using parallelisation.
+`bsubmargins()` and `wsubmargins()` are generally more computationally expensive than `bsub()` and `wsub()` models. 
+All models can be run faster in shorter walltime using parallelisation.
 
 #### Estimating average marginal effect for between-person substitution
 
@@ -228,7 +239,7 @@ ggarrange(p1, p2,
 ```
 
 
-```{r, mlmcoda-submargins, fig.width = 10, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
+```{r mlmcoda-submargins, fig.width = 10, fig.height = 8, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
 library(ggpubr)
 p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +

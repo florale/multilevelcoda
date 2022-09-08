@@ -6,11 +6,11 @@
 
 library(knitr)
 knit(
+  "vignettes/substitution-model.Rmd.orig",
+  "vignettes/substitution-model.Rmd")
+knit(
   "vignettes/comp-outcome.Rmd.orig",
   "vignettes/comp-outcome.Rmd")
 knit(
   "vignettes/comp-predictor.Rmd.orig",
   "vignettes/comp-predictor.Rmd")
-knit(
-  "vignettes/substitution-model.Rmd.orig",
-  "vignettes/substitution-model.Rmd")

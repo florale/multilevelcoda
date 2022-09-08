@@ -15,10 +15,11 @@ vignette: >
 
 
 
-In this vignette, we discuss how to specify multilevel models with compositional outcomes using `multilevelcoda`.
-
+In this vignette, we discuss how to specify multilevel models with compositional outcomes using `multilevelcoda`. 
 In addition to `multilevelcoda`, we will use `brms` package (to fit models) and
-`bayestestR` package (to compute useful indices and compare models).
+`bayestestR` package (to compute useful indices and compare models). 
+We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables) 
+and `sbp` (sequential binary partition).
 
 
 ```r
@@ -26,38 +27,24 @@ library(multilevelcoda)
 library(brms)
 library(bayestestR)
 
-options(digits = 3)
-```
-
-We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables) 
-and `sbp` (sequential binary partition).
-
-
-```r
 data("mcompd") 
 data("sbp") 
+
+options(digits = 3)
 ```
 
 # Multilevel model with compositional outcomes.
 ## Computing compositions and isometric log ratio coordinates. 
 
-Compositional data are often expressed as a set of ILR coordinates in regression models.
-Using the `compilr()` function, we can get ILR coordinates 
-that are used in the subsequent model as the predictors or outcomes.
+A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,
+each of which is predicted by a set of predictors. 
+The ILR coordinates outcomes can be calculated using the `compilr()` functions.
 
 
 ```r
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-```
 
-## Fitting model
-A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,
-each of which is predicted by a set of predictors. 
-As usual, the ILR coordinates outcomes can be calculated using the `compilr()` functions.
-
-
-```r
 head(cilr$TotalILR)
 #>        ilr1 ilr2    ilr3  ilr4
 #> [1,]  0.287 1.20  0.6270 1.702
@@ -68,6 +55,7 @@ head(cilr$TotalILR)
 #> [6,] -0.446 1.16 -0.0950 0.670
 ```
 
+## Fitting model
 Our `brms` model can be then fitted using the `brmcoda()` function.
 
 
@@ -76,8 +64,7 @@ mv <- brmcoda(compilr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
 #> Setting 'rescor' to TRUE by default for this model
-#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via
-#> 'set_rescor' instead of using the default.
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
 #> Compiling Stan program...
 #> Start sampling
 ```
@@ -143,18 +130,18 @@ summary(mv$Model)
 
 # Bayes Factor for compositional multilevel modelling
 
-We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. This can be done by comparing that model against the null, using Bayes factor. Let's examine whether stress predicts the overall sleep-wake composition.
-
-In the frequentist approach, we usually compare the fits of models using `anova()` function.
+We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. 
 In Bayesian, this can be done by comparing the marginal likelihoods of two models. 
 Bayes Factors (BFs) are indices of relative evidence of one model over another. 
 In the context of compositional multilevel modelling, Bayes Factors provide two main useful functions:
-- testing single parameters within a model
-- comparing models 
 
-We can utilize Bayes factors to answer the following question:
+- Testing single parameters within a model
+- Comparing models 
 
+We can utilize Bayes factors to answer the following question: 
 *"Which model is more likely to have produced the observed data?"*
+
+Let's examine whether stress predicts the overall sleep-wake composition.
 
 *Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
 `save_pars = save_pars(all = TRUE)`.
@@ -167,8 +154,7 @@ mv0 <- brmcoda(compilr = cilr,
                iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
                backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 #> Setting 'rescor' to TRUE by default for this model
-#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via
-#> 'set_rescor' instead of using the default.
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
 #> Compiling Stan program...
 #> Start sampling
 # full model
@@ -177,8 +163,7 @@ mv <- brmcoda(compilr = cilr,
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 #> Setting 'rescor' to TRUE by default for this model
-#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via
-#> 'set_rescor' instead of using the default.
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
 #> Compiling Stan program...
 #> Start sampling
 ```
@@ -188,11 +173,6 @@ We can now compare these models with the `bayesfactor_models()` function
 
 ```r
 comparison <- bayesfactor_models(mv$Model, denominator = mv0$Model)
-#> Computation of Bayes factors: estimating marginal likelihood, please wait...
-#> Recompiling the model with 'rstan'
-#> Recompilation done
-#> Recompiling the model with 'rstan'
-#> Recompilation done
 ```
 
 
@@ -202,21 +182,14 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model       BF
-#> [1]       1.26e-04
+#> [1]       1.15e-04
 #> 
 #> * Against Denominator: [2]
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 
-With a $BF$ of 1.87e-04 < 1, our data favours the intercept only model, showing that there is 
+With a $BF$ < 1, our data favours the intercept only model, showing that there is 
 insufficient evidence for stress predicting the overall sleep-wake composition.
 
 Bayes factors provide a intuitive measure of the strength of evidence of one model over the other
 or among different models. Check out the `bayestestR` packages for several other useful functions related to BFs.
-
-# References
-
-Dumuid, D., Pedišić, Ž., Stanford, T. E., Martín-Fernández, J. A., Hron, K., Maher, C. A., ... & Olds, T. (2019). The compositional isotemporal substitution model: a method for estimating changes in a health outcome for reallocation of time between sleep, physical activity and sedentary behaviour. Statistical methods in medical research, 28(3), 846-857.
-
-Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., & Barcelo-Vidal, C. (2003). Isometric logratio transformations for compositional data analysis. Mathematical geology, 35(3), 279-300.
-
