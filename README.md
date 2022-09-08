@@ -33,7 +33,7 @@ Release of `multilevelcoda` to CRAN is planned at a later date.
 
 You can see more examples and learn about the package from these vignettes:
 
-- [Introduction to Introduction to Compositional Multilevel Modelling](https://florale.github.io/multilevelcoda/articles/introduction.html)
+- [Introduction to Compositional Multilevel Modelling](https://florale.github.io/multilevelcoda/articles/introduction.html)
 - [Multilevel Models with Compositional Outcomes](https://florale.github.io/multilevelcoda/articles/comp-outcome.html)
 - [Multilevel Models with Compositional Predictors](https://florale.github.io/multilevelcoda/articles/comp-predictor.html)
 - [Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/substitution-model.html)
