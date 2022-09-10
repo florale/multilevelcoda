@@ -130,7 +130,7 @@
 <span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span>
-<span>               <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
+<span>                                <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
 <span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
@@ -171,9 +171,10 @@
 <span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
 <p>We can see that the first and forth within-person ILR coordinates were both associated with stress. Interpretation for multilevel ILR coordinates can often be less intuitive. For example, the significant coefficient for wilr1 shows that the within-person change in sleep behaviours (sleep duration and time awake in bed combined), relative to wake behaviours (moderate to vigorous physical activity, light physical activity, and sedentary behaviour) on a given day, is associated with stress. However, as there are several behaviours involved in this coordinate, we don’t know the within-person change in which of them drives the association. It could be the change in sleep, such that people sleep more than their own average on a given day, but it could also be the change in time awake. Further, we don’t know about the specific changes in time spent across behaviours. That is, if people sleep more, what behaviour do they spend less time in?</p>
 <p>This is common issue when working with multilevel compositional data as ILR coordinates often contains information about multiple compositional components. It is further inconvenient in the case of within-person ILR coordinates, as they represent the deviation from the mean (between-person) ILR coordinates. To gain further insights into these associations and help with interpretation, we can conduct post-hoc analyses using the substitution models from our <code>multilevel</code> package.</p>
-<div class="section level3">
-<h3 id="substitution-models">Substitution models<a class="anchor" aria-label="anchor" href="#substitution-models"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="substitution-models">Substitution models<a class="anchor" aria-label="anchor" href="#substitution-models"></a>
+</h2>
 <p><code>multilevelcoda</code> package provides <code>4</code> different functions to compute substitution models.</p>
 <p>Basic substitution model:</p>
 <ul>
@@ -186,16 +187,17 @@
 <li>Average marginal within-person substitution model</li>
 </ul>
 <p><em>Tips</em>: Substitution models are often computationally demanding tasks. You can speed up the models using parallelisation, for example, using <code>doFuture</code> package.</p>
-<div class="section level4">
-<h4 id="basic-substitution-model">Basic substitution model<a class="anchor" aria-label="anchor" href="#basic-substitution-model"></a>
-</h4>
+<div class="section level3">
+<h3 id="basic-substitution-model">Basic substitution model<a class="anchor" aria-label="anchor" href="#basic-substitution-model"></a>
+</h3>
 <p>We can calculate the changes in an outcomes when compositional variables are substituted for a specific of time using <code><a href="../reference/bsub.html">bsub()</a></code> (between-person level) and <code><a href="../reference/wsub.html">wsub()</a></code> (within-person level). Both functions use sample’s compositional mean as reference (i.e., composition when there is no change).</p>
-<div class="section level5">
-<h5 id="between-person-substitution-model">Between-person substitution model<a class="anchor" aria-label="anchor" href="#between-person-substitution-model"></a>
-</h5>
+<div class="section level4">
+<h4 id="between-person-substitution-model">Between-person substitution model<a class="anchor" aria-label="anchor" href="#between-person-substitution-model"></a>
+</h4>
 <p>Between-person substitution model can be computed using the <code><a href="../reference/bsub.html">bsub()</a></code> function. The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. If your model contains covariates, <code><a href="../reference/bsub.html">bsub()</a></code> will average predictions across levels of covariates as the default.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bsubm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bsub.html">bsub</a></span><span class="op">(</span>objec <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">bsubm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bsub.html">bsub</a></span><span class="op">(</span>objec <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: MultisessionFuture (doFuture-1) failed to call grmall() on cluster RichSOCKnode #4 (PID 1937 on 'localhost'). The reason reported was 'error writing to connection'. Post-mortem diagnostic: Detected a non-exportable reference ('externalptr') in one of the globals ('substitute' of class 'data.table') used in the future expression. The total size of the 50 globals exported is 20.73 MiB. The three largest globals are 'object' (18.75 MiB of class 'list'), 'setDT' (522.51 KiB of class 'function') and 'clo' (281.16 KiB of class 'function')</span></span></code></pre></div>
 <p>Output from <code><a href="../reference/bsub.html">bsub()</a></code> contains multiple dataset of results for all available compositional component. Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes. For ease of presentation, we only show the <span class="math inline">\(\pm5\)</span> minute substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">bsubm1</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">MinSubstituted</span><span class="op">)</span> <span class="op">==</span> <span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -212,14 +214,14 @@
 <tr class="odd">
 <td align="right">0.031</td>
 <td align="right">-0.001</td>
-<td align="right">0.065</td>
+<td align="right">0.064</td>
 <td align="right">5</td>
 <td align="left">WAKE</td>
 <td align="left">TST</td>
 </tr>
 <tr class="even">
 <td align="right">0.003</td>
-<td align="right">-0.013</td>
+<td align="right">-0.014</td>
 <td align="right">0.019</td>
 <td align="right">5</td>
 <td align="left">MVPA</td>
@@ -281,12 +283,13 @@
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">bsubm1</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mlmcoda-mlmcoda-plotbsubm1-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;"></p>
 </div>
-<div class="section level5">
-<h5 id="within-person-substitution-model">Within-person substitution model<a class="anchor" aria-label="anchor" href="#within-person-substitution-model"></a>
-</h5>
+<div class="section level4">
+<h4 id="within-person-substitution-model">Within-person substitution model<a class="anchor" aria-label="anchor" href="#within-person-substitution-model"></a>
+</h4>
 <p>Let’s now take a look at how stress changes when different pairwise of sleep-wake behaviours are substituted for a period of 1 to 5 minutes, at within-person level. We can obtain prediction for each level of covariates by adding an argument <code>summary = FALSE</code> to <code><a href="../reference/wsub.html">wsub()</a></code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wsubm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wsub.html">wsub</a></span><span class="op">(</span>objec <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span>, summary <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">wsubm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wsub.html">wsub</a></span><span class="op">(</span>objec <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span>, summary <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: MultisessionFuture (doFuture-1) failed to call grmall() on cluster RichSOCKnode #4 (PID 1937 on 'localhost'). The reason reported was 'error writing to connection'. Post-mortem diagnostic: Detected a non-exportable reference ('externalptr') in one of the globals ('substitute' of class 'data.table') used in the future expression. The total size of the 50 globals exported is 20.73 MiB. The three largest globals are 'object' (18.75 MiB of class 'list'), 'setDT' (522.51 KiB of class 'function') and 'clo' (281.16 KiB of class 'function')</span></span></code></pre></div>
 <p>Results for 5 minute substitution for each level of covariates. In this example, we get separate predictions for males and females.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">wsubm1</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">MinSubstituted</span><span class="op">)</span> <span class="op">==</span> <span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -454,16 +457,15 @@
 <p><img src="mlmcoda-mlmcoda-plotwsubm1-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;"></p>
 </div>
 </div>
-<div class="section level4">
-<h4 id="average-marginal-substitution-effects">Average Marginal Substitution Effects<a class="anchor" aria-label="anchor" href="#average-marginal-substitution-effects"></a>
-</h4>
+<div class="section level3">
+<h3 id="average-marginal-substitution-effects">Average Marginal Substitution Effects<a class="anchor" aria-label="anchor" href="#average-marginal-substitution-effects"></a>
+</h3>
 <p>While <code><a href="../reference/bsub.html">bsub()</a></code> and <code><a href="../reference/wsub.html">wsub()</a></code> estimate the substitution model from the sample’s compositional mean, <code><a href="../reference/bsubmargins.html">bsubmargins()</a></code> and <code><a href="../reference/wsubmargins.html">wsubmargins()</a></code> estimate the substitution model using the average effect of participant’s compositional mean. That is, for each participant, <code><a href="../reference/bsubmargins.html">bsubmargins()</a></code> and <code><a href="../reference/wsubmargins.html">wsubmargins()</a></code> compute the changes in the outcome when a fixed duration of time is reallocated from one compositional component to another, while the other components remain constant and then average across the resulting effect estimates.</p>
 <p><code><a href="../reference/bsubmargins.html">bsubmargins()</a></code> and <code><a href="../reference/wsubmargins.html">wsubmargins()</a></code> are generally more computationally expensive than <code><a href="../reference/bsub.html">bsub()</a></code> and <code><a href="../reference/wsub.html">wsub()</a></code> models. All models can be run faster in shorter walltime using parallelisation.</p>
-<div class="section level5">
-<h5 id="estimating-average-marginal-effect-for-between-person-substitution">Estimating average marginal effect for between-person substitution<a class="anchor" aria-label="anchor" href="#estimating-average-marginal-effect-for-between-person-substitution"></a>
-</h5>
+<div class="section level4">
+<h4 id="estimating-average-marginal-effect-for-between-person-substitution">Estimating average marginal effect for between-person substitution<a class="anchor" aria-label="anchor" href="#estimating-average-marginal-effect-for-between-person-substitution"></a>
+</h4>
 <p>In this example, we use package <code>doFuture</code> for parallelisation. <code><a href="../reference/bsubmargins.html">bsubmargins()</a></code> will run 5 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.</p>
-<p><em>Note</em>: parallelisation is highly recommended, but optional.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://doFuture.futureverse.org/reference/registerDoFuture.html" class="external-link">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
@@ -547,9 +549,9 @@
 </tbody>
 </table>
 </div>
-<div class="section level5">
-<h5 id="estimating-average-marginal-effect-for-within-person-substitution">Estimating average marginal effect for within-person substitution<a class="anchor" aria-label="anchor" href="#estimating-average-marginal-effect-for-within-person-substitution"></a>
-</h5>
+<div class="section level4">
+<h4 id="estimating-average-marginal-effect-for-within-person-substitution">Estimating average marginal effect for within-person substitution<a class="anchor" aria-label="anchor" href="#estimating-average-marginal-effect-for-within-person-substitution"></a>
+</h4>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wsubm2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wsubmargins.html">wsubmargins</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, substitute <span class="op">=</span> <span class="va">psub</span>, minute <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">wsubm2</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">MinSubstituted</span><span class="op">)</span> <span class="op">==</span> <span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -646,7 +648,6 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     get_legend</span></span></code></pre>
 <p><img src="mlmcoda-mlmcoda-submargins-1.png" title="Example of Average Marginal Substitution Model" alt="Example of Average Marginal Substitution Model" style="display: block; margin: auto;"></p>
-</div>
 </div>
 </div>
 </div>
