@@ -55,7 +55,7 @@ Compositional data are often expressed as a set of ILR coordinates in regression
 Using the `compilr()`, we can get ILR coordinates 
 that are used in the subsequent model as the predictors or outcomes.
 
-```{r}
+```{r compilr}
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 ```
@@ -67,7 +67,7 @@ from between- and within-person sleep-wake behaviours (expressed as ILR coordina
 
 Note: make sure you pass the correct names of the ILR coordinates to `brms` model.
 
-```{r, results = "hide"}
+```{r brmcoda, results = "hide"}
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
@@ -76,7 +76,7 @@ m <- brmcoda(compilr = cilr,
 
 Here is a `summary()` of the model results.
 
-```{r}
+```{r summary}
 summary(m$Model)
 ```
 
@@ -130,7 +130,7 @@ For precise Bayes factors, we will use 40,000 posterior draws for each model.
 *Notes* : To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
 `save_pars = save_pars(all = TRUE)`.
 
-```{r, results = "hide"}
+```{r bfmodel, results = "hide"}
 # intercept only model
 m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
@@ -160,11 +160,11 @@ m <- brmcoda(compilr = cilr,
 We can now compare these models with the `bayesfactor_models()` function, using the intercept-only 
 model as reference.
 
-```{r, results='hide', message=FALSE}
+```{r bf1, results='hide', message=FALSE}
 comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
 ```
 
-```{r}
+```{r bf2}
 comparison
 ```
 
@@ -172,7 +172,7 @@ We can see that model with only within-person composition is the best model - wi
 
 Let's compare these models against the full model.
 
-```{r}
+```{r bf3}
 update(comparison, reference = 1)
 ```
 
@@ -190,7 +190,7 @@ Between-person substitution model can be computed using the `bsub()` function. T
 examines the changes in stress for different pairwise substitution of sleep-wake behaviours
 for a period of 1 to 5 minutes, at between-person level. 
 
-```{r}
+```{r bsub}
 bsubm <- bsub(objec = m, substitute = psub, minute = 5)
 ```
 
@@ -199,7 +199,7 @@ Here are the results for changes in stress when sleep (TST) is substituted for 5
 For ease of presentation, we only show the $\pm5$ minute 
 substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
-```{r, results = "asis"}
+```{r bsubm, results = "asis"}
 knitr::kable(bsubm$TST[abs(MinSubstituted) == 5])
 ```
 
@@ -210,7 +210,7 @@ column indicating the levels of convariates, indicating that these results have 
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-```{r, eval = FALSE}
+```{r plotbsub, eval = FALSE}
 plotsub(data = bsubm$TST, x = "sleep", y = "stress")
 ``` 
 
@@ -225,14 +225,14 @@ plotsub(data = bsubm$TST, x = "sleep", y = "stress") +
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
 substituted for a period of 1 to 5 minutes, at within-person level. 
 
-```{r}
+```{r wsub}
 # Within-person substitution
 wsubm <- wsub(objec = m, substitute = psub, minute = 5, summary = TRUE)
 ``` 
 
 Results for 5 minute substitution.
 
-```{r, results = "asis"}
+```{r wsubm, results = "asis"}
 knitr::kable(wsubm$TST[abs(MinSubstituted) == 5])
 ```
 
@@ -242,7 +242,7 @@ in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Convers
 more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]).
 Let's also plot theses results.
 
-```{r, eval = FALSE}
+```{r plotwsub, eval = FALSE}
 plotsub(data = wsubm$TST, x = "sleep", y = "stress")
 ``` 
 

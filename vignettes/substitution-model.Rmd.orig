@@ -58,19 +58,19 @@ Let's fit our main `brms` model predicting `STRESS` from both between and within
 sleep-wake behaviours (represented by isometric log ratio coordinates), with sex as a covariate, 
 using the `brmcoda()` function. We can compute ILR coordinate predictors using `compilr()` function.
 
-```{r, results = "hide"}
+```{r brmcoda, results = "hide"}
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-               wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+                                wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
 A `summary()` of the model results.
 
-```{r}
+```{r summary}
 summary(m$Model)
 ```
 
@@ -92,7 +92,7 @@ It is further inconvenient in the case of within-person ILR coordinates, as they
 To gain further insights into these associations and help with interpretation, we can conduct 
 post-hoc analyses using the substitution models from our `multilevel` package.
 
-## Substitution models
+# Substitution models
 
 `multilevelcoda` package provides `4` different functions to compute substitution models.
 
@@ -109,18 +109,18 @@ Average marginal substitution model:
 *Tips*: Substitution models are often computationally demanding tasks. 
 You can speed up the models using parallelisation, for example, using `doFuture` package.
 
-### Basic substitution model
+## Basic substitution model
 We can calculate the changes in an outcomes when compositional variables are 
 substituted for a specific of time using `bsub()` (between-person level) and `wsub()` (within-person level).
 Both functions use sample's compositional mean as reference (i.e., composition when there is no change).
 
-#### Between-person substitution model
+### Between-person substitution model
 Between-person substitution model can be computed using the `bsub()` function. The below example 
 examines the changes in stress for different pairwise substitution of sleep-wake behaviours
 for a period of 1 to 5 minutes, at between-person level. If your model contains covariates, `bsub()` 
 will average predictions across levels of covariates as the default.
 
-```{r}
+```{r bsub}
 bsubm1 <- bsub(objec = m, substitute = psub, minute = 5)
 ```
 
@@ -129,7 +129,7 @@ Here are the results for changes in stress when sleep (TST) is substituted for 5
 For ease of presentation, we only show the $\pm5$ minute 
 substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
-```{r, results = "asis"}
+```{r bsubm, results = "asis"}
 knitr::kable(bsubm1$TST[abs(MinSubstituted) == 5])
 ```
 
@@ -139,7 +139,7 @@ in changes in stress at between-person level.
 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-```{r, eval=FALSE}
+```{r plotbsub, eval=FALSE}
 plotsub(data = bsubm1$TST, x = "sleep", y = "stress")
 ```
 
@@ -151,21 +151,21 @@ plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
   theme_cowplot()
 ```
 
-#### Within-person substitution model
+### Within-person substitution model
 
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
 substituted for a period of 1 to 5 minutes, at within-person level. 
 We can obtain prediction for each level of covariates by adding 
 an argument `summary = FALSE` to `wsub()`.
 
-```{r}
+```{r wsub}
 wsubm1 <- wsub(objec = m, substitute = psub, minute = 5, summary = FALSE)
 ``` 
 
 Results for 5 minute substitution for each level of covariates. In this example, we get separate 
 predictions for males and females.
 
-```{r, results = "asis"}
+```{r wsubm, results = "asis"}
 knitr::kable(wsubm1$TST[abs(MinSubstituted) == 5])
 ```
 
@@ -177,7 +177,7 @@ more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]).
 
 Let's also plot theses results.
 
-```{r, eval=FALSE}
+```{r plotwsub, eval=FALSE}
 plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
 ``` 
 
@@ -189,7 +189,7 @@ plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
   theme_cowplot()
 ``` 
 
-### Average Marginal Substitution Effects
+## Average Marginal Substitution Effects
 
 While `bsub()` and `wsub()` estimate the substitution model from the sample's compositional mean, 
 `bsubmargins()` and `wsubmargins()` estimate the substitution model using the average effect of participant's compositional mean. 
@@ -201,26 +201,24 @@ resulting effect estimates.
 `bsubmargins()` and `wsubmargins()` are generally more computationally expensive than `bsub()` and `wsub()` models. 
 All models can be run faster in shorter walltime using parallelisation.
 
-#### Estimating average marginal effect for between-person substitution
+### Estimating average marginal effect for between-person substitution
 
 In this example, we use package `doFuture` for parallelisation. `bsubmargins()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
-*Note*: parallelisation is highly recommended, but optional.
-
-```{r}
+```{r parallel}
 registerDoFuture()
 plan(multisession, workers = 5)
 ```
 
-```{r}
+```{r bsubmargin}
 bsubm2 <- bsubmargins(object = m, substitute = psub, minute = 5)
 knitr::kable(bsubm2$TST[abs(MinSubstituted) == 5])
 ```
 
-#### Estimating average marginal effect for within-person substitution
+### Estimating average marginal effect for within-person substitution
 
-```{r}
+```{r wsubmargin}
 wsubm2 <- wsubmargins(object = m, substitute = psub, minute = 5)
 knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5])
 registerDoSEQ()
@@ -229,7 +227,7 @@ registerDoSEQ()
 A comparison between between- and within-person substitution model of sleep on stress, 
 plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
-```{r, eval=FALSE}
+```{r plotsubmargin, eval=FALSE}
 library(ggpubr)
 p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress")
 p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress")

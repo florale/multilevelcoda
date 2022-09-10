@@ -182,7 +182,7 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model       BF
-#> [1]       1.15e-04
+#> [1]       8.14e-05
 #> 
 #> * Against Denominator: [2]
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
