@@ -42,7 +42,7 @@
 #'  chain = 1, iter = 500) 
 #'                
 #' }
-brmcoda <- function (formula, compilr, ...) {
+brmcoda <- function (compilr, formula, ...) {
 
   if (isTRUE(missing(compilr))) {
     stop(paste(
