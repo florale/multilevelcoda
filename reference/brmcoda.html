@@ -79,20 +79,20 @@ via full Bayesian inference using brms,</h1>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">brmcoda</span><span class="op">(</span><span class="va">formula</span>, <span class="va">compilr</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">brmcoda</span><span class="op">(</span><span class="va">compilr</span>, <span class="va">formula</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>formula</dt>
+    <dl><dt>compilr</dt>
+<dd><p>A <code><a href="compilr.html">compilr</a></code> object containing data of composition,
+ILR coordinates, and other variables used in the model.</p></dd>
+
+
+<dt>formula</dt>
 <dd><p>A object of class <code>formula</code>, <code>brmsformula</code>:
 A symbolic description of the model to be fitted.
 Details of the model specification can be found in <code>brmsformula</code>.</p></dd>
-
-
-<dt>compilr</dt>
-<dd><p>A <code><a href="compilr.html">compilr</a></code> object containing data of composition,
-ILR coordinates, and other variables used in the model.</p></dd>
 
 
 <dt>...</dt>
