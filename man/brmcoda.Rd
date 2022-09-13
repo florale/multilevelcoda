@@ -5,15 +5,15 @@
 \title{Fit Bayesian generalised (non-)linear multilevel compositional model
 via full Bayesian inference using brms,}
 \usage{
-brmcoda(formula, compilr, ...)
+brmcoda(compilr, formula, ...)
 }
 \arguments{
+\item{compilr}{A \code{\link{compilr}} object containing data of composition,
+ILR coordinates, and other variables used in the model.}
+
 \item{formula}{A object of class \code{formula}, \code{brmsformula}:
 A symbolic description of the model to be fitted.
 Details of the model specification can be found in \code{\link{brmsformula}}.}
-
-\item{compilr}{A \code{\link{compilr}} object containing data of composition,
-ILR coordinates, and other variables used in the model.}
 
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
