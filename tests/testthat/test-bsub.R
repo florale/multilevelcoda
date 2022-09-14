@@ -32,7 +32,7 @@ suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 foreach::registerDoSEQ()
 
@@ -75,8 +75,8 @@ test_that("bsub errors for invalid input", {
     m2 <- brmcoda(compilr = cilr,
                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-                 chain = 1, iter = 500, seed = 123,
-                 backend = backend))  
+                 chain = 1, iter = 1000, seed = 123,
+                 backend = backend))
   rg <- data.table(Age = 1)
   expect_warning(x <- bsub(object = m2, substitute = psub, minute = 2, regrid = rg))
   
@@ -138,7 +138,7 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
     m <- brmcoda(compilr = cilr,
                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                    wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-                 chain = 1, iter = 500, seed = 123,
+                 chain = 1, iter = 1000, seed = 123,
                  backend = backend))
   
   x6 <- bsub(object = m, substitute = psub, minute = 2, summary = FALSE)
@@ -271,7 +271,7 @@ psub <- possub(c("TST", "WAKE"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 a <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -302,7 +302,7 @@ psub <- possub(c("TST", "MVPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 b <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -333,7 +333,7 @@ psub <- possub(c("TST", "LPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 c <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -364,7 +364,7 @@ psub <- possub(c("TST", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 d <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -396,7 +396,7 @@ psub <- possub(c("WAKE", "MVPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 e <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -427,7 +427,7 @@ psub <- possub(c("WAKE", "LPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 f <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -458,7 +458,7 @@ psub <- possub(c("WAKE", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 g <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -488,7 +488,8 @@ cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 psub <- possub(c("MVPA", "LPA"))
 suppressWarnings(m <- brmcoda(compilr = cilr,
                               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-                              chain = 1, iter = 500, seed = 123))
+                              chain = 1, iter = 1000, seed = 123,
+                              backend = backend))
 h <- bsub(object = m, substitute = psub, minute = 2)
 
 test_that("bsub's results matches with brm model for 2-component composition (MVPA vs LPA)", {
@@ -518,7 +519,7 @@ psub <- possub(c("MVPA", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 i <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -549,7 +550,7 @@ psub <- possub(c("LPA", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
+               chain = 1, iter = 1000, seed = 123,
                backend = backend))
 j <- bsub(object = m, substitute = psub, minute = 2)
 
@@ -574,7 +575,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
 
 # #---------------------------------------------------------------------------------------------------
 # ## test that results from different sbp are (nearly) identical
-# # model sub dataset, chain = 1, iter = 500,
+# # model sub dataset, chain = 1, iter = 1000,
 # all.equal(x$TST$Mean, f$TST$Mean, tolerance = .15) # "Mean relative difference: 0.09914661"
 # all.equal(x$WAKE$Mean, f$WAKE$Mean) # "Mean relative difference: 0.0698194"
 # all.equal(x$MVPA$Mean, f$MVPA$Mean) # "Mean relative difference: 0.0781148"
