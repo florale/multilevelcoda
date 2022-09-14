@@ -32,7 +32,7 @@ suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 foreach::registerDoSEQ()
 
@@ -182,7 +182,7 @@ psub <- possub(c("TST", "WAKE"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 a <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -213,7 +213,7 @@ psub <- possub(c("TST", "MVPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 b <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -244,7 +244,7 @@ psub <- possub(c("TST", "LPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 c <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -275,7 +275,7 @@ psub <- possub(c("TST", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 d <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -307,7 +307,7 @@ psub <- possub(c("WAKE", "MVPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 e <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -338,7 +338,7 @@ psub <- possub(c("WAKE", "LPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 f <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -369,7 +369,7 @@ psub <- possub(c("WAKE", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 g <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -400,7 +400,7 @@ psub <- possub(c("MVPA", "LPA"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 h <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -431,7 +431,7 @@ psub <- possub(c("MVPA", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 i <- bsubmargins(object = m, substitute = psub, minute = 2)
 
@@ -462,7 +462,7 @@ psub <- possub(c("LPA", "SB"))
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 1000, seed = 123,
+               chain = 1, iter = 500, seed = 123,
                backend = backend))
 j <- bsubmargins(object = m, substitute = psub, minute = 2)
 
