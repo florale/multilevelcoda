@@ -94,23 +94,24 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>This package has functions to support estimating and presenting compositional data analysis (CoDA) with multilevel models. It supports both compositional data as an outcome using multivariate models and compositional data as predictors of other multilevel outcomes.</p>
+<p>This package provides functions to model compositional data in a multilevel framework using full Bayesian inference. It integrates the principes of Compositional Data Analysis (CoDA) and Multilevel Modelling and supports both compositional data as an outcome using multivariate models and compositional data as predictors of other multilevel outcomes.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>For the latest, development version, you can use the <code>remotes</code> package to install it from GitHub:</p>
+<p>The current developmental version can be downloaded from github via</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"florale/multilevelcoda"</span><span class="op">)</span></span></code></pre></div>
-<p>If you do not have the <code>remotes</code> package installed, you can install it from CRAN using this code first before running the above code to install <code>multilevelcoda</code></p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"florale/multilevelcoda"</span><span class="op">)</span></span></code></pre></div>
+<p>Because multilevelcoda is built on brms, which is based on Stan, a C++ compiler is required. The program Rtools (available on <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link uri">https://cran.r-project.org/bin/windows/Rtools/</a>) comes with a C++ compiler for Windows. On Mac, Xcode is required. For further instructions on how to get the compilers running, see the prerequisites section on <a href="https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started" class="external-link uri">https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started</a>.</p>
 <p>Release of <code>multilevelcoda</code> to CRAN is planned at a later date.</p>
 </div>
 <div class="section level2">
-<h2 id="learn-more">Learn More<a class="anchor" aria-label="anchor" href="#learn-more"></a>
+<h2 id="resources">Resources<a class="anchor" aria-label="anchor" href="#resources"></a>
 </h2>
-<p>You can see more examples and learn about the package from these vignettes:</p>
+<p>You can learn about the package from these vignettes:</p>
 <ul>
 <li><a href="https://florale.github.io/multilevelcoda/articles/introduction.html">Introduction to Compositional Multilevel Modelling</a></li>
 <li><a href="https://florale.github.io/multilevelcoda/articles/comp-outcome.html">Multilevel Models with Compositional Outcomes</a></li>
