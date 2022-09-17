@@ -3,10 +3,11 @@
 # multilevelcoda
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/florale/multilevelcoda/workflows/R-CMD-check/badge.svg)](https://github.com/florale/multilevelcoda/actions)
-[![Coverage Status](https://codecov.io/gh/florale/multilevelcoda/branch/master/graphs/badge.svg?branch=master)](https://codecov.io/github/florale/multilevelcoda?branch=master)
+[![Coverage Status](https://codecov.io/gh/florale/multilevelcoda/branch/main/graphs/badge.svg?branch=main)](https://codecov.io/github/florale/multilevelcoda?branch=master)
 [![CRAN Version](https://www.r-pkg.org/badges/version/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
+
 ## Overview
 
 This package provides functions to model compositional data in 
@@ -14,7 +15,7 @@ a multilevel framework using full Bayesian inference.
 It integrates the principes of Compositional Data Analysis (CoDA) 
 and Multilevel Modelling and supports both compositional data as 
 an outcome and predictors in a wide range of 
-generalized (non-)linear multivariate multilevel models .
+generalized (non-)linear multivariate multilevel models.
 
 ## Installation
 
