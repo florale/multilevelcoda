@@ -1,14 +1,12 @@
-<!-- badges: start -->
-[![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-<!-- badges: end -->
+
 
 # multilevelcoda
-
+<!-- badges: start -->
 [![R-CMD-check](https://github.com/florale/multilevelcoda/workflows/R-CMD-check/badge.svg)](https://github.com/florale/multilevelcoda/actions)
 [![Coverage Status](https://codecov.io/gh/florale/multilevelcoda/branch/master/graphs/badge.svg?branch=master)](https://codecov.io/github/florale/multilevelcoda?branch=master)
-[![CRAN
-Version](https://www.r-pkg.org/badges/version/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
-
+[![CRAN Version](https://www.r-pkg.org/badges/version/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
+[![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
 ## Overview
 
 This package provides functions to model compositional data in 
