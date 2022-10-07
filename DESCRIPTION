@@ -1,5 +1,5 @@
 Package: multilevelcoda
-Title: Estimate and present multilevel compositional data analysis (CoDA)
+Title: Estimate and Present Multilevel Compositional Data Analysis (CoDA)
 Version: 0.0.9000
 Authors@R: 
     c(person(given = "Flora",
@@ -13,12 +13,12 @@ Authors@R:
              email = "jwiley.psych@gmail.com",
              comment = c(ORCID = "0000-0002-0271-6702")))
 URL: https://florale.github.io/multilevelcoda/,
-    https://github.com/florale/multilevelcoda
+     https://github.com/florale/multilevelcoda
 BugReports: https://github.com/florale/multilevelcoda/issues
 Description: Implement Bayesian Multilevel Modelling for compositional data 
              in a multilevel framework. Compute multilevel compositional data and 
              Isometric log ratio (ILR) at between and within-person levels, 
-             and run post-hoc analyses such as isotemporal susbtitution models.
+             and run post-hoc analyses such as isotemporal substitution models.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
