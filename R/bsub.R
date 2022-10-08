@@ -120,7 +120,7 @@ bsub <- function(object, substitute, minute = 60L,
   # compositional mean
   b <- object$CompIlr$BetweenComp
 
-  mcomp <- mean(b, robust = TRUE)
+  mcomp <- mean.acomp(b)
   mcomp <- clo(mcomp, total = object$CompIlr$total)
   mcomp <- as.data.table(t(mcomp))
 
