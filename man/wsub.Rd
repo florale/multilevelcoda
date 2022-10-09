@@ -27,7 +27,16 @@ or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list of results from substitution models for all compositional variables.
+A list containing the result of isotemporal multilevel substitution model.
+Each elements of the list is the substitution estimation for a compositional variables,
+which include at least six elements.
+\itemize{
+\item{\code{Mean}}{ Posterior means.}
+\item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
+\item{\code{MinSubstituted}}{ Minute substituted within the composition.}
+\item{\code{Substitute}}{Compositional variables to be substituted from/to.}
+\item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
+}
 }
 \description{
 Estimate the difference in outcomes

@@ -19,7 +19,15 @@ Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
 }
 \value{
 A list containing the result of isotemporal multilevel substitution model.
-Each elements of the list is the substitution estimation for a compositional variable.
+Each elements of the list is the substitution estimation for a compositional variables,
+which include at least six elements.
+\itemize{
+\item{\code{Mean}}{ Posterior means.}
+\item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
+\item{\code{MinSubstituted}}{ Minute substituted within the composition.}
+\item{\code{Substitute}}{Compositional variables to be substituted from/to.}
+\item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
+}
 }
 \description{
 Using a fitted model object, estimates the the average marginal difference
