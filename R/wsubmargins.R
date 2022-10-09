@@ -25,11 +25,8 @@
 #'   \item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
 #' }
 #'
-#' @importFrom data.table data.table as.data.table copy :=
+#' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo
-#' @importFrom extraoperators %snin% %sin%
-#' @importFrom bayestestR describe_posterior
-#' @importFrom foreach %dopar%
 #' @importFrom stats fitted
 #' @export
 #' @examples

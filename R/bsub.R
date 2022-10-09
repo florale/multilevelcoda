@@ -40,7 +40,6 @@
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom insight find_predictors
 #' @importFrom emmeans ref_grid
-#' @importFrom foreach %dopar%
 #' @importFrom stats fitted
 #' @export
 #' @examples

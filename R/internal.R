@@ -4,8 +4,9 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
                          "spread", "value", "variable", "ID"))
 #' Functions used only internally
 #' @keywords internal
-#' @importFrom data.table as.data.table copy := setDT
+#' @importFrom data.table as.data.table copy := setDT rbindlist
 #' @importFrom compositions acomp ilr clo mean.acomp
+#' @importFrom bayestestR describe_posterior
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom stats fitted
