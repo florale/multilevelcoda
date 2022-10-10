@@ -30,6 +30,7 @@
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
 #'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' }
+#' 
 #' @importFrom compositions ilr acomp gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
 #' @importFrom zCompositions lrEM
@@ -101,7 +102,7 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
       BetweenILR = bilr,
       WithinILR = wilr,
       TotalILR = tilr,
-      data = tmp,
+      data = data,
       psi = psi,
       sbp = sbp,
       parts = parts,
