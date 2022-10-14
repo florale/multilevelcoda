@@ -25,11 +25,19 @@ library(ggsci)
 library(cowplot)
 ```
 
-In this vignette, we discuss how to specify multilevel models with compositional data using `multilevelcoda`.
+In this vignette, we discuss how to use `multilevelcoda` to specify multilevel
+models where compositional data are used as predictors.
 
-In addition to `multilevelcoda` package, we will use `brms` (to fit models) and
-`bayestestR` (to compute useful indices and compare models), and
-`doFuture` (to parallel models).
+The following table outlines the packages used and a brief description of their 
+purpose.
+
+| Package          | Purpose                                                                               |
+|:----------------:|:-------------------------------------------------------------------------------------:|
+| `multilevelcoda` | calculate between and within composition variables, calculate substitutions and plots |
+| `brms`           | fit Bayesian multilevel models using Stan as a backend                                |
+| `bayestestR`     | compute Bayes factors used to compare models                                          |
+| `doFuture`       | parallel processing to speed up run times                                             |
+
 
 ```{r setup}
 library(multilevelcoda)
@@ -40,7 +48,13 @@ library(doFuture)
 options(digits = 3) # reduce number of digits shown
 ```
 
-We will also attach built in datasets `mcompd` (simulated compositional sleep and wake variables)  `sbp` (sequential binary partition), and `psub` (base possible substitution).
+For the examples, we make use of three built in datasets:
+
+| Dataset  | Purpose                                                                                             |
+|:--------:|:---------------------------------------------------------------------------------------------------:|
+| `mcompd` | compositional sleep and wake variables and additional predictors/outcomes (simulated)               |
+| `sbp`    | a pre-specified sequential binary partition, used in calculating compositional predictors           |
+| `psub`   | all possible pairwise substitutions between compositional variables, used for substitution analyses |
 
 ```{r data}
 data("mcompd") 
@@ -48,12 +62,203 @@ data("sbp")
 data("psub")
 ```
 
+The following table shows a few rows of data from `mcompd`.
+
+```{r mcompdout, results = "asis", echo = FALSE}
+knitr::kable(rbind(head(mcompd, 3), tail(mcompd, 3)))
+```
+
+The following table shows the sequential binary partition being used in `sbp`.
+Columns correspond to the composition variables
+(TST, WAKE, MVPA, LPA, SB). Rows correspond to distinct ILR coordinates.
+
+```{r sbpout, results = "asis", echo = FALSE}
+knitr::kable(sbp)
+```
+
+The following table shows how all the possible binary substitions
+contrasts are setup. Time substitions work by taking time from the
+-1 variable and adding time to the +1 variable.
+
+```{r psubout, results = "asis", echo = FALSE}
+knitr::kable(psub)
+```
+
 # Multilevel model with compositional predictors
 ## Compositions and isometric log ratio (ILR) coordinates. 
 
-Compositional data are often expressed as a set of ILR coordinates in regression models.
-Using the `compilr()`, we can get ILR coordinates 
-that are used in the subsequent model as the predictors or outcomes.
+Compositional data are often expressed as a set of isometric log ratio (ILR)
+coordinates in regression models. We can use the `compilr()` function to calculate 
+both between- and within-level ILR coordinates for use in subsequent models as 
+predictors.
+*Note: `compilr()` also calculates total ILR coordinates that could be used 
+as outcomes (or predictors) in models, if the decomposition into a 
+between- and within-level ILR coordinates was not desired.*
+
+The `compilr()` function for multilevel data requires four arguments:
+
+| Argument | Input                                                                                                                                                               |
+|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| `data`   | a dataset containing all raw variables, including at a minimum the composition variables and an ID variable indicating which rows belong to which participant/group |
+| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates                                                             |
+| `parts`  | a character vector giving the names of the variables in `data` that are compositional                                                                               |
+| `idvar`  | a character string giving the name of teh variable that contains the IDs                                                                                            |
+ 
+
+```
+
+The following table shows how all the possible binary substitions
+contrasts are setup. Time substitions work by taking time from the
+-1 variable and adding time to the +1 variable.
+
+```{r psubout, results = "asis", echo = FALSE}
+knitr::kable(psub)
+```
+
+# Multilevel model with compositional predictors
+## Compositions and isometric log ratio (ILR) coordinates. 
+
+Compositional data are often expressed as a set of isometric log ratio (ILR)
+coordinates in regression models. We can use the `compilr()` function to calculate 
+both between- and within-level ILR coordinates for use in subsequent models as 
+predictors.
+*Note: `compilr()` also calculates total ILR coordinates that could be used 
+as outcomes (or predictors) in models, if the decomposition into a 
+between- and within-level ILR coordinates was not desired.*
+
+The `compilr()` function for multilevel data requires four arguments:
+
+| Argument | Input                                                                                                                                                               |
+|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| `data`   | a dataset containing all raw variables, including at a minimum the composition variables and an ID variable indicating which rows belong to which participant/group |
+| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates                                                             |
+| `parts`  | a character vector giving the names of the variables in `data` that are compositional                                                                               |
+| `idvar`  | a character string giving the name of teh variable that contains the IDs                                                                                            |
+ 
+
+```
+
+The following table shows how all the possible binary substitions
+contrasts are setup. Time substitions work by taking time from the
+-1 variable and adding time to the +1 variable.
+
+```{r psubout, results = "asis", echo = FALSE}
+knitr::kable(psub)
+```
+
+# Multilevel model with compositional predictors
+## Compositions and isometric log ratio (ILR) coordinates. 
+
+Compositional data are often expressed as a set of isometric log ratio (ILR)
+coordinates in regression models. We can use the `compilr()` function to calculate 
+both between- and within-level ILR coordinates for use in subsequent models as 
+predictors.
+*Note: `compilr()` also calculates total ILR coordinates that could be used 
+as outcomes (or predictors) in models, if the decomposition into a 
+between- and within-level ILR coordinates was not desired.*
+
+The `compilr()` function for multilevel data requires four arguments:
+
+| Argument | Input                                                                                                                                                               |
+|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| `data`   | a dataset containing all raw variables, including at a minimum the composition variables and an ID variable indicating which rows belong to which participant/group |
+| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates                                                             |
+| `parts`  | a character vector giving the names of the variables in `data` that are compositional                                                                               |
+| `idvar`  | a character string giving the name of teh variable that contains the IDs                                                                                            |
+ 
+
+```
+
+The following table shows how all the possible binary substitions
+contrasts are setup. Time substitions work by taking time from the
+-1 variable and adding time to the +1 variable.
+
+```{r psubout, results = "asis", echo = FALSE}
+knitr::kable(psub)
+```
+
+# Multilevel model with compositional predictors
+## Compositions and isometric log ratio (ILR) coordinates. 
+
+Compositional data are often expressed as a set of isometric log ratio (ILR)
+coordinates in regression models. We can use the `compilr()` function to calculate 
+both between- and within-level ILR coordinates for use in subsequent models as 
+predictors.
+*Note: `compilr()` also calculates total ILR coordinates that could be used 
+as outcomes (or predictors) in models, if the decomposition into a 
+between- and within-level ILR coordinates was not desired.*
+
+The `compilr()` function for multilevel data requires four arguments:
+
+| Argument | Input                                                                                                                                                               |
+|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| `data`   | a dataset containing all raw variables, including at a minimum the composition variables and an ID variable indicating which rows belong to which participant/group |
+| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates                                                             |
+| `parts`  | a character vector giving the names of the variables in `data` that are compositional                                                                               |
+| `idvar`  | a character string giving the name of teh variable that contains the IDs                                                                                            |
+ 
+
+```
+
+The following table shows how all the possible binary substitions
+contrasts are setup. Time substitions work by taking time from the
+-1 variable and adding time to the +1 variable.
+
+```{r psubout, results = "asis", echo = FALSE}
+knitr::kable(psub)
+```
+
+# Multilevel model with compositional predictors
+## Compositions and isometric log ratio (ILR) coordinates. 
+
+Compositional data are often expressed as a set of isometric log ratio (ILR)
+coordinates in regression models. We can use the `compilr()` function to calculate 
+both between- and within-level ILR coordinates for use in subsequent models as 
+predictors.
+*Note: `compilr()` also calculates total ILR coordinates that could be used 
+as outcomes (or predictors) in models, if the decomposition into a 
+between- and within-level ILR coordinates was not desired.*
+
+The `compilr()` function for multilevel data requires four arguments:
+
+| Argument | Input                                                                                                                                                               |
+|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| `data`   | a dataset containing all raw variables, including at a minimum the composition variables and an ID variable indicating which rows belong to which participant/group |
+| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates                                                             |
+| `parts`  | a character vector giving the names of the variables in `data` that are compositional                                                                               |
+| `idvar`  | a character string giving the name of teh variable that contains the IDs                                                                                            |
+ 
+
+```
+
+The following table shows how all the possible binary substitions
+contrasts are setup. Time substitions work by taking time from the
+-1 variable and adding time to the +1 variable.
+
+```{r psubout, results = "asis", echo = FALSE}
+knitr::kable(psub)
+```
+
+# Multilevel model with compositional predictors
+## Compositions and isometric log ratio (ILR) coordinates. 
+
+Compositional data are often expressed as a set of isometric log ratio (ILR)
+coordinates in regression models. We can use the `compilr()` function to calculate 
+both between- and within-level ILR coordinates for use in subsequent models as 
+predictors.
+*Note: `compilr()` also calculates total ILR coordinates that could be used 
+as outcomes (or predictors) in models, if the decomposition into a 
+between- and within-level ILR coordinates was not desired.*
+
+The `compilr()` function for multilevel data requires four arguments:
+
+| Argument | Input                                                                                                   |
+|:--------:|:-------------------------------------------------------------------------------------------------------:|
+| `data`   | a dataset containing all variables: at a minimum composition variables and an ID variable               |
+| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates |
+| `parts`  | a character vector giving the names of the variables in `data` that are compositional                   |
+| `idvar`  | a character string giving the name of teh variable that contains the IDs                                |
+
 
 ```{r compilr}
 cilr <- compilr(data = mcompd, sbp = sbp,
@@ -82,22 +287,23 @@ summary(m$Model)
 
 Results show that the first and forth within-person ILR coordinate was associated with stress.
 The interpretation of these outputs depends on how you construct your sequential binary partition.
-For the built-in sequential binary partition `sbp`, TODO add a table to show partition.
+For the built-in sequential binary partition `sbp` (shown previously), the resulting 
+interpretation would be as follows:
 
-| ILR coordinates | What it means                                 |
-|----------------|----------------------------------------------|
-| bilr1 | Sleep vs wake behaviours at between-person level |
-| bilr2 | Sleep vs awake in bed at between-person level  | 
-| bilr3 | MVPA vs (LPA and SB) at between-person level | 
-| bilr4 | LPA vs SB at between-person level |
-| wilr1 | Sleep vs wake behaviours at between-person level |
-| wilr2 | Sleep vs awake in bed at within-person level |
-| wilr3 | MVPA vs (LPA and SB) at within-person level |
-| wilr4 | LPA vs SB at within-person level|
+| ILR coordinates | What it means                                                 |
+|-----------------|---------------------------------------------------------------|
+| `bilr1`         | Sleep (TST & WAKE) vs wake behaviours at between-person level |
+| `bilr2`         | Sleep vs awake in bed at between-person level                 |
+| `bilr3`         | MVPA vs (LPA and SB) at between-person level                  |
+| `bilr4`         | LPA vs SB at between-person level                             |
+| `wilr1`         | Sleep (TST & WAKE) vs wake behaviours at between-person level |
+| `wilr2`         | Sleep vs awake in bed at within-person level                  |
+| `wilr3`         | MVPA vs (LPA and SB) at within-person level                   |
+| `wilr4`         | LPA vs SB at within-person level                              |
 
 Due to the nature of within-person ILR coordinates, it is often challenging to interpret these 
 results in great details.
-For example,  the significant coefficient for wilr1 shows that the within-person change in sleep behaviours
+For example,  the significant coefficient for `wilr1` shows that the within-person change in sleep behaviours
 (sleep duration and time awake in bed combined), relative to wake behaviours (moderate to vigorous
 physical activity, light physical activity, and sedentary behaviour) on a given day, was associated 
 with stress. However, as there are several behaviours involved in this coordinate, we don't know the
