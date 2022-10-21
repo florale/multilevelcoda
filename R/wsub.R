@@ -160,7 +160,7 @@ wsub <- function(object, substitute, minute = 60L,
     }
     
     dsame <- cbind(bilr, wilr, ID)
-    ysame <- fitted(object$Model, newdata = dsame, re.form = NA, summary = FALSE)
+    ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
     
     # substitution model
     out <- get.wsub(object = object, substitute = substitute,
@@ -188,7 +188,7 @@ wsub <- function(object, substitute, minute = 60L,
           }
       
       dsame <- cbind(bilr, wilr, ID, refg)
-      ysame <- fitted(object$Model, newdata = dsame, re.form = NA, summary = FALSE)
+      ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
       
       # substitution model
       out <- get.wsub(object = object, substitute = substitute,

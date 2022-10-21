@@ -115,7 +115,7 @@ wsubmargins <- function (object, substitute, minute = 60, ...) {
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
   
   samed <- cbind(bilr, wilr, object$CompIlr$data)
-  ysame <- fitted(object$Model, newdata = samed, re.form = NA, summary = FALSE)
+  ysame <- fitted(object$Model, newdata = samed, re_formula = NA, summary = FALSE)
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model

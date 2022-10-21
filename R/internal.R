@@ -62,7 +62,7 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
         
         # prediction
         subd <- cbind(newd, tilr, wilr)
-        ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
@@ -141,7 +141,7 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
         subd <- cbind(newd, bilr, wilr)
         
         # prediction
-        ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub) 
         
         # difference between substitution and no change
@@ -224,7 +224,7 @@ get.bsub <- function(object, substitute, mcomp,
     # prediction
     if(is.null(refg)) { # unadjusted
       subd <- cbind(newd, tilr, wilr, ID)
-      ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+      ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
       
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
@@ -237,7 +237,7 @@ get.bsub <- function(object, substitute, mcomp,
           if(isTRUE(summary)) { # averaging over reference grid
             for (h in seq_len(nrow(refg))) {
               subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
-              ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+              ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
               ydiff <- ysub - ysame[, h]
               hout[[h]] <- ydiff
             }
@@ -251,7 +251,7 @@ get.bsub <- function(object, substitute, mcomp,
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
                 subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
-                ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+                ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
                 ydiff <- ysub - ysame[, h]
                 ymean <- apply(ydiff, 2, 
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
@@ -327,7 +327,7 @@ get.wsub <- function(object, substitute, mcomp,
     # prediction
     if(is.null(refg)) { # unadjusted
       subd <- cbind(newd, bilr, wilr, ID)
-      ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+      ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
 
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
@@ -340,7 +340,7 @@ get.wsub <- function(object, substitute, mcomp,
           if(isTRUE(summary)) { # averaging over reference grid
             for (h in seq_len(nrow(refg))) {
               subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
-              ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+              ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
               ydiff <- ysub - ysame[, h]
               hout[[h]] <- ydiff
             }
@@ -354,7 +354,7 @@ get.wsub <- function(object, substitute, mcomp,
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
                 subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
-                ysub <- fitted(object$Model, newdata = subd, re.form = NA, summary = FALSE)
+                ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
                 ydiff <- ysub - ysame[, h]
                 ymean <- apply(ydiff, 2, 
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
