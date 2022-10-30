@@ -164,7 +164,7 @@ wsub <- function(object, substitute, minute = 60L,
     
     # substitution model
     out <- get.wsub(object = object, substitute = substitute,
-                    mcomp = mcomp, min = min, ysame = ysame)
+                    mcomp = mcomp, min = min, ysame = ysame, summary = summary)
     
     } else { # adj subsitution model
       # reference grid containing covariates

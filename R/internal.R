@@ -214,7 +214,7 @@ get.bsub <- function(object, substitute, mcomp,
     tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
     bilr <- ilr(bcomp, V = object$CompIlr$psi)
     tilr <- ilr(tcomp, V = object$CompIlr$psi)
-
+    
     wilr <- matrix(0, nrow = nrow(tilr), ncol = ncol(tilr))
     wilr <- as.data.table(wilr)
     
@@ -246,7 +246,7 @@ get.bsub <- function(object, substitute, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, c("MinSubstituted", "Substitute", "Predictor"), with = FALSE])
+                           subd[, .(MinSubstituted, Substitute, Predictor)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -323,7 +323,7 @@ get.wsub <- function(object, substitute, mcomp,
     
     colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
     colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-
+    
     # prediction
     if(is.null(refg)) { # unadjusted
       subd <- cbind(newd, bilr, wilr, ID)
@@ -349,7 +349,7 @@ get.wsub <- function(object, substitute, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, c("MinSubstituted", "Substitute", "Predictor"), with = FALSE])
+                           subd[, .(MinSubstituted, Substitute, Predictor)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -366,7 +366,7 @@ get.wsub <- function(object, substitute, mcomp,
                 }
               ymean <- rbindlist(hout)
             }
-        } 
+        }
     # final results for entire composition
     out <- list(ymean)
     names(out) <- i
