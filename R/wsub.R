@@ -21,7 +21,7 @@
 #' of combinations of covariates over which predictions are made.
 #' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
-#' Should estimated marginal means at each level of the reference grid (\code{FALSE}) 
+#' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
