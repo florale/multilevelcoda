@@ -51,7 +51,7 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
 #'              
-#' subm <- substitution(object = m, substitute = psub, delta = c(5, 10), 
+#' subm <- substitution(object = m, substitute = psub, 
 #'                      type = "conditional", level = "between")
 #' }
 substitution <- function(object, substitute, delta, 
@@ -59,6 +59,7 @@ substitution <- function(object, substitute, delta,
                          level = c("between", "within"),
                          type = c("conditional", "marginal"),
                          ...) {
+  
   if ("between" %in% level) {
     if("conditional" %in% type) {
     bout <- bsub(object = object, substitute = substitute, delta = delta, 

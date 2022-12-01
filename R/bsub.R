@@ -3,7 +3,7 @@
 #' @description 
 #' Estimate the difference in outcomes
 #' when compositional variables are substituted for a specific time period
-#' at `within-person` level. The resulting \code{bsub} encapsulates
+#' at `between-person` level. The resulting \code{bsub} encapsulates
 #' substitution estimation across all compositional variables
 #' present in the \code{\link{brmcoda}} object.
 #' 
@@ -14,9 +14,8 @@
 #' @param object A fitted \code{\link{brmcoda}} object.
 #' @param substitute A \code{data.frame} or \code{data.table} of possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
-#' @param minute A integer or numeric value indicating the maximum minute 
+#' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
 #' for which substitution model is desired.
-#' Default to \code{60L} (i.e., the model loops through 1:60L minutes).
 #' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
 #' of combinations of covariates over which predictions are made.
 #' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
@@ -31,7 +30,7 @@
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
 #'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
-#'   \item{\code{MinSubstituted}}{ Minute substituted within the composition.}
+#'   \item{\code{ChangeInComposition}}{ Amount of change substituted within the composition.}
 #'   \item{\code{Substitute}}{Compositional variables to be substituted from/to.}
 #'   \item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
 #' }
@@ -50,15 +49,15 @@
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
-#' # model with compositional predictor at between and within-person levels
+#' # model with compositional predictor at between and between-person levels
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
 #'              
-#' subm <- bsub(object = m, substitute = psub, minute = 5)
+#' subm <- bsub(object = m, substitute = psub, delta = 5)
 #' }
-bsub <- function(object, substitute, minute = 60L, 
+bsub <- function(object, substitute, delta, 
                  regrid = NULL, summary = TRUE, 
                  ...) {
 
@@ -87,14 +86,18 @@ bsub <- function(object, substitute, minute = 60L,
       sep = "\n"))
   }
   
-  if(isFALSE(missing(minute))) {
-    if (isFALSE(is.integer(minute))) {
-      if (isFALSE(minute > 0)) {
-        stop(" 'minute' must be an positive integer value.")
+  if(isFALSE(missing(delta))) {
+    if (isFALSE(is.integer(delta))) {
+      if (isFALSE(delta > 0)) {
+        stop(" 'delta' must be an positive integer value.")
         }
       }
-    } else {
-      minute <- 60L
+    } else if (isTRUE(missing(delta))){
+      stop(paste(
+        "'delta' is a required argument and cannot be missing;",
+        "  it should be interger, numeric positive value or vector", 
+        "  to specify the change in units across compositional parts", 
+        sep = "\n"))
     }
   
   if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
@@ -134,7 +137,7 @@ bsub <- function(object, substitute, minute = 60L,
 
   # input for substitution model
   ID <- 1 # to make fitted() happy
-  min <- as.integer(minute)
+  delta <- as.integer(delta)
 
   # model for no change
   bilr <- ilr(mcomp, V = object$CompIlr$psi)
@@ -164,7 +167,7 @@ bsub <- function(object, substitute, minute = 60L,
     
     # substitution model
     out <- get.bsub(object = object, substitute = substitute,
-                    mcomp = mcomp, min = min, ysame = ysame, summary = summary)
+                    mcomp = mcomp, delta = delta, ysame = ysame, summary = summary)
     
     } else { # adj subsitution model
       # reference grid containing covariates
@@ -192,7 +195,7 @@ bsub <- function(object, substitute, minute = 60L,
       
       # substitution model
       out <- get.bsub(object = object, substitute = substitute,
-                      mcomp = mcomp, min = min, ysame = ysame, 
+                      mcomp = mcomp, delta = delta, ysame = ysame, 
                       summary = summary, cv = cv, refg = refg)
   }
 }

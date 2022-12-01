@@ -13,7 +13,7 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
 #' @noRd
 # AME for Between-person Substitution model
 .get.bsubmargins <- function(object, substitute, b, 
-                             ysame, min, ...) {
+                             ysame, delta, ...) {
 
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
@@ -27,10 +27,10 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
     iv <- i
     
     kout <- vector("list", length = nrow(posub))
-    jout <- vector("list", length = min)
+    jout <- vector("list", length = length(delta))
     
-    for (j in seq_len(min)) { # time level
-      sub <- posub * j
+    for (j in seq_along(delta)) { # time level
+      sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         subk <- sub[k, ]
         subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
@@ -91,7 +91,7 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
 
 # AME for Within-person substitution model
 .get.wsubmargins <- function(object, substitute, b,
-                             ysame, min, ...) {
+                             ysame, delta, ...) {
 
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
@@ -104,10 +104,10 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
     iv <- i
     
     kout <- vector("list", length = nrow(posub))
-    jout <- vector("list", length = min)
+    jout <- vector("list", length = length(delta))
     
-    for (j in seq_len(min)) { # time level
-      sub <- posub * j
+    for (j in seq_along(delta)) { # time level
+      sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         subk <- sub[k, ]
         subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
@@ -171,7 +171,7 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
 
 # Between-person Substitution model
 get.bsub <- function(object, substitute, mcomp, 
-                     ysame, min, summary = summary,
+                     ysame, delta, summary = summary,
                      ID = 1, cv = NULL, refg = NULL, ...) {
   
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
@@ -186,10 +186,10 @@ get.bsub <- function(object, substitute, mcomp,
     iv <- i
   
     kout <- vector("list", length = nrow(posub))
-    jout <- vector("list", length = min)
+    jout <- vector("list", length = length(delta))
     
-    for (j in seq_len(min)) { # time level
-      sub <- posub * j
+    for (j in seq_along(delta)) { # time level
+      sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k, ]
         names(newcomp) <- object$CompIlr$parts
@@ -274,7 +274,7 @@ get.bsub <- function(object, substitute, mcomp,
 
 # Within-person Substitution model
 get.wsub <- function(object, substitute, mcomp,
-                     ysame, min, summary = summary, 
+                     ysame, delta, summary = summary, 
                      ID = 1, cv = NULL, refg = NULL, ...) {
   
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
@@ -289,10 +289,10 @@ get.wsub <- function(object, substitute, mcomp,
     iv <- i
   
     kout <- vector("list", length = nrow(posub))
-    jout <- vector("list", length = min)
+    jout <- vector("list", length = length(delta))
     
-    for (j in seq_len(min)) { # time level
-      sub <- posub * j
+    for (j in seq_along(delta)) { # time level
+      sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k, ]
         names(newcomp) <- object$CompIlr$parts
