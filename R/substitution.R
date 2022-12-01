@@ -52,7 +52,7 @@
 #'              chain = 1, iter = 500)
 #'              
 #' subm <- substitution(object = m, substitute = psub, 
-#'                      type = "conditional", level = "between")
+#'                      type = "marginal", level = "within")
 #' }
 substitution <- function(object, substitute, delta, 
                          regrid = NULL, summary = TRUE, 
@@ -60,6 +60,74 @@ substitution <- function(object, substitute, delta,
                          type = c("conditional", "marginal"),
                          ...) {
   
+  
+  if (isTRUE(missing(object))) {
+    stop(paste(
+      "'object' is a required argument and cannot be missing;",
+      "  it should be an object of class 'brmcoda'.", 
+      "  See ?bsub for details.",
+      sep = "\n"))
+  }
+  
+  if (isFALSE(inherits(object, "brmcoda"))) {
+    stop(sprintf(
+      "Can't handle an object of class (%s) 
+  It should be a fitted 'brmcoda' object
+  See ?bsub for details.",
+      class(object)))
+  }
+  
+  if (isTRUE(missing(substitute))) {
+    stop(paste(
+      "'substitute' is a required argument and cannot be missing;",
+      "  it should be a dataset of possible substitution", 
+      "  and can be computed using multilevelcoda::possub.", 
+      "  See ?bsub for details.",
+      sep = "\n"))
+  }
+  
+  if(isFALSE(missing(delta))) {
+    if (isFALSE(is.integer(delta))) {
+      if (isFALSE(delta > 0)) {
+        stop(" 'delta' must be an positive integer value.")
+      }
+    }
+  } else if (isTRUE(missing(delta))){
+    stop(paste(
+      "'delta' is a required argument and cannot be missing;",
+      "  it should be interger, numeric positive value or vector", 
+      "  to specify the change in units across compositional parts", 
+      sep = "\n"))
+  }
+  
+  if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
+    stop(sprintf(
+      "The number of columns in 'substitute' (%d) must be the same
+  as the compositional variables in 'parts' (%d).",
+      ncol(substitute),
+      length(object$CompIlr$parts)))
+  }
+  
+  if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
+    stop(sprintf(
+      "The names of compositional variables must be the 
+  same in 'substitute' (%s) and 'parts' (%s).",
+      colnames(substitute),
+      object$CompIlr$parts))
+  }
+  
+  if (isFALSE(is.null(regrid))) {
+    if(any(c(colnames(object$CompIlr$BetweenILR), colnames(object$CompIlr$WithinILR))
+           %in% c(colnames(regrid)))) {
+      stop(paste(
+        "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
+        "  These variables will be calculated by substitution model.",
+        "  Reference grid should contain information about the covariates used in 'brmcoda'.",
+        "  Please provide a different reference grid.",
+        sep = "\n"))
+    }
+  }
+
   if ("between" %in% level) {
     if("conditional" %in% type) {
     bout <- bsub(object = object, substitute = substitute, delta = delta, 

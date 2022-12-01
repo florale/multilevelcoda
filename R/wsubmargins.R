@@ -50,62 +50,6 @@
 #' }
 wsubmargins <- function (object, substitute, delta, ...) {
   
-  if (isTRUE(missing(object))) {
-    stop(paste(
-      "'object' is a required argument and cannot be missing;",
-      " it should be an object of class 'brmcoda'.", 
-      " See ?wsubmargins for details.",
-      sep = "\n"))
-  }
-  
-  if (isFALSE(inherits(object, "brmcoda"))) {
-    stop(sprintf(
-    "Can't handle an object of class (%s) 
-  It should be a fitted 'brmcoda' object
-  See ?bsub for details.",
-                 class(object)))
-  }
-  
-  if (isTRUE(missing(substitute))) {
-    stop(paste(
-      "'substitute' is a required argument and cannot be missing;",
-      " it should be a dataset of possible substitution", 
-      " and can be computed using multilevelcoda::possub.", 
-      " See ?wsubmargins for details.",
-      sep = "\n"))
-  }
-  
-  
-  if(isFALSE(missing(delta))) {
-    if (isFALSE(is.integer(delta))) {
-      if (isFALSE(delta > 0)) {
-        stop(" 'delta' must be an positive integer value.")
-      }
-    }
-  } else if (isTRUE(missing(delta))){
-    stop(paste(
-      "'delta' is a required argument and cannot be missing;",
-      "  it should be interger, numeric positive value or vector", 
-      "  to specify the change in units across compositional parts", 
-      sep = "\n"))
-  }
-  
-  if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
-    stop(sprintf(
-    "The number of columns in 'substitute' (%d) must be the same
-  as the compositional variables in 'parts' (%d).",
-                 ncol(substitute),
-                 length(object$CompIlr$parts)))
-  }
-  
-  if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
-    stop(sprintf(
-    "The names of compositional variables must be the same
-  in 'substitute' (%s) and 'parts' (%s).",
-                 colnames(substitute),
-                 object$CompIlr$parts))
-  }
-  
   # between-person composition
   b <- object$CompIlr$BetweenComp
   b <- as.data.table(clo(b, total = object$CompIlr$total))
