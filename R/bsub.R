@@ -12,7 +12,7 @@
 #' For average marginal effect, use \code{\link{bsubmargins}}.
 #'
 #' @param object A fitted \code{\link{brmcoda}} object.
-#' @param substitute A \code{data.frame} or \code{data.table} of possible substitution of variables.
+#' @param base A \code{data.frame} or \code{data.table} of possible substitution of variables.
 #' This data set can be computed using function \code{possub}. Required.
 #' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
 #' for substitution.
@@ -55,9 +55,9 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
 #'              
-#' subm <- bsub(object = m, substitute = psub, delta = 5)
+#' subm <- bsub(object = m, base = psub, delta = 5)
 #' }
-bsub <- function(object, substitute, delta, 
+bsub <- function(object, base, delta, 
                  regrid = NULL, summary = TRUE, 
                  level, type,
                  ...) {
@@ -100,7 +100,7 @@ bsub <- function(object, substitute, delta,
     ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
     
     # substitution model
-    out <- get.bsub(object = object, substitute = substitute,
+    out <- get.bsub(object = object, base = base,
                     mcomp = mcomp, delta = delta, ysame = ysame, summary = summary, 
                     level = level, type = type)
     
@@ -129,7 +129,7 @@ bsub <- function(object, substitute, delta,
       ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
       
       # substitution model
-      out <- get.bsub(object = object, substitute = substitute,
+      out <- get.bsub(object = object, base = base,
                       mcomp = mcomp, delta = delta, ysame = ysame, 
                       summary = summary, cv = cv, refg = refg, 
                       level = level, type = type)

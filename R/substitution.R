@@ -8,8 +8,6 @@
 #' present in the \code{\link{brmcoda}} object.
 #' 
 #' @param object A fitted \code{\link{brmcoda}} object.
-#' @param substitute A \code{data.frame} or \code{data.table} of possible substitution of variables.
-#' This dataset can be computed using function \code{possub}. Required.
 #' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
 #' for substitution.
 #' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
@@ -29,8 +27,8 @@
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional variable that is substituted from.}
 #'   \item{\code{To}}{ Compositional variables that is substituted to.}
-#'   \item{\code{Level}}{}
-#'   \item{\code{Type}}{}
+#'   \item{\code{Level}}{Level where changes in composition takes place.}
+#'   \item{\code{EffectType}}{Either estimated `conditional` or average `marginal` changes.}
 #' }
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
@@ -53,16 +51,15 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
 #'              
-#' subm <- substitution(object = m, substitute = psub, delta = 1,
-#'                      type = "marginal", level = "between")
+#' subm <- substitution(object = m, delta = c(30, 60),
+#'                      type = "conditional", level = c("between", "within"))
 #' }
-substitution <- function(object, substitute, delta, 
+substitution <- function(object, delta, 
                          regrid = NULL, summary = TRUE, 
                          level = c("between", "within"),
                          type = c("conditional", "marginal"),
                          ...) {
-  
-  
+
   if (isTRUE(missing(object))) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
@@ -79,15 +76,6 @@ substitution <- function(object, substitute, delta,
       class(object)))
   }
   
-  if (isTRUE(missing(substitute))) {
-    stop(paste(
-      "'substitute' is a required argument and cannot be missing;",
-      "  it should be a dataset of possible substitution", 
-      "  and can be computed using multilevelcoda::possub.", 
-      "  See ?bsub for details.",
-      sep = "\n"))
-  }
-  
   if(isFALSE(missing(delta))) {
     if (isFALSE(is.integer(delta))) {
       if (isFALSE(delta > 0)) {
@@ -102,22 +90,6 @@ substitution <- function(object, substitute, delta,
       sep = "\n"))
   }
   
-  if (isFALSE(identical(ncol(substitute), length(object$CompIlr$parts)))) {
-    stop(sprintf(
-      "The number of columns in 'substitute' (%d) must be the same
-  as the compositional variables in 'parts' (%d).",
-      ncol(substitute),
-      length(object$CompIlr$parts)))
-  }
-  
-  if (isFALSE(identical(colnames(substitute), object$CompIlr$parts))) {
-    stop(sprintf(
-      "The names of compositional variables must be the 
-  same in 'substitute' (%s) and 'parts' (%s).",
-      colnames(substitute),
-      object$CompIlr$parts))
-  }
-  
   if (isFALSE(is.null(regrid))) {
     if(any(c(colnames(object$CompIlr$BetweenILR), colnames(object$CompIlr$WithinILR))
            %in% c(colnames(regrid)))) {
@@ -130,27 +102,49 @@ substitution <- function(object, substitute, delta,
     }
   }
 
+  count <- length(object$CompIlr$parts)
+  n <- count - 2
+  
+  subvars1 <- c(1, -1)
+  subvars2 <- rep(0, n)
+  subvars <- c(subvars1, subvars2)
+  
+  nc <- length(subvars)
+  nr <- (nc - 1) * count
+  
+  base <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$CompILR$parts))
+  k <- 0
+  
+  for(i in 1:nc)
+    for(j in 1:nc)
+      if(i != j) {
+        k <- k + 1
+        base[k, c(i, j)] <- c(1, -1)
+      }
+  base <- as.data.table(base)
+  names(base) <- object$CompIlr$parts
+  
   if ("between" %in% level) {
     if("conditional" %in% type) {
-      bout <- bsub(object = object, substitute = substitute, delta = delta, 
+      bout <- bsub(object = object, base = base, delta = delta, 
                 regrid = regrid, summary = summary, 
-                level = level, type = type)
+                level = "between", type = "conditional")
     }
     if("marginal" %in% type) {
-      bmout <- bsubmargins(object = object, substitute = substitute, delta = delta,
-                           level = level, type = type)
+      bmout <- bsubmargins(object = object, base = base, delta = delta,
+                           level = "between", type = "marginal")
     }
   }
   
   if ("within" %in% level) {
     if("conditional" %in% type) {
-      wout <- wsub(object = object, substitute = substitute, delta = delta, 
+      wout <- wsub(object = object, base = base, delta = delta, 
                   regrid = regrid, summary = summary,
-                  level = level, type = type)
+                  level = "within", type = "conditional")
     }
     if("marginal" %in% type) {
-      wmout <- wsubmargins(object = object, substitute = substitute, delta = delta,
-                           level = level, type = type)
+      wmout <- wsubmargins(object = object, base = base, delta = delta,
+                           level = "within", type = "marginal")
     }
   }
   

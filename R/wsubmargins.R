@@ -1,5 +1,6 @@
 #' @title Between-person Marginal Substitution Model.
 #'
+#' @description
 #' Using a fitted model object, estimates the the average marginal difference 
 #' when compositional variables are substituted for a specific amount
 #' at `within-person` level. The resulting \code{wsubmargins} encapsulates 
@@ -7,7 +8,7 @@
 #' in the \code{\link{brmcoda}} object.
 #'
 #' @param object A \code{\link{brmcoda}} object. Required.
-#' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+#' @param base A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
 #' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
 #' for substitution.
@@ -45,9 +46,9 @@
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)             
-#' subm <- wsubmargins(object = m, substitute = psub, delta = 5)
+#' subm <- wsubmargins(object = m, base = psub, delta = 5)
 #' }
-wsubmargins <- function (object, substitute, delta, 
+wsubmargins <- function (object, base, delta, 
                          level, type,
                          ...) {
   
@@ -70,7 +71,7 @@ wsubmargins <- function (object, substitute, delta,
   
   # substitution model
   out <- .get.wsubmargins(object = object, b = b,
-                          substitute = substitute,
+                          base = base,
                           ysame = ysame, delta = delta, 
                           level = level, type = type)
 }

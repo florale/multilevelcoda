@@ -28,14 +28,14 @@ plotsub <- function(data, x, y, ...) {
   
   tmp <- copy(data)
 
-  plot <- ggplot(tmp, aes(x = MinSubstituted, y = Mean)) +
+  plot <- ggplot(tmp, aes(x = Delta, y = Mean)) +
     geom_hline(yintercept = 0, size = 0.2, linetype = 2) +
     geom_vline(xintercept = 0, size = 0.2, linetype = 2) +
-    geom_line(aes(colour = Substitute), size = 1) +
+    geom_line(aes(colour = To), size = 1) +
     geom_ribbon(aes(ymin = CI_low,
-                    ymax = CI_high, fill = Substitute),
+                    ymax = CI_high, fill = To),
                 alpha = 1 / 10, size = 1 / 10) +
-    facet_grid(~ Substitute) +
+    facet_grid(~ To) +
     xlab(paste("Change in", eval(x), sep = " ")) +
     ylab(paste("Change in", eval(y), sep = " "))
   plot

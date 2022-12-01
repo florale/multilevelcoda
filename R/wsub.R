@@ -1,5 +1,6 @@
 #' @title Within-person Basic Substitution Model
 #' 
+#' @description
 #' Using a fitted model object, estimate the difference in outcomes
 #' when compositional variables are substituted for a specific amount
 #' at `within-person` level. The resulting \code{wsub} encapsulates 
@@ -11,7 +12,7 @@
 #' For average marginal effect, use \code{\link{wsubmargins}}.
 #'
 #' @param object A \code{\link{brmcoda}} object.
-#' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+#' @param base A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
 #' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
 #' for substitution.
@@ -54,9 +55,9 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
 #'              
-#' subm <- wsub(object = m, substitute = psub, delta = 5)
+#' subm <- wsub(object = m, base = psub, delta = 5)
 #' }
-wsub <- function(object, substitute, delta, 
+wsub <- function(object, base, delta, 
                  regrid = NULL, summary = TRUE, 
                  level, type,
                  ...) {
@@ -99,7 +100,7 @@ wsub <- function(object, substitute, delta,
     ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
     
     # substitution model
-    out <- get.wsub(object = object, substitute = substitute,
+    out <- get.wsub(object = object, base = base,
                     mcomp = mcomp, delta = delta, ysame = ysame, summary = summary, 
                     level = level, type = type)
     
@@ -128,7 +129,7 @@ wsub <- function(object, substitute, delta,
       ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
       
       # substitution model
-      out <- get.wsub(object = object, substitute = substitute,
+      out <- get.wsub(object = object, base = base,
                       mcomp = mcomp, delta = delta, ysame = ysame,
                       summary = summary, cv = cv, refg = refg, 
                       level = level, type = type)

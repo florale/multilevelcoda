@@ -1,6 +1,8 @@
-#' Possible Pairwise Substitution 
+#' Base Pairwise Substitution 
 #'
-#' Makes a dataset of all possible pairwise substitution of a composition.
+#' @description
+#' Makes a data set of all possible pairwise substitution of a composition which can be used as 
+#' the base for substitution models.
 #' @param parts A character vector specifying the names of compositional variables to be used.
 #' 
 #' @return A data table of all possible pairwise substitution.
@@ -17,7 +19,7 @@
 #' 
 #' ## cleanup
 #' rm(mcompd, ps1, ps2)
-possub <- function(parts) {
+basesub <- function(parts) {
   
   count <- length(parts)
   n <- count - 2
@@ -29,16 +31,16 @@ possub <- function(parts) {
   nc <- length(subvars)
   nr <- (nc - 1) * count
   
-  possub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, parts))
+  basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, parts))
   k <- 0
   
   for(i in 1:nc)
     for(j in 1:nc)
       if(i != j) {
         k <- k + 1
-        possub[k, c(i, j)] <- c(1, -1)
+        basesub[k, c(i, j)] <- c(1, -1)
         }
-  possub <- as.data.table(possub)
-  possub
+  basesub <- as.data.table(basesub)
+  basesub
   }
 

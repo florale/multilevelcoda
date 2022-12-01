@@ -12,15 +12,15 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
 #' @importFrom stats fitted
 #' @noRd
 # Between-person Marginal Substitution Model.
-.get.bsubmargins <- function(object, substitute, b, 
+.get.bsubmargins <- function(object, base, b, 
                              ysame, delta, 
                              level, type,
                              ...) {
 
-  iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(base), .combine = c) %dopar% {
     
     # possible susbstituion of 1 compositional variable
-    posub <- as.data.table(substitute)
+    posub <- as.data.table(base)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
     
@@ -38,7 +38,7 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
         subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
         newcomp <- b + subk
         Delta <- subk[, get(i)]
-        names(newcomp) <- colnames(substitute)
+        names(newcomp) <- colnames(base)
         
         newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
 
@@ -48,7 +48,7 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
         newd$Delta <- as.numeric(newd$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
+        cols <- colnames(newd) %sin% c(colnames(b), colnames(base))
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
@@ -96,14 +96,14 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
 }
 
 # Within-person Marginal Substitution Model.
-.get.wsubmargins <- function(object, substitute, b,
+.get.wsubmargins <- function(object, base, b,
                              ysame, delta, 
                              level, type,
                              ...) {
 
-  iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(base), .combine = c) %dopar% {
     
-    posub <- as.data.table(substitute)
+    posub <- as.data.table(base)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
     
@@ -121,7 +121,7 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
         subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
         newcomp <- b + subk
         Delta <- subk[, get(i)]
-        names(newcomp) <- colnames(substitute)
+        names(newcomp) <- colnames(base)
         
         newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
         
@@ -131,7 +131,7 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
         newd$Delta <- as.numeric(newd$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
+        cols <- colnames(newd) %sin% c(colnames(b), colnames(base))
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
@@ -182,15 +182,15 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
 }
 
 # Basic Between-person Substitution model
-get.bsub <- function(object, substitute, mcomp, 
+get.bsub <- function(object, base, mcomp, 
                      ysame, delta, summary = summary,
                      level, type,
                      ID = 1, cv = NULL, refg = NULL, ...) {
   
-  iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(base), .combine = c) %dopar% {
     
     # possible susbstituion of 1 compositional variable
-    posub <- as.data.table(substitute)
+    posub <- as.data.table(base)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
     
@@ -245,7 +245,7 @@ get.bsub <- function(object, substitute, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(Delta, To, From, Level, EffectType)])
+                     subd[, .(From, To, Delta, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -261,7 +261,7 @@ get.bsub <- function(object, substitute, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(Delta, From, To, Level, EffectType)])
+                           subd[, .(From, To, Delta, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -272,7 +272,7 @@ get.bsub <- function(object, substitute, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv),with = FALSE])
+                               subd[, c("To", "From", "Delta", "Level", "EffectType", cv),with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
@@ -288,15 +288,15 @@ get.bsub <- function(object, substitute, mcomp,
 }
 
 # Basic Within-person Substitution model
-get.wsub <- function(object, substitute, mcomp,
+get.wsub <- function(object, base, mcomp,
                      ysame, delta, summary = summary, 
                      level, type,
                      ID = 1, cv = NULL, refg = NULL, ...) {
   
-  iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(base), .combine = c) %dopar% {
     
     # possible susbstituion of 1 compositional variable
-    posub <- as.data.table(substitute)
+    posub <- as.data.table(base)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
     
@@ -351,7 +351,7 @@ get.wsub <- function(object, substitute, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(Delta, To, From, Level, EffectType)])
+                     subd[, .(From, To, Delta, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -367,7 +367,7 @@ get.wsub <- function(object, substitute, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(Delta, To, From, Level, EffectType)])
+                           subd[, .(From, To, Delta, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -378,7 +378,7 @@ get.wsub <- function(object, substitute, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv), with = FALSE])
+                               subd[, c("To", "From", "Delta", "Level", "EffectType", cv), with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
