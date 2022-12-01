@@ -245,7 +245,7 @@ get.bsub <- function(object, base, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(From, To, Delta, Level, EffectType)])
+                     subd[, .(Delta, From, To, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -261,7 +261,7 @@ get.bsub <- function(object, base, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(From, To, Delta, Level, EffectType)])
+                           subd[, .(Delta, From, To, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -272,7 +272,8 @@ get.bsub <- function(object, base, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("To", "From", "Delta", "Level", "EffectType", cv),with = FALSE])
+                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv), 
+                                    with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
@@ -351,7 +352,7 @@ get.wsub <- function(object, base, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(From, To, Delta, Level, EffectType)])
+                     subd[, .(Delta, From, To, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -367,7 +368,7 @@ get.wsub <- function(object, base, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(From, To, Delta, Level, EffectType)])
+                           subd[, .(Delta, From, To, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -378,7 +379,8 @@ get.wsub <- function(object, base, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("To", "From", "Delta", "Level", "EffectType", cv), with = FALSE])
+                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv),
+                                    with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
