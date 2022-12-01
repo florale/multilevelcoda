@@ -2,18 +2,18 @@
 % Please edit documentation in R/wsubmargins.R
 \name{wsubmargins}
 \alias{wsubmargins}
-\title{Estimating Average Marginal Effects for Within-person Substitution Model.}
+\title{Between-person Marginal Substitution Model.}
 \usage{
-wsubmargins(object, substitute, minute = 60, ...)
+wsubmargins(object, base, delta, level, type, ...)
 }
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object. Required.}
 
-\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+\item{base}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
 
-\item{minute}{A integer or numeric value indicating the maximum minute for which substitution model is desired.
-Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
+\item{delta}{A integer, numeric value or vector indicating the amount of change in compositional parts
+for substitution.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
@@ -31,7 +31,7 @@ which include at least six elements.
 }
 \description{
 Using a fitted model object, estimates the the average marginal difference
-in outcomes when compositional variables are substituted for a specific period
+when compositional variables are substituted for a specific amount
 at \code{within-person} level. The resulting \code{wsubmargins} encapsulates
 substitution estimation across all compositional variables present
 in the \code{\link{brmcoda}} object.
@@ -53,6 +53,6 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
              chain = 1, iter = 500)             
-subm <- wsubmargins(object = m, substitute = psub, minute = 5)
+subm <- wsubmargins(object = m, base = psub, delta = 5)
 }
 }

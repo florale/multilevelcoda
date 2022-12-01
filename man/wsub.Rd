@@ -2,26 +2,25 @@
 % Please edit documentation in R/wsub.R
 \name{wsub}
 \alias{wsub}
-\title{Within-person Substitution Model}
+\title{Within-person Basic Substitution Model}
 \usage{
-wsub(object, substitute, minute = 60L, regrid = NULL, summary = TRUE, ...)
+wsub(object, base, delta, regrid = NULL, summary = TRUE, level, type, ...)
 }
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object.}
 
-\item{substitute}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
+\item{base}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 This dataset can be computed using function \code{possub}. Required.}
 
-\item{minute}{A integer or numeric value indicating the maximum minute
-for which substitution model is desired.
-Default to \code{60L} (i.e., the model loops through 1:60L minutes).}
+\item{delta}{A integer, numeric value or vector indicating the amount of change in compositional parts
+for substitution.}
 
 \item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consisting
 of combinations of covariates over which predictions are made.
-Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.}
+If not supplied, the reference grid is constructed via \code{\link{ref_grid}}.}
 
 \item{summary}{A logical value.
-Should estimated marginal means at each level of the reference grid (\code{FALSE})
+Should the estimate at each level of the reference grid (\code{FALSE})
 or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
@@ -39,15 +38,15 @@ which include at least six elements.
 }
 }
 \description{
-Estimate the difference in outcomes
-when compositional variables are substituted for a specific time period
+Using a fitted model object, estimate the difference in outcomes
+when compositional variables are substituted for a specific amount
 at \code{within-person} level. The resulting \code{wsub} encapsulates
 substitution estimation across all compositional variables
 present in the \code{\link{brmcoda}} object.
 
 Notes: The reference composition for substitution model
 is the compositional mean of the dataset provided.
-For average marginal effect, consider using \code{\link{wsubmargins}}.
+For average marginal effect, use \code{\link{wsubmargins}}.
 }
 \examples{
 \dontrun{
@@ -63,6 +62,6 @@ m <- brmcoda(compilr = cilr,
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
              chain = 1, iter = 500)
              
-subm <- wsub(object = m, substitute = psub, minute = 5)
+subm <- wsub(object = m, base = psub, delta = 5)
 }
 }
