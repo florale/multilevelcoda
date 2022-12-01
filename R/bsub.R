@@ -1,24 +1,24 @@
-#' @title Between-person Substitution Model.
+#' @title Between-person Basic Substitution Model.
 #' 
 #' @description 
 #' Estimate the difference in outcomes
-#' when compositional variables are substituted for a specific time period
+#' when compositional variables are substituted for a specific amount
 #' at `between-person` level. The resulting \code{bsub} encapsulates
 #' substitution estimation across all compositional variables
 #' present in the \code{\link{brmcoda}} object.
 #' 
 #' Notes: The reference composition for substitution model 
 #' is the compositional mean of the dataset provided.
-#' For average marginal effect, consider using \code{\link{bsubmargins}}.
+#' For average marginal effect, use \code{\link{bsubmargins}}.
 #'
 #' @param object A fitted \code{\link{brmcoda}} object.
 #' @param substitute A \code{data.frame} or \code{data.table} of possible substitution of variables.
-#' This dataset can be computed using function \code{possub}. Required.
+#' This data set can be computed using function \code{possub}. Required.
 #' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
-#' for which substitution model is desired.
+#' for substitution.
 #' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
 #' of combinations of covariates over which predictions are made.
-#' Otherwise, the reference grid is constructed via \code{\link{ref_grid}}.
+#' If not supplied, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
@@ -59,6 +59,7 @@
 #' }
 bsub <- function(object, substitute, delta, 
                  regrid = NULL, summary = TRUE, 
+                 level, type,
                  ...) {
   
   # compositional mean
@@ -100,7 +101,8 @@ bsub <- function(object, substitute, delta,
     
     # substitution model
     out <- get.bsub(object = object, substitute = substitute,
-                    mcomp = mcomp, delta = delta, ysame = ysame, summary = summary)
+                    mcomp = mcomp, delta = delta, ysame = ysame, summary = summary, 
+                    level = level, type = type)
     
     } else { # adj subsitution model
       # reference grid containing covariates
@@ -129,6 +131,7 @@ bsub <- function(object, substitute, delta,
       # substitution model
       out <- get.bsub(object = object, substitute = substitute,
                       mcomp = mcomp, delta = delta, ysame = ysame, 
-                      summary = summary, cv = cv, refg = refg)
+                      summary = summary, cv = cv, refg = refg, 
+                      level = level, type = type)
   }
 }

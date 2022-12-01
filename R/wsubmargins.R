@@ -1,8 +1,7 @@
-#' @title Estimating Average Marginal Effects for Within-person Substitution Model.
+#' @title Between-person Marginal Substitution Model.
 #'
-#' @description
 #' Using a fitted model object, estimates the the average marginal difference 
-#' in outcomes when compositional variables are substituted for a specific period
+#' when compositional variables are substituted for a specific amount
 #' at `within-person` level. The resulting \code{wsubmargins} encapsulates 
 #' substitution estimation across all compositional variables present
 #' in the \code{\link{brmcoda}} object.
@@ -11,7 +10,7 @@
 #' @param substitute A \code{data.frame} or \code{data.table} of the possible substitution of variables.
 #' This dataset can be computed using function \code{possub}. Required.
 #' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
-#' for which substitution model is desired.
+#' for substitution.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of isotemporal multilevel substitution model.
@@ -48,7 +47,9 @@
 #'              chain = 1, iter = 500)             
 #' subm <- wsubmargins(object = m, substitute = psub, delta = 5)
 #' }
-wsubmargins <- function (object, substitute, delta, ...) {
+wsubmargins <- function (object, substitute, delta, 
+                         level, type,
+                         ...) {
   
   # between-person composition
   b <- object$CompIlr$BetweenComp
@@ -70,5 +71,6 @@ wsubmargins <- function (object, substitute, delta, ...) {
   # substitution model
   out <- .get.wsubmargins(object = object, b = b,
                           substitute = substitute,
-                          ysame = ysame, delta = delta)
+                          ysame = ysame, delta = delta, 
+                          level = level, type = type)
 }

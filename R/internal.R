@@ -1,6 +1,6 @@
 ## make Rcmd check happy
-utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
-                         "Mean",  "CI_low", "CI_high", "Substitute", "MinSubstituted",
+utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
+                         "Mean",  "CI_low", "CI_high", "To", "Delta",
                          "spread", "value", "variable", "ID"))
 #' Functions used only internally
 #' @keywords internal
@@ -11,9 +11,11 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
 #' @importFrom foreach foreach %dopar%
 #' @importFrom stats fitted
 #' @noRd
-# AME for Between-person Substitution model
+# Between-person Marginal Substitution Model.
 .get.bsubmargins <- function(object, substitute, b, 
-                             ysame, delta, ...) {
+                             ysame, delta, 
+                             level, type,
+                             ...) {
 
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
@@ -35,15 +37,15 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
         subk <- sub[k, ]
         subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
         newcomp <- b + subk
-        MinSubstituted <- subk[, get(i)]
+        Delta <- subk[, get(i)]
         names(newcomp) <- colnames(substitute)
         
-        newd <- cbind(b, newcomp, object$CompIlr$data, MinSubstituted)
+        newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
 
         # useful information for the final results
-        newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
-        newd$Predictor <- iv
-        newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
+        newd[, To := rep(subvar, length.out = nrow(newd))[k]]
+        newd$From <- iv
+        newd$Delta <- as.numeric(newd$Delta)
         
         # remove impossible reallocation that result in negative values 
         cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
@@ -71,15 +73,19 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
         # posterior means and intervals
         ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...))
         ymean <- ymean[, .(Mean, CI_low, CI_high)]
-        ymean$MinSubstituted <- sub[k, get(i)]
+        ymean$Delta <- sub[k, get(i)]
         kout[[k]] <- ymean
         }
       jout[[j]] <- rbindlist(kout)
       }
     jout <- rbindlist(jout)
-    jout[, Substitute := rep(subvar, length.out = nrow(jout))]
-    jout$Predictor <- iv
-    names(jout) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
+    jout$From <- iv
+    jout[, To := rep(subvar, length.out = nrow(jout))]
+    jout$Level <- level
+    jout$EffectType <- type
+    
+    names(jout) <- c("Mean", "CI_low", "CI_high", "Delta", "From", "To", 
+                     "Level", "EffectType")
 
     # store final results for entire composition
     jout <- list(jout)
@@ -89,9 +95,11 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
   iout
 }
 
-# AME for Within-person substitution model
+# Within-person Marginal Substitution Model.
 .get.wsubmargins <- function(object, substitute, b,
-                             ysame, delta, ...) {
+                             ysame, delta, 
+                             level, type,
+                             ...) {
 
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
     
@@ -112,15 +120,15 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
         subk <- sub[k, ]
         subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
         newcomp <- b + subk
-        MinSubstituted <- subk[, get(i)]
+        Delta <- subk[, get(i)]
         names(newcomp) <- colnames(substitute)
         
-        newd <- cbind(b, newcomp, object$CompIlr$data, MinSubstituted)
+        newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
         
         # useful information for the final output
-        newd[, Substitute := rep(subvar, length.out = nrow(newd))[k]]
-        newd$Predictor <- iv
-        newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
+        newd[, To := rep(subvar, length.out = nrow(newd))[k]]
+        newd$From <- iv
+        newd$Delta <- as.numeric(newd$Delta)
         
         # remove impossible reallocation that result in negative values 
         cols <- colnames(newd) %sin% c(colnames(b), colnames(substitute))
@@ -150,16 +158,20 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
         # posterior means and intervals
         ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...))
         ymean <- ymean[, .(Mean, CI_low, CI_high)]
-        ymean$MinSubstituted <- sub[k, get(i)]
+        ymean$Delta <- sub[k, get(i)]
         kout[[k]] <- ymean
         }
       # results
       jout[[j]] <- rbindlist(kout)
       }
     jout <- rbindlist(jout)
-    jout[, Substitute := rep(subvar, length.out = nrow(jout))]
-    jout$Predictor <- iv
-    names(jout) <- c("Mean", "CI_low", "CI_high", "MinSubstituted", "Substitute", "Predictor")
+    jout$From <- iv
+    jout[, To := rep(subvar, length.out = nrow(jout))]
+    jout$Level <- level
+    jout$EffectType <- type
+    
+    names(jout) <- c("Mean", "CI_low", "CI_high", "Delta", "From", "To", 
+                     "Level", "EffectType")
     
     # final results for entire composition
     jout <- list(jout)
@@ -169,9 +181,10 @@ utils::globalVariables(c("i",  "..cols", ".", "Predictor", ".SD",
   iout
 }
 
-# Between-person Substitution model
+# Basic Between-person Substitution model
 get.bsub <- function(object, substitute, mcomp, 
                      ysame, delta, summary = summary,
+                     level, type,
                      ID = 1, cv = NULL, refg = NULL, ...) {
   
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
@@ -193,20 +206,22 @@ get.bsub <- function(object, substitute, mcomp,
       for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k, ]
         names(newcomp) <- object$CompIlr$parts
-        MinSubstituted <- sub[k, get(i)]
-        kout[[k]] <- cbind(mcomp, newcomp, MinSubstituted)
+        Delta <- sub[k, get(i)]
+        kout[[k]] <- cbind(mcomp, newcomp, Delta)
         }
       jout[[j]] <- do.call(rbind, kout)
     }
     newd <- setDT(do.call(rbind, jout))
 
     # useful information for the final results
-    newd[, Substitute := rep(subvar, length.out = nrow(newd))]
-    newd$Predictor <- iv
-    newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
-    
+    newd[, To := rep(subvar, length.out = nrow(newd))]
+    newd$From <- iv
+    newd$Delta <- as.numeric(newd$Delta)
+    newd$Level <- level
+    newd$EffectType <- type
+
     # remove impossible reallocation that result in negative values 
-    cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
+    cols <- colnames(newd) %snin% c("Delta", "To", "From", "Level", "EffectType")
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
 
     # compositions and ilrs for predictions
@@ -230,7 +245,7 @@ get.bsub <- function(object, substitute, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(MinSubstituted, Substitute, Predictor)])
+                     subd[, .(Delta, To, From, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -246,7 +261,7 @@ get.bsub <- function(object, substitute, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(MinSubstituted, Substitute, Predictor)])
+                           subd[, .(Delta, From, To, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -257,7 +272,7 @@ get.bsub <- function(object, substitute, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("MinSubstituted", "Substitute", "Predictor", cv),with = FALSE])
+                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv),with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
@@ -272,9 +287,10 @@ get.bsub <- function(object, substitute, mcomp,
   iout
 }
 
-# Within-person Substitution model
+# Basic Within-person Substitution model
 get.wsub <- function(object, substitute, mcomp,
                      ysame, delta, summary = summary, 
+                     level, type,
                      ID = 1, cv = NULL, refg = NULL, ...) {
   
   iout <- foreach(i = colnames(substitute), .combine = c) %dopar% {
@@ -296,20 +312,22 @@ get.wsub <- function(object, substitute, mcomp,
       for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k, ]
         names(newcomp) <- object$CompIlr$parts
-        MinSubstituted <- sub[k, get(i)]
-        kout[[k]] <- cbind(mcomp, newcomp, MinSubstituted)
+        Delta <- sub[k, get(i)]
+        kout[[k]] <- cbind(mcomp, newcomp, Delta)
       }
       jout[[j]] <- do.call(rbind, kout)
     }
     newd <- setDT(do.call(rbind, jout))
 
     # useful information for the final results
-    newd[, Substitute := rep(subvar, length.out = nrow(newd))]
-    newd$Predictor <- iv
-    newd$MinSubstituted <- as.numeric(newd$MinSubstituted)
+    newd[, To := rep(subvar, length.out = nrow(newd))]
+    newd$From <- iv
+    newd$Delta <- as.numeric(newd$Delta)
+    newd$Level <- level
+    newd$EffectType <- type
     
     # remove impossible reallocation that result in negative values 
-    cols <- colnames(newd) %snin% c("MinSubstituted", "Substitute", "Predictor")
+    cols <- colnames(newd) %snin% c("Delta", "To", "From", "Level", "EffectType")
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
@@ -333,7 +351,7 @@ get.wsub <- function(object, substitute, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(MinSubstituted, Substitute, Predictor)])
+                     subd[, .(Delta, To, From, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -349,7 +367,7 @@ get.wsub <- function(object, substitute, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(MinSubstituted, Substitute, Predictor)])
+                           subd[, .(Delta, To, From, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -360,7 +378,7 @@ get.wsub <- function(object, substitute, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("MinSubstituted", "Substitute", "Predictor", cv), with = FALSE])
+                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv), with = FALSE])
                 
                 hout[[h]] <- ymean
                 }
