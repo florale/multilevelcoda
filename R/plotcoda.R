@@ -36,7 +36,7 @@ plotsub <- function(data, x, y, ...) {
                     ymax = CI_high, fill = From),
                 alpha = 1 / 10, linewidth = 1 / 10) +
     facet_grid(~ From) +
-    xlab(paste("Change in", eval(x), sep = " ")) +
+    xlab(paste("Change to", eval(x), sep = " ")) +
     ylab(paste("Change in", eval(y), sep = " "))
   plot
 }

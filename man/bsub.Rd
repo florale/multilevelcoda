@@ -4,7 +4,16 @@
 \alias{bsub}
 \title{Between-person Basic Substitution Model.}
 \usage{
-bsub(object, base, delta, regrid = NULL, summary = TRUE, level, type, ...)
+bsub(
+  object,
+  base,
+  delta,
+  regrid = NULL,
+  summary = TRUE,
+  level = "between",
+  type = "conditional",
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}

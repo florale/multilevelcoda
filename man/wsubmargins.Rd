@@ -4,7 +4,7 @@
 \alias{wsubmargins}
 \title{Between-person Marginal Substitution Model.}
 \usage{
-wsubmargins(object, base, delta, level, type, ...)
+wsubmargins(object, base, delta, level = "within", type = "marginal", ...)
 }
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object. Required.}

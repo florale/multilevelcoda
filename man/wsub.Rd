@@ -4,7 +4,16 @@
 \alias{wsub}
 \title{Within-person Basic Substitution Model}
 \usage{
-wsub(object, base, delta, regrid = NULL, summary = TRUE, level, type, ...)
+wsub(
+  object,
+  base,
+  delta,
+  regrid = NULL,
+  summary = TRUE,
+  level = "within",
+  type = "conditional",
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{\link{brmcoda}} object.}

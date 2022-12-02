@@ -36,69 +36,68 @@ suppressWarnings(
                backend = backend))
 foreach::registerDoSEQ()
 
-x <- bsub(object = m, substitute = psub, minute = 2)
+x <- bsub(object = m, base = psub, delta = 2)
 
 # Testing
 #---------------------------------------------------------------------------------------------------
 
-test_that("bsub errors for invalid input", {
-  
-  ## missing object
-  expect_error(x <- bsub(substitute = psub, minute = 2))
+# test_that("bsub errors for invalid input", {
+# 
+#   ## missing object
+#   expect_error(x <- bsub(base = psub, delta = 2))
+# 
+#   ## missing base
+#   expect_error(x <- bsub(object = m, delta = 2))
+# 
+#   ## not brmcoda model
+#   m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
+#   expect_error(x <- bsub(object = m1, base = psub, delta = 2))
+# 
+#   ## invalid delta
+#   expect_error(x <- bsub(object = m, base = psub, delta = -10))
+#   expect_error(x <- bsub(object = m, base = psub, delta = 1:10))
+# 
+#   ## missing delta
+#   expect_error(x <- substitution(object = m1, base = psub))
+# 
+#   ## base does not have the same components as parts in cilr
+#   ps <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
+#   expect_error(x <- bsub(object = m, base = ps, delta = 2))
+# 
+#   ## base does have the same names as parts in cilr
+#   ps <- basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
+#   expect_error(x <- bsub(object = m, base = ps, delta = 2))
+# 
 
-  ## missing substitute
-  expect_error(x <- bsub(object = m, minute = 2))
-  
-  ## not brmcoda model
-  m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
-  expect_error(x <- bsub(object = m1, substitute = psub, minute = 2))
-  
-  ## invalid minute
-  expect_error(x <- bsub(object = m, substitute = psub, minute = -10))
-  expect_error(x <- bsub(object = m, substitute = psub, minute = 1:10))
-  
-  ## default minute is 60
-  x1 <- bsub(object = m, substitute = psub)
-  x2 <- bsub(object = m, substitute = psub, minute = 60)
-  expect_identical(x1, x2)
-  
-  ## substitute does not have the same components as parts in cilr
-  ps <- possub(c("WAKE", "MVPA", "LPA", "SB"))
-  expect_error(x <- bsub(object = m, substitute = ps, minute = 2))
-  
-  ## substitute does have the same names as parts in cilr
-  ps <- possub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
-  expect_error(x <- bsub(object = m, substitute = ps, minute = 2))
+# })
+
+test_that("bsub works as expected for adjusted/unadjusted model", {
   
   ## reference grid is provided for unadjusted model
   suppressWarnings(
     m2 <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                   wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-                 chain = 1, iter = 500, seed = 123,
-                 backend = backend))  
+                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+                  chain = 1, iter = 500, seed = 123,
+                  backend = backend))
   rg <- data.table(Age = 1)
-  expect_warning(x <- bsub(object = m2, substitute = psub, minute = 2, regrid = rg))
+  expect_warning(x <- bsub(object = m2, base = psub, delta = 2, regrid = rg))
   
   ## incorect reference grid 1
   rg <- data.table(Age = 1)
-  expect_error(x <- bsub(object = m, substitute = psub, minute = 2, regrid = rg))
+  expect_error(x <- bsub(object = m, base = psub, delta = 2, regrid = rg))
   
   ## reference grid has matching names with ILRs
   rg <- data.table(bilr1 = 1)
-  expect_error(x <- bsub(object = m, substitute = psub, minute = 2, regrid = rg))
+  expect_error(x <- bsub(object = m, base = psub, delta = 2, regrid = rg))
   
   ## incorect reference grid 2
   rg <- data.table(bilr1 = 1, Age = 1)
-  expect_error(x <- bsub(object = m, substitute = psub, minute = 2, regrid = rg))
-  
-})
+  expect_error(x <- bsub(object = m, base = psub, delta = 2, regrid = rg))
 
-test_that("bsub works as expected for adjusted/unadjusted model", {
-  
   ## function knows to use correct user's specified reference grid
   rg <- data.table(Female = 1)
-  x3 <- bsub(object = m, substitute = psub, minute = 2, regrid = rg)
+  x3 <- bsub(object = m, base = psub, delta = 2, regrid = rg)
   expect_true(all(x3$TST$Female == 1))
   expect_true(all(x3$WAKE$Female == 1))
   expect_true(all(x3$MVPA$Female == 1))
@@ -126,8 +125,8 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
   expect_true("Female" %nin% colnames(x$SB))
   
   ## average across reference grid as default
-  x4 <- bsub(object = m, substitute = psub, minute = 2, summary = TRUE)
-  x5 <- bsub(object = m, substitute = psub, minute = 2)
+  x4 <- bsub(object = m, base = psub, delta = 2, summary = TRUE)
+  x5 <- bsub(object = m, base = psub, delta = 2)
   expect_equal(x4, x5)
   
   ## keep prediction at each level of refrence grid 
@@ -141,7 +140,7 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   
-  x6 <- bsub(object = m, substitute = psub, minute = 2, summary = FALSE)
+  x6 <- bsub(object = m, base = psub, delta = 2, summary = FALSE)
   
   expect_equal(nrow(x6$TST), nrow(x5$TST) * 2)
   expect_equal(nrow(x6$WAKE), nrow(x5$WAKE) * 2)
@@ -177,37 +176,37 @@ test_that("bsub outputs what expected", {
   expect_type(x$TST$Mean, "double")
   expect_type(x$TST$CI_low, "double")
   expect_type(x$TST$CI_high, "double")
-  expect_type(x$TST$MinSubstituted, "double")
-  expect_type(x$TST$Substitute, "character")
-  expect_type(x$TST$Predictor, "character")
+  expect_type(x$TST$Delta, "double")
+  expect_type(x$TST$From, "character")
+  expect_type(x$TST$To, "character")
   
   expect_type(x$WAKE$Mean, "double")
   expect_type(x$WAKE$CI_low, "double")
   expect_type(x$WAKE$CI_high, "double")
-  expect_type(x$WAKE$MinSubstituted, "double")
-  expect_type(x$WAKE$Substitute, "character")
-  expect_type(x$WAKE$Predictor, "character")
+  expect_type(x$WAKE$Delta, "double")
+  expect_type(x$WAKE$From, "character")
+  expect_type(x$WAKE$To, "character")
   
   expect_type(x$MVPA$Mean, "double")
   expect_type(x$MVPA$CI_low, "double")
   expect_type(x$MVPA$CI_high, "double")
-  expect_type(x$MVPA$MinSubstituted, "double")
-  expect_type(x$MVPA$Substitute, "character")
-  expect_type(x$MVPA$Predictor, "character")
+  expect_type(x$MVPA$Delta, "double")
+  expect_type(x$MVPA$From, "character")
+  expect_type(x$MVPA$To, "character")
   
   expect_type(x$LPA$Mean, "double")
   expect_type(x$LPA$CI_low, "double")
   expect_type(x$LPA$CI_high, "double")
-  expect_type(x$LPA$MinSubstituted, "double")
-  expect_type(x$LPA$Substitute, "character")
-  expect_type(x$LPA$Predictor, "character")
+  expect_type(x$LPA$Delta, "double")
+  expect_type(x$LPA$From, "character")
+  expect_type(x$LPA$To, "character")
   
   expect_type(x$SB$Mean, "double")
   expect_type(x$SB$CI_low, "double")
   expect_type(x$SB$CI_high, "double")
-  expect_type(x$SB$MinSubstituted, "double")
-  expect_type(x$SB$Substitute, "character")
-  expect_type(x$SB$Predictor, "character")
+  expect_type(x$SB$Delta, "double")
+  expect_type(x$SB$From, "character")
+  expect_type(x$SB$To, "character")
   
   expect_true(ncol(x$TST) >= 6)
   expect_true(ncol(x$WAKE) >= 6)
@@ -215,11 +214,11 @@ test_that("bsub outputs what expected", {
   expect_true(ncol(x$LPA) >= 6)
   expect_true(ncol(x$SB) >= 6)
   
-  expect_true(all(x$TST$Predictor == "TST"))
-  expect_true(all(x$WAKE$Predictor == "WAKE"))
-  expect_true(all(x$MVPA$Predictor == "MVPA"))
-  expect_true(all(x$LPA$Predictor == "LPA"))
-  expect_true(all(x$SB$Predictor == "SB"))
+  expect_true(all(x$TST$To == "TST"))
+  expect_true(all(x$WAKE$To == "WAKE"))
+  expect_true(all(x$MVPA$To == "MVPA"))
+  expect_true(all(x$LPA$To == "LPA"))
+  expect_true(all(x$SB$To == "SB"))
   
   })
 
@@ -250,325 +249,326 @@ test_that("bsub gives results in expected direction and magnitude", {
     
   ## values are opposite sign for opposite substitution
   for (i in seq_along(x)) {
-    expect_true(all(x[[i]][, sign(Mean[sign(MinSubstituted) == 1]) 
-                           %a!=% sign(Mean[sign(MinSubstituted) == -1]), by = Substitute]$V1))
+    expect_true(all(x[[i]][, sign(Mean[sign(Delta) == 1]) 
+                           %a!=% sign(Mean[sign(Delta) == -1]), by = From]$V1))
   }
   
   ## results for 1 min have smaller magnitude than 2 mins
   for (i in seq_along(x)) {
-    expect_true(all(x[[i]][, abs(Mean[abs(MinSubstituted) == 1]) 
-                           < abs(Mean[abs(MinSubstituted) == 2])]))
+    expect_true(all(x[[i]][, abs(Mean[abs(Delta) == 1]) 
+                           < abs(Mean[abs(Delta) == 2])]))
   }
 })
 
 #---------------------------------------------------------------------------------------------------
 # Test 2-component composition for consistency between brm model and substitution model
 ## TST vs WAKE
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("TST", "WAKE"), idvar = "ID")
-psub <- possub(c("TST", "WAKE"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-a <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (TST vs WAKE)", {
+  
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("TST", "WAKE"), idvar = "ID")
+  psub <- basesub(c("TST", "WAKE"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  a <- bsub(object = m, base = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
-    expect_true(all(a$TST[Substitute == "WAKE" & MinSubstituted > 1]$Mean > 0)) 
-    expect_true(all(a$WAKE[Substitute == "TST" & MinSubstituted > 1]$Mean < 0)) 
+    expect_true(all(a$TST[From == "WAKE" & Delta > 1]$Mean > 0)) 
+    expect_true(all(a$WAKE[From == "TST" & Delta > 1]$Mean < 0)) 
   } else {
-    expect_true(all(a$TST[Substitute == "WAKE" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(a$WAKE[Substitute == "TST" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(a$TST[From == "WAKE" & Delta > 1]$Mean < 0))
+    expect_true(all(a$WAKE[From == "TST" & Delta > 1]$Mean > 0))
   }
   
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(a$TST[Substitute == "WAKE" & MinSubstituted == 1]$CI_low,
-                    a$TST[Substitute == "WAKE" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(a$TST[From == "WAKE" & Delta == 1]$CI_low,
+                    a$TST[From == "WAKE" & Delta == 1]$CI_high))))
   
 })
 
 ## TST vs MVPA
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("TST", "MVPA"), idvar = "ID")
-psub <- possub(c("TST", "MVPA"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-b <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (TST vs MVPA)", {
-
+  
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("TST", "MVPA"), idvar = "ID")
+  psub <- basesub(c("TST", "MVPA"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  b <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(b$TST[Substitute == "MVPA" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(b$MVPA[Substitute == "TST" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(b$TST[From == "MVPA" & Delta > 1]$Mean > 0))
+    expect_true(all(b$MVPA[From == "TST" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(b$TST[Substitute == "MVPA" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(b$MVPA[Substitute == "TST" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(b$TST[From == "MVPA" & Delta > 1]$Mean < 0))
+    expect_true(all(b$MVPA[From == "TST" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(b$TST[Substitute == "MVPA" & MinSubstituted == 1]$CI_low,
-                    b$TST[Substitute == "MVPA" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(b$TST[From == "MVPA" & Delta == 1]$CI_low,
+                    b$TST[From == "MVPA" & Delta == 1]$CI_high))))
 
 })
 
 ## TST vs LPA
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("TST", "LPA"), idvar = "ID")
-psub <- possub(c("TST", "LPA"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-c <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (TST vs LPA)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("TST", "LPA"), idvar = "ID")
+  psub <- basesub(c("TST", "LPA"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  c <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(c$TST[Substitute == "LPA" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(c$LPA[Substitute == "TST" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(c$TST[From == "LPA" & Delta > 1]$Mean > 0))
+    expect_true(all(c$LPA[From == "TST" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(c$TST[Substitute == "LPA" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(c$LPA[Substitute == "TST" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(c$TST[From == "LPA" & Delta > 1]$Mean < 0))
+    expect_true(all(c$LPA[From == "TST" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(c$TST[Substitute == "LPA" & MinSubstituted == 1]$CI_low,
-                    c$TST[Substitute == "LPA" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(c$TST[From == "LPA" & Delta == 1]$CI_low,
+                    c$TST[From == "LPA" & Delta == 1]$CI_high))))
 
 })
 
 ## TST vs SB
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("TST", "SB"), idvar = "ID")
-psub <- possub(c("TST", "SB"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-d <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (TST vs SB)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("TST", "SB"), idvar = "ID")
+  psub <- basesub(c("TST", "SB"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  d <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(d$TST[Substitute == "SB" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(d$SB[Substitute == "TST" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(d$TST[From == "SB" & Delta > 1]$Mean > 0))
+    expect_true(all(d$SB[From == "TST" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(d$TST[Substitute == "SB" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(d$SB[Substitute == "TST" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(d$TST[From == "SB" & Delta > 1]$Mean < 0))
+    expect_true(all(d$SB[From == "TST" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(d$TST[Substitute == "SB" & MinSubstituted == 1]$CI_low,
-                    d$TST[Substitute == "SB" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(d$TST[From == "SB" & Delta == 1]$CI_low,
+                    d$TST[From == "SB" & Delta == 1]$CI_high))))
 
 })
 
 ## WAKE vs MVPA
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("WAKE", "MVPA"), idvar = "ID")
-psub <- possub(c("WAKE", "MVPA"))
-
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-e <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (WAKE vs MVPA)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("WAKE", "MVPA"), idvar = "ID")
+  psub <- basesub(c("WAKE", "MVPA"))
+  
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  e <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(e$WAKE[Substitute == "MVPA" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(e$MVPA[Substitute == "WAKE" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(e$WAKE[From == "MVPA" & Delta > 1]$Mean > 0))
+    expect_true(all(e$MVPA[From == "WAKE" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(e$WAKE[Substitute == "MVPA" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(e$MVPA[Substitute == "WAKE" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(e$WAKE[From == "MVPA" & Delta > 1]$Mean < 0))
+    expect_true(all(e$MVPA[From == "WAKE" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(e$WAKE[Substitute == "MVPA" & MinSubstituted == 1]$CI_low,
-                    e$WAKE[Substitute == "MVPA" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(e$WAKE[From == "MVPA" & Delta == 1]$CI_low,
+                    e$WAKE[From == "MVPA" & Delta == 1]$CI_high))))
 
 })
 
 ## WAKE vs LPA
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("WAKE", "LPA"), idvar = "ID")
-psub <- possub(c("WAKE", "LPA"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-f <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (WAKE vs LPA)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("WAKE", "LPA"), idvar = "ID")
+  psub <- basesub(c("WAKE", "LPA"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  f <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(f$WAKE[Substitute == "LPA" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(f$LPA[Substitute == "WAKE" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(f$WAKE[From == "LPA" & Delta > 1]$Mean > 0))
+    expect_true(all(f$LPA[From == "WAKE" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(f$WAKE[Substitute == "LPA" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(f$LPA[Substitute == "WAKE" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(f$WAKE[From == "LPA" & Delta > 1]$Mean < 0))
+    expect_true(all(f$LPA[From == "WAKE" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(f$WAKE[Substitute == "LPA" & MinSubstituted == 1]$CI_low,
-                    f$WAKE[Substitute == "LPA" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(f$WAKE[From == "LPA" & Delta == 1]$CI_low,
+                    f$WAKE[From == "LPA" & Delta == 1]$CI_high))))
 
 })
 
 ## WAKE vs SB
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("WAKE", "SB"), idvar = "ID")
-psub <- possub(c("WAKE", "SB"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-g <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (WAKE vs SB)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("WAKE", "SB"), idvar = "ID")
+  psub <- basesub(c("WAKE", "SB"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  g <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(g$WAKE[Substitute == "SB" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(g$SB[Substitute == "WAKE" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(g$WAKE[From == "SB" & Delta > 1]$Mean > 0))
+    expect_true(all(g$SB[From == "WAKE" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(g$WAKE[Substitute == "SB" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(g$SB[Substitute == "WAKE" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(g$WAKE[From == "SB" & Delta > 1]$Mean < 0))
+    expect_true(all(g$SB[From == "WAKE" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(g$WAKE[Substitute == "SB" & MinSubstituted == 1]$CI_low,
-                    g$WAKE[Substitute == "SB" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(g$WAKE[From == "SB" & Delta == 1]$CI_low,
+                    g$WAKE[From == "SB" & Delta == 1]$CI_high))))
 
 })
 
 ## MVPA vs LPA
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("MVPA", "LPA"), idvar = "ID")
-psub <- possub(c("MVPA", "LPA"))
-suppressWarnings(m <- brmcoda(compilr = cilr,
-                              formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-                              chain = 1, iter = 500, seed = 123))
-h <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (MVPA vs LPA)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("MVPA", "LPA"), idvar = "ID")
+  psub <- basesub(c("MVPA", "LPA"))
+  suppressWarnings(m <- brmcoda(compilr = cilr,
+                                formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                                chain = 1, iter = 500, seed = 123))
+  h <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(h$MVPA[Substitute == "LPA" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(h$LPA[Substitute == "MVPA" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(h$MVPA[From == "LPA" & Delta > 1]$Mean > 0))
+    expect_true(all(h$LPA[From == "MVPA" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(h$MVPA[Substitute == "LPA" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(h$LPA[Substitute == "MVPA" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(h$MVPA[From == "LPA" & Delta > 1]$Mean < 0))
+    expect_true(all(h$LPA[From == "MVPA" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(h$MVPA[Substitute == "LPA" & MinSubstituted == 1]$CI_low,
-                    h$MVPA[Substitute == "LPA" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(h$MVPA[From == "LPA" & Delta == 1]$CI_low,
+                    h$MVPA[From == "LPA" & Delta == 1]$CI_high))))
 
 })
 
 ## MVPA vs SB
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("MVPA", "SB"), idvar = "ID")
-psub <- possub(c("MVPA", "SB"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-i <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (MVPA vs SB)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("MVPA", "SB"), idvar = "ID")
+  psub <- basesub(c("MVPA", "SB"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  i <- bsub(object = m, base = psub, delta = 1:2)
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(i$MVPA[Substitute == "SB" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(i$SB[Substitute == "MVPA" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(i$MVPA[From == "SB" & Delta > 1]$Mean > 0))
+    expect_true(all(i$SB[From == "MVPA" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(i$MVPA[Substitute == "SB" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(i$SB[Substitute == "MVPA" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(i$MVPA[From == "SB" & Delta > 1]$Mean < 0))
+    expect_true(all(i$SB[From == "MVPA" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(i$MVPA[Substitute == "SB" & MinSubstituted == 1]$CI_low,
-                    i$MVPA[Substitute == "SB" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(i$MVPA[From == "SB" & Delta == 1]$CI_low,
+                    i$MVPA[From == "SB" & Delta == 1]$CI_high))))
 
 })
 
 ## LPA vs SB
-sbp <- as.matrix(data.table(1, -1))
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("LPA", "SB"), idvar = "ID")
-psub <- possub(c("LPA", "SB"))
-suppressWarnings(
-  m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
-j <- bsub(object = m, substitute = psub, minute = 2)
-
 test_that("bsub's results matches with brm model for 2-component composition (LPA vs SB)", {
 
+  sbp <- as.matrix(data.table(1, -1))
+  cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+                  parts = c("LPA", "SB"), idvar = "ID")
+  psub <- basesub(c("LPA", "SB"))
+  suppressWarnings(
+    m <- brmcoda(compilr = cilr,
+                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
+  j <- bsub(object = m, base = psub, delta = 1:2)
+  
+  
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
-    expect_true(all(j$LPA[Substitute == "SB" & MinSubstituted > 1]$Mean > 0))
-    expect_true(all(j$SB[Substitute == "LPA" & MinSubstituted > 1]$Mean < 0))
+    expect_true(all(j$LPA[From == "SB" & Delta > 1]$Mean > 0))
+    expect_true(all(j$SB[From == "LPA" & Delta > 1]$Mean < 0))
   } else {
-    expect_true(all(j$LPA[Substitute == "SB" & MinSubstituted > 1]$Mean < 0))
-    expect_true(all(j$SB[Substitute == "LPA" & MinSubstituted > 1]$Mean > 0))
+    expect_true(all(j$LPA[From == "SB" & Delta > 1]$Mean < 0))
+    expect_true(all(j$SB[From == "LPA" & Delta > 1]$Mean > 0))
   }
 
   # CIs
   suppressWarnings(expect_true(
     (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
-    == (0 %agele% c(j$LPA[Substitute == "SB" & MinSubstituted == 1]$CI_low,
-                    j$LPA[Substitute == "SB" & MinSubstituted == 1]$CI_high))))
+    == (0 %agele% c(j$LPA[From == "SB" & Delta == 1]$CI_low,
+                    j$LPA[From == "SB" & Delta == 1]$CI_high))))
 
 })
 
@@ -591,7 +591,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               chain = 10, iter = 10000, cores = 8, seed = 123))
 # 
-# h <- bsub(object = m, substitute = psub, minute = 2)
+# h <- bsub(object = m, base = psub, delta = 1:2)
 # 
 # sbp <- matrix(c(
 #   1, -1, -1, -1, 1,
@@ -607,7 +607,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               chain = 10, iter = 10000, cores = 8, seed = 123))
 # 
-# j <- bsub(object = m, substitute = psub, minute = 2)
+# j <- bsub(object = m, base = psub, delta = 1:2)
 # 
 # # chain = 4, iter = 4000
 # all.equal(h$TST$Mean, j$TST$Mean) # "Mean relative difference: 0.008437258"

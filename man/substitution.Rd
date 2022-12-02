@@ -66,6 +66,6 @@ m <- brmcoda(compilr = cilr,
              chain = 1, iter = 500)
              
 subm <- substitution(object = m, delta = c(30, 60),
-                     type = "marginal", level = "within")
+                     type = "conditional", level = c("between", "within"))
 }
 }

@@ -18,6 +18,7 @@ library(multilevelcoda)
 library(extraoperators)
 library(brms)
 library(lme4)
+library(cmdstanr)
 data(mcompd)
 data(sbp)
 data(psub)
@@ -63,7 +64,7 @@ test_that("wilr from brmcoda gives expected predictions", {
   sbp <- as.matrix(data.table(1, -1))
   cilr <- compilr(data = daydata, sbp = sbp,
                   parts = c("TST", "Wake"), idvar = "ID")
-  psub <- possub(c("TST", "Wake"))
+  psub <- basesub(c("TST", "Wake"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
                  formula = PA ~ wilr1 + (1 | ID),
