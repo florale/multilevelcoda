@@ -126,9 +126,9 @@ substitution <- function(object, delta,
   
   if ("between" %in% level) {
     if("conditional" %in% type) {
-      bout <- bsub(object = object, base = base, delta = delta, 
-                regrid = regrid, summary = summary, 
-                level = "between", type = "conditional")
+      bout <- bsub(object = object, base = base, delta = delta,
+                   regrid = regrid, summary = summary,
+                   level = "between", type = "conditional")
     }
     if("marginal" %in% type) {
       bmout <- bsubmargins(object = object, base = base, delta = delta,
@@ -138,9 +138,9 @@ substitution <- function(object, delta,
   
   if ("within" %in% level) {
     if("conditional" %in% type) {
-      wout <- wsub(object = object, base = base, delta = delta, 
-                  regrid = regrid, summary = summary,
-                  level = "within", type = "conditional")
+      wout <- wsub(object = object, base = base, delta = delta,
+                   regrid = regrid, summary = summary,
+                   level = "within", type = "conditional")
     }
     if("marginal" %in% type) {
       wmout <- wsubmargins(object = object, base = base, delta = delta,

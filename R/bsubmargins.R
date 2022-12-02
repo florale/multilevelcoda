@@ -44,7 +44,7 @@
 #' subm <- bsubmargins(object = m, base = psub, delta = 5)
 #' }
 bsubmargins <- function (object, base, delta, 
-                         level, type,
+                         level = "between", type = "marginal",
                          ...) {
   
   # between-person composition

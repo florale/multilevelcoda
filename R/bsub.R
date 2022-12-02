@@ -59,7 +59,7 @@
 #' }
 bsub <- function(object, base, delta, 
                  regrid = NULL, summary = TRUE, 
-                 level, type,
+                 level = "between", type = "conditional",
                  ...) {
   
   # compositional mean

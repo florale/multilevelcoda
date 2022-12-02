@@ -49,7 +49,7 @@
 #' subm <- wsubmargins(object = m, base = psub, delta = 5)
 #' }
 wsubmargins <- function (object, base, delta, 
-                         level, type,
+                         level = "within", type = "marginal",
                          ...) {
   
   # between-person composition

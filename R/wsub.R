@@ -59,7 +59,7 @@
 #' }
 wsub <- function(object, base, delta, 
                  regrid = NULL, summary = TRUE, 
-                 level, type,
+                 level = "within", type = "conditional",
                  ...) {
   
   # compositional mean

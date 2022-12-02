@@ -1,6 +1,6 @@
 ## make Rcmd check happy
-utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
-                         "Mean",  "CI_low", "CI_high", "To", "Delta",
+utils::globalVariables(c("i",  "..cols", ".", "To", ".SD",
+                         "Mean",  "CI_low", "CI_high", "From", "Delta",
                          "spread", "value", "variable", "ID"))
 #' Functions used only internally
 #' @keywords internal
@@ -43,8 +43,8 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
         newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
 
         # useful information for the final results
-        newd[, To := rep(subvar, length.out = nrow(newd))[k]]
-        newd$From <- iv
+        newd[, From := rep(subvar, length.out = nrow(newd))[k]]
+        newd$To <- iv
         newd$Delta <- as.numeric(newd$Delta)
         
         # remove impossible reallocation that result in negative values 
@@ -79,12 +79,12 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
       jout[[j]] <- rbindlist(kout)
       }
     jout <- rbindlist(jout)
-    jout$From <- iv
-    jout[, To := rep(subvar, length.out = nrow(jout))]
+    jout$To <- iv
+    jout[, From := rep(subvar, length.out = nrow(jout))]
     jout$Level <- level
     jout$EffectType <- type
     
-    names(jout) <- c("Mean", "CI_low", "CI_high", "Delta", "From", "To", 
+    names(jout) <- c("Mean", "CI_low", "CI_high", "Delta", "To", "From", 
                      "Level", "EffectType")
 
     # store final results for entire composition
@@ -126,8 +126,8 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
         newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
         
         # useful information for the final output
-        newd[, To := rep(subvar, length.out = nrow(newd))[k]]
-        newd$From <- iv
+        newd[, From := rep(subvar, length.out = nrow(newd))[k]]
+        newd$To <- iv
         newd$Delta <- as.numeric(newd$Delta)
         
         # remove impossible reallocation that result in negative values 
@@ -165,12 +165,12 @@ utils::globalVariables(c("i",  "..cols", ".", "From", ".SD",
       jout[[j]] <- rbindlist(kout)
       }
     jout <- rbindlist(jout)
-    jout$From <- iv
-    jout[, To := rep(subvar, length.out = nrow(jout))]
+    jout$To <- iv
+    jout[, From := rep(subvar, length.out = nrow(jout))]
     jout$Level <- level
     jout$EffectType <- type
     
-    names(jout) <- c("Mean", "CI_low", "CI_high", "Delta", "From", "To", 
+    names(jout) <- c("Mean", "CI_low", "CI_high", "Delta", "To", "From", 
                      "Level", "EffectType")
     
     # final results for entire composition
@@ -214,14 +214,14 @@ get.bsub <- function(object, base, mcomp,
     newd <- setDT(do.call(rbind, jout))
 
     # useful information for the final results
-    newd[, To := rep(subvar, length.out = nrow(newd))]
-    newd$From <- iv
+    newd[, From := rep(subvar, length.out = nrow(newd))]
+    newd$To <- iv
     newd$Delta <- as.numeric(newd$Delta)
     newd$Level <- level
     newd$EffectType <- type
 
     # remove impossible reallocation that result in negative values 
-    cols <- colnames(newd) %snin% c("Delta", "To", "From", "Level", "EffectType")
+    cols <- colnames(newd) %snin% c("Delta", "From", "To", "Level", "EffectType")
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
 
     # compositions and ilrs for predictions
@@ -245,7 +245,7 @@ get.bsub <- function(object, base, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(Delta, From, To, Level, EffectType)])
+                     subd[, .(Delta, To, From, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -261,7 +261,7 @@ get.bsub <- function(object, base, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(Delta, From, To, Level, EffectType)])
+                           subd[, .(Delta, To, From, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -272,7 +272,7 @@ get.bsub <- function(object, base, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv), 
+                               subd[, c("Delta", "From", "To", "Level", "EffectType", cv), 
                                     with = FALSE])
                 
                 hout[[h]] <- ymean
@@ -321,14 +321,14 @@ get.wsub <- function(object, base, mcomp,
     newd <- setDT(do.call(rbind, jout))
 
     # useful information for the final results
-    newd[, To := rep(subvar, length.out = nrow(newd))]
-    newd$From <- iv
+    newd[, From := rep(subvar, length.out = nrow(newd))]
+    newd$To <- iv
     newd$Delta <- as.numeric(newd$Delta)
     newd$Level <- level
     newd$EffectType <- type
     
     # remove impossible reallocation that result in negative values 
-    cols <- colnames(newd) %snin% c("Delta", "To", "From", "Level", "EffectType")
+    cols <- colnames(newd) %snin% c("Delta", "From", "To", "Level", "EffectType")
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
@@ -352,7 +352,7 @@ get.wsub <- function(object, base, mcomp,
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(Delta, From, To, Level, EffectType)])
+                     subd[, .(Delta, To, From, Level, EffectType)])
       
       } else { # adjusted
         hout <- vector("list", length = nrow(refg))
@@ -368,7 +368,7 @@ get.wsub <- function(object, base, mcomp,
             ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
             ymean <- rbindlist(ymean)
             ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(Delta, From, To, Level, EffectType)])
+                           subd[, .(Delta, To, From, Level, EffectType)])
             
             } else { # keeping prediction at each level of reference grid
               for (h in seq_len(nrow(refg))) {
@@ -379,7 +379,7 @@ get.wsub <- function(object, base, mcomp,
                                function(x) {describe_posterior(x, centrality = "mean", ...)})
                 ymean <- rbindlist(ymean)
                 ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("Delta", "To", "From", "Level", "EffectType", cv),
+                               subd[, c("Delta", "From", "To", "Level", "EffectType", cv),
                                     with = FALSE])
                 
                 hout[[h]] <- ymean
