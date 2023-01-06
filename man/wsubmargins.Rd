@@ -2,39 +2,47 @@
 % Please edit documentation in R/wsubmargins.R
 \name{wsubmargins}
 \alias{wsubmargins}
-\title{Between-person Marginal Substitution Model.}
+\title{Between-person Average Marginal Substitution Model.}
 \usage{
-wsubmargins(object, base, delta, level = "within", type = "marginal", ...)
+wsubmargins(object, delta, basesub, level = "within", type = "marginal", ...)
 }
 \arguments{
-\item{object}{A \code{\link{brmcoda}} object. Required.}
+\item{object}{A fitted \code{\link{brmcoda}} object. Required.}
 
-\item{base}{A \code{data.frame} or \code{data.table} of the possible substitution of variables.
-This dataset can be computed using function \code{possub}. Required.}
+\item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
-\item{delta}{A integer, numeric value or vector indicating the amount of change in compositional parts
-for substitution.}
+\item{basesub}{A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
+This data set can be computed using function \code{\link{basesub}}.
+If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
+
+\item{level}{A character value or vector.
+Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
+
+\item{type}{A character value or vector.
+Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list containing the result of isotemporal multilevel substitution model.
-Each elements of the list is the substitution estimation for a compositional variables,
-which include at least six elements.
+A list containing the result of multilevel compositional substitution model.
+Each element of the list is the estimation for a compositional part
+and include at least six elements.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
-\item{\code{MinSubstituted}}{ Minute substituted within the composition.}
-\item{\code{Substitute}}{Compositional variables to be substituted from/to.}
-\item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
+\item{\code{Delta}}{ Amount substituted across compositional parts.}
+\item{\code{From}}{ Compositional part that is substituted from.}
+\item{\code{To}}{ Compositional parts that is substituted to.}
+\item{\code{Level}}{Level where changes in composition takes place.}
+\item{\code{EffectType}}{Either estimated \code{conditional} or average \code{marginal} changes.}
 }
 }
 \description{
 Using a fitted model object, estimates the the average marginal difference
-when compositional variables are substituted for a specific amount
-at \code{within-person} level. The resulting \code{wsubmargins} encapsulates
-substitution estimation across all compositional variables present
-in the \code{\link{brmcoda}} object.
+when compositional parts are substituted for specific unit(s) at \code{within-person} level.
+The \code{wsubmargins} output encapsulates
+the substitution results for all compositional parts
+present in the \code{\link{brmcoda}} object.
 }
 \examples{
 \dontrun{
@@ -53,6 +61,6 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
              chain = 1, iter = 500)             
-subm <- wsubmargins(object = m, base = psub, delta = 5)
+subm <- wsubmargins(object = m, basesub = psub, delta = 5)
 }
 }

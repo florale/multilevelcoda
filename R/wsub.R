@@ -2,38 +2,45 @@
 #' 
 #' @description
 #' Using a fitted model object, estimate the difference in outcomes
-#' when compositional variables are substituted for a specific amount
-#' at `within-person` level. The resulting \code{wsub} encapsulates 
-#' substitution estimation across all compositional variables 
+#' when compositional parts are substituted for specific unit(s) at `within-person` level. 
+#' The \code{wsub} output encapsulates 
+#' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
 #' 
 #' Notes: The reference composition for substitution model 
-#' is the compositional mean of the dataset provided. 
+#' is the compositional mean of the data set provided.
 #' For average marginal effect, use \code{\link{wsubmargins}}.
 #'
-#' @param object A \code{\link{brmcoda}} object.
-#' @param base A \code{data.frame} or \code{data.table} of the possible substitution of variables.
-#' This dataset can be computed using function \code{possub}. Required.
-#' @param delta A integer, numeric value or vector indicating the amount of change in compositional parts
-#' for substitution.
+#' @param object A fitted \code{\link{brmcoda}} object. Required.
+#' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
+#' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
+#' This data set can be computed using function \code{\link{basesub}}. 
+#' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
 #' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
 #' of combinations of covariates over which predictions are made.
-#' If not supplied, the reference grid is constructed via \code{\link{ref_grid}}.
+#' If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
+#' @param level A character string or vector. 
+#' Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.
+#' @param type A character string or vector. 
+#' Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
-#' @return A list containing the result of isotemporal multilevel substitution model.
-#' Each elements of the list is the substitution estimation for a compositional variables, 
-#' which include at least six elements.
+#' @return A list containing the result of multilevel compositional substitution model.
+#' Each element of the list is the estimation for a compositional part 
+#' and include at least six elements.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
 #'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
-#'   \item{\code{MinSubstituted}}{ Minute substituted within the composition.}
-#'   \item{\code{Substitute}}{Compositional variables to be substituted from/to.}
-#'   \item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
+#'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
+#'   \item{\code{From}}{ Compositional part that is substituted from.}
+#'   \item{\code{To}}{ Compositional parts that is substituted to.}
+#'   \item{\code{Level}}{Level where changes in composition takes place.}
+#'   \item{\code{EffectType}}{Either estimated `conditional` or average `marginal` changes.}
 #' }
+#' 
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom extraoperators %snin% %sin%
@@ -55,9 +62,9 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
 #'              
-#' subm <- wsub(object = m, base = psub, delta = 5)
+#' subm <- wsub(object = m, basesub = psub, delta = 5)
 #' }
-wsub <- function(object, base, delta, 
+wsub <- function(object, delta, basesub, 
                  regrid = NULL, summary = TRUE, 
                  level = "within", type = "conditional",
                  ...) {
@@ -100,7 +107,7 @@ wsub <- function(object, base, delta,
     ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
     
     # substitution model
-    out <- get.wsub(object = object, base = base,
+    out <- get.wsub(object = object, basesub = basesub,
                     mcomp = mcomp, delta = delta, ysame = ysame, summary = summary, 
                     level = level, type = type)
     
@@ -129,7 +136,7 @@ wsub <- function(object, base, delta,
       ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
       
       # substitution model
-      out <- get.wsub(object = object, base = base,
+      out <- get.wsub(object = object, basesub = basesub,
                       mcomp = mcomp, delta = delta, ysame = ysame,
                       summary = summary, cv = cv, refg = refg, 
                       level = level, type = type)

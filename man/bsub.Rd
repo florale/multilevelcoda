@@ -6,8 +6,8 @@
 \usage{
 bsub(
   object,
-  base,
   delta,
+  basesub,
   regrid = NULL,
   summary = TRUE,
   level = "between",
@@ -16,41 +16,49 @@ bsub(
 )
 }
 \arguments{
-\item{object}{A fitted \code{\link{brmcoda}} object.}
+\item{object}{A fitted \code{\link{brmcoda}} object. Required.}
 
-\item{base}{A \code{data.frame} or \code{data.table} of possible substitution of variables.
-This data set can be computed using function \code{possub}. Required.}
+\item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
-\item{delta}{A integer, numeric value or vector indicating the amount of change in compositional parts
-for substitution.}
+\item{basesub}{A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
+This data set can be computed using function \code{\link{basesub}}.
+If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
 \item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consisting
 of combinations of covariates over which predictions are made.
-If not supplied, the reference grid is constructed via \code{\link{ref_grid}}.}
+If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
 
 \item{summary}{A logical value.
 Should the estimate at each level of the reference grid (\code{FALSE})
 or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
 
+\item{level}{A character value or vector.
+Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
+
+\item{type}{A character value or vector.
+Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
+
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list containing the result of isotemporal multilevel substitution model.
-Each elements of the list is the substitution estimation for a compositional variables,
-which include at least six elements.
+A list containing the result of multilevel compositional substitution model.
+Each element of the list is the estimation for a compositional part
+and include at least six elements.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
-\item{\code{ChangeInComposition}}{ Amount of change substituted within the composition.}
-\item{\code{Substitute}}{Compositional variables to be substituted from/to.}
-\item{\code{Predictor}}{Central compositional variable to be substituted from/to.}
+\item{\code{Delta}}{ Amount substituted across compositional parts.}
+\item{\code{From}}{ Compositional part that is substituted from.}
+\item{\code{To}}{ Compositional parts that is substituted to.}
+\item{\code{Level}}{Level where changes in composition takes place.}
+\item{\code{EffectType}}{Either estimated \code{conditional} or average \code{marginal} changes.}
 }
 }
 \description{
 Estimate the difference in outcomes
-when compositional variables are substituted for a specific amount
-at \code{between-person} level. The resulting \code{bsub} encapsulates
-substitution estimation across all compositional variables
+when compositional parts are substituted for specific unit(s) at \code{between-person} level.
+The \code{bsub} output encapsulates
+the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 
 Notes: The reference composition for substitution model
@@ -71,6 +79,6 @@ m <- brmcoda(compilr = cilr,
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
              chain = 1, iter = 500)
              
-subm <- bsub(object = m, base = psub, delta = 5)
+subm <- bsub(object = m, basesub = psub, delta = 5)
 }
 }
