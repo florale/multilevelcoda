@@ -36,7 +36,7 @@ suppressWarnings(
                backend = backend))
 foreach::registerDoSEQ()
 
-x <- bsubmargins(object = m, base = psub, delta = 2)
+x <- bsubmargins(object = m, basesub = psub, delta = 2)
 
 # Testing
 #---------------------------------------------------------------------------------------------------
@@ -44,29 +44,29 @@ x <- bsubmargins(object = m, base = psub, delta = 2)
 # test_that("bsubmargins errors for invalid input", {
 # 
 #   ## missing object
-#   expect_error(x <- bsubmargins(base = psub, delta = 2))
+#   expect_error(x <- bsubmargins(basesub = psub, delta = 2))
 # 
-#   ## missing base
+#   ## missing basesub
 #   expect_error(x <- bsubmargins(object = m, delta = 2))
 # 
 #   ## not brmcoda model
 #   m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
-#   expect_error(x <- bsubmargins(object = m1, base = psub, delta = 2))
+#   expect_error(x <- bsubmargins(object = m1, basesub = psub, delta = 2))
 # 
 #   ## not brmcoda model
-#   expect_error(x <- bsubmargins(object = m, base = psub, delta = -10))
-#   expect_error(x <- bsubmargins(object = m, base = psub, delta = 1:10))
+#   expect_error(x <- bsubmargins(object = m, basesub = psub, delta = -10))
+#   expect_error(x <- bsubmargins(object = m, basesub = psub, delta = 1:10))
 # 
 #   ## missing delta
-#   expect_error(x <- substitution(object = m1, base = psub))
+#   expect_error(x <- substitution(object = m1, basesub = psub))
 # 
-#   ## base has the same components as parts in cilr
+#   ## basesub has the same components as parts in cilr
 #   ps <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
-#   expect_error(x <- bsubmargins(object = m, base = ps, delta = 2))
+#   expect_error(x <- bsubmargins(object = m, basesub = ps, delta = 2))
 # 
-#   ## base has the same names as parts in cilr
+#   ## basesub has the same names as parts in cilr
 #   ps <- basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
-#   expect_error(x <- bsubmargins(object = m, base = ps, delta = 2))
+#   expect_error(x <- bsubmargins(object = m, basesub = ps, delta = 2))
 # })
 
 test_that("bsubmargins outputs what expected", {
@@ -185,7 +185,7 @@ test_that("bsubmargins's results matches with brm for 2-component composition (T
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  a <- bsubmargins(object = m, base = psub, delta = 1:2)
+  a <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -216,7 +216,7 @@ test_that("bsubmargins's results matches with brm for 2-component composition (T
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  b <- bsubmargins(object = m, base = psub, delta = 1:2)
+  b <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -247,7 +247,7 @@ test_that("bsubmargins's results matches with brm model for 2-component composit
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  c <- bsubmargins(object = m, base = psub, delta = 1:2)
+  c <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -278,7 +278,7 @@ test_that("bsubmargins's results matches with brm model for 2-component composit
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  d <- bsubmargins(object = m, base = psub, delta = 1:2)
+  d <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -310,7 +310,7 @@ test_that("bsubmargins's results matches with brm for 2-component composition (W
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  e <- bsubmargins(object = m, base = psub, delta = 1:2)
+  e <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -341,7 +341,7 @@ test_that("bsubmargins's results matches with brm for 2-component composition (W
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  f <- bsubmargins(object = m, base = psub, delta = 1:2)
+  f <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -372,7 +372,7 @@ test_that("bsubmargins's results matches with brm model for 2-component composit
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  g <- bsubmargins(object = m, base = psub, delta = 1:2)
+  g <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -403,7 +403,7 @@ test_that("bsubmargins's results matches with brm for 2-component composition (M
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  h <- bsubmargins(object = m, base = psub, delta = 1:2)
+  h <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -434,7 +434,7 @@ test_that("bsubmargins's results matches with brm model for 2-component composit
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  i <- bsubmargins(object = m, base = psub, delta = 1:2)
+  i <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -465,7 +465,7 @@ test_that("bsubmargins's results matches with brm model for 2-component composit
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  j <- bsubmargins(object = m, base = psub, delta = 1:2)
+  j <- bsubmargins(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 

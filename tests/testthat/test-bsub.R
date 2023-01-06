@@ -36,7 +36,7 @@ suppressWarnings(
                backend = backend))
 foreach::registerDoSEQ()
 
-x <- bsub(object = m, base = psub, delta = 2)
+x <- bsub(object = m, basesub = psub, delta = 2)
 
 # Testing
 #---------------------------------------------------------------------------------------------------
@@ -44,29 +44,29 @@ x <- bsub(object = m, base = psub, delta = 2)
 # test_that("bsub errors for invalid input", {
 # 
 #   ## missing object
-#   expect_error(x <- bsub(base = psub, delta = 2))
+#   expect_error(x <- bsub(basesub = psub, delta = 2))
 # 
-#   ## missing base
+#   ## missing basesub
 #   expect_error(x <- bsub(object = m, delta = 2))
 # 
 #   ## not brmcoda model
 #   m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
-#   expect_error(x <- bsub(object = m1, base = psub, delta = 2))
+#   expect_error(x <- bsub(object = m1, basesub = psub, delta = 2))
 # 
 #   ## invalid delta
-#   expect_error(x <- bsub(object = m, base = psub, delta = -10))
-#   expect_error(x <- bsub(object = m, base = psub, delta = 1:10))
+#   expect_error(x <- bsub(object = m, basesub = psub, delta = -10))
+#   expect_error(x <- bsub(object = m, basesub = psub, delta = 1:10))
 # 
 #   ## missing delta
-#   expect_error(x <- substitution(object = m1, base = psub))
+#   expect_error(x <- substitution(object = m1, basesub = psub))
 # 
-#   ## base does not have the same components as parts in cilr
+#   ## basesub does not have the same components as parts in cilr
 #   ps <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
-#   expect_error(x <- bsub(object = m, base = ps, delta = 2))
+#   expect_error(x <- bsub(object = m, basesub = ps, delta = 2))
 # 
-#   ## base does have the same names as parts in cilr
+#   ## basesub does have the same names as parts in cilr
 #   ps <- basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
-#   expect_error(x <- bsub(object = m, base = ps, delta = 2))
+#   expect_error(x <- bsub(object = m, basesub = ps, delta = 2))
 # 
 
 # })
@@ -81,23 +81,23 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
                   chain = 1, iter = 500, seed = 123,
                   backend = backend))
   rg <- data.table(Age = 1)
-  expect_warning(x <- bsub(object = m2, base = psub, delta = 2, regrid = rg))
+  expect_warning(x <- bsub(object = m2, basesub = psub, delta = 2, regrid = rg))
   
   ## incorect reference grid 1
   rg <- data.table(Age = 1)
-  expect_error(x <- bsub(object = m, base = psub, delta = 2, regrid = rg))
+  expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
   
   ## reference grid has matching names with ILRs
   rg <- data.table(bilr1 = 1)
-  expect_error(x <- bsub(object = m, base = psub, delta = 2, regrid = rg))
+  expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
   
   ## incorect reference grid 2
   rg <- data.table(bilr1 = 1, Age = 1)
-  expect_error(x <- bsub(object = m, base = psub, delta = 2, regrid = rg))
+  expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
 
   ## function knows to use correct user's specified reference grid
   rg <- data.table(Female = 1)
-  x3 <- bsub(object = m, base = psub, delta = 2, regrid = rg)
+  x3 <- bsub(object = m, basesub = psub, delta = 2, regrid = rg)
   expect_true(all(x3$TST$Female == 1))
   expect_true(all(x3$WAKE$Female == 1))
   expect_true(all(x3$MVPA$Female == 1))
@@ -125,8 +125,8 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
   expect_true("Female" %nin% colnames(x$SB))
   
   ## average across reference grid as default
-  x4 <- bsub(object = m, base = psub, delta = 2, summary = TRUE)
-  x5 <- bsub(object = m, base = psub, delta = 2)
+  x4 <- bsub(object = m, basesub = psub, delta = 2, summary = TRUE)
+  x5 <- bsub(object = m, basesub = psub, delta = 2)
   expect_equal(x4, x5)
   
   ## keep prediction at each level of refrence grid 
@@ -140,7 +140,7 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   
-  x6 <- bsub(object = m, base = psub, delta = 2, summary = FALSE)
+  x6 <- bsub(object = m, basesub = psub, delta = 2, summary = FALSE)
   
   expect_equal(nrow(x6$TST), nrow(x5$TST) * 2)
   expect_equal(nrow(x6$WAKE), nrow(x5$WAKE) * 2)
@@ -274,7 +274,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  a <- bsub(object = m, base = psub, delta = 1:2)
+  a <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
@@ -305,7 +305,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  b <- bsub(object = m, base = psub, delta = 1:2)
+  b <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -336,7 +336,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  c <- bsub(object = m, base = psub, delta = 1:2)
+  c <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -367,7 +367,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  d <- bsub(object = m, base = psub, delta = 1:2)
+  d <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -399,7 +399,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  e <- bsub(object = m, base = psub, delta = 1:2)
+  e <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -430,7 +430,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  f <- bsub(object = m, base = psub, delta = 1:2)
+  f <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -461,7 +461,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  g <- bsub(object = m, base = psub, delta = 1:2)
+  g <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -490,7 +490,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
   suppressWarnings(m <- brmcoda(compilr = cilr,
                                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                                 chain = 1, iter = 500, seed = 123))
-  h <- bsub(object = m, base = psub, delta = 1:2)
+  h <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -521,7 +521,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  i <- bsub(object = m, base = psub, delta = 1:2)
+  i <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
   if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
@@ -552,7 +552,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
                  formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  j <- bsub(object = m, base = psub, delta = 1:2)
+  j <- bsub(object = m, basesub = psub, delta = 1:2)
   
   
   ## Estimates
@@ -591,7 +591,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               chain = 10, iter = 10000, cores = 8, seed = 123))
 # 
-# h <- bsub(object = m, base = psub, delta = 1:2)
+# h <- bsub(object = m, basesub = psub, delta = 1:2)
 # 
 # sbp <- matrix(c(
 #   1, -1, -1, -1, 1,
@@ -607,7 +607,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               chain = 10, iter = 10000, cores = 8, seed = 123))
 # 
-# j <- bsub(object = m, base = psub, delta = 1:2)
+# j <- bsub(object = m, basesub = psub, delta = 1:2)
 # 
 # # chain = 4, iter = 4000
 # all.equal(h$TST$Mean, j$TST$Mean) # "Mean relative difference: 0.008437258"

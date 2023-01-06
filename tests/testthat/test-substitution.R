@@ -36,7 +36,7 @@ suppressWarnings(
                backend = backend))
 foreach::registerDoSEQ()
 
-x <- substitution(object = m, base = psub, delta = 2)
+x <- substitution(object = m, basesub = psub, delta = 2)
 
 # Testing
 #---------------------------------------------------------------------------------------------------
@@ -44,20 +44,28 @@ x <- substitution(object = m, base = psub, delta = 2)
 test_that("substitution errors for invalid input", {
   
   ## missing object
-  expect_error(x <- substitution(base = psub, delta = 2))
+  expect_error(x <- substitution(basesub = psub, delta = 2))
   
   ## not brmcoda model
   m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
-  expect_error(x <- substitution(object = m1, base = psub, delta = 2))
+  expect_error(x <- substitution(object = m1, basesub = psub, delta = 2))
   
   ## incorrect delta
-  expect_error(x <- substitution(object = m, base = psub, delta = -10))
+  expect_error(x <- substitution(object = m, basesub = psub, delta = -10))
 
   ## missing delta
-  expect_error(x <- substitution(object = m, base = psub))
+  expect_error(x <- substitution(object = m, basesub = psub))
   
   ## reference grid has matching names with ILRs
   rg <- data.table(bilr1 = 1)
-  expect_error(x <- substitution(object = m, base = psub, delta = 2, regrid = rg))
+  expect_error(x <- substitution(object = m, basesub = psub, delta = 2, regrid = rg))
+  
+  ## basesub does not have the same components as parts in cilr
+  ps <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- substitution(object = m, basesub = ps, minute = 2))
+  
+  ## basesub does have the same names as parts in cilr
+  ps <- basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- substitution(object = m, basesub = ps, minute = 2))
   
 })
