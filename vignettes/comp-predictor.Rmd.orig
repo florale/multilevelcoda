@@ -102,7 +102,7 @@ The `compilr()` function for multilevel data requires four arguments:
 | `data`   | a dataset containing all variables: at a minimum composition variables and an ID variable               |
 | `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates |
 | `parts`  | a character vector giving the names of the variables in `data` that are compositional                   |
-| `idvar`  | a character string giving the name of teh variable that contains the IDs                                |
+| `idvar`  | a character string giving the name of the variable that contains the IDs                                |
 
 ```{r compilr}
 cilr <- compilr(data = mcompd, sbp = sbp,
@@ -233,24 +233,22 @@ When examining the relationships between compositional data and an outcome,
 we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
 from one compositional component to another, while the other components remain constant. 
 These changes can be examined using the compositional isotemporal substitution model. 
-In `multilevelcoda`, we extend this model to multilevel approach to test both between-person and within-person changes.
+In `multilevelcoda`, we extend this model to multilevel approach to test both between-person and within-person changes. All substitution models can be computed using the `substitution()` function.
 
 ## Between-person substitution model
-Between-person substitution model can be computed using the `bsub()` function. The below example 
-examines the changes in stress for different pairwise substitution of sleep-wake behaviours
-for a period of 1 to 5 minutes, at between-person level. 
+The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours
+for 5 minutes, at between-person level. 
 
 ```{r bsub}
-bsubm <- bsub(objec = m, substitute = psub, minute = 5)
+bsubm <- substitution(object = m, delta = 5, 
+                      level = "between", type = "conditional")
 ```
 
-Output from `bsub()` contains multiple datasets of results for all compositional components. 
+The output contains multiple data sets of results for all compositional components. 
 Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. 
-For ease of presentation, we only show the $\pm5$ minute 
-substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
 
 ```{r bsubm, results = "asis"}
-knitr::kable(bsubm$TST[abs(MinSubstituted) == 5])
+knitr::kable(bsubm$TST)
 ```
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
@@ -258,50 +256,27 @@ increasing sleep (TST) at the expense of any other behaviours was not associated
 Notice there is no 
 column indicating the levels of convariates, indicating that these results have been averaged.
 
-These results can be plotted to see the patterns more easily using the `plotsub()` function.
-
-```{r plotbsub, eval = FALSE}
-plotsub(data = bsubm$TST, x = "sleep", y = "stress")
-``` 
-
-```{r mlmcoda-plotbsubm2, fig.width = 10, echo=FALSE, fig.height = 6, fig.cap = "Example of Between-person Substitution Model"}
-plotsub(data = bsubm$TST, x = "sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco() + 
-  theme_cowplot()
-``` 
-
 ## Within-person substitution model
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
-substituted for a period of 1 to 5 minutes, at within-person level. 
+substituted for 5 minutes, at within-person level. 
 
 ```{r wsub}
 # Within-person substitution
-wsubm <- wsub(objec = m, substitute = psub, minute = 5, summary = TRUE)
+wsubm <- substitution(object = m, delta = 5, 
+                      level = "within", type = "conditional")
 ``` 
 
 Results for 5 minute substitution.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(wsubm$TST[abs(MinSubstituted) == 5])
+knitr::kable(wsubm$TST)
 ```
 
-At within-person level, we got some significant results for substitution of sleep (TST) and time 
-awake in bed (WAKE) for 5 minutes, but not other behaviours. Increasing sleep at the expense of time spent awake 
+At within-person level, there were significant results for substitution of sleep (TST) and time 
+awake in bed (WAKE) for 5 minutes, but not other behaviours. 
+Increasing sleep at the expense of time spent awake 
 in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
 more time awake in bed predicted less stress (b = -0.016 [95% CI -0.03,	-0.00]).
-Let's also plot theses results.
-
-```{r plotwsub, eval = FALSE}
-plotsub(data = wsubm$TST, x = "sleep", y = "stress")
-``` 
-
-```{r mlmcoda-plotwsubm2, fig.width = 10, echo=FALSE, fig.height = 6, fig.cap = "Example of Within-person Substitution Model"}
-plotsub(data = wsubm$TST, x = "sleep", y = "stress") +
-  scale_color_jco() +
-  scale_fill_jco() + 
-  theme_cowplot()
-``` 
 
 ## More interesting substitution models
 You can learn more about different types of substitution models at  

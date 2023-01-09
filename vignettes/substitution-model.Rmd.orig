@@ -94,7 +94,8 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 
 # Substitution models
 
-`multilevelcoda` package provides `4` different functions to compute substitution models.
+`multilevelcoda` package provides `4` different functions to compute substitution models, using the
+`substitution()` function.
 
 Basic substitution model:
 
@@ -107,30 +108,26 @@ Average marginal substitution model:
 - Average marginal within-person substitution model
 
 *Tips*: Substitution models are often computationally demanding tasks. 
-You can speed up the models using parallelisation, for example, using `doFuture` package.
+You can speed up the models using parallel execution, for example, using `doFuture` package.
 
 ## Basic substitution model
-We can calculate the changes in an outcomes when compositional variables are 
-substituted for a specific of time using `bsub()` (between-person level) and `wsub()` (within-person level).
-Both functions use sample's compositional mean as reference (i.e., composition when there is no change).
-
 ### Between-person substitution model
-Between-person substitution model can be computed using the `bsub()` function. The below example 
-examines the changes in stress for different pairwise substitution of sleep-wake behaviours
-for a period of 1 to 5 minutes, at between-person level. If your model contains covariates, `bsub()` 
+The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
+We specify `level = between` to indicate substitutional change would be at the between-person level, 
+and `type = conditional` to indicate basic substitution model.
+If your model contains covariates, `substitution()` 
 will average predictions across levels of covariates as the default.
 
 ```{r bsub}
-bsubm1 <- bsub(objec = m, substitute = psub, minute = 5)
+bsubm1 <- substitution(object = m, delta = 1:5, 
+                      level = "between", type = "conditional")
 ```
 
-Output from `bsub()` contains multiple dataset of results for all available compositional component. 
-Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes. 
-For ease of presentation, we only show the $\pm5$ minute 
-substitution results, but the full dataset would contain similar results for 1, 2, etc. minute substitutions.
+Output from `substitution()` contains multiple data set of results for all available compositional component. 
+Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes.
 
 ```{r bsubm, results = "asis"}
-knitr::kable(bsubm1$TST[abs(MinSubstituted) == 5])
+knitr::kable(bsubm1$TST)
 ```
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
@@ -154,19 +151,21 @@ plotsub(data = bsubm1$TST, x = "sleep", y = "stress") +
 ### Within-person substitution model
 
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
-substituted for a period of 1 to 5 minutes, at within-person level. 
+substituted for 5 minutes, at within-person level. 
 We can obtain prediction for each level of covariates by adding 
-an argument `summary = FALSE` to `wsub()`.
+an argument `summary = FALSE` to `substitution()`.
 
 ```{r wsub}
-wsubm1 <- wsub(objec = m, substitute = psub, minute = 5, summary = FALSE)
+wsubm1 <- substitution(object = m, delta = 5, 
+                      level = "within", type = "conditional",
+                      summary = FALSE)
 ``` 
 
 Results for 5 minute substitution for each level of covariates. In this example, we get separate 
 predictions for males and females.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(wsubm1$TST[abs(MinSubstituted) == 5])
+knitr::kable(wsubm1$TST)
 ```
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
@@ -191,19 +190,18 @@ plotsub(data = wsubm1$TST, x = "sleep", y = "stress") +
 
 ## Average Marginal Substitution Effects
 
-While `bsub()` and `wsub()` estimate the substitution model from the sample's compositional mean, 
-`bsubmargins()` and `wsubmargins()` estimate the substitution model using the average effect of participant's compositional mean. 
-That is, for each participant, `bsubmargins()` and `wsubmargins()` compute the changes in the outcome 
-when a fixed duration of time is reallocated from one compositional component to another, 
-while the other components remain constant and then average across the 
-resulting effect estimates. 
+Average substitution models models are generally more computationally expensive than basic subsitution models. 
+The average marginal models use the group- level compositional mean as the reference composition 
+to obtain the average of the predicted group-level changes in the outcome when every person in the sample 
+reallocates a specific unit from one compositional part to another. 
+This is difference from the basic substitution model which yields prediction conditioned on 
+an "average" person in the data set (by using the population- level compositional mean
+as the reference composition). 
+All models can be run faster in shorter walltime using parallel execution.
 
-`bsubmargins()` and `wsubmargins()` are generally more computationally expensive than `bsub()` and `wsub()` models. 
-All models can be run faster in shorter walltime using parallelisation.
+### Between-person Average Marginal Substitution Effects
 
-### Estimating average marginal effect for between-person substitution
-
-In this example, we use package `doFuture` for parallelisation. `bsubmargins()` will run 5 
+In this example, we use package `doFuture` for parallelisation. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
 ```{r parallel}
@@ -212,14 +210,16 @@ plan(multisession, workers = 5)
 ```
 
 ```{r bsubmargin}
-bsubm2 <- bsubmargins(object = m, substitute = psub, minute = 5)
+bsubm2 <- substitution(object = m, delta = 1:5,
+                       level = "between", type = "marginal")
 knitr::kable(bsubm2$TST[abs(MinSubstituted) == 5])
 ```
 
 ### Estimating average marginal effect for within-person substitution
 
 ```{r wsubmargin}
-wsubm2 <- wsubmargins(object = m, substitute = psub, minute = 5)
+wsubm2 <- substitution(object = m, delta = 1:5,
+                       level = "within", type = "marginal")
 knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5])
 registerDoSEQ()
 ```

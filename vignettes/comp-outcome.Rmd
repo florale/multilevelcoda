@@ -64,7 +64,10 @@ mv <- brmcoda(compilr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
 #> Setting 'rescor' to TRUE by default for this model
-#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+#> Warning: In the future, 'rescor' will be set to FALSE
+#> by default for all models. It is thus recommended to
+#> explicitely set 'rescor' via 'set_rescor' instead of
+#> using the default.
 #> Compiling Stan program...
 #> Start sampling
 ```
@@ -90,38 +93,64 @@ summary(mv$Model)
 #> 
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
-#>                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(ilr1_Intercept)     0.33      0.02     0.30     0.37 1.00      984     2019
-#> sd(ilr2_Intercept)     0.30      0.01     0.28     0.34 1.00     1367     2028
-#> sd(ilr3_Intercept)     0.39      0.02     0.35     0.43 1.00     1848     2524
-#> sd(ilr4_Intercept)     0.30      0.02     0.27     0.33 1.01     1604     2019
+#>                    Estimate Est.Error l-95% CI
+#> sd(ilr1_Intercept)     0.33      0.02     0.30
+#> sd(ilr2_Intercept)     0.30      0.01     0.28
+#> sd(ilr3_Intercept)     0.39      0.02     0.35
+#> sd(ilr4_Intercept)     0.30      0.02     0.27
+#>                    u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(ilr1_Intercept)     0.37 1.00      984     2019
+#> sd(ilr2_Intercept)     0.34 1.00     1367     2028
+#> sd(ilr3_Intercept)     0.43 1.00     1848     2524
+#> sd(ilr4_Intercept)     0.33 1.01     1604     2019
 #> 
 #> Population-Level Effects: 
-#>                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> ilr1_Intercept    -0.43      0.02    -0.48    -0.39 1.01     1060     1933
-#> ilr2_Intercept     1.46      0.02     1.42     1.51 1.00     1078     1660
-#> ilr3_Intercept    -0.88      0.03    -0.93    -0.82 1.00     2052     2818
-#> ilr4_Intercept     0.65      0.02     0.60     0.69 1.00     1934     2660
-#> ilr1_STRESS       -0.01      0.00    -0.02    -0.00 1.00     5597     3516
-#> ilr2_STRESS        0.01      0.00     0.00     0.01 1.00     4905     3916
-#> ilr3_STRESS        0.00      0.00    -0.01     0.01 1.00     6341     3363
-#> ilr4_STRESS        0.01      0.00    -0.00     0.01 1.00     5854     3408
+#>                Estimate Est.Error l-95% CI u-95% CI
+#> ilr1_Intercept    -0.43      0.02    -0.48    -0.39
+#> ilr2_Intercept     1.46      0.02     1.42     1.51
+#> ilr3_Intercept    -0.88      0.03    -0.93    -0.82
+#> ilr4_Intercept     0.65      0.02     0.60     0.69
+#> ilr1_STRESS       -0.01      0.00    -0.02    -0.00
+#> ilr2_STRESS        0.01      0.00     0.00     0.01
+#> ilr3_STRESS        0.00      0.00    -0.01     0.01
+#> ilr4_STRESS        0.01      0.00    -0.00     0.01
+#>                Rhat Bulk_ESS Tail_ESS
+#> ilr1_Intercept 1.01     1060     1933
+#> ilr2_Intercept 1.00     1078     1660
+#> ilr3_Intercept 1.00     2052     2818
+#> ilr4_Intercept 1.00     1934     2660
+#> ilr1_STRESS    1.00     5597     3516
+#> ilr2_STRESS    1.00     4905     3916
+#> ilr3_STRESS    1.00     6341     3363
+#> ilr4_STRESS    1.00     5854     3408
 #> 
 #> Family Specific Parameters: 
-#>            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sigma_ilr1     0.44      0.01     0.43     0.45 1.00     6407     3329
-#> sigma_ilr2     0.38      0.00     0.37     0.39 1.00     6625     3272
-#> sigma_ilr3     0.70      0.01     0.68     0.71 1.00     5853     2767
-#> sigma_ilr4     0.53      0.01     0.51     0.54 1.00     4974     3417
+#>            Estimate Est.Error l-95% CI u-95% CI Rhat
+#> sigma_ilr1     0.44      0.01     0.43     0.45 1.00
+#> sigma_ilr2     0.38      0.00     0.37     0.39 1.00
+#> sigma_ilr3     0.70      0.01     0.68     0.71 1.00
+#> sigma_ilr4     0.53      0.01     0.51     0.54 1.00
+#>            Bulk_ESS Tail_ESS
+#> sigma_ilr1     6407     3329
+#> sigma_ilr2     6625     3272
+#> sigma_ilr3     5853     2767
+#> sigma_ilr4     4974     3417
 #> 
 #> Residual Correlations: 
-#>                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> rescor(ilr1,ilr2)    -0.54      0.01    -0.57    -0.52 1.00     6181     3388
-#> rescor(ilr1,ilr3)    -0.18      0.02    -0.21    -0.14 1.00     4693     3018
-#> rescor(ilr2,ilr3)    -0.05      0.02    -0.09    -0.02 1.00     5906     3466
-#> rescor(ilr1,ilr4)     0.11      0.02     0.07     0.14 1.00     5590     3278
-#> rescor(ilr2,ilr4)    -0.05      0.02    -0.08    -0.01 1.00     6525     3923
-#> rescor(ilr3,ilr4)     0.56      0.01     0.53     0.58 1.00     5916     3176
+#>                   Estimate Est.Error l-95% CI u-95% CI
+#> rescor(ilr1,ilr2)    -0.54      0.01    -0.57    -0.52
+#> rescor(ilr1,ilr3)    -0.18      0.02    -0.21    -0.14
+#> rescor(ilr2,ilr3)    -0.05      0.02    -0.09    -0.02
+#> rescor(ilr1,ilr4)     0.11      0.02     0.07     0.14
+#> rescor(ilr2,ilr4)    -0.05      0.02    -0.08    -0.01
+#> rescor(ilr3,ilr4)     0.56      0.01     0.53     0.58
+#>                   Rhat Bulk_ESS Tail_ESS
+#> rescor(ilr1,ilr2) 1.00     6181     3388
+#> rescor(ilr1,ilr3) 1.00     4693     3018
+#> rescor(ilr2,ilr3) 1.00     5906     3466
+#> rescor(ilr1,ilr4) 1.00     5590     3278
+#> rescor(ilr2,ilr4) 1.00     6525     3923
+#> rescor(ilr3,ilr4) 1.00     5916     3176
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -154,7 +183,10 @@ mv0 <- brmcoda(compilr = cilr,
                iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
                backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 #> Setting 'rescor' to TRUE by default for this model
-#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+#> Warning: In the future, 'rescor' will be set to FALSE
+#> by default for all models. It is thus recommended to
+#> explicitely set 'rescor' via 'set_rescor' instead of
+#> using the default.
 #> Compiling Stan program...
 #> Start sampling
 # full model
@@ -163,7 +195,10 @@ mv <- brmcoda(compilr = cilr,
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 #> Setting 'rescor' to TRUE by default for this model
-#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+#> Warning: In the future, 'rescor' will be set to FALSE
+#> by default for all models. It is thus recommended to
+#> explicitely set 'rescor' via 'set_rescor' instead of
+#> using the default.
 #> Compiling Stan program...
 #> Start sampling
 ```
@@ -182,7 +217,7 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model       BF
-#> [1]       8.14e-05
+#> [1]       2.74e-04
 #> 
 #> * Against Denominator: [2]
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
