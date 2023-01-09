@@ -32,10 +32,10 @@ If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
 Should the estimate at each level of the reference grid (\code{FALSE})
 or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
 
-\item{level}{A character value or vector.
+\item{level}{A character string or vector.
 Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
 
-\item{type}{A character value or vector.
+\item{type}{A character string or vector.
 Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}

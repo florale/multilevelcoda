@@ -12,8 +12,8 @@
 #' 
 #' data(mcompd)
 #' 
-#' ps <- possub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-#' ps2 <- possub(c("WAKE", "MVPA", "LPA", "SB"))
+#' ps <- basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' ps2 <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
 #' 
 #' print(ps2)
 #' 

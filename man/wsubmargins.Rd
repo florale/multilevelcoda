@@ -15,10 +15,10 @@ wsubmargins(object, delta, basesub, level = "within", type = "marginal", ...)
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{level}{A character value or vector.
+\item{level}{A character string or vector.
 Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
 
-\item{type}{A character value or vector.
+\item{type}{A character string or vector.
 Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
