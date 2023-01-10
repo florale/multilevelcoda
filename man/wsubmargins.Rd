@@ -45,7 +45,7 @@ the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 }
 \examples{
-\dontrun{
+\donttest{
 data(mcompd)
 data(sbp)
 data(psub)

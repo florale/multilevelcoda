@@ -29,7 +29,7 @@ along with many other useful information about the model.}
 This function fits a \code{brm} model with multilevel ILR coordinates.
 }
 \examples{
-\dontrun{
+\donttest{
 data(mcompd)
 data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, 

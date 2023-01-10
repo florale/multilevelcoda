@@ -45,7 +45,6 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 Computes sets of compositions and IRLs for Multilevel Compositional Data models.
 }
 \examples{
-## Example 1 - Dataset with no 0
 data(mcompd)
 data(sbp)
 cilr1 <- compilr(data = mcompd, sbp = sbp, 

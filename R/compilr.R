@@ -36,7 +36,6 @@
 #' @importFrom zCompositions lrEM
 #' @export
 #' @examples
-#' ## Example 1 - Dataset with no 0
 #' data(mcompd)
 #' data(sbp)
 #' cilr1 <- compilr(data = mcompd, sbp = sbp, 

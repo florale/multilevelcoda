@@ -62,7 +62,7 @@ the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 }
 \examples{
-\dontrun{
+\donttest{
 data(mcompd)
 data(sbp)
 data(psub)
@@ -75,7 +75,7 @@ m <- brmcoda(compilr = cilr,
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
              chain = 1, iter = 500)
              
-subm <- substitution(object = m, delta = c(30, 60),
+subm <- substitution(object = m, delta = c(1, 10),
                      type = "conditional", level = c("between", "within"))
 }
 }

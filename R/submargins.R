@@ -36,26 +36,22 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-#'                 
-#' library(doFuture)
-#' registerDoFuture()
-#' plan(multisession, workers = 5)
 #' 
 #' # model with compositional predictor
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
 #'              chain = 1, iter = 500)
-#' subm <- submargins(object = m, basesub = psub, delta = 1:5)
+#' subm <- submargins(object = m, basesub = psub, delta = 5)
 #' }
-submargins <- function (object, delta, basesub,
-                        level = "total", type = "marginal",
-                        ...) {
+submargins <- function(object, delta, basesub,
+                       level = "total", type = "marginal",
+                       ...) {
   
   # full composition
   t <- object$CompIlr$TotalComp
