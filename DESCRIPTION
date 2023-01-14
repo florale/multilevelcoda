@@ -32,6 +32,7 @@ Imports:
     data.table (>= 1.12.0),
     compositions,
     brms,
+    bayestestR,
     extraoperators,
     ggplot2,
     emmeans,
@@ -44,8 +45,7 @@ Suggests:
     knitr,
     rmarkdown,
     doFuture,
-    lme4,
-    bayestestR
+    lme4
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 VignetteBuilder: knitr
