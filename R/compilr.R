@@ -33,7 +33,6 @@
 #' 
 #' @importFrom compositions ilr acomp gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
-#' @importFrom zCompositions lrEM
 #' @export
 #' @examples
 #' data(mcompd)

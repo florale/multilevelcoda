@@ -15,8 +15,6 @@
 #' @return A ggplot graph object showing the estimated difference in outcome when
 #' each pair of compositional variables are substituted for a specific time.
 #' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_ribbon facet_grid xlab ylab
-#' @importFrom ggsci scale_color_simpsons
-#' @importFrom ggsci scale_fill_simpsons
 #' @importFrom data.table copy
 #' @export
 plotsub <- function(data, x, y, ...) {
