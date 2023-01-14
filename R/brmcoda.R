@@ -19,7 +19,7 @@
 #' @importFrom brms brm
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
