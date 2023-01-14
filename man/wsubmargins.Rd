@@ -51,10 +51,6 @@ data(sbp)
 data(psub)
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-                
-library(doFuture)
-registerDoFuture()
-plan(multisession, workers = 5)
 
 # model with compositional predictor at between and within-person levels
 m <- brmcoda(compilr = cilr, 
