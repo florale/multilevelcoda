@@ -30,17 +30,17 @@ jobs:
           needs: website
           
       - name: Install dependencies
-        run: |
-        remotes::install_deps(dependencies = TRUE)
-        install.packages("pkgdown", type = "binary")
-        install.packages("preferably")
+        run: 
+          install.packages("remotes")
+          remotes::install_github("amirmasoudabdol/preferably", type = "source")
+        shell: Rscript {0}	  
 
       - name: Test coverage
-        run: covr::codecov(quiet = FALSE)
+          run: covr::codecov(quiet = FALSE)
         shell: Rscript {0}
         
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+          run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
