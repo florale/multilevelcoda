@@ -31,7 +31,8 @@ jobs:
           
       - name: Install dependencies
         run: 
-          pak::install_github("amirmasoudabdol/preferably", type = "source")
+          pak::local_install_deps(dependencies = TRUE)
+          pak::pkg_install("preferably")
         shell: Rscript {0}	  
 
       - name: Build site
