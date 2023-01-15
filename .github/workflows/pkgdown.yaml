@@ -31,8 +31,7 @@ jobs:
           
       - name: Install dependencies
         run: 
-          pak::local_install_deps(dependencies = TRUE)
-          pak::pkg_install("preferably")
+          pak::pkg_install("preferably", dependencies = TRUE)
         shell: Rscript {0}	  
 
       - name: Build site
