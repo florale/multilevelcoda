@@ -104,25 +104,23 @@
 
     
     
-<p>vignette: &gt; % % % —</p>
 <div class="section level2">
 <h2 id="intro">Intro<a class="anchor" aria-label="anchor" href="#intro"></a>
 </h2>
-<p>Substitution model is a useful post-hoc analysis for regression
-models with compositional predictors. Results from our main
-<code>brms</code> model tell us how each compositional predictor
-(expressed as ILR coordiante) is associated with an outcome. However, we
-often are also interested in the changes in an outcomes when a fixed
-duration of time is reallocated from one compositional component to
-another, while the other components remain constant.</p>
-<p>The Compositional Isotemporal Substitution Model can be used to
-estimate this change. The <code>multilevelcoda</code> package implements
-this method in a multilevel framework and offers functions for both
-between- and within-person levels of variability. We discuss 4 different
+<div class="blue">
+<p>We often are interested in how an outcome changes when a fixed unit
+of the predictor (e.g., minutes of behaviours during a day) is
+reallocated from one compositional component to another. The
+Compositional Isotemporal Substitution Model can be used to estimate
+this change. The <code>multilevelcoda</code> package implements this
+method in a multilevel framework and offers functions for both between-
+and within-person levels of variability. We discuss 4 different
 substitution models in this vignette.</p>
-<p>We will begin by loading necessary packages,
+</div>
+<p><br>
+We will begin by loading necessary packages,
 <code>multilevelcoda</code>, <code>brms</code> (for models fitting),
-doFuture (for parallelisation), and datasets <code>mcompd</code>
+doFuture (for parallelisation), and data sets <code>mcompd</code>
 (simulated compositional sleep and wake variables), <code>sbp</code>
 (sequential binary partition), and <code>psub</code> (base possible
 substitution).</p>
@@ -167,10 +165,10 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Group-Level Effects: </span></span>
 <span><span class="co">#&gt; ~ID (Number of levels: 266) </span></span>
-<span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat</span></span>
-<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00</span></span>
-<span><span class="co">#&gt;               Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)     1574     2552</span></span>
+<span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS</span></span>
+<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574</span></span>
+<span><span class="co">#&gt;               Tail_ESS</span></span>
+<span><span class="co">#&gt; sd(Intercept)     2552</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Population-Level Effects: </span></span>
 <span><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS</span></span>
@@ -197,10 +195,8 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span><span class="co">#&gt; Female        2370</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family Specific Parameters: </span></span>
-<span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS</span></span>
-<span><span class="co">#&gt; sigma     2.37      0.03     2.31     2.43 1.00     5233</span></span>
-<span><span class="co">#&gt;       Tail_ESS</span></span>
-<span><span class="co">#&gt; sigma     2780</span></span>
+<span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; sigma     2.37      0.03     2.31     2.43 1.00     5233     2780</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -221,32 +217,32 @@ specific changes in time spent across behaviours. That is, if people
 sleep more, what behaviour do they spend less time in?</p>
 <p>This is common issue when working with multilevel compositional data
 as ILR coordinates often contains information about multiple
-compositional components. It is further inconvenient in the case of
-within-person ILR coordinates, as they represent the deviation from the
-mean (between-person) ILR coordinates. To gain further insights into
-these associations and help with interpretation, we can conduct post-hoc
+compositional components. To gain further insights into these
+associations and help with interpretation, we can conduct post-hoc
 analyses using the substitution models from our <code>multilevel</code>
 package.</p>
 </div>
 <div class="section level2">
 <h2 id="substitution-models">Substitution models<a class="anchor" aria-label="anchor" href="#substitution-models"></a>
 </h2>
-<p><code>multilevelcoda</code> package provides <code>4</code> different
-functions to compute substitution models, using the
+<p><code>multilevelcoda</code> package provides <code>2</code> different
+methods to compute substitution models, via the
 <code><a href="../reference/substitution.html">substitution()</a></code> function.</p>
-<p>Basic substitution model:</p>
+<p>Basic substitution models:</p>
 <ul>
-<li>Between-person substitution model</li>
-<li>Within-person substitution model</li>
+<li>
+<em>Between-person</em> substitution</li>
+<li>
+<em>Within-person</em> substitution</li>
 </ul>
-<p>Average marginal substitution model:</p>
+<p>Average marginal substitution models:</p>
 <ul>
-<li>Average marginal between-person substitution model</li>
-<li>Average marginal within-person substitution model</li>
+<li>Average marginal <em>between-person</em> substitution</li>
+<li>Average marginal <em>within-person</em> substitution</li>
 </ul>
-<p><em>Tips</em>: Substitution models are often computationally
-demanding tasks. You can speed up the models using parallel execution,
-for example, using <code>doFuture</code> package.</p>
+<p><em>Tips: Substitution models are often computationally demanding
+tasks. You can speed up the models using parallel execution, for
+example, using <code>doFuture</code> package.</em></p>
 <div class="section level3">
 <h3 id="basic-substitution-model">Basic substitution model<a class="anchor" aria-label="anchor" href="#basic-substitution-model"></a>
 </h3>
@@ -263,7 +259,8 @@ covariates as the default.</p>
 <span>                      type <span class="op">=</span> <span class="st">"conditional"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Output from <code><a href="../reference/substitution.html">substitution()</a></code> contains multiple data set of
 results for all available compositional component. Here are the results
-for changes in stress when sleep (TST) is substituted for 5 minutes.</p>
+for changes in stress when sleep (TST) is substituted for 10
+minutes.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm1</span><span class="op">$</span><span class="va">BetweenpersonSub</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -363,11 +360,11 @@ for changes in stress when sleep (TST) is substituted for 5 minutes.</p>
 <p>None of them are significant, given that the credible intervals did
 not cross 0, showing that increasing sleep (TST) at the expense of any
 other behaviours was not associated in changes in stress at
-between-person level.</p>
-<p>These results can be plotted to see the patterns more easily using
-the <code><a href="../reference/plotsub.html">plotsub()</a></code> function.</p>
+between-person level. These results can be plotted to see the patterns
+more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></code> function.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenpersonSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenpersonSub</span><span class="op">$</span><span class="va">TST</span>, </span>
+<span>        x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mlmcoda-mlmcoda-plotbsubm1-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;"></p>
 <p>Here are the results for within-person level.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -468,12 +465,11 @@ the <code><a href="../reference/plotsub.html">plotsub()</a></code> function.</p>
 </table>
 <p>At within-person level, we got some significant results for
 substitution of sleep (TST) and time awake in bed (WAKE) for 5 minutes,
-but not other behaviours. For males (Female = 0), increasing 5 minutes
-in sleep at the expense of time spent awake in bed predicted 0.02 higher
-stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and
-more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,
--0.00]).</p>
-<p>Let’s also plot theses results.</p>
+but not other behaviours. Increasing 5 minutes in sleep at the expense
+of time spent awake in bed predicted 0.04 higher stress [95% CI 0.01,
+0.7], on a given day. Conversely, less sleep and more time awake in bed
+predicted less stress (b = -0.03 [95% CI -0.06, -0.01]). Let’s also plot
+theses results.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">WithinpersonSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mlmcoda-mlmcoda-plotwsubm1-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;"></p>
@@ -481,20 +477,19 @@ more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,
 <div class="section level3">
 <h3 id="average-marginal-substitution-effects">Average Marginal Substitution Effects<a class="anchor" aria-label="anchor" href="#average-marginal-substitution-effects"></a>
 </h3>
-<p>Average substitution models models are generally more computationally
-expensive than basic subsitution models. The average marginal models use
-the group- level compositional mean as the reference composition to
-obtain the average of the predicted group-level changes in the outcome
-when every person in the sample reallocates a specific unit from one
-compositional part to another. This is difference from the basic
-substitution model which yields prediction conditioned on an “average”
-person in the data set (by using the population- level compositional
-mean as the reference composition). All models can be run faster in
-shorter walltime using parallel execution.</p>
-<p>In this example, we use package <code>doFuture</code> for
-parallelisation. <code><a href="../reference/substitution.html">substitution()</a></code> will run 5 substitution
-models for 5 sleep-wake behaviours, so we will parallel them across 5
-workers.</p>
+<p>The average marginal models use the group- level compositional mean
+as the reference composition to obtain the average of the predicted
+group-level changes in the outcome when every person in the sample
+reallocates a specific unit from one compositional part to another. This
+is difference from the basic substitution model which yields prediction
+conditioned on an “average” person in the data set (by using the
+population- level compositional mean as the reference composition).
+Average substitution models models are generally more computationally
+expensive than basic subsitution models. All models can be run faster in
+shorter walltime using parallel execution. In this example, we use
+package <code>doFuture</code> to parallel our models.
+<code><a href="../reference/substitution.html">substitution()</a></code> will run 5 substitution models for 5
+sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://doFuture.futureverse.org/reference/registerDoFuture.html" class="external-link">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -502,6 +497,7 @@ workers.</p>
 <span><span class="va">subm2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
 <span>                      type <span class="op">=</span> <span class="st">"marginal"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/foreach/man/registerDoSEQ.html" class="external-link">registerDoSEQ</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Below are the results.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm2</span><span class="op">$</span><span class="va">BetweenpersonSubMargins</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">

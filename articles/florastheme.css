@@ -1,0 +1,81 @@
+<style>
+body {
+   font-family: sans-serif;
+   font-size: 16px
+}
+header {
+  font-family: sans-serif;
+}
+h1{
+  font-family: sans-serif;
+  font-size: 26px
+}
+h2{
+  font-family: sans-serif;
+  font-size: 24px
+}
+h3{
+  font-family: sans-serif;
+  font-size: 20px
+}
+h4{
+  font-family: sans-serif;
+  font-size: 18px
+}
+div.blue {
+  background-color:#BFD3E2; 
+  border-radius: 4px; 
+  padding: 12px 6px 6px 10px
+}
+
+div.lblue {
+  background-color:#E2EBF2; 
+  border-radius: 4px; 
+  padding: 12px 6px 6px 10px
+}
+div.brown {
+  background-color:#F3EEE9; 
+  border-radius: 4px; 
+  padding: 12px 6px 6px 10px
+}
+div.sand {
+  background-color:#F3F0E7; 
+  border-radius: 4px; 
+  padding: 12px 6px 6px 10px
+}
+div.green {
+   background-color:#D8DFD9; 
+   border-radius: 4px; 
+   padding: 12px 6px 6px 10px
+}
+div.pink {
+   background-color:#E8DDD9; 
+   border-radius: 4px; 
+   padding: 12px 6px 6px 10px
+}
+div.lpink {
+   background-color:#F2EDEE; 
+   border-radius: 4px; 
+   padding: 12px 6px 6px 10px
+}
+div.dblue {
+   background-color:#A3B1BE; 
+   border-radius: 4px; 
+   padding: 12px 6px 6px 10px
+}
+div.sky {
+   background-color:#D2E0EA; 
+   border-radius: 4px; 
+   padding: 12px 6px 6px 10px
+}
+div.beige {
+  background-color:#FAF7F3; 
+  border-radius: 4px; 
+  padding: 12px 6px 6px 10px
+}
+div.gbrown {
+  background-color:#DCD5CE; 
+  border-radius: 4px; 
+  padding: 12px 6px 6px 10px
+}
+</style>
