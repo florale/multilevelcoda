@@ -244,7 +244,6 @@ significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
 <div class="section level2">
 <h2 id="bayes-factor-for-compositional-multilevel-modelling">Bayes Factor for compositional multilevel modelling<a class="anchor" aria-label="anchor" href="#bayes-factor-for-compositional-multilevel-modelling"></a>
 </h2>
-<div class="blue">
 <p>We are often interested in whether a predictor significantly predict
 the overall composition, in addition to the individual ILR coordinates.
 In Bayesian, this can be done by comparing the marginal likelihoods of
@@ -258,7 +257,6 @@ modelling, Bayes Factors provide two main useful functions:</p>
 <p>We can utilize Bayes factors to answer the following question:
 <em>“Which model (i.e., set of composition predictors, expressed as
 ILRs) is more likely to have produced the observed data?”</em></p>
-</div>
 <p>Let’s examine whether stress predicts the overall sleep-wake
 composition.</p>
 <p><em>Note</em>: To use Bayes factors, <code>brmsfit</code> models must
@@ -296,7 +294,7 @@ be fitted with an additional non-default argument
 <span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     Model       BF</span></span>
-<span><span class="co">#&gt; [1]       1.76e-04</span></span>
+<span><span class="co">#&gt; [1]       3.51e-04</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * Against Denominator: [2]</span></span>
 <span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
