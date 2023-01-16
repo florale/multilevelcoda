@@ -1,12 +1,20 @@
 ---
 title: "Compositional Multilevel Substitution Models"
-output:
+output: 
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: true
-    toc_depth: 3
+    theme: sandstone
+    highlight: zenburn
+    css: "florastheme.css"
+    toc: yes
+    toc_float: yes
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    fig_caption: yes
+    number_sections: true
+---
 vignette: >
   %\VignetteIndexEntry{Compositional Multilevel Substitution Models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -35,18 +43,7 @@ and datasets `mcompd` (simulated compositional sleep and wake variables),
 ```r
 library(multilevelcoda)
 library(brms)
-#> Loading required package: Rcpp
-#> Loading 'brms' package (version 2.18.0). Useful instructions
-#> can be found by typing help('brms'). A more detailed introduction
-#> to the package is available through vignette('brms_overview').
-#> 
-#> Attaching package: 'brms'
-#> The following object is masked from 'package:stats':
-#> 
-#>     ar
 library(doFuture)
-#> Loading required package: foreach
-#> Loading required package: future
 
 data("mcompd") 
 data("sbp")
@@ -87,40 +84,40 @@ summary(m$Model)
 #> 
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
-#>               Estimate Est.Error l-95% CI u-95% CI
-#> sd(Intercept)     0.99      0.06     0.87     1.11
-#>               Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept) 1.00     1574     2552
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00
+#>               Bulk_ESS Tail_ESS
+#> sd(Intercept)     1574     2552
 #> 
 #> Population-Level Effects: 
-#>           Estimate Est.Error l-95% CI u-95% CI Rhat
-#> Intercept     2.62      0.49     1.66     3.58 1.00
-#> bilr1         0.11      0.31    -0.48     0.73 1.00
-#> bilr2         0.52      0.33    -0.13     1.20 1.00
-#> bilr3         0.13      0.22    -0.30     0.55 1.00
-#> bilr4         0.02      0.28    -0.54     0.55 1.00
-#> wilr1        -0.34      0.12    -0.58    -0.11 1.00
-#> wilr2         0.05      0.13    -0.21     0.30 1.00
-#> wilr3        -0.11      0.08    -0.26     0.05 1.00
-#> wilr4         0.24      0.10     0.04     0.44 1.00
-#> Female       -0.39      0.17    -0.71    -0.06 1.00
-#>           Bulk_ESS Tail_ESS
-#> Intercept     1345     2241
-#> bilr1         1126     2074
-#> bilr2         1366     1982
-#> bilr3         1126     1436
-#> bilr4          922     1831
-#> wilr1         3041     2537
-#> wilr2         3208     3224
-#> wilr3         3269     3139
-#> wilr4         3279     2873
-#> Female        1515     2370
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> Intercept     2.62      0.49     1.66     3.58 1.00     1345
+#> bilr1         0.11      0.31    -0.48     0.73 1.00     1126
+#> bilr2         0.52      0.33    -0.13     1.20 1.00     1366
+#> bilr3         0.13      0.22    -0.30     0.55 1.00     1126
+#> bilr4         0.02      0.28    -0.54     0.55 1.00      922
+#> wilr1        -0.34      0.12    -0.58    -0.11 1.00     3041
+#> wilr2         0.05      0.13    -0.21     0.30 1.00     3208
+#> wilr3        -0.11      0.08    -0.26     0.05 1.00     3269
+#> wilr4         0.24      0.10     0.04     0.44 1.00     3279
+#> Female       -0.39      0.17    -0.71    -0.06 1.00     1515
+#>           Tail_ESS
+#> Intercept     2241
+#> bilr1         2074
+#> bilr2         1982
+#> bilr3         1436
+#> bilr4         1831
+#> wilr1         2537
+#> wilr2         3224
+#> wilr3         3139
+#> wilr4         2873
+#> Female        2370
 #> 
 #> Family Specific Parameters: 
-#>       Estimate Est.Error l-95% CI u-95% CI Rhat
-#> sigma     2.37      0.03     2.31     2.43 1.00
-#>       Bulk_ESS Tail_ESS
-#> sigma     5233     2780
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> sigma     2.37      0.03     2.31     2.43 1.00     5233
+#>       Tail_ESS
+#> sigma     2780
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -164,7 +161,6 @@ Average marginal substitution model:
 You can speed up the models using parallel execution, for example, using `doFuture` package.
 
 ## Basic substitution model
-### Between-person substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
 We specify `level = between` to indicate substitutional change would be at the between-person level, 
 and `type = conditional` to indicate basic substitution model.
@@ -173,8 +169,8 @@ will average predictions across levels of covariates as the default.
 
 
 ```r
-bsubm1 <- substitution(object = m, delta = 1:5, 
-                      level = "between", type = "conditional")
+subm1 <- substitution(object = m, delta = 1:10,
+                      type = "conditional", level = c("between", "within"))
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -182,15 +178,21 @@ Here are the results for changes in stress when sleep (TST) is substituted for 5
 
 
 ```r
-knitr::kable(bsubm1$TST)
+knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
 ```
 
 
 
-||
-||
-||
-||
+|   Mean| CI_low| CI_high| Delta|To  |From |Level   |EffectType  |
+|------:|------:|-------:|-----:|:---|:----|:-------|:-----------|
+|  0.065| -0.003|   0.134|    10|TST |WAKE |between |conditional |
+|  0.005| -0.028|   0.038|    10|TST |MVPA |between |conditional |
+|  0.011| -0.013|   0.035|    10|TST |LPA  |between |conditional |
+|  0.014| -0.014|   0.043|    10|TST |SB   |between |conditional |
+| -0.056| -0.117|   0.002|   -10|TST |WAKE |between |conditional |
+| -0.005| -0.037|   0.026|   -10|TST |MVPA |between |conditional |
+| -0.011| -0.035|   0.013|   -10|TST |LPA  |between |conditional |
+| -0.014| -0.042|   0.013|   -10|TST |SB   |between |conditional |
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
@@ -200,46 +202,34 @@ These results can be plotted to see the patterns more easily using the `plotsub(
 
 
 ```r
-plotsub(data = bsubm1$TST, x = "sleep", y = "stress")
+plotsub(data = subm1$BetweenpersonSub$TST, x = "sleep", y = "stress")
 ```
 
 
+<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;" />
 
-```
-#> Error in plotsub(data = bsubm1$TST, x = "sleep", y = "stress"): data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
-```
-
-### Within-person substitution model
-
-Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are
-substituted for 5 minutes, at within-person level. 
-We can obtain prediction for each level of covariates by adding 
-an argument `summary = FALSE` to `substitution()`.
+Here are the results for within-person level.
 
 
 ```r
-wsubm1 <- substitution(object = m, delta = 5, 
-                      level = "within", type = "conditional",
-                      summary = FALSE)
-```
-
-Results for 5 minute substitution for each level of covariates. In this example, we get separate 
-predictions for males and females.
-
-
-```r
-knitr::kable(wsubm1$TST)
+knitr::kable(subm1$WithinpersonSub$TST[abs(Delta) == 10])
 ```
 
 
 
-||
-||
-||
-||
+|   Mean| CI_low| CI_high| Delta|To  |From |Level  |EffectType  |
+|------:|------:|-------:|-----:|:---|:----|:------|:-----------|
+|  0.036|  0.007|   0.066|    10|TST |WAKE |within |conditional |
+| -0.006| -0.018|   0.006|    10|TST |MVPA |within |conditional |
+| -0.010| -0.019|   0.000|    10|TST |LPA  |within |conditional |
+| -0.004| -0.014|   0.006|    10|TST |SB   |within |conditional |
+| -0.030| -0.056|  -0.005|   -10|TST |WAKE |within |conditional |
+|  0.006| -0.005|   0.018|   -10|TST |MVPA |within |conditional |
+|  0.009|  0.000|   0.019|   -10|TST |LPA  |within |conditional |
+|  0.004| -0.006|   0.013|   -10|TST |SB   |within |conditional |
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
-awake in bed (WAKE) for 5 minutes for both males and females, but not other behaviours. 
+awake in bed (WAKE) for 5 minutes, but not other behaviours. 
 For males (Female = 0), increasing 5 minutes in sleep at the expense of time spent awake 
 in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
 more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]). 
@@ -248,14 +238,11 @@ Let's also plot theses results.
 
 
 ```r
-plotsub(data = wsubm1$TST, x = "sleep", y = "stress")
+plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress")
 ```
 
 
-
-```
-#> Error in plotsub(data = wsubm1$TST, x = "sleep", y = "stress"): data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
-```
+<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;" />
 
 ## Average Marginal Substitution Effects
 
@@ -268,8 +255,6 @@ an "average" person in the data set (by using the population- level compositiona
 as the reference composition). 
 All models can be run faster in shorter walltime using parallel execution.
 
-### Between-person Average Marginal Substitution Effects
-
 In this example, we use package `doFuture` for parallelisation. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
@@ -277,26 +262,47 @@ substitution models for 5 sleep-wake behaviours, so we will parallel them across
 ```r
 registerDoFuture()
 plan(multisession, workers = 5)
-```
 
-
-```r
-bsubm2 <- substitution(object = m, delta = 1:5,
-                       level = "between", type = "marginal")
-knitr::kable(bsubm2$TST[abs(MinSubstituted) == 5])
-#> Error in knitr::kable(bsubm2$TST[abs(MinSubstituted) == 5]): object 'MinSubstituted' not found
-```
-
-### Estimating average marginal effect for within-person substitution
-
-
-```r
-wsubm2 <- substitution(object = m, delta = 1:5,
-                       level = "within", type = "marginal")
-knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5])
-#> Error in knitr::kable(wsubm2$TST[abs(MinSubstituted) == 5]): object 'MinSubstituted' not found
+subm2 <- substitution(object = m, delta = 1:10,
+                      type = "marginal", level = c("between", "within"))
 registerDoSEQ()
 ```
+
+
+
+```r
+knitr::kable(subm2$BetweenpersonSubMargins$TST[abs(Delta) == 10])
+```
+
+
+
+|   Mean| CI_low| CI_high| Delta|To  |From |Level   |EffectType |
+|------:|------:|-------:|-----:|:---|:----|:-------|:----------|
+|  0.078| -0.003|   0.162|    10|TST |WAKE |between |marginal   |
+|  0.005| -0.032|   0.042|    10|TST |MVPA |between |marginal   |
+|  0.011| -0.014|   0.036|    10|TST |LPA  |between |marginal   |
+|  0.015| -0.015|   0.045|    10|TST |SB   |between |marginal   |
+| -0.063| -0.131|   0.003|   -10|TST |WAKE |between |marginal   |
+| -0.005| -0.041|   0.029|   -10|TST |MVPA |between |marginal   |
+| -0.012| -0.037|   0.014|   -10|TST |LPA  |between |marginal   |
+| -0.015| -0.045|   0.014|   -10|TST |SB   |between |marginal   |
+
+```r
+knitr::kable(subm2$WithinpersonSubMargins$TST[abs(Delta) == 10])
+```
+
+
+
+|   Mean| CI_low| CI_high| Delta|To  |From |Level  |EffectType |
+|------:|------:|-------:|-----:|:---|:----|:------|:----------|
+|  0.046|  0.009|   0.082|    10|TST |WAKE |within |marginal   |
+| -0.007| -0.020|   0.006|    10|TST |MVPA |within |marginal   |
+| -0.010| -0.019|   0.000|    10|TST |LPA  |within |marginal   |
+| -0.004| -0.014|   0.007|    10|TST |SB   |within |marginal   |
+| -0.035| -0.064|  -0.006|   -10|TST |WAKE |within |marginal   |
+|  0.007| -0.006|   0.019|   -10|TST |MVPA |within |marginal   |
+|  0.010|  0.000|   0.019|   -10|TST |LPA  |within |marginal   |
+|  0.004| -0.007|   0.014|   -10|TST |SB   |within |marginal   |
 
 A comparison between between- and within-person substitution model of sleep on stress, 
 plot using `plotsub()` and `ggpubr::ggarrange()` functions.
@@ -304,23 +310,12 @@ plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
 ```r
 library(ggpubr)
-p1 <- plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress")
-p2 <- plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress")
+p1 <- plotsub(data = subm2$BetweenpersonSubMargins$TST, x = "between-person sleep", y = "stress")
+p2 <- plotsub(data = subm2$WithinpersonSubMargins$TST, x = "within-person sleep", y = "stress")
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
 ```
 
 
-
-```
-#> Loading required package: ggplot2
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
-#> Error in plotsub(data = bsubm2$TST, x = "between-person sleep", y = "stress"): data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
-#> Error in plotsub(data = wsubm2$TST, x = "within-person sleep", y = "stress"): data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
-#> Error in ggarrange(p1, p2, ncol = 1, nrow = 2): object 'p1' not found
-```
+<img src="mlmcoda-mlmcoda-submargins-1.png" title="Example of Average Marginal Substitution Model" alt="Example of Average Marginal Substitution Model" style="display: block; margin: auto;" />

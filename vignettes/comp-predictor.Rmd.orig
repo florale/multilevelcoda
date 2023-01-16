@@ -1,12 +1,20 @@
 ---
 title: "Multilevel Models with Compositional Predictors"
-output:
+output: 
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: true
-    toc_depth: 3
+    theme: sandstone
+    highlight: zenburn
+    css: "florastheme.css"
+    toc: yes
+    toc_float: yes
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    fig_caption: yes
+    number_sections: true
+---
 vignette: >
   %\VignetteIndexEntry{Multilevel Models with Compositional Predictors}
   %\VignetteEngine{knitr::rmarkdown}
@@ -248,7 +256,7 @@ The output contains multiple data sets of results for all compositional componen
 Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. 
 
 ```{r bsubm, results = "asis"}
-knitr::kable(bsubm$TST)
+knitr::kable(bsubm$BetweenpersonSub$TST)
 ```
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
@@ -269,7 +277,7 @@ wsubm <- substitution(object = m, delta = 5,
 Results for 5 minute substitution.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(wsubm$TST)
+knitr::kable(wsubm$WithinpersonSub$TST)
 ```
 
 At within-person level, there were significant results for substitution of sleep (TST) and time 
