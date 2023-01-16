@@ -66,7 +66,7 @@ is the compositional mean of the dataset provided.
 For average marginal effect, use \code{\link{bsubmargins}}.
 }
 \examples{
-\dontrun{
+\donttest{
 data(mcompd)
 data(sbp)
 data(psub)
