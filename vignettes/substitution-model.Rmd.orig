@@ -33,13 +33,16 @@ library(cowplot)
 ```
 
 # Intro
+<div class = "blue">
+
 We often are interested in how an outcome changes when a fixed unit of the predictor 
 (e.g., minutes of behaviours during a day) is reallocated
 from one compositional component to another. 
 The Compositional Isotemporal Substitution Model can be used to estimate this change. 
 The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
 for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
-
+</div>
+\
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
 and data sets `mcompd` (simulated compositional sleep and wake variables),

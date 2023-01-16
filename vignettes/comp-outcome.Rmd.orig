@@ -1,12 +1,19 @@
 ---
 title: "Multilevel Model with Compositional Outcomes"
-output:
+output: 
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: true
-    toc_depth: 3
+    theme: sandstone
+    highlight: zenburn
+    css: "florastheme.css"
+    toc: yes
+    toc_float: yes
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    fig_caption: yes
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{Multilevel Model with Compositional Outcomes}
   %\VignetteEngine{knitr::rmarkdown}
@@ -40,9 +47,6 @@ options(digits = 3)
 
 # Multilevel model with compositional outcomes.
 ## Computing compositions and isometric log ratio coordinates. 
-
-A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,
-each of which is predicted by a set of predictors. 
 The ILR coordinates outcomes can be calculated using the `compilr()` functions.
 
 ```{r compilr}
@@ -53,6 +57,8 @@ head(cilr$TotalILR)
 ```
 
 ## Fitting model
+
+A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,each of which is predicted by a set of predictors. 
 Our `brms` model can be then fitted using the `brmcoda()` function.
 
 ```{r brmcoda, results = "hide"}
@@ -69,6 +75,7 @@ summary(mv$Model)
 ```
 
 # Bayes Factor for compositional multilevel modelling
+<div class = "blue">
 
 We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. 
 In Bayesian, this can be done by comparing the marginal likelihoods of two models. 
@@ -79,7 +86,9 @@ In the context of compositional multilevel modelling, Bayes Factors provide two 
 - Comparing models 
 
 We can utilize Bayes factors to answer the following question: 
-*"Which model is more likely to have produced the observed data?"*
+*"Which model (i.e., set of composition predictors, expressed as ILRs) is more likely to have produced the observed data?"*
+
+</div>
 
 Let's examine whether stress predicts the overall sleep-wake composition.
 

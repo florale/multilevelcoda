@@ -23,13 +23,16 @@ vignette: >
 
 
 # Intro
+<div class = "blue">
+
 We often are interested in how an outcome changes when a fixed unit of the predictor 
 (e.g., minutes of behaviours during a day) is reallocated
 from one compositional component to another. 
 The Compositional Isotemporal Substitution Model can be used to estimate this change. 
 The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
 for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
-
+</div>
+\
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
 and data sets `mcompd` (simulated compositional sleep and wake variables),
@@ -180,9 +183,9 @@ knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
 |  0.065| -0.003|   0.134|    10|TST |WAKE |between |conditional |
 |  0.005| -0.028|   0.038|    10|TST |MVPA |between |conditional |
 |  0.011| -0.013|   0.035|    10|TST |LPA  |between |conditional |
-|  0.014| -0.014|   0.042|    10|TST |SB   |between |conditional |
+|  0.014| -0.014|   0.043|    10|TST |SB   |between |conditional |
 | -0.056| -0.117|   0.002|   -10|TST |WAKE |between |conditional |
-| -0.005| -0.038|   0.026|   -10|TST |MVPA |between |conditional |
+| -0.005| -0.037|   0.026|   -10|TST |MVPA |between |conditional |
 | -0.011| -0.035|   0.013|   -10|TST |LPA  |between |conditional |
 | -0.014| -0.042|   0.013|   -10|TST |SB   |between |conditional |
 
@@ -211,13 +214,13 @@ knitr::kable(subm1$WithinpersonSub$TST[abs(Delta) == 10])
 
 |   Mean| CI_low| CI_high| Delta|To  |From |Level  |EffectType  |
 |------:|------:|-------:|-----:|:---|:----|:------|:-----------|
-|  0.037|  0.007|   0.067|    10|TST |WAKE |within |conditional |
+|  0.036|  0.007|   0.066|    10|TST |WAKE |within |conditional |
 | -0.006| -0.018|   0.006|    10|TST |MVPA |within |conditional |
 | -0.010| -0.019|   0.000|    10|TST |LPA  |within |conditional |
 | -0.004| -0.014|   0.006|    10|TST |SB   |within |conditional |
 | -0.030| -0.056|  -0.005|   -10|TST |WAKE |within |conditional |
 |  0.006| -0.005|   0.018|   -10|TST |MVPA |within |conditional |
-|  0.010|  0.000|   0.019|   -10|TST |LPA  |within |conditional |
+|  0.009|  0.000|   0.019|   -10|TST |LPA  |within |conditional |
 |  0.004| -0.006|   0.013|   -10|TST |SB   |within |conditional |
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
@@ -253,7 +256,6 @@ plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
                       type = "marginal", level = c("between", "within"))
-#> Error: MultisessionFuture (doFuture-2) failed to call gassign() on cluster RichSOCKnode #2 (PID 36056 on localhost 'localhost'). The reason reported was 'error writing to connection'. Post-mortem diagnostic: A process with this PID exists, which suggests that the localhost worker is still alive. Detected a non-exportable reference ('externalptr') in one of the globals ('basesub' of class 'data.table') used in the future expression. The total size of the 49 globals exported is 12.44 MiB. The three largest globals are 'object' (10.35 MiB of class 'list'), 'setDT' (522.51 KiB of class 'function') and 'clo' (281.16 KiB of class 'function')
 registerDoSEQ()
 ```
 
