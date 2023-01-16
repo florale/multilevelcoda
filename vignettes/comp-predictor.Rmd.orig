@@ -94,15 +94,11 @@ knitr::kable(psub)
 # Multilevel model with compositional predictors
 ## Compositions and isometric log ratio (ILR) coordinates. 
 
-<div class = "blue">
-
 Compositional data are often expressed as a set of isometric log ratio (ILR)
 coordinates in regression models. We can use the `compilr()` function to calculate 
 both between- and within-level ILR coordinates for use in subsequent models as 
 predictors.
 
-</div>
-\
 
 *Notes: `compilr()` also calculates total ILR coordinates to be used 
 as outcomes (or predictors) in models, if the decomposition into a 
@@ -178,9 +174,6 @@ is the substitution model.
 We will discuss the substitution model later in this vignette.
 
 ## Bayes Factor for significance testing
-
-<div class = "blue">
-
 In the frequentist approach, we usually compare the fits of models using `anova()`.
 In Bayesian, this can be done by comparing the marginal likelihoods of two models. 
 Bayes Factors (BFs) are indices of relative evidence of one model over another. 
@@ -191,9 +184,6 @@ In the context of compositional multilevel modelling, Bayes Factors provide two 
 
 We may utilize Bayes factors to answer the following question: 
 *"Which model (i.e., set of ILR predictors) is more likely to have produced the observed data?"*
-
-</div>
-\
 
 Let's fit a series of model with `brmcoda()` to predict `STRESS` from sleep-wake composition.
 For precise Bayes factors, we will use 40,000 posterior draws for each model.
@@ -250,9 +240,6 @@ update(comparison, reference = 1)
 Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.
 
 # Substitution model
-
-<div class = "blue">
-
 When examining the relationships between compositional data and an outcome, 
 we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
 from one compositional component to another, while the other components remain constant. 
@@ -260,8 +247,7 @@ These changes can be examined using the compositional isotemporal substitution m
 In `multilevelcoda`, we extend this model to multilevel approach to test both between-person and within-person changes. All substitution models can be computed using the `substitution()` function, 
 with the following arguments:
 
-</div>
-\
+
 
 | Argument         | Description                                                                                                                                            |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|

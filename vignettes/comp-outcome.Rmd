@@ -163,7 +163,6 @@ summary(mv$Model)
 ```
 
 # Bayes Factor for compositional multilevel modelling
-<div class = "blue">
 
 We are often interested in whether a predictor significantly predict the overall composition, in addition to the individual ILR coordinates. 
 In Bayesian, this can be done by comparing the marginal likelihoods of two models. 
@@ -175,8 +174,6 @@ In the context of compositional multilevel modelling, Bayes Factors provide two 
 
 We can utilize Bayes factors to answer the following question: 
 *"Which model (i.e., set of composition predictors, expressed as ILRs) is more likely to have produced the observed data?"*
-
-</div>
 
 Let's examine whether stress predicts the overall sleep-wake composition.
 
@@ -223,7 +220,7 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model       BF
-#> [1]       1.76e-04
+#> [1]       3.51e-04
 #> 
 #> * Against Denominator: [2]
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
