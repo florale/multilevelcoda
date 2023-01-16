@@ -49,7 +49,7 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
