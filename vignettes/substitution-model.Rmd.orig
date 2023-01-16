@@ -14,7 +14,6 @@ output:
     fig_height: 4
     fig_caption: yes
     number_sections: true
----
 vignette: >
   %\VignetteIndexEntry{Compositional Multilevel Substitution Models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -34,19 +33,16 @@ library(cowplot)
 ```
 
 # Intro
-Substitution model is a useful post-hoc analysis for regression models with compositional predictors. 
-Results from our main `brms` model tell us how each compositional predictor (expressed as ILR coordiante) 
-is associated with an outcome. However,
-we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
-from one compositional component to another, while the other components remain constant.
-
+We often are interested in how an outcome changes when a fixed unit of the predictor 
+(e.g., minutes of behaviours during a day) is reallocated
+from one compositional component to another. 
 The Compositional Isotemporal Substitution Model can be used to estimate this change. 
 The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
 for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
 
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
-and datasets `mcompd` (simulated compositional sleep and wake variables),
+and data sets `mcompd` (simulated compositional sleep and wake variables),
 `sbp` (sequential binary partition), and `psub` (base possible substitution).
 
 ```{r setup}
@@ -96,27 +92,25 @@ behaviour do they spend less time in?
 
 This is common issue when working with multilevel compositional data as ILR coordinates often 
 contains information about multiple compositional components. 
-It is further inconvenient in the case of within-person ILR coordinates, as they represent the deviation from the mean (between-person) ILR coordinates. 
 To gain further insights into these associations and help with interpretation, we can conduct 
 post-hoc analyses using the substitution models from our `multilevel` package.
 
 # Substitution models
 
-`multilevelcoda` package provides `4` different functions to compute substitution models, using the
+`multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Basic substitution model:
+Basic substitution models:
 
-- Between-person substitution model
-- Within-person substitution model
+- *Between-person* substitution
+- *Within-person* substitution
 
-Average marginal substitution model:
+Average marginal substitution models:
 
-- Average marginal between-person substitution model
-- Average marginal within-person substitution model
+- Average marginal *between-person* substitution
+- Average marginal *within-person* substitution
 
-*Tips*: Substitution models are often computationally demanding tasks. 
-You can speed up the models using parallel execution, for example, using `doFuture` package.
+*Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
 ## Basic substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
@@ -131,7 +125,7 @@ subm1 <- substitution(object = m, delta = 1:10,
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
-Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes.
+Here are the results for changes in stress when sleep (TST) is substituted for 10 minutes.
 
 ```{r bsubm, results = "asis"}
 knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
@@ -139,12 +133,12 @@ knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
-in changes in stress at between-person level.
-
+in changes in stress at between-person level. 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
 ```{r plotbsub, eval=FALSE}
-plotsub(data = subm1$BetweenpersonSub$TST, x = "sleep", y = "stress")
+plotsub(data = subm1$BetweenpersonSub$TST, 
+        x = "sleep", y = "stress")
 ```
 
 
@@ -163,11 +157,9 @@ knitr::kable(subm1$WithinpersonSub$TST[abs(Delta) == 10])
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
-For males (Female = 0), increasing 5 minutes in sleep at the expense of time spent awake 
-in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
-more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]). 
-
-Let's also plot theses results.
+Increasing 5 minutes in sleep at the expense of time spent awake 
+in bed predicted 0.04 higher stress [95% CI 0.01, 0.7], on a given day. 
+Conversely, less sleep and more time awake in bed predicted less stress (b = -0.03 [95% CI -0.06,	-0.01]). Let's also plot theses results.
 
 ```{r plotwsub, eval=FALSE}
 plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress")
@@ -183,16 +175,14 @@ plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress") +
 
 ## Average Marginal Substitution Effects
 
-Average substitution models models are generally more computationally expensive than basic subsitution models. 
 The average marginal models use the group- level compositional mean as the reference composition 
 to obtain the average of the predicted group-level changes in the outcome when every person in the sample 
 reallocates a specific unit from one compositional part to another. 
 This is difference from the basic substitution model which yields prediction conditioned on 
 an "average" person in the data set (by using the population- level compositional mean
 as the reference composition). 
-All models can be run faster in shorter walltime using parallel execution.
-
-In this example, we use package `doFuture` for parallelisation. `substitution()` will run 5 
+Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
 ```{r submargin}
@@ -204,6 +194,7 @@ subm2 <- substitution(object = m, delta = 1:10,
 registerDoSEQ()
 ```
 
+Below are the results.
 
 ```{r submarginsout}
 knitr::kable(subm2$BetweenpersonSubMargins$TST[abs(Delta) == 10])

@@ -14,7 +14,6 @@ output:
     fig_height: 4
     fig_caption: yes
     number_sections: true
----
 vignette: >
   %\VignetteIndexEntry{Multilevel Models with Compositional Predictors}
   %\VignetteEngine{knitr::rmarkdown}
@@ -84,8 +83,8 @@ Columns correspond to the composition variables
 knitr::kable(sbp)
 ```
 
-The following table shows how all the possible binary substitions
-contrasts are setup. Time substitions work by taking time from the
+The following table shows how all the possible binary substitutions
+contrasts are setup. Time substitutions work by taking time from the
 -1 variable and adding time to the +1 variable.
 
 ```{r psubout, results = "asis", echo = FALSE}
@@ -99,18 +98,21 @@ Compositional data are often expressed as a set of isometric log ratio (ILR)
 coordinates in regression models. We can use the `compilr()` function to calculate 
 both between- and within-level ILR coordinates for use in subsequent models as 
 predictors.
-*Note: `compilr()` also calculates total ILR coordinates that could be used 
+
+*Note: `compilr()` also calculates total ILR coordinates to be used 
 as outcomes (or predictors) in models, if the decomposition into a 
 between- and within-level ILR coordinates was not desired.*
 
 The `compilr()` function for multilevel data requires four arguments:
 
-| Argument | Input                                                                                                   |
-|:--------:|:-------------------------------------------------------------------------------------------------------:|
-| `data`   | a dataset containing all variables: at a minimum composition variables and an ID variable               |
-| `sbp`    | a matrix with contrast codes used to calculate the sequential binary partitions for the ILR coordinates |
-| `parts`  | a character vector giving the names of the variables in `data` that are compositional                   |
-| `idvar`  | a character string giving the name of the variable that contains the IDs                                |
+| Argument     | Description                                                                                                      |
+|--------------|------------------------------------------------------------------------------------------------------------------|
+| `data`       | A long data set containing all variables needed to fit the multilevel models,                                    |
+|              | including the repeated measure compositional predictors and outcomes, along with any additional covariates.      |
+| `sbp`        | A Sequential Binary Partition to calculate $ilr$ coordinates.                                                    |
+| `parts`      | The name of the compositional components in `data`.                                                              |
+| `idvar`      | The grouping factor on `data` to compute the between-person and within-person composition and $ilr$ coordinates. |
+| `total`      | Optional argument to specify the amount to which the compositions should be closed.                              |
 
 ```{r compilr}
 cilr <- compilr(data = mcompd, sbp = sbp,
@@ -122,7 +124,7 @@ We now will use output from the `compilr()` to fit our `brms` model,
 using the `brmcoda()`. Here is a model predicting `STRESS`
 from between- and within-person sleep-wake behaviours (expressed as ILR coordinates).
 
-Note: make sure you pass the correct names of the ILR coordinates to `brms` model.
+*Notes: make sure you pass the correct names of the ILR coordinates to `brms` model.*
 
 ```{r brmcoda, results = "hide"}
 m <- brmcoda(compilr = cilr,
@@ -142,16 +144,17 @@ The interpretation of these outputs depends on how you construct your sequential
 For the built-in sequential binary partition `sbp` (shown previously), the resulting 
 interpretation would be as follows:
 
-| ILR coordinates | What it means                                                 |
-|-----------------|---------------------------------------------------------------|
-| `bilr1`         | Sleep (TST & WAKE) vs wake behaviours at between-person level |
-| `bilr2`         | Sleep vs awake in bed at between-person level                 |
-| `bilr3`         | MVPA vs (LPA and SB) at between-person level                  |
-| `bilr4`         | LPA vs SB at between-person level                             |
-| `wilr1`         | Sleep (TST & WAKE) vs wake behaviours at between-person level |
-| `wilr2`         | Sleep vs awake in bed at within-person level                  |
-| `wilr3`         | MVPA vs (LPA and SB) at within-person level                   |
-| `wilr4`         | LPA vs SB at within-person level                              |
+| ILR       | Interpretation                                                                       |
+|-----------|--------------------------------------------------------------------------------------|
+| `bilr1`   | Between-person sleep (`TST` & `WAKE`) vs wake (`MVPA`, `LPA`, & `SB`) behaviours     |
+| `bilr2`   | Between-person `TST` vs `WAKE`                                                       |
+| `bilr3`   | Between-person `MVPA` vs (`LPA` and `SB`)                                            |
+| `bilr4`   | Between-person `LPA` vs `SB`                                                         |
+| `wilr1`   | Within-person `Sleep` (`TST` & `WAKE`) vs wake (`MVPA`, `LPA`, & `SB`) behaviours    |
+| `wilr2`   | Within-person `TST` vs `WAKE`                                                        |
+| `wilr3`   | Within-person `MVPA` vs (`LPA` and `SB`)                                             |
+| `wilr4`   | Within-person `LPA` vs `SB`                                                          |
+
 
 Due to the nature of within-person ILR coordinates, it is often challenging to interpret these 
 results in great details.
@@ -241,11 +244,23 @@ When examining the relationships between compositional data and an outcome,
 we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
 from one compositional component to another, while the other components remain constant. 
 These changes can be examined using the compositional isotemporal substitution model. 
-In `multilevelcoda`, we extend this model to multilevel approach to test both between-person and within-person changes. All substitution models can be computed using the `substitution()` function.
+In `multilevelcoda`, we extend this model to multilevel approach to test both between-person and within-person changes. All substitution models can be computed using the `substitution()` function, 
+with the following arguments:
+
+| Argument         | Description                                                                                                                                            |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `object`         | A fitted `brmcoda` object                                                                                                                              |
+| `base`           | A `data.frame` or `data.table` of possible substitution of variables.                                                                                  |
+|                  | This data set can be computed using function `possub`                                                                                                  |
+| `delta`          | A integer, numeric value or vector indicating the amount of change in compositional parts for substitution                                             |
+| `level`          | A character value or vector to specify whether the change in composition should be at `between`-person and/or `within`-person levels                   |
+| `type`           | A character value or vector to specify whether the estimated change in outcome should be `conditional` or `marginal`                                   |
+| `regrid`         | Optional reference grid consisting of combinations of covariates over which predictions are made. If not provided, the default reference grid is used. |
+| `summary`        | A logical value to indicate whether the prediction at each level of the reference grid or an average of them should be returned.                       |
+| `...`            | Additional arguments to be passed to `describe_posterior`                                   
 
 ## Between-person substitution model
-The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours
-for 5 minutes, at between-person level. 
+The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for 5 minutes, at between-person level. 
 
 ```{r bsub}
 bsubm <- substitution(object = m, delta = 5, 
@@ -261,8 +276,7 @@ knitr::kable(bsubm$BetweenpersonSub$TST)
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated in changes in stress. 
-Notice there is no 
-column indicating the levels of convariates, indicating that these results have been averaged.
+Notice there is no column indicating the levels of convariates, indicating that these results have been averaged.
 
 ## Within-person substitution model
 Let's now take a look at how stress changes when different pairwise of sleep-wake behaviours are

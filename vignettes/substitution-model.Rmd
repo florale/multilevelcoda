@@ -14,7 +14,6 @@ output:
     fig_height: 4
     fig_caption: yes
     number_sections: true
----
 vignette: >
   %\VignetteIndexEntry{Compositional Multilevel Substitution Models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -24,19 +23,16 @@ vignette: >
 
 
 # Intro
-Substitution model is a useful post-hoc analysis for regression models with compositional predictors. 
-Results from our main `brms` model tell us how each compositional predictor (expressed as ILR coordiante) 
-is associated with an outcome. However,
-we often are also interested in the changes in an outcomes when a fixed duration of time is reallocated
-from one compositional component to another, while the other components remain constant.
-
+We often are interested in how an outcome changes when a fixed unit of the predictor 
+(e.g., minutes of behaviours during a day) is reallocated
+from one compositional component to another. 
 The Compositional Isotemporal Substitution Model can be used to estimate this change. 
 The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
 for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
 
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
-and datasets `mcompd` (simulated compositional sleep and wake variables),
+and data sets `mcompd` (simulated compositional sleep and wake variables),
 `sbp` (sequential binary partition), and `psub` (base possible substitution).
 
 
@@ -84,10 +80,10 @@ summary(m$Model)
 #> 
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat
-#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00
-#>               Bulk_ESS Tail_ESS
-#> sd(Intercept)     1574     2552
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574
+#>               Tail_ESS
+#> sd(Intercept)     2552
 #> 
 #> Population-Level Effects: 
 #>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
@@ -114,10 +110,8 @@ summary(m$Model)
 #> Female        2370
 #> 
 #> Family Specific Parameters: 
-#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-#> sigma     2.37      0.03     2.31     2.43 1.00     5233
-#>       Tail_ESS
-#> sigma     2780
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     2.37      0.03     2.31     2.43 1.00     5233     2780
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -138,27 +132,25 @@ behaviour do they spend less time in?
 
 This is common issue when working with multilevel compositional data as ILR coordinates often 
 contains information about multiple compositional components. 
-It is further inconvenient in the case of within-person ILR coordinates, as they represent the deviation from the mean (between-person) ILR coordinates. 
 To gain further insights into these associations and help with interpretation, we can conduct 
 post-hoc analyses using the substitution models from our `multilevel` package.
 
 # Substitution models
 
-`multilevelcoda` package provides `4` different functions to compute substitution models, using the
+`multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Basic substitution model:
+Basic substitution models:
 
-- Between-person substitution model
-- Within-person substitution model
+- *Between-person* substitution
+- *Within-person* substitution
 
-Average marginal substitution model:
+Average marginal substitution models:
 
-- Average marginal between-person substitution model
-- Average marginal within-person substitution model
+- Average marginal *between-person* substitution
+- Average marginal *within-person* substitution
 
-*Tips*: Substitution models are often computationally demanding tasks. 
-You can speed up the models using parallel execution, for example, using `doFuture` package.
+*Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
 ## Basic substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
@@ -174,7 +166,7 @@ subm1 <- substitution(object = m, delta = 1:10,
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
-Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes.
+Here are the results for changes in stress when sleep (TST) is substituted for 10 minutes.
 
 
 ```r
@@ -188,21 +180,21 @@ knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
 |  0.065| -0.003|   0.134|    10|TST |WAKE |between |conditional |
 |  0.005| -0.028|   0.038|    10|TST |MVPA |between |conditional |
 |  0.011| -0.013|   0.035|    10|TST |LPA  |between |conditional |
-|  0.014| -0.014|   0.043|    10|TST |SB   |between |conditional |
+|  0.014| -0.014|   0.042|    10|TST |SB   |between |conditional |
 | -0.056| -0.117|   0.002|   -10|TST |WAKE |between |conditional |
-| -0.005| -0.037|   0.026|   -10|TST |MVPA |between |conditional |
+| -0.005| -0.038|   0.026|   -10|TST |MVPA |between |conditional |
 | -0.011| -0.035|   0.013|   -10|TST |LPA  |between |conditional |
 | -0.014| -0.042|   0.013|   -10|TST |SB   |between |conditional |
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
-in changes in stress at between-person level.
-
+in changes in stress at between-person level. 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
 
 ```r
-plotsub(data = subm1$BetweenpersonSub$TST, x = "sleep", y = "stress")
+plotsub(data = subm1$BetweenpersonSub$TST, 
+        x = "sleep", y = "stress")
 ```
 
 
@@ -219,22 +211,20 @@ knitr::kable(subm1$WithinpersonSub$TST[abs(Delta) == 10])
 
 |   Mean| CI_low| CI_high| Delta|To  |From |Level  |EffectType  |
 |------:|------:|-------:|-----:|:---|:----|:------|:-----------|
-|  0.036|  0.007|   0.066|    10|TST |WAKE |within |conditional |
+|  0.037|  0.007|   0.067|    10|TST |WAKE |within |conditional |
 | -0.006| -0.018|   0.006|    10|TST |MVPA |within |conditional |
 | -0.010| -0.019|   0.000|    10|TST |LPA  |within |conditional |
 | -0.004| -0.014|   0.006|    10|TST |SB   |within |conditional |
 | -0.030| -0.056|  -0.005|   -10|TST |WAKE |within |conditional |
 |  0.006| -0.005|   0.018|   -10|TST |MVPA |within |conditional |
-|  0.009|  0.000|   0.019|   -10|TST |LPA  |within |conditional |
+|  0.010|  0.000|   0.019|   -10|TST |LPA  |within |conditional |
 |  0.004| -0.006|   0.013|   -10|TST |SB   |within |conditional |
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
-For males (Female = 0), increasing 5 minutes in sleep at the expense of time spent awake 
-in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
-more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]). 
-
-Let's also plot theses results.
+Increasing 5 minutes in sleep at the expense of time spent awake 
+in bed predicted 0.04 higher stress [95% CI 0.01, 0.7], on a given day. 
+Conversely, less sleep and more time awake in bed predicted less stress (b = -0.03 [95% CI -0.06,	-0.01]). Let's also plot theses results.
 
 
 ```r
@@ -246,16 +236,14 @@ plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress")
 
 ## Average Marginal Substitution Effects
 
-Average substitution models models are generally more computationally expensive than basic subsitution models. 
 The average marginal models use the group- level compositional mean as the reference composition 
 to obtain the average of the predicted group-level changes in the outcome when every person in the sample 
 reallocates a specific unit from one compositional part to another. 
 This is difference from the basic substitution model which yields prediction conditioned on 
 an "average" person in the data set (by using the population- level compositional mean
 as the reference composition). 
-All models can be run faster in shorter walltime using parallel execution.
-
-In this example, we use package `doFuture` for parallelisation. `substitution()` will run 5 
+Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
 
@@ -265,9 +253,11 @@ plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
                       type = "marginal", level = c("between", "within"))
+#> Error: MultisessionFuture (doFuture-2) failed to call gassign() on cluster RichSOCKnode #2 (PID 36056 on localhost 'localhost'). The reason reported was 'error writing to connection'. Post-mortem diagnostic: A process with this PID exists, which suggests that the localhost worker is still alive. Detected a non-exportable reference ('externalptr') in one of the globals ('basesub' of class 'data.table') used in the future expression. The total size of the 49 globals exported is 12.44 MiB. The three largest globals are 'object' (10.35 MiB of class 'list'), 'setDT' (522.51 KiB of class 'function') and 'clo' (281.16 KiB of class 'function')
 registerDoSEQ()
 ```
 
+Below are the results.
 
 
 ```r
