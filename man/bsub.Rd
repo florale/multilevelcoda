@@ -66,10 +66,20 @@ is the compositional mean of the dataset provided.
 For average marginal effect, use \code{\link{bsubmargins}}.
 }
 \examples{
-\dontrun{
+\donttest{
 data(mcompd)
 data(sbp)
 data(psub)
+
+if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+backend <- "rstan"
+skip_on_os("windows")
+} else {
+if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
+ backend <- "cmdstanr"
+ }
+}
+ 
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
@@ -77,8 +87,8 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-             chain = 1, iter = 500)
-             
+             chain = 1, iter = 500,
+             backend = backend)
 subm <- bsub(object = m, basesub = psub, delta = 5)
 }
 }
