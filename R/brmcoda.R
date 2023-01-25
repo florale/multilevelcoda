@@ -19,17 +19,7 @@
 #' @importFrom brms brm
 #' @export
 #' @examples
-#' \donttest{
-#' 
-#' if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-#' backend <- "rstan"
-#' skip_on_os("windows")
-#' } else {
-#' if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
-#'  backend <- "cmdstanr"
-#'  }
-#'}
-#' 
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
@@ -44,15 +34,13 @@
 #' m1 <- brmcoda(compilr = cilr, 
 #'  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'              chain = 1, iter = 500,
-#'              backend = backend)
-#'              
+#'              chain = 1, iter = 500)
+#'
 #' # model with compositional outcome  
 #' m2 <- brmcoda(compilr = cilr, 
 #'  formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
-#'              chain = 1, iter = 500,
-#'              backend = backend)
-#'              
+#'  chain = 1, iter = 500) 
+#'                
 #' }
 brmcoda <- function (compilr, formula, ...) {
 

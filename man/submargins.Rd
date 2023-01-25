@@ -45,17 +45,7 @@ the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 }
 \examples{
-\donttest{
-
-if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-backend <- "rstan"
-skip_on_os("windows")
-} else {
-if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
- backend <- "cmdstanr"
- }
-}
-
+\dontrun{
 data(mcompd)
 data(sbp)
 data(psub)
@@ -65,8 +55,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 # model with compositional predictor
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
-             chain = 1, iter = 500,
-             backend = backend)
+             chain = 1, iter = 500)
 subm <- submargins(object = m, basesub = psub, delta = 5)
 }
 }

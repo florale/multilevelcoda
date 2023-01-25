@@ -36,17 +36,7 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \donttest{
-#' 
-#' if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-#' backend <- "rstan"
-#' skip_on_os("windows")
-#' } else {
-#' if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
-#'  backend <- "cmdstanr"
-#'  }
-#'}
-#' 
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
@@ -57,9 +47,7 @@
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'              chain = 1, iter = 500,
-#'              backend = backend)
-#'                           
+#'              chain = 1, iter = 500)             
 #' subm <- wsubmargins(object = m, basesub = psub, delta = 5)
 #' }
 wsubmargins <- function (object, delta, basesub, 
