@@ -45,8 +45,10 @@
 #' 
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
-#'              wilr2 + wilr3 + wilr4 + Female + (1 | ID), chains = 1, iter = 500)
-#'                
+#'                                 wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
+#'              chains = 1, iter = 500,
+#'              backend = "cmdstanr")
+#'              
 #' subm <- bsubmargins(object = m, basesub = psub, delta = 5)
 #' }
 bsubmargins <- function (object, delta, basesub, 

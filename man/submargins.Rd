@@ -55,7 +55,9 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 # model with compositional predictor
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
-             chain = 1, iter = 500)
+             chain = 1, iter = 500,
+             backend = "cmdstanr")
+             
 subm <- submargins(object = m, basesub = psub, delta = 5)
 }
 }
