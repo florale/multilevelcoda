@@ -44,7 +44,8 @@ Suggests:
     withr,
     knitr,
     rmarkdown,
-    doFuture,
+    doFuture,,
+    cmdstanr,
     lme4
 Config/testthat/edition: 3
 Config/testthat/parallel: true

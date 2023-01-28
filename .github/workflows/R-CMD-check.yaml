@@ -45,5 +45,6 @@ jobs:
             rcmdcheck
             BH
             RcppEigen
+            cmdstanr
 
       - uses: r-lib/actions/check-r-package@v2
