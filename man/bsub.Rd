@@ -66,11 +66,10 @@ is the compositional mean of the dataset provided.
 For average marginal effect, use \code{\link{bsubmargins}}.
 }
 \examples{
-\donttest{
+\dontrun{
 data(mcompd)
 data(sbp)
 data(psub)
-library(cmdstanr)
 
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
