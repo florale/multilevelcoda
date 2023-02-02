@@ -47,7 +47,13 @@ jobs:
             BH
             RcppEigen
             stan-dev/cmdstanr
-            
+            testthat (>= 3.0.0)
+            covr
+            withr
+            knitr
+            rmarkdown
+            doFuture
+            lme4
       - name: Build Cmdstan
         run: |
           cmdstanr::check_cmdstan_toolchain(fix = TRUE)
