@@ -41,7 +41,6 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          dependencies: NA
           extra-packages: |
             rcmdcheck
             BH
@@ -53,6 +52,7 @@ jobs:
             rmarkdown
             doFuture
             lme4
+            
       - name: Build Cmdstan
         run: |
           cmdstanr::check_cmdstan_toolchain(fix = TRUE)
