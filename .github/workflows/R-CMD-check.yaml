@@ -47,7 +47,6 @@ jobs:
             BH
             RcppEigen
             stan-dev/cmdstanr
-            testthat (>= 3.0.0)
             covr
             withr
             knitr
