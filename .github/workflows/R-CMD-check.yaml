@@ -43,7 +43,7 @@ jobs:
         with:
           dependencies: NA
           extra-packages: |
-            any::rcmdcheck
+            rcmdcheck
             BH
             RcppEigen
             testthat
