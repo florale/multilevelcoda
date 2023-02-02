@@ -53,12 +53,7 @@
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
-#' if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-#' backend <- "rstan"
-#' } else {
-#' if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
-#' backend <- "cmdstanr"
-#' }}
+#' 
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
