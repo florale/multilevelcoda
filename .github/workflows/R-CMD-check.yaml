@@ -41,17 +41,19 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          dependencies: NA
           extra-packages: |
             rcmdcheck
             BH
             RcppEigen
-            stan-dev/cmdstanr
+            testthat
             covr
             withr
             knitr
             rmarkdown
             doFuture
             lme4
+            stan-dev/cmdstanr
             
       - name: Build Cmdstan
         run: |
