@@ -47,14 +47,3 @@ jobs:
             RcppEigen
 
       - uses: r-lib/actions/check-r-package@v2
-      
-      - name: cmdstan env vars
-        run: |
-          echo "CMDSTAN_PATH=${HOME}/.cmdstan" >> $GITHUB_ENV
-        shell: bash
-        
-      - name: Install cmdstan
-        run: |
-          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
-          cmdstanr::install_cmdstan(cores = 2)
-        shell: Rscript {0}
