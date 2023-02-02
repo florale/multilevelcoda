@@ -31,17 +31,7 @@ jobs:
 
 
     steps:
-      - name: cmdstan env vars
-        run: |
-          echo "CMDSTAN_PATH=${HOME}/.cmdstan" >> $GITHUB_ENV
-        shell: bash
-      - uses: actions/checkout@v2
 
-      - name: Install cmdstan
-        run: |
-          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
-          cmdstanr::install_cmdstan(cores = 2)
-        shell: Rscript {0}
         
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -57,5 +47,14 @@ jobs:
             rcmdcheck
             BH
             RcppEigen
-
+            stan-dev/cmdstanr
+            
+      - name: Build Cmdstan
+        run: |
+          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          cmdstanr::install_cmdstan(cores = parallel::detectCores())
+        shell: Rscript {0}
+        
       - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--as-cran")'
