@@ -29,6 +29,10 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
+      - name: cmdstan env vars
+        run: |
+          echo "CMDSTAN_PATH=${HOME}/.cmdstan" >> $GITHUB_ENV
+        shell: bash
         
       - uses: r-lib/actions/setup-pandoc@v2
 
