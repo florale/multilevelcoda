@@ -37,7 +37,23 @@ jobs:
           rtools-version: ${{ matrix.config.rtools }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-
+          
+      - name: Query dependencies
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+      
+      - name: Install dependencies
+        run: |
+          Sys.setenv("MAKEFLAGS"="-j2")
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("rcmdcheck")
+          remotes::install_local(path = ".")
+          install.packages("curl")
+        shell: Rscript {0}
+        
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: NA
