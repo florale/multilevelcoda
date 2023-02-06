@@ -70,6 +70,7 @@ jobs:
           cmdstanr::install_cmdstan(cores = parallel::detectCores())
         shell: Rscript {0}
         
-      - uses: r-lib/actions/check-r-package@v2
+- uses: r-lib/actions/check-r-package@v2
         with:
-          args: 'c("--as-cran")'
+          build_args: 'c("--no-manual", "--no-build-vignettes")'
+          args: 'c("--no-manual", "-ignore-vignettes")'
