@@ -39,7 +39,6 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          dependencies: NA
           extra-packages: |
             rcmdcheck
             BH
@@ -60,5 +59,3 @@ jobs:
         shell: Rscript {0}
         
       - uses: r-lib/actions/check-r-package@v2
-        with:
-          args: 'c("--as-cran")'
