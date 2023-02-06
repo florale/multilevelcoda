@@ -38,10 +38,11 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
 
       - name: Install system dependencies
-        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libglpk-dev libglpk40 libcurl4-openssl-dev openmpi-bin openmpi-common libopenmpi-dev || true
+    
+      - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r@v2
         with:
