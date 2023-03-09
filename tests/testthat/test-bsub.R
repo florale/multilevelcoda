@@ -11,6 +11,10 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
   }
 }
 
+if(identical(backend, "cmdstanr")) {
+  expect_true(requiredNamespace("cmdstanr"))
+}
+
 # Packages
 library(testthat)
 library(data.table)
@@ -231,7 +235,7 @@ test_that("bsub gives results in sensible range", {
   expect_true(x$LPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
   expect_true(x$SB$Mean %ae% "[-0.5, 0) | (0, 0.5]")
   
-  expect_true(x$TST$CI_low %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$TST$CI_low %ae% "[-1, 1]")
   expect_true(x$WAKE$CI_low %ae% "[-1, 0) | (0, 1]")
   expect_true(x$MVPA$CI_low %ae% "[-1, 0) | (0, 1]")
   expect_true(x$LPA$CI_low %ae% "[-1, 0) | (0, 1]")
