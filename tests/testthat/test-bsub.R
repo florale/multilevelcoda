@@ -37,7 +37,7 @@ suppressWarnings(
                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
-               backend = backend))
+               backend = "cmdstanr"))
 foreach::registerDoSEQ()
 
 x <- bsub(object = m, basesub = psub, delta = 2)
@@ -83,7 +83,7 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
                   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
                   chain = 1, iter = 500, seed = 123,
-                  backend = backend))
+                  backend = "cmdstanr"))
   rg <- data.table(Age = 1)
   expect_warning(x <- bsub(object = m2, basesub = psub, delta = 2, regrid = rg))
   
@@ -142,7 +142,7 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                    wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
-                 backend = backend))
+                 backend = "cmdstanr"))
   
   x6 <- bsub(object = m, basesub = psub, delta = 2, summary = FALSE)
   
