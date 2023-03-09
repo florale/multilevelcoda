@@ -48,16 +48,17 @@ update.compilr <- function(compilr, newdata) {
   idvar <- compilr$idvar
   
   compilr(newdata, sbp, parts, total, idvar)
-  
 }
+.S3method("update", "compilr", update.compilr)
 
 #' Update \code{\link{brmcoda}} models
 #' 
 #' This method allows for updating an existing \code{\link{brmcoda}} object.
 #' 
 #' Details of the model specification can be found in \code{\link{brmsformula}}.
-#' @param compilr A \code{\link{compilr}} object containing data of composition, 
-#' ILR coordinates, and other variables used in the model.
+#' @param object A fitted \code{\link{brmcoda}} object to be updated. Required.
+#' @param newcilr A \code{\link{compilr}} object containing data of composition, 
+#' ILR coordinates, and other variables used in the updated model.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
@@ -81,7 +82,7 @@ update.compilr <- function(compilr, newdata) {
 #' newdat <- mcompd[ID != 1] # excluding ID 1
 #' fit_new <- update(fit, newdata = newdat)
 #' }
-update.brmcoda <- function(model,
+update.brmcoda <- function(object,
                            newcilr = NULL, newdata = NULL, ...) {
   
   if (is.null(newdata)) {
@@ -89,16 +90,19 @@ update.brmcoda <- function(model,
   }
   
   if(!is.null(newdata)) {
-    newcilr <- update(model$CompIlr, newdata = newdata)
+    newcilr <- update(object$CompIlr, newdata = newdata)
   }
   
   newdata <- cbind(newcilr$data, newcilr$BetweenILR, 
                    newcilr$WithinILR, newcilr$TotalILR)
   
-  fit_new <- update(model$Model, newdata = newdata, ...)
+  fit_new <- update(object$Model, newdata = newdata, ...)
   
   structure(
     list(CompIlr = newcilr,
          Model = fit_new),
     class = "brmcoda")
+  NextMethod("update")
+  
 }
+.S3method("update", "brmcoda", update.brmcoda)
