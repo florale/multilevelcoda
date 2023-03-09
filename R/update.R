@@ -85,7 +85,7 @@ update.brmcoda <- function(model,
                            newcilr = NULL, newdata = NULL, ...) {
   
   if (is.null(newdata)) {
-    stop2("'newdata' is required when updating a 'brmcoda' object.")
+    stop("'newdata' is required when updating a 'brmcoda' object.")
   }
   
   if(!is.null(newdata)) {
