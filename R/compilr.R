@@ -12,7 +12,7 @@
 #' @param total A numeric value of the total amount to which the compositions should be closed.
 #' Default to \code{1440}.
 #'
-#' @return A list with twelve elements.
+#' @return A \code{\link{compilr}} object with twelve elements.
 #' \itemize{
 #'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
@@ -37,12 +37,12 @@
 #' @examples
 #' data(mcompd)
 #' data(sbp)
-#' cilr1 <- compilr(data = mcompd, sbp = sbp, 
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-#' str(cilr1)
+#' str(cilr)
 #' 
 #' ## cleanup
-#' rm(cilr1, mcompd, sbp)
+#' rm(cilr, mcompd, sbp)
 compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")

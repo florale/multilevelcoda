@@ -22,7 +22,7 @@ Default to \code{1440}.}
 Default to \code{ID}.}
 }
 \value{
-A list with twelve elements.
+A \code{\link{compilr}} object with twelve elements.
 \itemize{
 \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
@@ -47,10 +47,10 @@ Computes sets of compositions and IRLs for Multilevel Compositional Data models.
 \examples{
 data(mcompd)
 data(sbp)
-cilr1 <- compilr(data = mcompd, sbp = sbp, 
+cilr <- compilr(data = mcompd, sbp = sbp, 
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-str(cilr1)
+str(cilr)
 
 ## cleanup
-rm(cilr1, mcompd, sbp)
+rm(cilr, mcompd, sbp)
 }
