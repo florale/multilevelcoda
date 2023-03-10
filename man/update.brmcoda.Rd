@@ -21,9 +21,6 @@ It must include a composition and the same ID variable as the existing \code{\li
 \description{
 This method allows for updating an existing \code{\link{brmcoda}} object.
 }
-\details{
-Details of the model specification can be found in \code{\link{brmsformula}}.
-}
 \examples{
 \dontrun{
 data(mcompd)
