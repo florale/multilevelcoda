@@ -26,6 +26,7 @@
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
 #'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' }
+#' 
 #' @exportS3Method update compilr
 #' @examples 
 #' data(mcompd)
