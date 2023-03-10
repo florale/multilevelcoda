@@ -2,12 +2,12 @@
 % Please edit documentation in R/update.R
 \name{update.compilr}
 \alias{update.compilr}
-\title{Update \code{\link{compilr}} \}
+\title{Update \code{\link{compilr}}}
 \usage{
-\method{update}{compilr}(object, newdata)
+\method{update}{compilr}(compilr, newdata)
 }
 \arguments{
-\item{object}{A \code{\link{compilr}} object containing data of composition,
+\item{compilr}{A \code{\link{compilr}} object containing data of composition,
 ILR coordinates, and other variables to be updated.}
 
 \item{newdata}{A \code{data.frame} or \code{data.table}
@@ -44,7 +44,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 newdat <- mcompd[ID != 1] # excluding ID 1
-cilr_new <- update(object = cilr, newdata = newdat)
+cilr_new <- update(compilr = cilr, newdata = newdat)
 
 ## cleanup
 rm(cilr, mcompd, sbp, cilr_new, newdat)

@@ -1,8 +1,8 @@
-#' Update \code{\link{compilr}} \
+#' Update \code{\link{compilr}} 
 #' 
 #' This method allows for updating an existing \code{\link{compilr}} object.
 #' 
-#' @param object A \code{\link{compilr}} object containing data of composition, 
+#' @param compilr A \code{\link{compilr}} object containing data of composition, 
 #' ILR coordinates, and other variables to be updated.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
@@ -26,10 +26,7 @@
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
 #'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' }
-#' 
-#' @method update compilr
 #' @exportS3Method update compilr
-#' @export
 #' @examples 
 #' data(mcompd)
 #' data(sbp)
@@ -37,26 +34,28 @@
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' newdat <- mcompd[ID != 1] # excluding ID 1
-#' cilr_new <- update(object = cilr, newdata = newdat)
+#' cilr_new <- update(compilr = cilr, newdata = newdat)
 #' 
 #' ## cleanup
 #' rm(cilr, mcompd, sbp, cilr_new, newdat)
 #' 
-update.compilr <- function(object, newdata) { 
+update.compilr <- function(compilr, newdata) { 
   # add checks
   
-  sbp <- object$sbp
-  parts <- object$parts
-  total <- object$total
-  idvar <- object$idvar
+  sbp <- compilr$sbp
+  parts <- compilr$parts
+  total <- compilr$total
+  idvar <- compilr$idvar
   
   compilr(newdata, sbp, parts, total, idvar)
 }
+.S3method("update", "compilr", update.compilr)
 
 #' Update \code{\link{brmcoda}} models
 #' 
 #' This method allows for updating an existing \code{\link{brmcoda}} object.
 #' 
+#' Details of the model specification can be found in \code{\link{brmsformula}}.
 #' @param object A fitted \code{\link{brmcoda}} object to be updated. Required.
 #' @param newcilr A \code{\link{compilr}} object containing data of composition, 
 #' ILR coordinates, and other variables used in the updated model.
@@ -65,9 +64,7 @@ update.compilr <- function(object, newdata) {
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
 #' @param ... Further arguments passed to \code{\link{update}}.
 #' 
-#' @method update brmcoda
 #' @exportS3Method update brmcoda
-#' @export
 #' @examples 
 #' \dontrun{
 #' data(mcompd)
@@ -105,4 +102,7 @@ update.brmcoda <- function(object,
     list(CompIlr = newcilr,
          Model = fit_new),
     class = "brmcoda")
+  NextMethod("update")
+  
 }
+.S3method("update", "brmcoda", update.brmcoda)
