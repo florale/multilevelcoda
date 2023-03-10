@@ -64,6 +64,7 @@ jobs:
             rmarkdown
             doFuture
             lme4
+            covr
             
       - name: Build Cmdstan
         run: |
