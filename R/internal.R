@@ -1,7 +1,8 @@
 ## make Rcmd check happy
 utils::globalVariables(c("i",  "..cols", ".", "To", ".SD",
                          "Mean",  "CI_low", "CI_high", "From", "Delta",
-                         "spread", "value", "variable", "ID", "EffectType", "Level"))
+                         "spread", "value", "variable", "ID", "EffectType", "Level",
+                         "update"))
 #' Functions used only internally
 #' @keywords internal
 #' @importFrom data.table as.data.table copy := setDT rbindlist
