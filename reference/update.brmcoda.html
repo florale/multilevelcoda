@@ -98,9 +98,17 @@ It must include a composition and the same ID variable as the existing <code><a 
 
 
 <dt>...</dt>
-<dd><p>Further arguments passed to <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></code>.</p></dd>
+<dd><p>Further arguments passed to <code>update.brmsfit</code>.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>A <code><a href="brmcoda.html">brmcoda</a></code> with two elements</p><ul><li><p><code>CompIlr</code> An object of class <code>compilr</code> used in the <code>brm</code> model.</p></li>
+<li><p><code>Model</code> An object of class <code>brmsfit</code>, which contains the posterior draws
+along with many other useful information about the model.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Details of the model specification can be found in <code>brmsformula</code>.</p>
