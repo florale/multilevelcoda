@@ -4,7 +4,7 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
   backend <- "rstan"
   ## if using rstan backend, models can crash on Windows
   ## so skip if on windows and cannot use cmdstanr
-  skip_on_os("windows", "mac")
+  skip_on_os("windows")
 } else {
   if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
     backend <- "cmdstanr"
