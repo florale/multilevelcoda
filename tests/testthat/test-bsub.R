@@ -4,7 +4,7 @@ if (!requireNamespace("cmdstanr", quietly = TRUE)) {
   backend <- "rstan"
   ## if using rstan backend, models can crash on Windows
   ## so skip if on windows and cannot use cmdstanr
-  skip_on_os("windows")
+  skip_on_os("windows", "mac")
 } else {
   if (isFALSE(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)))) {
     backend <- "cmdstanr"
@@ -226,28 +226,28 @@ test_that("bsub outputs what expected", {
   
   })
 
-# test_that("bsub gives results in sensible range", {
-# 
-#   ## difference in outcome
-#   expect_true(x$TST$Mean %ae% "[-0.5, 0) | (0, 0.5]")
-#   expect_true(x$WAKE$Mean %ae% "[-0.5, 0) | (0, 0.5]")
-#   expect_true(x$MVPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
-#   expect_true(x$LPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
-#   expect_true(x$SB$Mean %ae% "[-0.5, 0) | (0, 0.5]")
-# 
-#   expect_true(x$TST$CI_low %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$WAKE$CI_low %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$MVPA$CI_low %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$LPA$CI_low %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$SB$CI_low %ae% "[-1, 0) | (0, 1]")
-# 
-#   expect_true(x$TST$CI_high %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$WAKE$CI_high %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$MVPA$CI_high %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$LPA$CI_high %ae% "[-1, 0) | (0, 1]")
-#   expect_true(x$SB$CI_high %ae% "[-1, 0) | (0, 1]")
-# 
-# })
+test_that("bsub gives results in sensible range", {
+
+  ## difference in outcome
+  expect_true(x$TST$Mean %ae% "[-0.5, 0) | (0, 0.5]")
+  expect_true(x$WAKE$Mean %ae% "[-0.5, 0) | (0, 0.5]")
+  expect_true(x$MVPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
+  expect_true(x$LPA$Mean %ae% "[-0.5, 0) | (0, 0.5]")
+  expect_true(x$SB$Mean %ae% "[-0.5, 0) | (0, 0.5]")
+
+  expect_true(x$TST$CI_low %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$WAKE$CI_low %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$MVPA$CI_low %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$LPA$CI_low %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$SB$CI_low %ae% "[-1, 0) | (0, 1]")
+
+  expect_true(x$TST$CI_high %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$WAKE$CI_high %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$MVPA$CI_high %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$LPA$CI_high %ae% "[-1, 0) | (0, 1]")
+  expect_true(x$SB$CI_high %ae% "[-1, 0) | (0, 1]")
+
+})
 
 test_that("bsub gives results in expected direction and magnitude", {
     
