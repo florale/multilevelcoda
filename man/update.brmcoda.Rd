@@ -16,7 +16,15 @@ ILR coordinates, and other variables used in the updated model.}
 containing data of all variables used in the analysis.
 It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.}
 
-\item{...}{Further arguments passed to \code{\link{update}}.}
+\item{...}{Further arguments passed to \code{\link{update.brmsfit}}.}
+}
+\value{
+A \code{\link{brmcoda}} with two elements
+\itemize{
+\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+\item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
+along with many other useful information about the model.}
+}
 }
 \description{
 This method allows for updating an existing \code{\link{brmcoda}} object.

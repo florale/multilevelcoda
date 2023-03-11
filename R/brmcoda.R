@@ -10,7 +10,7 @@
 #' ILR coordinates, and other variables used in the model.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
-#' @return A list with two elements
+#' @return A \code{\link{brmcoda}} with two elements
 #' \itemize{
 #'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
 #'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 

@@ -2,12 +2,13 @@
 #' 
 #' This method allows for updating an existing \code{\link{compilr}} object.
 #' 
-#' @param compilr A \code{\link{compilr}} object containing data of composition, 
+#' @param object A \code{\link{compilr}} object containing data of composition, 
 #' ILR coordinates, and other variables to be updated.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
-#'
+#' @param ... generic argument, not in use.
+#' 
 #' @return A updated \code{\link{compilr}} object with twelve elements.
 #' \itemize{
 #'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
@@ -35,22 +36,21 @@
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' newdat <- mcompd[ID != 1] # excluding ID 1
-#' cilr_new <- update(compilr = cilr, newdata = newdat)
+#' cilr_new <- update(object = cilr, newdata = newdat)
 #' 
 #' ## cleanup
 #' rm(cilr, mcompd, sbp, cilr_new, newdat)
 #' 
-update.compilr <- function(compilr, newdata) { 
+update.compilr <- function(object, newdata, ...) { 
   # add checks
   
-  sbp <- compilr$sbp
-  parts <- compilr$parts
-  total <- compilr$total
-  idvar <- compilr$idvar
+  sbp <- object$sbp
+  parts <- object$parts
+  total <- object$total
+  idvar <- object$idvar
   
   compilr(newdata, sbp, parts, total, idvar)
 }
-.S3method("update", "compilr", update.compilr)
 
 #' Update \code{\link{brmcoda}} models
 #' 
@@ -63,8 +63,15 @@ update.compilr <- function(compilr, newdata) {
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
-#' @param ... Further arguments passed to \code{\link{update}}.
+#' @param ... Further arguments passed to \code{\link{update.brmsfit}}.
 #' 
+#' @return A \code{\link{brmcoda}} with two elements
+#' \itemize{
+#'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+#'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   along with many other useful information about the model.}
+#'   }
+#'   
 #' @exportS3Method update brmcoda
 #' @examples 
 #' \dontrun{
@@ -106,4 +113,3 @@ update.brmcoda <- function(object,
   NextMethod("update")
   
 }
-.S3method("update", "brmcoda", update.brmcoda)
