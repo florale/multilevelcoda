@@ -28,6 +28,7 @@
 #'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' }
 #' 
+#' @importFrom extraoperators %ain% %snin% %nin%
 #' @exportS3Method update compilr
 #' @examples 
 #' data(mcompd)
@@ -91,7 +92,7 @@ update.compilr <- function(object, newdata, ...) {
 #'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
 #'   }
-#'   
+#'  
 #' @exportS3Method update brmcoda
 #' @examples 
 #' \dontrun{
