@@ -42,8 +42,28 @@
 #' rm(cilr, mcompd, sbp, cilr_new, newdat)
 #' 
 update.compilr <- function(object, newdata, ...) { 
-  # add checks
   
+  if (isTRUE(missing(newdata))) {
+    stop("'newdata' is required when updating a 'compilr' object.")
+    } else {
+      if (isFALSE(inherits(newdata, c("data.table", "data.frame", "matrix")))) {
+        stop("newdata must be a data table, data frame or matrix.")
+      }
+    }
+  
+  if (isFALSE(object$parts %ain% colnames(newdata))) { # check compositional variables
+    stop(sprintf(
+      "The folllowing compositional parts could not be found in 'newdata'  (%s).",
+      paste(object$parts %snin% colnames(newdata), collapse = ", ")))
+  }
+  
+  if (object$idvar %nin% colnames(newdata)) { # check ID
+    stop(sprintf(
+      "The names of the ID variable must be the \n same in 'object' (%s) and 'newdata'.",
+      object$idvar))
+  }
+  
+  # update compilr
   sbp <- object$sbp
   parts <- object$parts
   total <- object$total
@@ -92,13 +112,21 @@ update.compilr <- function(object, newdata, ...) {
 #' }
 update.brmcoda <- function(object,
                            newcilr = NULL, newdata = NULL, ...) {
-  
-  if (is.null(newdata)) {
-    stop("'newdata' is required when updating a 'brmcoda' object.")
+  if(!is.null(newcilr) && !is.null(newdata)) {
+    warning(paste("Either 'newcilr' or 'newdata' is required to update brmcoda,",
+                  "  but both were supplied.",
+                  "  'newcilr' will be used to update brmcoda and 'newdata' will be ignored.",
+                  sep = "\n"))
   }
-  
-  if(!is.null(newdata)) {
+  if(is.null(newcilr)) {
+    if(is.null(newdata)) {
+      stop("either 'newdata' or 'newcilr' is required when updating a 'brmcoda' object.")
+    }
     newcilr <- update(object$CompIlr, newdata = newdata)
+  } else {
+    if(isFALSE(inherits(newcilr, "compilr"))) {
+      stop("'newcilr' must be an object of class 'compilr'.")
+    }
   }
   
   newdata <- cbind(newcilr$data, newcilr$BetweenILR, 
