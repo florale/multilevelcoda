@@ -139,6 +139,5 @@ update.brmcoda <- function(object,
     list(CompIlr = newcilr,
          Model = fit_new),
     class = "brmcoda")
-  NextMethod("update")
-  
+
 }
