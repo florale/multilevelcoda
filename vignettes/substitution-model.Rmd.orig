@@ -4,7 +4,6 @@ output:
   html_document:
     theme: sandstone
     highlight: zenburn
-    css: "florastheme.css"
     toc: yes
     toc_float: yes
     collapsed: no

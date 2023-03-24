@@ -4,7 +4,6 @@ output:
   html_document:
     theme: sandstone
     highlight: zenburn
-    css: "florastheme.css"
     toc: yes
     toc_float: yes
     collapsed: no
@@ -80,34 +79,21 @@ summary(m$Model)
 #> 
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574
-#>               Tail_ESS
-#> sd(Intercept)     2552
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574     2552
 #> 
 #> Population-Level Effects: 
-#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-#> Intercept     2.62      0.49     1.66     3.58 1.00     1345
-#> bilr1         0.11      0.31    -0.48     0.73 1.00     1126
-#> bilr2         0.52      0.33    -0.13     1.20 1.00     1366
-#> bilr3         0.13      0.22    -0.30     0.55 1.00     1126
-#> bilr4         0.02      0.28    -0.54     0.55 1.00      922
-#> wilr1        -0.34      0.12    -0.58    -0.11 1.00     3041
-#> wilr2         0.05      0.13    -0.21     0.30 1.00     3208
-#> wilr3        -0.11      0.08    -0.26     0.05 1.00     3269
-#> wilr4         0.24      0.10     0.04     0.44 1.00     3279
-#> Female       -0.39      0.17    -0.71    -0.06 1.00     1515
-#>           Tail_ESS
-#> Intercept     2241
-#> bilr1         2074
-#> bilr2         1982
-#> bilr3         1436
-#> bilr4         1831
-#> wilr1         2537
-#> wilr2         3224
-#> wilr3         3139
-#> wilr4         2873
-#> Female        2370
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.62      0.49     1.66     3.58 1.00     1345     2241
+#> bilr1         0.11      0.31    -0.48     0.73 1.00     1126     2074
+#> bilr2         0.52      0.33    -0.13     1.20 1.00     1366     1982
+#> bilr3         0.13      0.22    -0.30     0.55 1.00     1126     1436
+#> bilr4         0.02      0.28    -0.54     0.55 1.00      922     1831
+#> wilr1        -0.34      0.12    -0.58    -0.11 1.00     3041     2537
+#> wilr2         0.05      0.13    -0.21     0.30 1.00     3208     3224
+#> wilr3        -0.11      0.08    -0.26     0.05 1.00     3269     3139
+#> wilr4         0.24      0.10     0.04     0.44 1.00     3279     2873
+#> Female       -0.39      0.17    -0.71    -0.06 1.00     1515     2370
 #> 
 #> Family Specific Parameters: 
 #>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
@@ -163,6 +149,7 @@ will average predictions across levels of covariates as the default.
 ```r
 subm1 <- substitution(object = m, delta = 1:10,
                       type = "conditional", level = c("between", "within"))
+#> Warning: executing %dopar% sequentially: no parallel backend registered
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -177,7 +164,7 @@ knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
 
 |   Mean| CI_low| CI_high| Delta|To  |From |Level   |EffectType  |
 |------:|------:|-------:|-----:|:---|:----|:-------|:-----------|
-|  0.064| -0.003|   0.134|    10|TST |WAKE |between |conditional |
+|  0.065| -0.003|   0.134|    10|TST |WAKE |between |conditional |
 |  0.005| -0.028|   0.038|    10|TST |MVPA |between |conditional |
 |  0.011| -0.013|   0.035|    10|TST |LPA  |between |conditional |
 |  0.014| -0.014|   0.042|    10|TST |SB   |between |conditional |
@@ -198,7 +185,7 @@ plotsub(data = subm1$BetweenpersonSub$TST,
 ```
 
 
-<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" title="Example of Between-person Substitution Model" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;" />
+<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;" />
 
 Here are the results for within-person level.
 
@@ -232,7 +219,7 @@ plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress")
 ```
 
 
-<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" title="Example of Within-person Substitution Model" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;" />
+<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;" />
 
 ## Average Marginal Substitution Effects
 
@@ -307,4 +294,14 @@ ggarrange(p1, p2,
 ```
 
 
-<img src="mlmcoda-mlmcoda-submargins-1.png" title="Example of Average Marginal Substitution Model" alt="Example of Average Marginal Substitution Model" style="display: block; margin: auto;" />
+
+```
+#> Loading required package: ggplot2
+#> 
+#> Attaching package: 'ggpubr'
+#> The following object is masked from 'package:cowplot':
+#> 
+#>     get_legend
+```
+
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model" style="display: block; margin: auto;" />
