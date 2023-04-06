@@ -4,7 +4,7 @@
 \alias{update.brmcoda}
 \title{Update \code{\link{brmcoda}} models}
 \usage{
-\method{update}{brmcoda}(object, newcilr = NULL, newdata = NULL, ...)
+\method{update}{brmcoda}(object, formula. = NULL, newcilr = NULL, newdata = NULL, ...)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object to be updated. Required.}
@@ -16,12 +16,12 @@ ILR coordinates, and other variables used in the updated model.}
 containing data of all variables used in the analysis.
 It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.}
 
-\item{...}{Further arguments passed to \code{\link{update.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements
 \itemize{
-\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model.}
+\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
@@ -46,7 +46,10 @@ fit <- brmcoda(compilr = cilr,
               chain = 1, iter = 500,
               backend = "cmdstanr")
 
-newdat <- mcompd[ID != 1] # excluding ID 1
-fit_new <- update(fit, newdata = newdat)
+# removing the effect of wilr1
+fit1 <- update(fit, formula. = ~ . - wilr1)
+
+# using only a subset
+fit2 <- update(fit, newdata = mcompd[ID != 1])
 }
 }

@@ -84,7 +84,7 @@ update.compilr <- function(object, newdata, ...) {
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
-#' @param ... Further arguments passed to \code{\link{update.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return A \code{\link{brmcoda}} with two elements
 #' \itemize{
@@ -108,36 +108,55 @@ update.compilr <- function(object, newdata, ...) {
 #'               chain = 1, iter = 500,
 #'               backend = "cmdstanr")
 #'
-#' newdat <- mcompd[ID != 1] # excluding ID 1
-#' fit_new <- update(fit, newdata = newdat)
+#' # removing the effect of wilr1
+#' fit1 <- update(fit, formula. = ~ . - wilr1)
+#' 
+#' # using only a subset
+#' fit2 <- update(fit, newdata = mcompd[ID != 1])
 #' }
-update.brmcoda <- function(object,
+update.brmcoda <- function(object, formula. = NULL,
                            newcilr = NULL, newdata = NULL, ...) {
+  
   if(!is.null(newcilr) && !is.null(newdata)) {
     warning(paste("Either 'newcilr' or 'newdata' is required to update brmcoda,",
                   "  but both were supplied.",
                   "  'newcilr' will be used to update brmcoda and 'newdata' will be ignored.",
                   sep = "\n"))
   }
-  if(is.null(newcilr)) {
-    if(is.null(newdata)) {
-      stop("either 'newdata' or 'newcilr' is required when updating a 'brmcoda' object.")
-    }
-    newcilr <- update(object$CompIlr, newdata = newdata)
-  } else {
-    if(isFALSE(inherits(newcilr, "compilr"))) {
-      stop("'newcilr' must be an object of class 'compilr'.")
-    }
+  
+  # check args
+  if (is.null(formula.) && is.null(newcilr) && is.null(newdata)) {
+    stop("either 'formula.', 'newdata', or 'newcilr' is required when updating a 'brmcoda' object.")
   }
   
-  newdata <- cbind(newcilr$data, newcilr$BetweenILR, 
-                   newcilr$WithinILR, newcilr$TotalILR)
-  
-  fit_new <- update(object$Model, newdata = newdata, ...)
-  
-  structure(
-    list(CompIlr = newcilr,
-         Model = fit_new),
-    class = "brmcoda")
-
+  # only formula updated
+  if (!is.null(formula.) && is.null(newcilr) && is.null(newdata)) {
+    fit_new <- update(object$Model, formula. = formula., ...)
+    
+    structure(
+      list(CompIlr = object$CompIlr,
+           Model = fit_new),
+      class = "brmcoda")
+  } else { # no formula, newdata/newcilr is provided
+    
+    if(is.null(newcilr)) {
+      if(!is.null(newdata)) {
+        newcilr <- update(object$CompIlr, newdata = newdata)
+      }} else {
+        if(isFALSE(inherits(newcilr, "compilr"))) {
+          stop("'newcilr' must be an object of class 'compilr'.")
+        }    }
+    
+    newdata <- cbind(newcilr$data,
+                     newcilr$BetweenILR,
+                     newcilr$WithinILR,
+                     newcilr$TotalILR)
+    fit_new <- update(object$Model, formula. = formula., newdata = newdata, ...)
+    
+    structure(
+      list(CompIlr = newcilr,
+           Model = fit_new),
+      class = "brmcoda")
+    
+  }
 }
