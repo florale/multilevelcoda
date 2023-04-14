@@ -77,8 +77,8 @@ update.compilr <- function(object, newdata, ...) {
 #' 
 #' This method allows for updating an existing \code{\link{brmcoda}} object.
 #' 
-#' Details of the model specification can be found in \code{\link{brmsformula}}.
 #' @param object A fitted \code{\link{brmcoda}} object to be updated. Required.
+#' @param formula. Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.
 #' @param newcilr A \code{\link{compilr}} object containing data of composition, 
 #' ILR coordinates, and other variables used in the updated model.
 #' @param newdata A \code{data.frame} or \code{data.table}

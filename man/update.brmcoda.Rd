@@ -9,6 +9,8 @@
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object to be updated. Required.}
 
+\item{formula.}{Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.}
+
 \item{newcilr}{A \code{\link{compilr}} object containing data of composition,
 ILR coordinates, and other variables used in the updated model.}
 
@@ -28,9 +30,6 @@ along with many other useful information about the model.}
 }
 \description{
 This method allows for updating an existing \code{\link{brmcoda}} object.
-}
-\details{
-Details of the model specification can be found in \code{\link{brmsformula}}.
 }
 \examples{
 \dontrun{
