@@ -12,7 +12,7 @@
 #' 
 #' @return A \code{\link{brmcoda}} with two elements
 #' \itemize{
-#'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+#'   \item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
 #'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
 #'   }
@@ -68,7 +68,7 @@ brmcoda <- function (compilr, formula, ...) {
            ...)
   
   structure(
-    list(CompIlr = compilr,
+    list(CompILR = compilr,
          Model = m),
     class = "brmcoda")
 }

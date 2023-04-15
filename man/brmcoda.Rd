@@ -20,7 +20,7 @@ Details of the model specification can be found in \code{\link{brmsformula}}.}
 \value{
 A \code{\link{brmcoda}} with two elements
 \itemize{
-\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+\item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }

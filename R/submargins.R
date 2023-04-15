@@ -56,15 +56,15 @@ submargins <- function(object, delta, basesub,
                        ...) {
   
   # full composition
-  t <- object$CompIlr$TotalComp
-  t <- as.data.table(clo(t, total = object$CompIlr$total))
+  t <- object$CompILR$TotalComp
+  t <- as.data.table(clo(t, total = object$CompILR$total))
   
   delta <- as.integer(delta)
   
   # model for no change
-  tilr <- object$CompIlr$TotalILR
+  tilr <- object$CompILR$TotalILR
   
-  samed <- cbind(tilr, object$CompIlr$data)
+  samed <- cbind(tilr, object$CompILR$data)
   ysame <- fitted(object$Model, newdata = samed, re_formula = NA, summary = FALSE)
   ysame <- rowMeans(ysame) # average across participants when there is no change
   

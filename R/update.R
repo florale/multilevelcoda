@@ -114,14 +114,18 @@ update.compilr <- function(object, newdata, ...) {
 #' # using only a subset
 #' fit2 <- update(fit, newdata = mcompd[ID != 1])
 #' }
-update.brmcoda <- function(object, formula. = NULL,
-                           newcilr = NULL, newdata = NULL, ...) {
+update.brmcoda <- function(object,
+                           formula. = NULL,
+                           newdata = NULL,
+                           newcilr = NULL,
+                           ...) {
   
   if(!is.null(newcilr) && !is.null(newdata)) {
-    warning(paste("Either 'newcilr' or 'newdata' is required to update brmcoda,",
-                  "  but both were supplied.",
-                  "  'newcilr' will be used to update brmcoda and 'newdata' will be ignored.",
-                  sep = "\n"))
+    warning(paste(
+      "Either 'newcilr' or 'newdata' is required to update brmcoda,",
+      "  but both were supplied.",
+      "  'newcilr' will be used to update brmcoda and 'newdata' will be ignored.",
+      sep = "\n"))
   }
   
   # check args
@@ -129,32 +133,35 @@ update.brmcoda <- function(object, formula. = NULL,
     stop("either 'formula.', 'newdata', or 'newcilr' is required when updating a 'brmcoda' object.")
   }
   
-  # only formula updated
+  # updating only formula
   if (!is.null(formula.) && is.null(newcilr) && is.null(newdata)) {
     fit_new <- update(object$Model, formula. = formula., ...)
     
     structure(
-      list(CompIlr = object$CompIlr,
+      list(CompILR = object$CompILR,
            Model = fit_new),
       class = "brmcoda")
-  } else { # no formula, newdata/newcilr is provided
+    
+  } else { # updating newdata/newcilr (with and without updating formula)
     
     if(is.null(newcilr)) {
       if(!is.null(newdata)) {
-        newcilr <- update(object$CompIlr, newdata = newdata)
+        newcilr <- update(object$CompILR, newdata = newdata)
       }} else {
         if(isFALSE(inherits(newcilr, "compilr"))) {
           stop("'newcilr' must be an object of class 'compilr'.")
-        }    }
+        }
+      }
     
     newdata <- cbind(newcilr$data,
                      newcilr$BetweenILR,
                      newcilr$WithinILR,
                      newcilr$TotalILR)
+    
     fit_new <- update(object$Model, formula. = formula., newdata = newdata, ...)
     
     structure(
-      list(CompIlr = newcilr,
+      list(CompILR = newcilr,
            Model = fit_new),
       class = "brmcoda")
     

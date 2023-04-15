@@ -37,7 +37,7 @@ get.bsub <- function(object, basesub, mcomp,
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k,]
-        names(newcomp) <- object$CompIlr$parts
+        names(newcomp) <- object$CompILR$parts
         Delta <- sub[k, get(i)]
         kout[[k]] <- cbind(mcomp, newcomp, Delta)
       }
@@ -57,10 +57,10 @@ get.bsub <- function(object, basesub, mcomp,
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
-    tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-    bilr <- ilr(bcomp, V = object$CompIlr$psi)
-    tilr <- ilr(tcomp, V = object$CompIlr$psi)
+    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
+    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+    bilr <- ilr(bcomp, V = object$CompILR$psi)
+    tilr <- ilr(tcomp, V = object$CompILR$psi)
     
     wilr <- matrix(0, nrow = nrow(tilr), ncol = ncol(tilr))
     wilr <- as.data.table(wilr)
@@ -144,7 +144,7 @@ get.wsub <- function(object, basesub, mcomp,
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         newcomp <- mcomp + sub[k, ]
-        names(newcomp) <- object$CompIlr$parts
+        names(newcomp) <- object$CompILR$parts
         Delta <- sub[k, get(i)]
         kout[[k]] <- cbind(mcomp, newcomp, Delta)
       }
@@ -164,13 +164,13 @@ get.wsub <- function(object, basesub, mcomp,
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
-    tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
+    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
+    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
     wcomp <- tcomp - bcomp 
     
-    bilr <- ilr(bcomp, V = object$CompIlr$psi)
-    tilr <- ilr(tcomp, V = object$CompIlr$psi)
-    wilr <- ilr(wcomp, V = object$CompIlr$psi)
+    bilr <- ilr(bcomp, V = object$CompILR$psi)
+    tilr <- ilr(tcomp, V = object$CompILR$psi)
+    wilr <- ilr(wcomp, V = object$CompILR$psi)
     
     colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
     colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
@@ -256,7 +256,7 @@ get.wsub <- function(object, basesub, mcomp,
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
+        newd <- cbind(b, newcomp, object$CompILR$data, Delta)
         
         # useful information for the final results
         newd[, From := rep(subvar, length.out = nrow(newd))[k]]
@@ -268,10 +268,10 @@ get.wsub <- function(object, basesub, mcomp,
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
-        tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-        bilr <- ilr(bcomp, V = object$CompIlr$psi)
-        tilr <- ilr(tcomp, V = object$CompIlr$psi)
+        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
+        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        bilr <- ilr(bcomp, V = object$CompILR$psi)
+        tilr <- ilr(tcomp, V = object$CompILR$psi)
         
         wilr <- as.data.table(matrix(0, nrow = nrow(tilr), ncol = ncol(tilr)))
         
@@ -339,7 +339,7 @@ get.wsub <- function(object, basesub, mcomp,
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        newd <- cbind(b, newcomp, object$CompIlr$data, Delta)
+        newd <- cbind(b, newcomp, object$CompILR$data, Delta)
         
         # useful information for the final output
         newd[, From := rep(subvar, length.out = nrow(newd))[k]]
@@ -351,10 +351,10 @@ get.wsub <- function(object, basesub, mcomp,
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
-        bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
-        tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-        bilr <- ilr(bcomp, V = object$CompIlr$psi)
-        tilr <- ilr(tcomp, V = object$CompIlr$psi)
+        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
+        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        bilr <- ilr(bcomp, V = object$CompILR$psi)
+        tilr <- ilr(tcomp, V = object$CompILR$psi)
         
         wilr <- tilr - bilr 
         
@@ -426,7 +426,7 @@ get.wsub <- function(object, basesub, mcomp,
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        newd <- cbind(newcomp, object$CompIlr$data, Delta)
+        newd <- cbind(newcomp, object$CompILR$data, Delta)
         
         # useful information for the final results
         newd[, From := rep(subvar, length.out = nrow(newd))[k]]
@@ -438,8 +438,8 @@ get.wsub <- function(object, basesub, mcomp,
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
-        tilr <- ilr(tcomp, V = object$CompIlr$psi)
+        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        tilr <- ilr(tcomp, V = object$CompILR$psi)
         
         colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
         

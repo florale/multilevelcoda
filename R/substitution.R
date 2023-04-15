@@ -101,7 +101,7 @@ substitution <- function(object,
   }
   
   if (isFALSE(is.null(regrid))) {
-    if(any(c(colnames(object$CompIlr$BetweenILR), colnames(object$CompIlr$WithinILR))
+    if(any(c(colnames(object$CompILR$BetweenILR), colnames(object$CompILR$WithinILR))
            %in% c(colnames(regrid)))) {
       stop(paste(
         "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
@@ -113,7 +113,7 @@ substitution <- function(object,
   }
   
   if (isTRUE(missing(basesub))) {
-    count <- length(object$CompIlr$parts)
+    count <- length(object$CompILR$parts)
     n <- count - 2
     
     subvars1 <- c(1, -1)
@@ -134,22 +134,22 @@ substitution <- function(object,
         }
     
     basesub <- as.data.table(basesub)
-    names(basesub) <- object$CompIlr$parts
+    names(basesub) <- object$CompILR$parts
     
   } else if(isFALSE(missing(basesub))) {
-    if (isFALSE(identical(ncol(basesub), length(object$CompIlr$parts)))) {
+    if (isFALSE(identical(ncol(basesub), length(object$CompILR$parts)))) {
       stop(sprintf(
         "The number of columns in 'basesub' (%d) must be the same
         as the compositional parts in 'parts' (%d).",
         ncol(basesub),
-        length(object$CompIlr$parts)))
+        length(object$CompILR$parts)))
     }
-    if (isFALSE(identical(colnames(basesub), object$CompIlr$parts))) {
+    if (isFALSE(identical(colnames(basesub), object$CompILR$parts))) {
       stop(sprintf(
         "The names of compositional parts must be the
         same in 'basesub' (%s) and 'parts' (%s).",
         colnames(basesub),
-        object$CompIlr$parts))
+        object$CompILR$parts))
     }
   }
   

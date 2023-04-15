@@ -60,19 +60,19 @@ wsubmargins <- function (object,
                          ...) {
   
   # between-person composition
-  b <- object$CompIlr$BetweenComp
-  b <- as.data.table(clo(b, total = object$CompIlr$total))
+  b <- object$CompILR$BetweenComp
+  b <- as.data.table(clo(b, total = object$CompILR$total))
   
   delta <- as.integer(delta)
   
   # model for no change
-  bilr <- object$CompIlr$BetweenILR
+  bilr <- object$CompILR$BetweenILR
   wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
   
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
   
-  samed <- cbind(bilr, wilr, object$CompIlr$data)
+  samed <- cbind(bilr, wilr, object$CompILR$data)
   ysame <- fitted(object$Model, newdata = samed, re_formula = NA, summary = FALSE)
   ysame <- rowMeans(ysame) # average across participants when there is no change
   

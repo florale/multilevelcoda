@@ -75,10 +75,10 @@ wsub <- function(object,
                  ...) {
   
   # compositional mean
-  b <- object$CompIlr$BetweenComp
+  b <- object$CompILR$BetweenComp
   
   mcomp <- mean(b, robust = TRUE)
-  mcomp <- clo(mcomp, total = object$CompIlr$total)
+  mcomp <- clo(mcomp, total = object$CompILR$total)
   mcomp <- as.data.table(t(mcomp))
   
   # input for substitution model
@@ -86,14 +86,14 @@ wsub <- function(object,
   delta <- as.integer(delta)
   
   # model for no change
-  bilr <- ilr(mcomp, V = object$CompIlr$psi)
+  bilr <- ilr(mcomp, V = object$CompILR$psi)
   bilr <- as.data.table(t(bilr))
   wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
   
   # check covariates
-  ilrn <- c(names(object$CompIlr$BetweenILR), names(object$CompIlr$WithinILR)) # get ilr names in brm model
+  ilrn <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in brm model
   vn <- do.call(rbind, find_predictors(object$Model)) # get all varnames in brm model
   
   # if there is no covariates

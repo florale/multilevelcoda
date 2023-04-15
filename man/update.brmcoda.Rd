@@ -4,19 +4,19 @@
 \alias{update.brmcoda}
 \title{Update \code{\link{brmcoda}} models}
 \usage{
-\method{update}{brmcoda}(object, formula. = NULL, newcilr = NULL, newdata = NULL, ...)
+\method{update}{brmcoda}(object, formula. = NULL, newdata = NULL, newcilr = NULL, ...)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object to be updated. Required.}
 
 \item{formula.}{Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.}
 
-\item{newcilr}{A \code{\link{compilr}} object containing data of composition,
-ILR coordinates, and other variables used in the updated model.}
-
 \item{newdata}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.
 It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.}
+
+\item{newcilr}{A \code{\link{compilr}} object containing data of composition,
+ILR coordinates, and other variables used in the updated model.}
 
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
