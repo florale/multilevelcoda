@@ -170,7 +170,7 @@ test_that("bsub outputs what expected", {
   
   ## types
   expect_type(x, "list")
-  expect_equal(length(x), length(m$CompIlr$parts))
+  expect_equal(length(x), length(m$CompILR$parts))
   expect_s3_class(x$TST, "data.table")
   expect_s3_class(x$WAKE, "data.table")
   expect_s3_class(x$MVPA, "data.table")
@@ -212,11 +212,11 @@ test_that("bsub outputs what expected", {
   expect_type(x$SB$From, "character")
   expect_type(x$SB$To, "character")
   
-  expect_true(ncol(x$TST) >= 6)
-  expect_true(ncol(x$WAKE) >= 6)
-  expect_true(ncol(x$MVPA) >= 6)
-  expect_true(ncol(x$LPA) >= 6)
-  expect_true(ncol(x$SB) >= 6)
+  expect_true(ncol(x$TST) >= 8)
+  expect_true(ncol(x$WAKE) >= 8)
+  expect_true(ncol(x$MVPA) >= 8)
+  expect_true(ncol(x$LPA) >= 8)
+  expect_true(ncol(x$SB) >= 8)
   
   expect_true(all(x$TST$To == "TST"))
   expect_true(all(x$WAKE$To == "WAKE"))
@@ -224,6 +224,17 @@ test_that("bsub outputs what expected", {
   expect_true(all(x$LPA$To == "LPA"))
   expect_true(all(x$SB$To == "SB"))
   
+  expect_true(all(x$TST$Level == "between"))
+  expect_true(all(x$WAKE$Level == "between"))
+  expect_true(all(x$MVPA$Level == "between"))
+  expect_true(all(x$LPA$Level == "between"))
+  expect_true(all(x$SB$Level == "between"))
+  
+  expect_true(all(x$TST$EffectType == "conditional"))
+  expect_true(all(x$WAKE$EffectType == "conditional"))
+  expect_true(all(x$MVPA$EffectType == "conditional"))
+  expect_true(all(x$LPA$EffectType == "conditional"))
+  expect_true(all(x$SB$EffectType == "conditional"))
   })
 
 if (tolower(Sys.info()[["sysname"]]) != "darwin") {
