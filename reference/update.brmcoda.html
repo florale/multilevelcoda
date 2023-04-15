@@ -77,7 +77,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for brmcoda</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, formula. <span class="op">=</span> <span class="cn">NULL</span>, newcilr <span class="op">=</span> <span class="cn">NULL</span>, newdata <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, formula. <span class="op">=</span> <span class="cn">NULL</span>, newdata <span class="op">=</span> <span class="cn">NULL</span>, newcilr <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -90,15 +90,15 @@
 <dd><p>Changes to the formula; for details see <code><a href="https://rdrr.io/r/stats/update.formula.html" class="external-link">update.formula</a></code> and <code>brmsformula</code>.</p></dd>
 
 
-<dt>newcilr</dt>
-<dd><p>A <code><a href="compilr.html">compilr</a></code> object containing data of composition,
-ILR coordinates, and other variables used in the updated model.</p></dd>
-
-
 <dt>newdata</dt>
 <dd><p>A <code>data.frame</code> or <code>data.table</code>
 containing data of all variables used in the analysis.
 It must include a composition and the same ID variable as the existing <code><a href="compilr.html">compilr</a></code> object.</p></dd>
+
+
+<dt>newcilr</dt>
+<dd><p>A <code><a href="compilr.html">compilr</a></code> object containing data of composition,
+ILR coordinates, and other variables used in the updated model.</p></dd>
 
 
 <dt>...</dt>
