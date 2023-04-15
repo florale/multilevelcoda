@@ -20,21 +20,27 @@
 plotsub <- function(data, x, y, ...) {
 
   if (isFALSE(inherits(data, c("data.table", "data.frame")))) {
-    stop("data must be a data table or data frame,",
-         "and is an element of a wsub, bsub, wsubmargins, bsubmargins object.")
+    stop(
+      "data must be a data table or data frame,",
+      "and is an element of a wsub, bsub, wsubmargins, bsubmargins object.")
   }
   
   tmp <- copy(data)
 
-  plot <- ggplot(tmp, aes(x = Delta, y = Mean)) +
-    geom_hline(yintercept = 0, linewidth = 0.2, linetype = 2) +
-    geom_vline(xintercept = 0, linewidth = 0.2, linetype = 2) +
+  ggplot(tmp, aes(x = Delta, y = Mean)) +
+    geom_hline(yintercept = 0,
+               linewidth = 0.2,
+               linetype = 2) +
+    geom_vline(xintercept = 0,
+               linewidth = 0.2,
+               linetype = 2) +
     geom_line(aes(colour = From), linewidth = 1) +
-    geom_ribbon(aes(ymin = CI_low,
-                    ymax = CI_high, fill = From),
-                alpha = 1 / 10, linewidth = 1 / 10) +
-    facet_grid(~ From) +
+    geom_ribbon(
+      aes(ymin = CI_low,
+          ymax = CI_high, fill = From),
+      alpha = 1 / 10,
+      linewidth = 1 / 10) +
+    facet_grid( ~ From) +
     xlab(paste("Change to", eval(x), sep = " ")) +
     ylab(paste("Change in", eval(y), sep = " "))
-  plot
 }

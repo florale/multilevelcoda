@@ -37,8 +37,8 @@
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{Level where changes in composition takes place.}
-#'   \item{\code{EffectType}}{Either estimated `conditional` or average `marginal` changes.}
+#'   \item{\code{Level}}{ Level where changes in composition takes place.}
+#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
 #' }
 #' 
 #' @importFrom data.table as.data.table copy :=
@@ -65,9 +65,13 @@
 #'              
 #' subm <- wsub(object = m, basesub = psub, delta = 5)
 #' }
-wsub <- function(object, delta, basesub, 
-                 regrid = NULL, summary = TRUE, 
-                 level = "within", type = "conditional",
+wsub <- function(object,
+                 delta,
+                 basesub,
+                 regrid = NULL,
+                 summary = TRUE,
+                 level = "within",
+                 type = "conditional",
                  ...) {
   
   # compositional mean
@@ -76,7 +80,7 @@ wsub <- function(object, delta, basesub,
   mcomp <- mean(b, robust = TRUE)
   mcomp <- clo(mcomp, total = object$CompIlr$total)
   mcomp <- as.data.table(t(mcomp))
-
+  
   # input for substitution model
   ID <- 1 # to make fitted() happy
   delta <- as.integer(delta)
@@ -87,59 +91,89 @@ wsub <- function(object, delta, basesub,
   wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
-
+  
   # check covariates
   ilrn <- c(names(object$CompIlr$BetweenILR), names(object$CompIlr$WithinILR)) # get ilr names in brm model
   vn <- do.call(rbind, find_predictors(object$Model)) # get all varnames in brm model
-
+  
   # if there is no covariates
   # number of variables in the brm model = number of ilr coordinates
-  if (isTRUE(identical(length(vn), length(ilrn)))) { # unadj subsitution model
+  if (isTRUE(identical(length(vn), length(ilrn)))) {
+    # unadj subsitution model
     if (isFALSE(is.null(regrid))) {
-      warning(paste(
-        "This is an unadjusted model, but a reference grid was provided.",
-        "  Please note that the covariates provided in the reference grid",
-        "  need to be present in 'brmcoda' model object.",
-        "  Unadjusted substitution model was estimated.",
-        sep = "\n"))
+      warning(
+        paste(
+          "This is an unadjusted model, but a reference grid was provided.",
+          "  Please note that the covariates provided in the reference grid",
+          "  need to be present in 'brmcoda' model object.",
+          "  Unadjusted substitution model was estimated.",
+          sep = "\n"
+        )
+      )
     }
     
     dsame <- cbind(bilr, wilr, ID)
-    ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
+    ysame <- fitted(
+      object$Model,
+      newdata = dsame,
+      re_formula = NA,
+      summary = FALSE)
     
     # substitution model
-    out <- get.wsub(object = object, basesub = basesub,
-                    mcomp = mcomp, delta = delta, ysame = ysame, summary = summary, 
-                    level = level, type = type)
+    out <- get.wsub(
+      object = object,
+      basesub = basesub,
+      mcomp = mcomp,
+      delta = delta,
+      ysame = ysame,
+      summary = summary,
+      level = level,
+      type = type)
     
-    } else { # adj subsitution model
-      # reference grid containing covariates
-      rg <- as.data.table(ref_grid(object$Model) @grid)
-      cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
-      
-      if (isFALSE(is.null(regrid))) { # check user's specified reference grid
-        if(isFALSE(identical(colnames(regrid), cv))) { # ensure all covs are provided
-          stop(paste(
+  } else {
+    # adj subsitution model
+    # reference grid containing covariates
+    rg <- as.data.table(ref_grid(object$Model)@grid)
+    cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
+    
+    if (isFALSE(is.null(regrid))) {
+      # check user's specified reference grid
+      if (isFALSE(identical(colnames(regrid), cv))) {
+        # ensure all covs are provided
+        stop(
+          paste(
             "'regrid' should contains information about",
             "  the covariates in 'brmcoda' model to estimate the substitution model.",
             "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
             "  as these variables will be calculated by substitution model.",
             "  Please provide a different reference grid.",
             sep = "\n"))
-          } else {
-            refg <- regrid
-            }
-        } else { # use default rg
-          refg <- rg[, cv, with = FALSE]
-          }
-      
-      dsame <- cbind(bilr, wilr, ID, refg)
-      ysame <- fitted(object$Model, newdata = dsame, re_formula = NA, summary = FALSE)
-      
-      # substitution model
-      out <- get.wsub(object = object, basesub = basesub,
-                      mcomp = mcomp, delta = delta, ysame = ysame,
-                      summary = summary, cv = cv, refg = refg, 
-                      level = level, type = type)
+      } else {
+        refg <- regrid
+      }
+    } else {
+      # use default rg
+      refg <- rg[, cv, with = FALSE]
     }
+    
+    dsame <- cbind(bilr, wilr, ID, refg)
+    ysame <- fitted(
+      object$Model,
+      newdata = dsame,
+      re_formula = NA,
+      summary = FALSE)
+    
+    # substitution model
+    out <- get.wsub(
+      object = object,
+      basesub = basesub,
+      mcomp = mcomp,
+      delta = delta,
+      ysame = ysame,
+      summary = summary,
+      cv = cv,
+      refg = refg,
+      level = level,
+      type = type)
+  }
 }

@@ -27,8 +27,8 @@
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{Level where changes in composition takes place.}
-#'   \item{\code{EffectType}}{Either estimated `conditional` or average `marginal` changes.}
+#'   \item{\code{Level}}{ Level where changes in composition takes place.}
+#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
 #' }
 #'
 #' @importFrom data.table as.data.table copy :=
@@ -63,14 +63,18 @@ submargins <- function(object, delta, basesub,
   
   # model for no change
   tilr <- object$CompIlr$TotalILR
-
+  
   samed <- cbind(tilr, object$CompIlr$data)
   ysame <- fitted(object$Model, newdata = samed, re_formula = NA, summary = FALSE)
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model
-  out <- .get.submargins(object = object, t = t,
-                         basesub = basesub,
-                         ysame = ysame, delta = delta, 
-                         level = level, type = type)
+  out <- .get.submargins(
+    object = object,
+    t = t,
+    basesub = basesub,
+    ysame = ysame,
+    delta = delta,
+    level = level,
+    type = type)
 }

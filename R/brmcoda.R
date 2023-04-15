@@ -59,6 +59,7 @@ brmcoda <- function (compilr, formula, ...) {
       "  See ?multilevelcoda::compilr for details.",
       sep = "\n"))
   }
+  
   tmp <- cbind(compilr$data, compilr$BetweenILR, 
                compilr$WithinILR, compilr$TotalILR)
   
@@ -66,9 +67,8 @@ brmcoda <- function (compilr, formula, ...) {
            data = tmp,
            ...)
   
-  out <- structure(
+  structure(
     list(CompIlr = compilr,
          Model = m),
     class = "brmcoda")
-  out
 }

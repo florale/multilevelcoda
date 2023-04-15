@@ -50,8 +50,8 @@ and include at least six elements.
 \item{\code{Delta}}{ Amount substituted across compositional parts.}
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{Level where changes in composition takes place.}
-\item{\code{EffectType}}{Either estimated \code{conditional} or average \code{marginal} changes.}
+\item{\code{Level}}{ Level where changes in composition takes place.}
+\item{\code{EffectType}}{ Either estimated \code{conditional} or average \code{marginal} changes.}
 }
 }
 \description{

@@ -27,8 +27,8 @@
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{Level where changes in composition takes place.}
-#'   \item{\code{EffectType}}{Either estimated `conditional` or average `marginal` changes.}
+#'   \item{\code{Level}}{ Level where changes in composition takes place.}
+#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
 #' }
 #'
 #' @importFrom data.table as.data.table copy :=
@@ -52,8 +52,11 @@
 #'                      
 #' subm <- wsubmargins(object = m, basesub = psub, delta = 5)
 #' }
-wsubmargins <- function (object, delta, basesub, 
-                         level = "within", type = "marginal",
+wsubmargins <- function (object,
+                         delta,
+                         basesub,
+                         level = "within",
+                         type = "marginal",
                          ...) {
   
   # between-person composition
@@ -74,8 +77,12 @@ wsubmargins <- function (object, delta, basesub,
   ysame <- rowMeans(ysame) # average across participants when there is no change
   
   # substitution model
-  out <- .get.wsubmargins(object = object, b = b,
-                          basesub = basesub,
-                          ysame = ysame, delta = delta, 
-                          level = level, type = type)
+  out <- .get.wsubmargins(
+    object = object,
+    b = b,
+    basesub = basesub,
+    ysame = ysame,
+    delta = delta,
+    level = level,
+    type = type)
 }

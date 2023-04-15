@@ -34,12 +34,13 @@ basesub <- function(parts) {
   basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, parts))
   k <- 0
   
-  for(i in 1:nc)
-    for(j in 1:nc)
-      if(i != j) {
+  for (i in 1:nc)
+    for (j in 1:nc)
+      if (i != j) {
         k <- k + 1
         basesub[k, c(i, j)] <- c(1, -1)
-        }
+      }
+  
   basesub <- as.data.table(basesub)
   basesub
   }

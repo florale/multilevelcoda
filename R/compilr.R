@@ -44,6 +44,7 @@
 #' ## cleanup
 #' rm(cilr, mcompd, sbp)
 compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
+  
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
   }
@@ -55,9 +56,10 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
     stop(sprintf(
     "The number of compositional variables in parts (%d) 
   must be the same as in sbp (%d).",
-                 length(parts),
-                 ncol(sbp)))
+  length(parts),
+  ncol(sbp)))
   }
+  
   tmp <- as.data.table(data)
   psi <- gsi.buildilrBase(t(sbp))
   
@@ -85,14 +87,16 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
   
-  if(any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
-    stop(paste(
-      "'data' should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
-      "  these variables will be used in subsequent models.",
-      "  Please rename them before running 'compilr'.",
-               sep = "\n"))
+  if (any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
+    stop(
+      paste(
+        "'data' should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
+        "  these variables will be used in subsequent models.",
+        "  Please rename them before running 'compilr'.",
+        sep = "\n"))
   }
-  out <- structure(
+  
+  structure(
     list(
       BetweenComp = bcomp,
       WithinComp = wcomp,
@@ -106,6 +110,6 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
       parts = parts,
       idvar = idvar,
       total = total),
-    class = "compilr")
-  out
+    class = "compilr"
+  )
 }

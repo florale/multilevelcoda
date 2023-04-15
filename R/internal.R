@@ -28,33 +28,34 @@ get.bsub <- function(object, basesub, mcomp,
     # substitution variable names
     subvar <- colnames(posub) %snin% eval(i)
     iv <- i
-  
+    
     kout <- vector("list", length = nrow(posub))
     jout <- vector("list", length = length(delta))
     
-    for (j in seq_along(delta)) { # delta level
+    for (j in seq_along(delta)) {
+      # delta level
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
-        newcomp <- mcomp + sub[k, ]
+        newcomp <- mcomp + sub[k,]
         names(newcomp) <- object$CompIlr$parts
         Delta <- sub[k, get(i)]
         kout[[k]] <- cbind(mcomp, newcomp, Delta)
-        }
+      }
       jout[[j]] <- do.call(rbind, kout)
     }
     newd <- setDT(do.call(rbind, jout))
-
+    
     # useful information for the final results
     newd[, From := rep(subvar, length.out = nrow(newd))]
     newd$To <- iv
     newd$Delta <- as.numeric(newd$Delta)
     newd$Level <- level
     newd$EffectType <- type
-
+    
     # remove impossible reallocation that result in negative values 
     cols <- colnames(newd) %snin% c("Delta", "From", "To", "Level", "EffectType")
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
-
+    
     # compositions and ilrs for predictions
     bcomp <- acomp(newd[, colnames(object$CompIlr$BetweenComp), with = FALSE])
     tcomp <- acomp(newd[, object$CompIlr$parts, with = FALSE])
@@ -78,44 +79,44 @@ get.bsub <- function(object, basesub, mcomp,
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
                      subd[, .(Delta, To, From, Level, EffectType)])
       
-      } else { # adjusted
-        hout <- vector("list", length = nrow(refg))
-          if(isTRUE(summary)) { # averaging over reference grid
-            for (h in seq_len(nrow(refg))) {
-              subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
-              ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-              ydiff <- ysub - ysame[, h]
-              hout[[h]] <- ydiff
-            }
-            
-            ymean <- Reduce(`+`, hout) / length(hout)
-            ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
-            ymean <- rbindlist(ymean)
-            ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(Delta, To, From, Level, EffectType)])
-            
-            } else { # keeping prediction at each level of reference grid
-              for (h in seq_len(nrow(refg))) {
-                subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
-                ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-                ydiff <- ysub - ysame[, h]
-                ymean <- apply(ydiff, 2, 
-                               function(x) {describe_posterior(x, centrality = "mean", ...)})
-                ymean <- rbindlist(ymean)
-                ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("Delta", "From", "To", "Level", "EffectType", cv), 
-                                    with = FALSE])
-                
-                hout[[h]] <- ymean
-                }
-              ymean <- rbindlist(hout)
-            }
+    } else { # adjusted
+      hout <- vector("list", length = nrow(refg))
+      if(isTRUE(summary)) { # averaging over reference grid
+        for (h in seq_len(nrow(refg))) {
+          subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
+          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - ysame[, h]
+          hout[[h]] <- ydiff
         }
+        
+        ymean <- Reduce(`+`, hout) / length(hout)
+        ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+        ymean <- rbindlist(ymean)
+        ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
+                       subd[, .(Delta, To, From, Level, EffectType)])
+        
+      } else { # keeping prediction at each level of reference grid
+        for (h in seq_len(nrow(refg))) {
+          subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
+          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - ysame[, h]
+          ymean <- apply(ydiff, 2, 
+                         function(x) {describe_posterior(x, centrality = "mean", ...)})
+          ymean <- rbindlist(ymean)
+          ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
+                         subd[, c("Delta", "From", "To", "Level", "EffectType", cv), 
+                              with = FALSE])
+          
+          hout[[h]] <- ymean
+        }
+        ymean <- rbindlist(hout)
+      }
+    }
     # final results for entire composition
     out <- list(ymean)
     names(out) <- i
     out
-    }
+  }
   iout
 }
 
@@ -135,7 +136,7 @@ get.wsub <- function(object, basesub, mcomp,
     # substitution variable names
     subvar <- colnames(posub) %snin% eval(i)
     iv <- i
-  
+    
     kout <- vector("list", length = nrow(posub))
     jout <- vector("list", length = length(delta))
     
@@ -150,7 +151,7 @@ get.wsub <- function(object, basesub, mcomp,
       jout[[j]] <- do.call(rbind, kout)
     }
     newd <- setDT(do.call(rbind, jout))
-
+    
     # useful information for the final results
     newd[, From := rep(subvar, length.out = nrow(newd))]
     newd$To <- iv
@@ -178,51 +179,51 @@ get.wsub <- function(object, basesub, mcomp,
     if(is.null(refg)) { # unadjusted
       subd <- cbind(newd, bilr, wilr, ID)
       ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-
+      
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
       ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
                      subd[, .(Delta, To, From, Level, EffectType)])
       
-      } else { # adjusted
-        hout <- vector("list", length = nrow(refg))
-          if(isTRUE(summary)) { # averaging over reference grid
-            for (h in seq_len(nrow(refg))) {
-              subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
-              ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-              ydiff <- ysub - ysame[, h]
-              hout[[h]] <- ydiff
-            }
-            
-            ymean <- Reduce(`+`, hout) / length(hout)
-            ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
-            ymean <- rbindlist(ymean)
-            ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                           subd[, .(Delta, To, From, Level, EffectType)])
-            
-            } else { # keeping prediction at each level of reference grid
-              for (h in seq_len(nrow(refg))) {
-                subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
-                ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-                ydiff <- ysub - ysame[, h]
-                ymean <- apply(ydiff, 2, 
-                               function(x) {describe_posterior(x, centrality = "mean", ...)})
-                ymean <- rbindlist(ymean)
-                ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                               subd[, c("Delta", "From", "To", "Level", "EffectType", cv),
-                                    with = FALSE])
-                
-                hout[[h]] <- ymean
-                }
-              ymean <- rbindlist(hout)
-            }
+    } else { # adjusted
+      hout <- vector("list", length = nrow(refg))
+      if(isTRUE(summary)) { # averaging over reference grid
+        for (h in seq_len(nrow(refg))) {
+          subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
+          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - ysame[, h]
+          hout[[h]] <- ydiff
         }
+        
+        ymean <- Reduce(`+`, hout) / length(hout)
+        ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+        ymean <- rbindlist(ymean)
+        ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
+                       subd[, .(Delta, To, From, Level, EffectType)])
+        
+      } else { # keeping prediction at each level of reference grid
+        for (h in seq_len(nrow(refg))) {
+          subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
+          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - ysame[, h]
+          ymean <- apply(ydiff, 2, 
+                         function(x) {describe_posterior(x, centrality = "mean", ...)})
+          ymean <- rbindlist(ymean)
+          ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
+                         subd[, c("Delta", "From", "To", "Level", "EffectType", cv),
+                              with = FALSE])
+          
+          hout[[h]] <- ymean
+        }
+        ymean <- rbindlist(hout)
+      }
+    }
     # final results for entire composition
     out <- list(ymean)
     names(out) <- i
     out
-    }
+  }
   iout
 }
 
@@ -441,7 +442,7 @@ get.wsub <- function(object, basesub, mcomp,
         tilr <- ilr(tcomp, V = object$CompIlr$psi)
         
         colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
-
+        
         # prediction
         subd <- cbind(newd, tilr)
         ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)

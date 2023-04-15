@@ -33,8 +33,8 @@
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{Level where changes in composition takes place. Either }
-#'   \item{\code{EffectType}}{Either estimated `conditional` or average `marginal` changes.}
+#'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
+#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
 #' }
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
@@ -61,12 +61,15 @@
 #' subm <- substitution(object = m, delta = c(1, 10),
 #'                      type = "conditional", level = c("between", "within"))
 #' }
-substitution <- function(object, delta, basesub = NULL,
-                         regrid = NULL, summary = TRUE, 
+substitution <- function(object,
+                         delta,
+                         basesub = NULL,
+                         regrid = NULL,
+                         summary = TRUE,
                          level = c("between", "within"),
                          type = c("conditional", "marginal"),
                          ...) {
-
+  
   if (isTRUE(missing(object))) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
@@ -80,7 +83,7 @@ substitution <- function(object, delta, basesub = NULL,
       "Can't handle an object of class (%s) 
   It should be a fitted 'brmcoda' object
   See ?bsub for details.",
-      class(object)))
+  class(object)))
   }
   
   if(isFALSE(missing(delta))) {
@@ -109,7 +112,7 @@ substitution <- function(object, delta, basesub = NULL,
     }
   }
   
-  if(isTRUE(missing(basesub))) {
+  if (isTRUE(missing(basesub))) {
     count <- length(object$CompIlr$parts)
     n <- count - 2
     
@@ -123,55 +126,74 @@ substitution <- function(object, delta, basesub = NULL,
     basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$CompILR$parts))
     k <- 0
     
-    for(i in 1:nc)
-      for(j in 1:nc)
-        if(i != j) {
+    for (i in 1:nc)
+      for (j in 1:nc)
+        if (i != j) {
           k <- k + 1
           basesub[k, c(i, j)] <- c(1, -1)
         }
     
     basesub <- as.data.table(basesub)
     names(basesub) <- object$CompIlr$parts
-    } else if(isFALSE(missing(basesub))) {
-      
-      if (isFALSE(identical(ncol(basesub), length(object$CompIlr$parts)))) {
-        stop(sprintf(
+    
+  } else if(isFALSE(missing(basesub))) {
+    if (isFALSE(identical(ncol(basesub), length(object$CompIlr$parts)))) {
+      stop(sprintf(
         "The number of columns in 'basesub' (%d) must be the same
         as the compositional parts in 'parts' (%d).",
         ncol(basesub),
         length(object$CompIlr$parts)))
-        }
-      
-      if (isFALSE(identical(colnames(basesub), object$CompIlr$parts))) {
-        stop(sprintf(
+    }
+    if (isFALSE(identical(colnames(basesub), object$CompIlr$parts))) {
+      stop(sprintf(
         "The names of compositional parts must be the
         same in 'basesub' (%s) and 'parts' (%s).",
         colnames(basesub),
         object$CompIlr$parts))
-      }
     }
+  }
   
   if ("between" %in% level) {
     if("conditional" %in% type) {
-      bout <- bsub(object = object, basesub = basesub, delta = delta,
-                   regrid = regrid, summary = summary,
-                   level = "between", type = "conditional")
+      bout <- bsub(
+        object = object,
+        basesub = basesub,
+        delta = delta,
+        regrid = regrid,
+        summary = summary,
+        level = "between",
+        type = "conditional")
     }
     if("marginal" %in% type) {
-      bmout <- bsubmargins(object = object, basesub = basesub, delta = delta,
-                           level = "between", type = "marginal")
+      bmout <-
+        bsubmargins(
+          object = object,
+          basesub = basesub,
+          delta = delta,
+          level = "between",
+          type = "marginal")
     }
   }
   
   if ("within" %in% level) {
     if("conditional" %in% type) {
-      wout <- wsub(object = object, basesub = basesub, delta = delta,
-                   regrid = regrid, summary = summary,
-                   level = "within", type = "conditional")
+      wout <- wsub(
+        object = object,
+        basesub = basesub,
+        delta = delta,
+        regrid = regrid,
+        summary = summary,
+        level = "within",
+        type = "conditional")
     }
     if("marginal" %in% type) {
-      wmout <- wsubmargins(object = object, basesub = basesub, delta = delta,
-                           level = "within", type = "marginal")
+      wmout <-
+        wsubmargins(
+          object = object,
+          basesub = basesub,
+          delta = delta,
+          level = "within",
+          type = "marginal")
     }
   }
   
