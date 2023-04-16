@@ -53,6 +53,8 @@ test_that("update.compilr errors where appropriate", {
   # newdata incorrect ID
   expect_error(cilr_new <- update(object = cilr, newdata = mcompd[, -c("ID")]))
   
+  # incorrect newdata
+  expect_error(cilr_new <- update(object = cilr, newdata = list("a" = 1, "b" = 2)))
 })
 
 test_that("update.compilr gives expected output", {
