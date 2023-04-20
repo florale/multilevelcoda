@@ -47,5 +47,18 @@ test_that("compilr errors if it should", {
   mcompd[, bilr1 := .1]
   expect_error(x <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID],
                             sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
-
+  
+  # sbp contains invalid values
+  sbpe <- matrix(c(
+    1, 1, -1,-1, -1,
+    1, -1, 0, 0, 0,
+    0, 0, 1, -1, -2,
+    0, 0, 0, 1, -1), ncol = 5, byrow = TRUE)
+  expect_error(x <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID],
+                            sbpe, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+  
+  # data has 0
+  mcompd0 <- mcompd[ID %in% 1:10, .SD[1:3]][, .(TST = 0, WAKE = 0, MVPA = 0, LPA = 0, SB = 0)]
+  expect_error(x <- compilr(data =mcompd0,
+                            sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
   })

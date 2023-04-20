@@ -39,6 +39,10 @@ x <- submargins(object = m, basesub = psub, delta = 2)
 
 # Testing
 #---------------------------------------------------------------------------------------------------
+test_that("submargins errors when delta out of range", {
+  expect_error(x <- submargins(object = m, basesub = psub, delta = 1000))
+})
+
 test_that("submargins outputs what expected", {
   
   ## types

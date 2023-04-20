@@ -69,6 +69,10 @@ x <- wsubmargins(object = m, basesub = psub, delta = 2)
 #   expect_error(x <- wsubmargins(object = m, basesub = ps, delta = 2))
 # })
 
+test_that("wsubmargins errors when delta out of range", {
+  expect_error(x <- wsubmargins(object = m, basesub = psub, delta = 1000))
+})
+
 test_that("wsubmargins outputs what expected", {
   
   ## types

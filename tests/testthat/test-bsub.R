@@ -98,7 +98,10 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
   ## incorect reference grid 2
   rg <- data.table(bilr1 = 1, Age = 1)
   expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
-
+  
+  # delta out of range
+  expect_error(x <- bsub(object = m, basesub = psub, delta = 1000))
+  
   ## function knows to use correct user's specified reference grid
   rg <- data.table(Female = 1)
   x3 <- bsub(object = m, basesub = psub, delta = 2, regrid = rg)
@@ -163,6 +166,29 @@ test_that("bsub works as expected for adjusted/unadjusted model", {
   expect_true(all(x6$MVPA$Female %in% c(0, 1)))
   expect_true(all(x6$LPA$Female %in% c(0, 1)))
   expect_true(all(x6$SB$Female %in% c(0, 1)))
+  
+})
+test_that("bsub checks for user-specified reference composition", {
+  
+  # incorrect length
+  ref1 <- c(400, 60, 500, 60)
+  expect_error(bsub(object = m, basesub = psub, recomp = ref1, delta = 2))
+  
+  # incorrect class
+  ref2 <- c("400", "100", "500", "200", "200")
+  expect_error(bsub(object = m, basesub = psub, recomp = ref2, delta = 2))
+  
+  # incorrect class
+  ref3 <- c(400, 100, 500, 200, 200)
+  expect_error(x <- bsub(object = m, basesub = psub, recomp = ref3, delta = 2))
+  
+  # values outside of possible range
+  ref4 <- c(100, 100, 900, 100, 240)
+  expect_error(x <- bsub(object = m, basesub = psub, recomp = ref4, delta = 2))
+  
+  # include 0
+  ref5 <- c(100, 200, 900, 0, 240)
+  expect_error(x <- bsub(object = m, basesub = psub, recomp = ref5, delta = 2))
   
 })
 
