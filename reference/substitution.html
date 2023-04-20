@@ -94,6 +94,7 @@ present in the <code><a href="brmcoda.html">brmcoda</a></code> object.</p>
 <span>  basesub <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  regrid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  recomp <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -119,13 +120,21 @@ If <code>NULL</code>, all possible pairwise substitution of compositional parts 
 <dt>regrid</dt>
 <dd><p>If non-<code>NULL</code>, a <code>data.table</code> of reference grid consisting
 of combinations of covariates over which predictions are made.
-If <code>NULL</code>, the reference grid is constructed via <code>ref_grid</code>.</p></dd>
+If <code>NULL</code>, the reference grid is constructed via <code>ref_grid</code>.
+Only applicable to basic substitution model.</p></dd>
 
 
 <dt>summary</dt>
 <dd><p>A logical value.
 Should the estimate at each level of the reference grid (<code>FALSE</code>)
-or their average (<code>TRUE</code>) be returned? Default to <code>TRUE</code>.</p></dd>
+or their average (<code>TRUE</code>) be returned? Default to <code>TRUE</code>.
+Only applicable to basic substitution model.</p></dd>
+
+
+<dt>recomp</dt>
+<dd><p>A numeric or integer vector used as reference composition. If <code>NULL</code>,
+compositional mean is used.
+Only applicable to basic substitution model.</p></dd>
 
 
 <dt>level</dt>

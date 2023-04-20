@@ -103,6 +103,7 @@ For average marginal effect, use <code><a href="wsubmargins.html">wsubmargins</a
 <span>  <span class="va">basesub</span>,</span>
 <span>  regrid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  recomp <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"within"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"conditional"</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -135,6 +136,11 @@ If <code>NULL</code>, the reference grid is constructed via <code>ref_grid</code
 <dd><p>A logical value.
 Should the estimate at each level of the reference grid (<code>FALSE</code>)
 or their average (<code>TRUE</code>) be returned? Default to <code>TRUE</code>.</p></dd>
+
+
+<dt>recomp</dt>
+<dd><p>A numeric or integer vector used as reference composition. If <code>NULL</code>,
+compositional mean is used.</p></dd>
 
 
 <dt>level</dt>
