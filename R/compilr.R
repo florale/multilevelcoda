@@ -52,6 +52,9 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
     stop(sprintf("sbp is a '%s' but must be a matrix.",
                  paste(class(sbp), collapse = " ")))
   }
+  if (isTRUE(any(apply(sbp, 2, function(x) x %nin% c(-1, 0, 1))))) {
+    stop("sbp should only contain 1, -1 and 0 (a partition)")
+  }
   if (isFALSE(identical(length(parts), ncol(sbp)))) {
     stop(sprintf(
     "The number of compositional variables in parts (%d) 
@@ -62,6 +65,16 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   
   tmp <- as.data.table(data)
   psi <- gsi.buildilrBase(t(sbp))
+  
+  # check 0
+  if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) x == 0)))) {
+    stop(paste(
+      "This dataset of composition contains zero(s);",
+      "  Zeros hinder the application of compositional data analysis",
+      "  because the analysis is based on log-ratios",
+      "  Please deal with zeros before running 'compilr'.",
+      sep = "\n"))
+  }
   
   ## Composition and ILRs
   # total
@@ -83,9 +96,9 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   colnames(bcomp) <- paste0("B", parts)
   colnames(wcomp) <- paste0("W", parts)
   colnames(tcomp) <- parts
-  colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
-  colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-  colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
+  colnames(bilr)  <- paste0("bilr", seq_len(ncol(bilr)))
+  colnames(wilr)  <- paste0("wilr", seq_len(ncol(wilr)))
+  colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
   
   if (any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
     stop(
