@@ -51,14 +51,25 @@
 #'              
 #' subm <- submargins(object = m, basesub = psub, delta = 5)
 #' }
-submargins <- function(object, delta, basesub,
-                       level = "total", type = "marginal",
+submargins <- function(object,
+                       delta,
+                       basesub,
+                       level = "total",
+                       type = "marginal",
                        ...) {
   
   # full composition
   t <- object$CompILR$TotalComp
   t <- as.data.table(clo(t, total = object$CompILR$total))
   
+  # error if delta out of range
+  if(isTRUE(any(delta > apply(t, 2, min)))) {
+    stop(sprintf(
+      "delta value should be less than or equal to %s, which is
+  the amount of composition part available for pairwise substitution.",
+  paste0(round(min(apply(t, 2, min))), collapse = ", ")
+    ))
+  }
   delta <- as.integer(delta)
   
   # model for no change

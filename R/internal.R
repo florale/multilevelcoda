@@ -1,5 +1,5 @@
 ## make Rcmd check happy
-utils::globalVariables(c("i",  "..cols", ".", "To", ".SD",
+utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "b", "t",
                          "Mean",  "CI_low", "CI_high", "From", "Delta",
                          "spread", "value", "variable", "ID", "EffectType", "Level",
                          "update"))

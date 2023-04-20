@@ -62,6 +62,14 @@ bsubmargins <- function (object,
   b <- object$CompILR$BetweenComp
   b <- as.data.table(clo(b, total = object$CompILR$total))
 
+  # error if delta out of range
+  if(isTRUE(any(delta > apply(b, 2, min)))) {
+    stop(sprintf(
+      "delta value should be less than or equal to %s, which is
+  the amount of composition part available for pairwise substitution.",
+  paste0(round(min(apply(b, 2, min))), collapse = ", ")
+    ))
+  }
   delta <- as.integer(delta)
   
   # model for no change

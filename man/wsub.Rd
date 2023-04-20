@@ -10,6 +10,7 @@ wsub(
   basesub,
   regrid = NULL,
   summary = TRUE,
+  recomp = NULL,
   level = "within",
   type = "conditional",
   ...
@@ -31,6 +32,9 @@ If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
 \item{summary}{A logical value.
 Should the estimate at each level of the reference grid (\code{FALSE})
 or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
+
+\item{recomp}{A numeric or integer vector used as reference composition. If \code{NULL},
+compositional mean is used.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}

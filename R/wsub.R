@@ -22,6 +22,8 @@
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
+#' @param  recomp A numeric or integer vector used as reference composition. If \code{NULL},
+#' compositional mean is used.
 #' @param level A character string or vector. 
 #' Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.
 #' @param type A character string or vector. 
@@ -70,20 +72,79 @@ wsub <- function(object,
                  basesub,
                  regrid = NULL,
                  summary = TRUE,
+                 recomp = NULL,
                  level = "within",
                  type = "conditional",
                  ...) {
   
+  
   # compositional mean
   b <- object$CompILR$BetweenComp
+
+  if (is.null(recomp)) {
+    mcomp <- mean(b, robust = TRUE)
+    mcomp <- clo(mcomp, total = object$CompILR$total)
+    mcomp <- as.data.table(t(mcomp))
+    
+  } else {
+    if (isFALSE(identical(length(object$CompILR$parts), length(recomp)))) {
+      stop(
+        sprintf(
+          "The number of values in parts (%d)
+  must be the same as in recomp (%d).",
+  length(object$CompILR$parts),
+  length(recomp)
+        ))
+    }
+    
+    if (isFALSE(class(recomp) %in% c("numeric", "interger"))) {
+      stop(
+        sprintf(
+          "recomp (%s) should be a vector of numeric or interger values.",
+          class(recomp)
+        ))
+    }
+    
+    if(isFALSE(sum(recomp) == object$CompILR$total)) {
+      stop(sprintf(
+        "The total amount of recomp (%s) should be the same as the composition (%s).",
+        sum(recomp),
+        object$CompILR$total
+      ))
+    }
+    
+    if (isTRUE((any(recomp > apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)) |
+                any(recomp < apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min))))) {
+      stop(paste(
+        sprintf(
+          "recomp should be numeric or interger values that are between (%s) and (%s)",
+          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min)), collapse = ", "),
+          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)), collapse = ", ")),
+        "\n", 
+        " for",
+        paste0(object$CompILR$parts, collapse = ", "),
+        "respectively"
+      ))
+    }
+    recomp <- as.integer(recomp)
+    mcomp  <- clo(recomp, total = object$CompILR$total)
+    mcomp  <- as.data.table(t(mcomp))
+    colnames(mcomp) <- colnames(object$CompILR$BetweenComp)
+  }
   
-  mcomp <- mean(b, robust = TRUE)
-  mcomp <- clo(mcomp, total = object$CompILR$total)
-  mcomp <- as.data.table(t(mcomp))
+  # error if delta out of range
+  if(isTRUE(any(delta > min(mcomp)))) {
+    stop(sprintf(
+      "delta value should be less than or equal to %s, which is
+  the amount of composition part available for pairwise substitution.",
+  round(min(mcomp), 2)
+    ))
+  }
   
   # input for substitution model
   ID <- 1 # to make fitted() happy
   delta <- as.integer(delta)
+  recomp <- is.integer(recomp)
   
   # model for no change
   bilr <- ilr(mcomp, V = object$CompILR$psi)
