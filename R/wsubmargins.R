@@ -75,7 +75,7 @@ wsubmargins <- function (object,
   
   # model for no change
   bilr <- object$CompILR$BetweenILR
-  wilr <- object$CompILR$WithinILR
+  wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
   
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
