@@ -63,7 +63,7 @@
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
-#' subm <- substitution(object = m, delta = c(1, 10),
+#' subm <- substitution(object = m, delta = 5,
 #'                      type = "conditional", level = c("between", "within"))
 #' }
 substitution <- function(object,

@@ -150,6 +150,7 @@ wsub <- function(object,
   bilr <- ilr(mcomp, V = object$CompILR$psi)
   bilr <- as.data.table(t(bilr))
   wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
+  
   colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
   colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
   

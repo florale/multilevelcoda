@@ -270,10 +270,10 @@ get.wsub <- function(object, basesub, mcomp,
         # compositions and ilrs for predictions
         bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
         tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        
         bilr <- ilr(bcomp, V = object$CompILR$psi)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
-        
-        wilr <- as.data.table(matrix(0, nrow = nrow(tilr), ncol = ncol(tilr)))
+        wilr <- object$CompILR$WithinILR
         
         colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
         colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
@@ -353,10 +353,10 @@ get.wsub <- function(object, basesub, mcomp,
         # compositions and ilr for predictions
         bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
         tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        
         bilr <- ilr(bcomp, V = object$CompILR$psi)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
-        
-        wilr <- tilr - bilr 
+        wilr <- tilr - bilr
         
         colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
         colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
