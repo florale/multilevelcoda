@@ -66,6 +66,16 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   tmp <- as.data.table(data)
   psi <- gsi.buildilrBase(t(sbp))
   
+  # check NAs
+  if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) any(is.na(x)))))) {
+    stop(paste(
+      "This dataset of composition contains missing data;",
+      "  Missind data hinder the application of compositional data analysis",
+      "  because the analysis is based on log-ratios",
+      "  Please deal with missing data before running 'compilr'.",
+      sep = "\n"))
+  }
+  
   # check 0
   if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) x == 0)))) {
     stop(paste(
@@ -78,14 +88,14 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
   
   ## Composition and ILRs
   # total
-  tcomp <- acomp(tmp[, parts, with = FALSE])
+  tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
   tilr <- ilr(tcomp, V = psi)
   
   # between-person
   for (v in parts) {
     tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
     }
-  bcomp <- acomp(tmp[, parts, with = FALSE])
+  bcomp <- acomp(tmp[, parts, with = FALSE], total = total)
   bilr <- ilr(bcomp, V = psi)
 
   # within-person 
