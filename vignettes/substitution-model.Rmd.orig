@@ -62,7 +62,7 @@ Let's fit our main `brms` model predicting `STRESS` from both between and within
 sleep-wake behaviours (represented by isometric log ratio coordinates), with sex as a covariate, 
 using the `brmcoda()` function. We can compute ILR coordinate predictors using `compilr()` function.
 
-```{r brmcoda, results = "hide"}
+```{r brmcoda, results = "hide", message=FALSE}
 cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
@@ -100,7 +100,7 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 `multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Basic substitution models:
+Conditional substitution models:
 
 - *Between-person* substitution
 - *Within-person* substitution
@@ -112,10 +112,10 @@ Average marginal substitution models:
 
 *Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
-## Basic substitution model
+## Conditional substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
 We specify `level = between` to indicate substitutional change would be at the between-person level, 
-and `type = conditional` to indicate basic substitution model.
+and `type = conditional` to indicate conditional substitution model.
 If your model contains covariates, `substitution()` 
 will average predictions across levels of covariates as the default.
 
@@ -142,7 +142,7 @@ plotsub(data = subm1$BetweenSub$TST,
 ```
 
 
-```{r mlmcoda-plotbsubm1, fig.width = 10, fig.height = 6, echo=FALSE, fig.cap = "Example of Between-person Substitution Model"}
+```{r mlmcoda-plotbsubm1, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Between-person Substitution Model"}
 plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
@@ -177,11 +177,22 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress")
 ``` 
 
 
-```{r mlmcoda-plotwsubm1, fig.width = 10, fig.height = 6, echo= FALSE, fig.cap = "Example of Within-person Substitution Model"}
+```{r mlmcoda-plotwsubm1, fig.width = 8, fig.height = 6, echo= FALSE, fig.cap = "Example of Within-person Substitution Model"}
 plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
-  theme_cowplot()
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
 ``` 
 
 ## Average Marginal Substitution Effects
@@ -189,10 +200,10 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress") +
 The average marginal models use the group- level compositional mean as the reference composition 
 to obtain the average of the predicted group-level changes in the outcome when every person in the sample 
 reallocates a specific unit from one compositional part to another. 
-This is difference from the basic substitution model which yields prediction conditioned on 
+This is difference from the conditional substitution model which yields prediction conditioned on 
 an "average" person in the data set (by using the population- level compositional mean
 as the reference composition). 
-Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+Average substitution models models are generally more computationally expensive than conditional subsitution models. All models can be run faster in shorter walltime using parallel execution. 
 In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
@@ -225,16 +236,38 @@ ggarrange(p1, p2,
 ```
 
 
-```{r mlmcoda-submargins, fig.width = 10, fig.height = 8, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
+```{r mlmcoda-submargins, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
 library(ggpubr)
 p1 <- plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
-  theme_cowplot() 
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
 p2 <- plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
-  theme_cowplot()
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)

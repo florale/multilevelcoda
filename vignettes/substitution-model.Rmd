@@ -61,171 +61,6 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
-#> Compiling Stan program...
-#> In file included from /var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.hpp:1:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/src/stan/model/model_header.hpp:4:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math.hpp:19:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/rev.hpp:10:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/rev/fun.hpp:196:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/prim/functor.hpp:14:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/prim/functor/integrate_ode_rk45.hpp:6:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/prim/functor/ode_rk45.hpp:9:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/numeric/odeint.hpp:76:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/numeric/odeint/integrate/observer_collection.hpp:23:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/function.hpp:30:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/function/detail/prologue.hpp:17:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/function/function_base.hpp:21:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/type_index.hpp:29:
-#> In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/type_index/stl_type_index.hpp:47:
-#> /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:132:33: warning: 'unary_function<const std::error_category *, unsigned long>' is depreca
-#> ted [-Wdeprecated-declarations]
-#>         struct hash_base : std::unary_function<T, std::size_t> {};
-#>                                 ^
-#> /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:692:18: note: in instantiation of template class 'boost::hash_detail::hash_base<const std::error_category *>' requested here
-#>         : public boost::hash_detail::hash_base<T*>
-#>                  ^
-#> /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:420:24: note: in instantiation of template class 'boost::hash<const std::error_category *>' requested here
-#>         boost::hash<T> hasher;
-#>                        ^
-#> /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:551:9: note: in instantiation of function template specialization 'boost::hash_combine<const std::error_category *>' requested here
-#>         hash_combine(seed, &v.category());
-#>         ^
-#> /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/unary_function.h:23:29: note: 'unary_function<const std::error_category *, unsigned long>' has been explicitly marked deprecated here
-#> struct _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 unary_function
-#>                             ^
-#> /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:825:41: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
-#> #    define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
-#>                                         ^
-#> /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:810:49: note: expanded from macro '_LIBCPP_DEPRECATED'
-#> #      define _LIBCPP_DEPRECATED __attribute__((deprecated))
-#>                                                 ^
-#> 1 warning generated.
-#> Start sampling
-#> Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 1 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 1
-#> Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 1 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 1
-#> Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 1 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 1
-#> Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 2 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 2
-#> Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 2 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 2
-#> Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 2 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 2
-#> Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 2 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 2
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 3
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
-#> Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
-#> Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a74262ed2ff.stan', line 54, column 4 to column 55)
-#> Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
-#> Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
-#> Chain 4
 ```
 
 A `summary()` of the model results.
@@ -289,7 +124,7 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 `multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Basic substitution models:
+Conditional substitution models:
 
 - *Between-person* substitution
 - *Within-person* substitution
@@ -301,10 +136,10 @@ Average marginal substitution models:
 
 *Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
-## Basic substitution model
+## Conditional substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
 We specify `level = between` to indicate substitutional change would be at the between-person level, 
-and `type = conditional` to indicate basic substitution model.
+and `type = conditional` to indicate conditional substitution model.
 If your model contains covariates, `substitution()` 
 will average predictions across levels of covariates as the default.
 
@@ -388,10 +223,10 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress")
 The average marginal models use the group- level compositional mean as the reference composition 
 to obtain the average of the predicted group-level changes in the outcome when every person in the sample 
 reallocates a specific unit from one compositional part to another. 
-This is difference from the basic substitution model which yields prediction conditioned on 
+This is difference from the conditional substitution model which yields prediction conditioned on 
 an "average" person in the data set (by using the population- level compositional mean
 as the reference composition). 
-Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+Average substitution models models are generally more computationally expensive than conditional subsitution models. All models can be run faster in shorter walltime using parallel execution. 
 In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 

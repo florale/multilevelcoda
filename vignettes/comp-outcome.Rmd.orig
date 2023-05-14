@@ -60,7 +60,7 @@ head(cilr$TotalILR)
 A model with multilevel compositional outcomes is multivariate, as it has multiple ILR coordinate outcomes,each of which is predicted by a set of predictors. 
 Our `brms` model can be then fitted using the `brmcoda()` function.
 
-```{r brmcoda, results = "hide"}
+```{r brmcoda, results = "hide", message=FALSE}
 mv <- brmcoda(compilr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
@@ -91,7 +91,7 @@ Let's examine whether stress predicts the overall sleep-wake composition.
 *Note*: To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
 `save_pars = save_pars(all = TRUE)`.
 
-```{r bfmodel, results = "hide"}
+```{r bfmodel, results = "hide", message=FALSE}
 # intercept only
 mv0 <- brmcoda(compilr = cilr,
                formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),

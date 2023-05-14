@@ -126,7 +126,7 @@ from between- and within-person sleep-wake behaviours (expressed as ILR coordina
 
 *Notes: make sure you pass the correct names of the ILR coordinates to `brms` model.*
 
-```{r brmcoda, results = "hide"}
+```{r brmcoda, results = "hide", message=FALSE}
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
@@ -190,7 +190,7 @@ For precise Bayes factors, we will use 40,000 posterior draws for each model.
 *Notes* : To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
 `save_pars = save_pars(all = TRUE)`.
 
-```{r bfmodel, results = "hide"}
+```{r bfmodel, results = "hide", message=FALSE}
 # intercept only model
 m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
