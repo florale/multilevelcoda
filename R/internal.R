@@ -44,7 +44,7 @@ get.bsub <- function(object, basesub, mcomp,
       jout[[j]] <- do.call(rbind, kout)
     }
     newd <- setDT(do.call(rbind, jout))
-    
+
     # useful information for the final results
     newd[, From := rep(subvar, length.out = nrow(newd))]
     newd$To <- iv
@@ -57,8 +57,9 @@ get.bsub <- function(object, basesub, mcomp,
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
-    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+    
     bilr <- ilr(bcomp, V = object$CompILR$psi)
     tilr <- ilr(tcomp, V = object$CompILR$psi)
     
@@ -74,7 +75,7 @@ get.bsub <- function(object, basesub, mcomp,
       ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
       
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
-      ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+      suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
                      subd[, .(Delta, To, From, Level, EffectType)])
@@ -90,7 +91,7 @@ get.bsub <- function(object, basesub, mcomp,
         }
         
         ymean <- Reduce(`+`, hout) / length(hout)
-        ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+        suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         ymean <- rbindlist(ymean)
         ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
                        subd[, .(Delta, To, From, Level, EffectType)])
@@ -100,8 +101,7 @@ get.bsub <- function(object, basesub, mcomp,
           subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
           ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
           ydiff <- ysub - ysame[, h]
-          ymean <- apply(ydiff, 2, 
-                         function(x) {describe_posterior(x, centrality = "mean", ...)})
+          suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
           ymean <- rbindlist(ymean)
           ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
                          subd[, c("Delta", "From", "To", "Level", "EffectType", cv), 
@@ -164,13 +164,12 @@ get.wsub <- function(object, basesub, mcomp,
     newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
-    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
-    wcomp <- tcomp - bcomp 
+    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
     bilr <- ilr(bcomp, V = object$CompILR$psi)
     tilr <- ilr(tcomp, V = object$CompILR$psi)
-    wilr <- ilr(wcomp, V = object$CompILR$psi)
+    wilr <- tilr - bilr
     
     colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
     colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
@@ -181,7 +180,7 @@ get.wsub <- function(object, basesub, mcomp,
       ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
       
       ydiff <- apply(ysub, 2, function(y) {y - ysame})
-      ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+      suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
                      subd[, .(Delta, To, From, Level, EffectType)])
@@ -197,7 +196,7 @@ get.wsub <- function(object, basesub, mcomp,
         }
         
         ymean <- Reduce(`+`, hout) / length(hout)
-        ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)})
+        suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         ymean <- rbindlist(ymean)
         ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
                        subd[, .(Delta, To, From, Level, EffectType)])
@@ -207,8 +206,7 @@ get.wsub <- function(object, basesub, mcomp,
           subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
           ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
           ydiff <- ysub - ysame[, h]
-          ymean <- apply(ydiff, 2, 
-                         function(x) {describe_posterior(x, centrality = "mean", ...)})
+          suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
           ymean <- rbindlist(ymean)
           ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
                          subd[, c("Delta", "From", "To", "Level", "EffectType", cv),
@@ -268,8 +266,9 @@ get.wsub <- function(object, basesub, mcomp,
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
-        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        
         bilr <- ilr(bcomp, V = object$CompILR$psi)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
         
@@ -287,7 +286,7 @@ get.wsub <- function(object, basesub, mcomp,
         ydiff <- ysub - ysame
         
         # posterior means and intervals
-        ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...))
+        suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
         ymean <- ymean[, .(Mean, CI_low, CI_high)]
         ymean$Delta <- sub[k, get(i)]
         kout[[k]] <- ymean
@@ -351,8 +350,9 @@ get.wsub <- function(object, basesub, mcomp,
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
-        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE])
-        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        
         bilr <- ilr(bcomp, V = object$CompILR$psi)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
         
@@ -372,7 +372,7 @@ get.wsub <- function(object, basesub, mcomp,
         ydiff <- ysub - ysame
         
         # posterior means and intervals
-        ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...))
+        suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
         ymean <- ymean[, .(Mean, CI_low, CI_high)]
         ymean$Delta <- sub[k, get(i)]
         kout[[k]] <- ymean
@@ -438,7 +438,7 @@ get.wsub <- function(object, basesub, mcomp,
         newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE])
+        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
         
         colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
@@ -452,7 +452,7 @@ get.wsub <- function(object, basesub, mcomp,
         ydiff <- ysub - ysame
         
         # posterior means and intervals
-        ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...))
+        suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
         ymean <- ymean[, .(Mean, CI_low, CI_high)]
         ymean$Delta <- sub[k, get(i)]
         kout[[k]] <- ymean
