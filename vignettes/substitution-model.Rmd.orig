@@ -145,7 +145,18 @@ plotsub(data = subm1$BetweenSub$TST,
 plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
-  theme_cowplot()
+  theme(
+         panel.background = element_rect(fill='transparent'),
+         plot.background = element_rect(fill='transparent', color=NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill='transparent'),
+         legend.box.background = element_rect(fill='transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
 ```
 
 Here are the results for within-person level.
@@ -218,7 +229,7 @@ library(ggpubr)
 p1 <- plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
-  theme_cowplot()
+  theme_cowplot() 
 p2 <- plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
