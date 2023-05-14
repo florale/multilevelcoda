@@ -124,7 +124,18 @@ substitution).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://florale.github.io/multilevelcoda/">multilevelcoda</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: Rcpp</span></span>
+<span><span class="co">#&gt; Loading 'brms' package (version 2.19.0). Useful instructions</span></span>
+<span><span class="co">#&gt; can be found by typing help('brms'). A more detailed introduction</span></span>
+<span><span class="co">#&gt; to the package is available through vignette('brms_overview').</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'brms'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     ar</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://doFuture.futureverse.org" class="external-link">doFuture</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: foreach</span></span>
+<span><span class="co">#&gt; Loading required package: future</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"mcompd"</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sbp"</span><span class="op">)</span></span>
@@ -149,7 +160,170 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span>                                <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
-<span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
+<span><span class="co">#&gt; In file included from /var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.hpp:1:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/src/stan/model/model_header.hpp:4:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math.hpp:19:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/rev.hpp:10:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/rev/fun.hpp:196:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/prim/functor.hpp:14:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/prim/functor/integrate_ode_rk45.hpp:6:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/stan/math/prim/functor/ode_rk45.hpp:9:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/numeric/odeint.hpp:76:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/numeric/odeint/integrate/observer_collection.hpp:23:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/function.hpp:30:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/function/detail/prologue.hpp:17:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/function/function_base.hpp:21:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/type_index.hpp:29:</span></span>
+<span><span class="co">#&gt; In file included from /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/type_index/stl_type_index.hpp:47:</span></span>
+<span><span class="co">#&gt; /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:132:33: warning: 'unary_function&lt;const std::error_category *, unsigned long&gt;' is depreca</span></span>
+<span><span class="co">#&gt; ted [-Wdeprecated-declarations]</span></span>
+<span><span class="co">#&gt;         struct hash_base : std::unary_function&lt;T, std::size_t&gt; {};</span></span>
+<span><span class="co">#&gt;                                 ^</span></span>
+<span><span class="co">#&gt; /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:692:18: note: in instantiation of template class 'boost::hash_detail::hash_base&lt;const std::error_category *&gt;' requested here</span></span>
+<span><span class="co">#&gt;         : public boost::hash_detail::hash_base&lt;T*&gt;</span></span>
+<span><span class="co">#&gt;                  ^</span></span>
+<span><span class="co">#&gt; /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:420:24: note: in instantiation of template class 'boost::hash&lt;const std::error_category *&gt;' requested here</span></span>
+<span><span class="co">#&gt;         boost::hash&lt;T&gt; hasher;</span></span>
+<span><span class="co">#&gt;                        ^</span></span>
+<span><span class="co">#&gt; /Users/florale/.cmdstan/cmdstan-2.30.1/stan/lib/stan_math/lib/boost_1.78.0/boost/container_hash/hash.hpp:551:9: note: in instantiation of function template specialization 'boost::hash_combine&lt;const std::error_category *&gt;' requested here</span></span>
+<span><span class="co">#&gt;         hash_combine(seed, &amp;v.category());</span></span>
+<span><span class="co">#&gt;         ^</span></span>
+<span><span class="co">#&gt; /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/unary_function.h:23:29: note: 'unary_function&lt;const std::error_category *, unsigned long&gt;' has been explicitly marked deprecated here</span></span>
+<span><span class="co">#&gt; struct _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 unary_function</span></span>
+<span><span class="co">#&gt;                             ^</span></span>
+<span><span class="co">#&gt; /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:825:41: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'</span></span>
+<span><span class="co">#&gt; #    define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED</span></span>
+<span><span class="co">#&gt;                                         ^</span></span>
+<span><span class="co">#&gt; /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:810:49: note: expanded from macro '_LIBCPP_DEPRECATED'</span></span>
+<span><span class="co">#&gt; #      define _LIBCPP_DEPRECATED __attribute__((deprecated))</span></span>
+<span><span class="co">#&gt;                                                 ^</span></span>
+<span><span class="co">#&gt; 1 warning generated.</span></span>
+<span><span class="co">#&gt; Start sampling</span></span>
+<span><span class="co">#&gt; Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 1 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 1</span></span>
+<span><span class="co">#&gt; Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 1 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 1</span></span>
+<span><span class="co">#&gt; Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 1 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 1</span></span>
+<span><span class="co">#&gt; Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 2 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 2</span></span>
+<span><span class="co">#&gt; Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 2 Exception: normal_id_glm_lpdf: Scale vector is 0, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 2</span></span>
+<span><span class="co">#&gt; Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 2 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 2</span></span>
+<span><span class="co">#&gt; Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 2 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 2</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 3 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 3</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span>
+<span><span class="co">#&gt; Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</span></span>
+<span><span class="co">#&gt; Chain 4 Exception: normal_id_glm_lpdf: Scale vector is inf, but must be positive finite! (in '/var/folders/fd/yjc3115x11v279rv07jxd0f40000gn/T/RtmpeJk7Sc/model-14a742a6102d2.stan', line 54, column 4 to column 55)</span></span>
+<span><span class="co">#&gt; Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</span></span>
+<span><span class="co">#&gt; Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</span></span>
+<span><span class="co">#&gt; Chain 4</span></span></code></pre></div>
 <p>A <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model results.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
@@ -163,24 +337,24 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span><span class="co">#&gt; Group-Level Effects: </span></span>
 <span><span class="co">#&gt; ~ID (Number of levels: 266) </span></span>
 <span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574     2552</span></span>
+<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179     2176</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Population-Level Effects: </span></span>
 <span><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept     2.62      0.49     1.66     3.58 1.00     1345     2241</span></span>
-<span><span class="co">#&gt; bilr1         0.11      0.31    -0.48     0.73 1.00     1126     2074</span></span>
-<span><span class="co">#&gt; bilr2         0.52      0.33    -0.13     1.20 1.00     1366     1982</span></span>
-<span><span class="co">#&gt; bilr3         0.13      0.22    -0.30     0.55 1.00     1126     1436</span></span>
-<span><span class="co">#&gt; bilr4         0.02      0.28    -0.54     0.55 1.00      922     1831</span></span>
-<span><span class="co">#&gt; wilr1        -0.34      0.12    -0.58    -0.11 1.00     3041     2537</span></span>
-<span><span class="co">#&gt; wilr2         0.05      0.13    -0.21     0.30 1.00     3208     3224</span></span>
-<span><span class="co">#&gt; wilr3        -0.11      0.08    -0.26     0.05 1.00     3269     3139</span></span>
-<span><span class="co">#&gt; wilr4         0.24      0.10     0.04     0.44 1.00     3279     2873</span></span>
-<span><span class="co">#&gt; Female       -0.39      0.17    -0.71    -0.06 1.00     1515     2370</span></span>
+<span><span class="co">#&gt; Intercept     2.64      0.47     1.68     3.57 1.00     1429     2263</span></span>
+<span><span class="co">#&gt; bilr1         0.12      0.33    -0.54     0.77 1.00      971     1409</span></span>
+<span><span class="co">#&gt; bilr2         0.53      0.35    -0.16     1.21 1.00     1124     1679</span></span>
+<span><span class="co">#&gt; bilr3         0.13      0.21    -0.29     0.55 1.00     1052     1809</span></span>
+<span><span class="co">#&gt; bilr4        -0.01      0.29    -0.57     0.55 1.00     1021     1941</span></span>
+<span><span class="co">#&gt; wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990     3206</span></span>
+<span><span class="co">#&gt; wilr2         0.05      0.13    -0.21     0.31 1.00     3396     3077</span></span>
+<span><span class="co">#&gt; wilr3        -0.10      0.08    -0.25     0.04 1.00     2900     3218</span></span>
+<span><span class="co">#&gt; wilr4         0.23      0.10     0.04     0.43 1.00     2894     3220</span></span>
+<span><span class="co">#&gt; Female       -0.39      0.17    -0.74    -0.08 1.00     1405     1697</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family Specific Parameters: </span></span>
 <span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sigma     2.37      0.03     2.31     2.43 1.00     5233     2780</span></span>
+<span><span class="co">#&gt; sigma     2.37      0.03     2.31     2.43 1.00     4462     2814</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -247,7 +421,7 @@ results for all available compositional component. Here are the results
 for changes in stress when sleep (TST) is substituted for 10
 minutes.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm1</span><span class="op">$</span><span class="va">BetweenpersonSub</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm1</span><span class="op">$</span><span class="va">BetweenSub</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="right">Mean</th>
@@ -261,9 +435,9 @@ minutes.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">0.065</td>
-<td align="right">-0.003</td>
-<td align="right">0.134</td>
+<td align="right">0.064</td>
+<td align="right">-0.004</td>
+<td align="right">0.132</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -272,8 +446,8 @@ minutes.</p>
 </tr>
 <tr class="even">
 <td align="right">0.005</td>
-<td align="right">-0.028</td>
-<td align="right">0.038</td>
+<td align="right">-0.029</td>
+<td align="right">0.039</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -281,9 +455,9 @@ minutes.</p>
 <td align="left">conditional</td>
 </tr>
 <tr class="odd">
-<td align="right">0.011</td>
-<td align="right">-0.013</td>
-<td align="right">0.035</td>
+<td align="right">0.012</td>
+<td align="right">-0.014</td>
+<td align="right">0.037</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -292,8 +466,8 @@ minutes.</p>
 </tr>
 <tr class="even">
 <td align="right">0.014</td>
-<td align="right">-0.014</td>
-<td align="right">0.042</td>
+<td align="right">-0.017</td>
+<td align="right">0.043</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -302,8 +476,8 @@ minutes.</p>
 </tr>
 <tr class="odd">
 <td align="right">-0.056</td>
-<td align="right">-0.117</td>
-<td align="right">0.002</td>
+<td align="right">-0.116</td>
+<td align="right">0.004</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -311,9 +485,9 @@ minutes.</p>
 <td align="left">conditional</td>
 </tr>
 <tr class="even">
-<td align="right">-0.005</td>
+<td align="right">-0.006</td>
 <td align="right">-0.038</td>
-<td align="right">0.026</td>
+<td align="right">0.027</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -321,9 +495,9 @@ minutes.</p>
 <td align="left">conditional</td>
 </tr>
 <tr class="odd">
-<td align="right">-0.011</td>
-<td align="right">-0.035</td>
-<td align="right">0.013</td>
+<td align="right">-0.012</td>
+<td align="right">-0.037</td>
+<td align="right">0.014</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -333,7 +507,7 @@ minutes.</p>
 <tr class="even">
 <td align="right">-0.014</td>
 <td align="right">-0.042</td>
-<td align="right">0.013</td>
+<td align="right">0.016</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -348,12 +522,12 @@ other behaviours was not associated in changes in stress at
 between-person level. These results can be plotted to see the patterns
 more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></code> function.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenpersonSub</span><span class="op">$</span><span class="va">TST</span>, </span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenSub</span><span class="op">$</span><span class="va">TST</span>, </span>
 <span>        x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;"></p>
+<pre><code><span><span class="co">#&gt; Error in theme(panel.background = element_rect(fill = "transparent"), : could not find function "theme"</span></span></code></pre>
 <p>Here are the results for within-person level.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm1</span><span class="op">$</span><span class="va">WithinpersonSub</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm1</span><span class="op">$</span><span class="va">WithinSub</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="right">Mean</th>
@@ -368,8 +542,8 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 <tbody>
 <tr class="odd">
 <td align="right">0.036</td>
-<td align="right">0.007</td>
-<td align="right">0.066</td>
+<td align="right">0.004</td>
+<td align="right">0.067</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -378,7 +552,7 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 </tr>
 <tr class="even">
 <td align="right">-0.006</td>
-<td align="right">-0.018</td>
+<td align="right">-0.019</td>
 <td align="right">0.006</td>
 <td align="right">10</td>
 <td align="left">TST</td>
@@ -387,7 +561,7 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 <td align="left">conditional</td>
 </tr>
 <tr class="odd">
-<td align="right">-0.010</td>
+<td align="right">-0.009</td>
 <td align="right">-0.019</td>
 <td align="right">0.000</td>
 <td align="right">10</td>
@@ -397,9 +571,9 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 <td align="left">conditional</td>
 </tr>
 <tr class="even">
-<td align="right">-0.004</td>
+<td align="right">-0.003</td>
 <td align="right">-0.014</td>
-<td align="right">0.006</td>
+<td align="right">0.007</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -408,8 +582,8 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 </tr>
 <tr class="odd">
 <td align="right">-0.030</td>
-<td align="right">-0.056</td>
-<td align="right">-0.005</td>
+<td align="right">-0.057</td>
+<td align="right">-0.003</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -418,7 +592,7 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 </tr>
 <tr class="even">
 <td align="right">0.006</td>
-<td align="right">-0.005</td>
+<td align="right">-0.006</td>
 <td align="right">0.018</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
@@ -439,7 +613,7 @@ more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></c
 <tr class="even">
 <td align="right">0.004</td>
 <td align="right">-0.006</td>
-<td align="right">0.013</td>
+<td align="right">0.014</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -455,8 +629,8 @@ of time spent awake in bed predicted 0.04 higher stress [95% CI 0.01,
 0.7], on a given day. Conversely, less sleep and more time awake in bed
 predicted less stress (b = -0.03 [95% CI -0.06, -0.01]). Let’s also plot
 theses results.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">WithinpersonSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">WithinSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
@@ -475,7 +649,7 @@ shorter walltime using parallel execution. In this example, we use
 package <code>doFuture</code> to parallel our models.
 <code><a href="../reference/substitution.html">substitution()</a></code> will run 5 substitution models for 5
 sleep-wake behaviours, so we will parallel them across 5 workers.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://doFuture.futureverse.org/reference/registerDoFuture.html" class="external-link">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
@@ -483,8 +657,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <span>                      type <span class="op">=</span> <span class="st">"marginal"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/foreach/man/registerDoSEQ.html" class="external-link">registerDoSEQ</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Below are the results.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm2</span><span class="op">$</span><span class="va">BetweenpersonSubMargins</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm2</span><span class="op">$</span><span class="va">BetweenSubMargins</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="right">Mean</th>
@@ -498,9 +672,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">0.078</td>
-<td align="right">-0.003</td>
-<td align="right">0.162</td>
+<td align="right">0.077</td>
+<td align="right">-0.006</td>
+<td align="right">0.159</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -509,7 +683,7 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr>
 <tr class="even">
 <td align="right">0.005</td>
-<td align="right">-0.032</td>
+<td align="right">-0.033</td>
 <td align="right">0.042</td>
 <td align="right">10</td>
 <td align="left">TST</td>
@@ -518,9 +692,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">marginal</td>
 </tr>
 <tr class="odd">
-<td align="right">0.011</td>
-<td align="right">-0.014</td>
-<td align="right">0.036</td>
+<td align="right">0.012</td>
+<td align="right">-0.015</td>
+<td align="right">0.038</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -528,8 +702,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">marginal</td>
 </tr>
 <tr class="even">
-<td align="right">0.015</td>
-<td align="right">-0.015</td>
+<td align="right">0.014</td>
+<td align="right">-0.018</td>
 <td align="right">0.045</td>
 <td align="right">10</td>
 <td align="left">TST</td>
@@ -538,9 +712,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">marginal</td>
 </tr>
 <tr class="odd">
-<td align="right">-0.063</td>
-<td align="right">-0.131</td>
-<td align="right">0.003</td>
+<td align="right">-0.062</td>
+<td align="right">-0.129</td>
+<td align="right">0.004</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -550,7 +724,7 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <tr class="even">
 <td align="right">-0.005</td>
 <td align="right">-0.041</td>
-<td align="right">0.029</td>
+<td align="right">0.031</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -559,8 +733,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr>
 <tr class="odd">
 <td align="right">-0.012</td>
-<td align="right">-0.037</td>
-<td align="right">0.014</td>
+<td align="right">-0.039</td>
+<td align="right">0.015</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -568,9 +742,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">marginal</td>
 </tr>
 <tr class="even">
-<td align="right">-0.015</td>
+<td align="right">-0.014</td>
 <td align="right">-0.045</td>
-<td align="right">0.014</td>
+<td align="right">0.018</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -579,8 +753,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm2</span><span class="op">$</span><span class="va">WithinpersonSubMargins</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">subm2</span><span class="op">$</span><span class="va">WithinSubMargins</span><span class="op">$</span><span class="va">TST</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Delta</span><span class="op">)</span> <span class="op">==</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="right">Mean</th>
@@ -595,8 +769,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <tbody>
 <tr class="odd">
 <td align="right">0.046</td>
-<td align="right">0.009</td>
-<td align="right">0.082</td>
+<td align="right">0.007</td>
+<td align="right">0.083</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -605,8 +779,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr>
 <tr class="even">
 <td align="right">-0.007</td>
-<td align="right">-0.020</td>
-<td align="right">0.006</td>
+<td align="right">-0.021</td>
+<td align="right">0.007</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -615,7 +789,7 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr>
 <tr class="odd">
 <td align="right">-0.010</td>
-<td align="right">-0.019</td>
+<td align="right">-0.020</td>
 <td align="right">0.000</td>
 <td align="right">10</td>
 <td align="left">TST</td>
@@ -636,7 +810,7 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <tr class="odd">
 <td align="right">-0.035</td>
 <td align="right">-0.064</td>
-<td align="right">-0.006</td>
+<td align="right">-0.004</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -645,8 +819,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr>
 <tr class="even">
 <td align="right">0.007</td>
-<td align="right">-0.006</td>
-<td align="right">0.019</td>
+<td align="right">-0.007</td>
+<td align="right">0.020</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -656,7 +830,7 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <tr class="odd">
 <td align="right">0.010</td>
 <td align="right">0.000</td>
-<td align="right">0.019</td>
+<td align="right">0.020</td>
 <td align="right">-10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -678,10 +852,10 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <p>A comparison between between- and within-person substitution model of
 sleep on stress, plot using <code><a href="../reference/plotsub.html">plotsub()</a></code> and
 <code>ggpubr::ggarrange()</code> functions.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/" class="external-link">ggpubr</a></span><span class="op">)</span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">BetweenpersonSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"between-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">WithinpersonSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"within-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">BetweenSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"between-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">WithinSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"within-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, </span>
 <span>          ncol <span class="op">=</span> <span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
