@@ -127,7 +127,7 @@ Output from `substitution()` contains multiple data set of results for all avail
 Here are the results for changes in stress when sleep (TST) is substituted for 10 minutes.
 
 ```{r bsubm, results = "asis"}
-knitr::kable(subm1$BetweenpersonSub$TST[abs(Delta) == 10])
+knitr::kable(subm1$BetweenSub$TST[abs(Delta) == 10])
 ```
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
@@ -136,13 +136,13 @@ in changes in stress at between-person level.
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
 ```{r plotbsub, eval=FALSE}
-plotsub(data = subm1$BetweenpersonSub$TST, 
+plotsub(data = subm1$BetweenSub$TST, 
         x = "sleep", y = "stress")
 ```
 
 
 ```{r mlmcoda-plotbsubm1, fig.width = 10, fig.height = 6, echo=FALSE, fig.cap = "Example of Between-person Substitution Model"}
-plotsub(data = subm1$BetweenpersonSub$TST, x = "sleep", y = "stress") +
+plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme_cowplot()
@@ -151,7 +151,7 @@ plotsub(data = subm1$BetweenpersonSub$TST, x = "sleep", y = "stress") +
 Here are the results for within-person level.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(subm1$WithinpersonSub$TST[abs(Delta) == 10])
+knitr::kable(subm1$WithinSub$TST[abs(Delta) == 10])
 ```
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
@@ -161,12 +161,12 @@ in bed predicted 0.04 higher stress [95% CI 0.01, 0.7], on a given day.
 Conversely, less sleep and more time awake in bed predicted less stress (b = -0.03 [95% CI -0.06,	-0.01]). Let's also plot theses results.
 
 ```{r plotwsub, eval=FALSE}
-plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress")
+plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress")
 ``` 
 
 
 ```{r mlmcoda-plotwsubm1, fig.width = 10, fig.height = 6, echo= FALSE, fig.cap = "Example of Within-person Substitution Model"}
-plotsub(data = subm1$WithinpersonSub$TST, x = "sleep", y = "stress") +
+plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme_cowplot()
@@ -196,8 +196,8 @@ registerDoSEQ()
 Below are the results.
 
 ```{r submarginsout}
-knitr::kable(subm2$BetweenpersonSubMargins$TST[abs(Delta) == 10])
-knitr::kable(subm2$WithinpersonSubMargins$TST[abs(Delta) == 10])
+knitr::kable(subm2$BetweenSubMargins$TST[abs(Delta) == 10])
+knitr::kable(subm2$WithinSubMargins$TST[abs(Delta) == 10])
 ```
 
 A comparison between between- and within-person substitution model of sleep on stress, 
@@ -205,8 +205,8 @@ plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
 ```{r plotsubmargin, eval=FALSE}
 library(ggpubr)
-p1 <- plotsub(data = subm2$BetweenpersonSubMargins$TST, x = "between-person sleep", y = "stress")
-p2 <- plotsub(data = subm2$WithinpersonSubMargins$TST, x = "within-person sleep", y = "stress")
+p1 <- plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", y = "stress")
+p2 <- plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", y = "stress")
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
@@ -215,11 +215,11 @@ ggarrange(p1, p2,
 
 ```{r mlmcoda-submargins, fig.width = 10, fig.height = 8, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
 library(ggpubr)
-p1 <- plotsub(data = subm2$BetweenpersonSubMargins$TST, x = "between-person sleep", y = "stress") +
+p1 <- plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme_cowplot()
-p2 <- plotsub(data = subm2$WithinpersonSubMargins$TST, x = "within-person sleep", y = "stress") +
+p2 <- plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme_cowplot()

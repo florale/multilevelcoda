@@ -203,9 +203,9 @@ substitution <- function(object,
     }
   }
   
-  out <- list(BetweenpersonSub = if(exists("bout")) (bout) else (NULL),
-              WithinpersonSub = if(exists("wout")) (wout) else (NULL),
-              BetweenpersonSubMargins = if(exists("bmout")) (bmout) else (NULL),
-              WithinpersonSubMargins = if(exists("wmout")) (wmout) else (NULL))
+  out <- list(BetweenSub = if(exists("bout")) (bout) else (NULL),
+              WithinSub = if(exists("wout")) (wout) else (NULL),
+              BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
+              WithinSubMargins = if(exists("wmout")) (wmout) else (NULL))
   out
 }

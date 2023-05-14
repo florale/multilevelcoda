@@ -272,7 +272,7 @@ The output contains multiple data sets of results for all compositional componen
 Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. 
 
 ```{r bsubm, results = "asis"}
-knitr::kable(bsubm$BetweenpersonSub$TST)
+knitr::kable(bsubm$BetweenSub$TST)
 ```
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
@@ -292,7 +292,7 @@ wsubm <- substitution(object = m, delta = 5,
 Results for 5 minute substitution.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(wsubm$WithinpersonSub$TST)
+knitr::kable(wsubm$WithinSub$TST)
 ```
 
 At within-person level, there were significant results for substitution of sleep (TST) and time 
