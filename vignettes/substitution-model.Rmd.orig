@@ -29,6 +29,7 @@ knitr::opts_chunk$set(
 
 library(ggsci)
 library(cowplot)
+library(ggplot2)
 ```
 
 # Intro
@@ -146,12 +147,12 @@ plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress") +
   scale_color_jco() +
   scale_fill_jco() +
   theme(
-         panel.background = element_rect(fill='transparent'),
-         plot.background = element_rect(fill='transparent', color=NA),
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
          panel.grid.major = element_blank(),
          panel.grid.minor = element_blank(),
-         legend.background = element_rect(fill='transparent'),
-         legend.box.background = element_rect(fill='transparent'),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
          legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
          axis.ticks = element_blank(),
          panel.border = element_blank(),
