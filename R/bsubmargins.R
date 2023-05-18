@@ -73,22 +73,22 @@ bsubmargins <- function (object,
   delta <- as.integer(delta)
   
   # model for no change
-  bilr <- object$CompILR$BetweenILR
-  wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
+  bilr0 <- object$CompILR$BetweenILR
+  wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
   
-  colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-  colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
+  colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+  colnames(wilr0) <- colnames(object$CompILR$WithinILR)
   
-  samed <- cbind(bilr, wilr, object$CompILR$data)
-  ysame <- fitted(object$Model, newdata = samed, re_formula = NA, summary = FALSE)
-  ysame <- rowMeans(ysame) # average across participants when there is no change
+  dref <- cbind(bilr0, wilr0, object$CompILR$data)
+  yref <- fitted(object$Model, newdata = dref, re_formula = NA, summary = FALSE)
+  yref <- rowMeans(yref) # average across participants when there is no change
   
   # substitution model
   out <- .get.bsubmargins(
     object = object,
     b = b,
     basesub = basesub,
-    ysame = ysame,
+    yref = yref,
     delta = delta,
     level = level,
     type = type)

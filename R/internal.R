@@ -13,10 +13,11 @@ utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "b", "t",
 #' @importFrom stats fitted
 #' @noRd
 # Basic Between-person Substitution model
-get.bsub <- function(object, basesub, mcomp, 
-                     ysame, delta, summary = summary,
+get.bsub <- function(object, basesub, recomp, 
+                     yref, dref,
+                     delta, summary,
                      level, type,
-                     ID = 1, cv = NULL, refg = NULL, ...) {
+                     ID = 1, cv = NULL, regrid = NULL, ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
@@ -36,57 +37,56 @@ get.bsub <- function(object, basesub, mcomp,
       # delta level
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
-        newcomp <- mcomp + sub[k,]
+        newcomp <- recomp + sub[k,]
         names(newcomp) <- object$CompILR$parts
         Delta <- sub[k, get(i)]
-        kout[[k]] <- cbind(mcomp, newcomp, Delta)
+        kout[[k]] <- cbind(recomp, newcomp, Delta)
       }
       jout[[j]] <- do.call(rbind, kout)
     }
-    newd <- setDT(do.call(rbind, jout))
+    dnew <- setDT(do.call(rbind, jout))
 
     # useful information for the final results
-    newd[, From := rep(subvar, length.out = nrow(newd))]
-    newd$To <- iv
-    newd$Delta <- as.numeric(newd$Delta)
-    newd$Level <- level
-    newd$EffectType <- type
+    dnew[, From := rep(subvar, length.out = nrow(dnew))]
+    dnew$To <- iv
+    dnew$Delta <- as.numeric(dnew$Delta)
+    dnew$Level <- level
+    dnew$EffectType <- type
     
     # remove impossible reallocation that result in negative values 
-    cols <- colnames(newd) %snin% c("Delta", "From", "To", "Level", "EffectType")
-    newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+    cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level", "EffectType")
+    dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+    bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+    tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
     bilr <- ilr(bcomp, V = object$CompILR$psi)
     tilr <- ilr(tcomp, V = object$CompILR$psi)
     
-    wilr <- matrix(0, nrow = nrow(tilr), ncol = ncol(tilr))
-    wilr <- as.data.table(wilr)
+    wilr <- dref[, colnames(object$CompILR$WithinILR), with = FALSE]
     
-    colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
-    colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+    colnames(tilr) <- colnames(object$CompILR$BetweenILR)
+    colnames(wilr) <- colnames(object$CompILR$WithinILR)
     
     # prediction
-    if(is.null(refg)) { # unadjusted
-      subd <- cbind(newd, tilr, wilr, ID)
-      ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+    if(is.null(regrid)) { # unadjusted
+      dsub <- cbind(dnew, tilr, wilr, ID)
+      ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
       
-      ydiff <- apply(ysub, 2, function(y) {y - ysame})
+      ydiff <- apply(ysub, 2, function(y) {y - yref})
       suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(Delta, To, From, Level, EffectType)])
+                     dsub[, .(Delta, To, From, Level, EffectType)])
       
     } else { # adjusted
-      hout <- vector("list", length = nrow(refg))
+      hout <- vector("list", length = nrow(regrid))
       if(isTRUE(summary)) { # averaging over reference grid
-        for (h in seq_len(nrow(refg))) {
-          subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
-          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - ysame[, h]
+        for (h in seq_len(nrow(regrid))) {
+          dsub <- cbind(dnew, tilr, wilr, ID, regrid[h, ])
+          ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - yref[, h]
           hout[[h]] <- ydiff
         }
         
@@ -94,17 +94,17 @@ get.bsub <- function(object, basesub, mcomp,
         suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         ymean <- rbindlist(ymean)
         ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                       subd[, .(Delta, To, From, Level, EffectType)])
+                       dsub[, .(Delta, To, From, Level, EffectType)])
         
       } else { # keeping prediction at each level of reference grid
-        for (h in seq_len(nrow(refg))) {
-          subd <- cbind(newd, tilr, wilr, ID, refg[h, ])
-          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - ysame[, h]
+        for (h in seq_len(nrow(regrid))) {
+          dsub <- cbind(dnew, tilr, wilr, ID, regrid[h, ])
+          ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - yref[, h]
           suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
           ymean <- rbindlist(ymean)
           ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                         subd[, c("Delta", "From", "To", "Level", "EffectType", cv), 
+                         dsub[, c("Delta", "From", "To", "Level", "EffectType", cv), 
                               with = FALSE])
           
           hout[[h]] <- ymean
@@ -121,10 +121,11 @@ get.bsub <- function(object, basesub, mcomp,
 }
 
 # Basic Within-person Substitution model
-get.wsub <- function(object, basesub, mcomp,
-                     ysame, delta, summary = summary, 
+get.wsub <- function(object, basesub, recomp,
+                     yref, dref,
+                     delta, summary, 
                      level, type,
-                     ID = 1, cv = NULL, refg = NULL, ...) {
+                     ID = 1, cv = NULL, regrid = NULL, ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
@@ -143,55 +144,55 @@ get.wsub <- function(object, basesub, mcomp,
     for (j in seq_along(delta)) { # delta level
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
-        newcomp <- mcomp + sub[k, ]
+        newcomp <- recomp + sub[k, ]
         names(newcomp) <- object$CompILR$parts
         Delta <- sub[k, get(i)]
-        kout[[k]] <- cbind(mcomp, newcomp, Delta)
+        kout[[k]] <- cbind(recomp, newcomp, Delta)
       }
       jout[[j]] <- do.call(rbind, kout)
     }
-    newd <- setDT(do.call(rbind, jout))
+    dnew <- setDT(do.call(rbind, jout))
     
     # useful information for the final results
-    newd[, From := rep(subvar, length.out = nrow(newd))]
-    newd$To <- iv
-    newd$Delta <- as.numeric(newd$Delta)
-    newd$Level <- level
-    newd$EffectType <- type
+    dnew[, From := rep(subvar, length.out = nrow(dnew))]
+    dnew$To <- iv
+    dnew$Delta <- as.numeric(dnew$Delta)
+    dnew$Level <- level
+    dnew$EffectType <- type
     
     # remove impossible reallocation that result in negative values 
-    cols <- colnames(newd) %snin% c("Delta", "From", "To", "Level", "EffectType")
-    newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+    cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level", "EffectType")
+    dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-    tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+    bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+    tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
     bilr <- ilr(bcomp, V = object$CompILR$psi)
     tilr <- ilr(tcomp, V = object$CompILR$psi)
     wilr <- tilr - bilr
     
-    colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
-    colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+    colnames(bilr) <- colnames(object$CompILR$BetweenILR)
+    colnames(wilr) <- colnames(object$CompILR$WithinILR)
     
     # prediction
-    if(is.null(refg)) { # unadjusted
-      subd <- cbind(newd, bilr, wilr, ID)
-      ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+    if(is.null(regrid)) { # unadjusted
+      dsub <- cbind(dnew, bilr, wilr, ID)
+      ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
       
-      ydiff <- apply(ysub, 2, function(y) {y - ysame})
+      ydiff <- apply(ysub, 2, function(y) {y - yref})
       suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                     subd[, .(Delta, To, From, Level, EffectType)])
+                     dsub[, .(Delta, To, From, Level, EffectType)])
       
     } else { # adjusted
-      hout <- vector("list", length = nrow(refg))
+      hout <- vector("list", length = nrow(regrid))
       if(isTRUE(summary)) { # averaging over reference grid
-        for (h in seq_len(nrow(refg))) {
-          subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
-          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - ysame[, h]
+        for (h in seq_len(nrow(regrid))) {
+          dsub <- cbind(dnew, bilr, wilr, ID, regrid[h, ])
+          ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - yref[, h]
           hout[[h]] <- ydiff
         }
         
@@ -199,17 +200,17 @@ get.wsub <- function(object, basesub, mcomp,
         suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         ymean <- rbindlist(ymean)
         ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
-                       subd[, .(Delta, To, From, Level, EffectType)])
+                       dsub[, .(Delta, To, From, Level, EffectType)])
         
       } else { # keeping prediction at each level of reference grid
-        for (h in seq_len(nrow(refg))) {
-          subd <- cbind(newd, bilr, wilr, ID, refg[h, ])
-          ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - ysame[, h]
+        for (h in seq_len(nrow(regrid))) {
+          dsub <- cbind(dnew, bilr, wilr, ID, regrid[h, ])
+          ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+          ydiff <- ysub - yref[, h]
           suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
           ymean <- rbindlist(ymean)
           ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
-                         subd[, c("Delta", "From", "To", "Level", "EffectType", cv),
+                         dsub[, c("Delta", "From", "To", "Level", "EffectType", cv),
                               with = FALSE])
           
           hout[[h]] <- ymean
@@ -227,7 +228,7 @@ get.wsub <- function(object, basesub, mcomp,
 
 # Between-person Marginal Substitution Model.
 .get.bsubmargins <- function(object, basesub, b, 
-                             ysame, delta, 
+                             yref, delta, 
                              level, type,
                              ...) {
   
@@ -254,36 +255,36 @@ get.wsub <- function(object, basesub, mcomp,
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        newd <- cbind(b, newcomp, object$CompILR$data, Delta)
+        dnew <- cbind(b, newcomp, object$CompILR$data, Delta)
         
         # useful information for the final results
-        newd[, From := rep(subvar, length.out = nrow(newd))[k]]
-        newd$To <- iv
-        newd$Delta <- as.numeric(newd$Delta)
+        dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
+        dnew$To <- iv
+        dnew$Delta <- as.numeric(dnew$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(newd) %sin% c(colnames(b), colnames(basesub))
-        newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+        cols <- colnames(dnew) %sin% c(colnames(b), colnames(basesub))
+        dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         
         bilr <- ilr(bcomp, V = object$CompILR$psi)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
         
         wilr <- as.data.table(matrix(0, nrow = nrow(tilr), ncol = ncol(tilr)))
         
-        colnames(tilr) <- paste0("bilr", seq_len(ncol(tilr)))
-        colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+        colnames(tilr) <- colnames(object$CompILR$BetweenILR)
+        colnames(wilr) <- colnames(object$CompILR$WithinILR)
         
         # prediction
-        subd <- cbind(newd, tilr, wilr)
-        ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+        dsub <- cbind(dnew, tilr, wilr)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
-        ydiff <- ysub - ysame
+        ydiff <- ysub - yref
         
         # posterior means and intervals
         suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
@@ -312,7 +313,7 @@ get.wsub <- function(object, basesub, mcomp,
 
 # Within-person Marginal Substitution Model.
 .get.wsubmargins <- function(object, basesub, b,
-                             ysame, delta, 
+                             yref, delta, 
                              level, type,
                              ...) {
   
@@ -338,38 +339,38 @@ get.wsub <- function(object, basesub, mcomp,
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        newd <- cbind(b, newcomp, object$CompILR$data, Delta)
+        dnew <- cbind(b, newcomp, object$CompILR$data, Delta)
         
         # useful information for the final output
-        newd[, From := rep(subvar, length.out = nrow(newd))[k]]
-        newd$To <- iv
-        newd$Delta <- as.numeric(newd$Delta)
+        dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
+        dnew$To <- iv
+        dnew$Delta <- as.numeric(dnew$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(newd) %sin% c(colnames(b), colnames(basesub))
-        newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+        cols <- colnames(dnew) %sin% c(colnames(b), colnames(basesub))
+        dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
-        bcomp <- acomp(newd[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         
         bilr <- ilr(bcomp, V = object$CompILR$psi)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
         
         wilr <- tilr - bilr 
         
-        colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
-        colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
+        colnames(bilr) <- colnames(object$CompILR$BetweenILR)
+        colnames(wilr) <- colnames(object$CompILR$WithinILR)
         
         # substitution data
-        subd <- cbind(newd, bilr, wilr)
+        dsub <- cbind(dnew, bilr, wilr)
         
         # prediction
-        ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub) 
         
         # difference between substitution and no change
-        ydiff <- ysub - ysame
+        ydiff <- ysub - yref
         
         # posterior means and intervals
         suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
@@ -399,7 +400,7 @@ get.wsub <- function(object, basesub, mcomp,
 
 # Marginal Substitution Model.
 .get.submargins <- function(object, basesub, t,
-                            ysame, delta,
+                            yref, delta,
                             level, type,
                             ...) {
   
@@ -426,30 +427,30 @@ get.wsub <- function(object, basesub, mcomp,
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        newd <- cbind(newcomp, object$CompILR$data, Delta)
+        dnew <- cbind(newcomp, object$CompILR$data, Delta)
         
         # useful information for the final results
-        newd[, From := rep(subvar, length.out = nrow(newd))[k]]
-        newd$To <- iv
-        newd$Delta <- as.numeric(newd$Delta)
+        dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
+        dnew$To <- iv
+        dnew$Delta <- as.numeric(dnew$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(newd) %sin% c(colnames(t), colnames(basesub))
-        newd <- newd[rowSums(newd[, ..cols] < 0) == 0]
+        cols <- colnames(dnew) %sin% c(colnames(t), colnames(basesub))
+        dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        tcomp <- acomp(newd[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         tilr <- ilr(tcomp, V = object$CompILR$psi)
         
-        colnames(tilr) <- paste0("ilr", seq_len(ncol(tilr)))
+        colnames(tilr) <- colnames(object$CompILR$TotalILR)
         
         # prediction
-        subd <- cbind(newd, tilr)
-        ysub <- fitted(object$Model, newdata = subd, re_formula = NA, summary = FALSE)
+        dsub <- cbind(dnew, tilr)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
-        ydiff <- ysub - ysame
+        ydiff <- ysub - yref
         
         # posterior means and intervals
         suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))

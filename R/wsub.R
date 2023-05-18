@@ -68,23 +68,24 @@
 #' subm <- wsub(object = m, basesub = psub, delta = 5)
 #' }
 wsub <- function(object,
-                 delta,
                  basesub,
+                 delta,
                  regrid = NULL,
-                 summary = TRUE,
                  recomp = NULL,
+                 summary = TRUE,
                  level = "within",
                  type = "conditional",
                  ...) {
   
-  
   # compositional mean
   b <- object$CompILR$BetweenComp
-
+  mcomp <- mean(b, robust = TRUE)
+  mcomp <- acomp(mcomp, total = object$CompILR$total)
+  mcomp <- as.data.table(t(mcomp))
+  
+  # get refcomp
   if (is.null(recomp)) {
-    mcomp <- mean(b, robust = TRUE)
-    mcomp <- clo(mcomp, total = object$CompILR$total)
-    mcomp <- as.data.table(t(mcomp))
+    recomp <- mcomp
     
   } else {
     if (isFALSE(identical(length(object$CompILR$parts), length(recomp)))) {
@@ -127,31 +128,37 @@ wsub <- function(object,
       ))
     }
     recomp <- as.integer(recomp)
-    mcomp  <- clo(recomp, total = object$CompILR$total)
-    mcomp  <- as.data.table(t(mcomp))
-    colnames(mcomp) <- colnames(object$CompILR$BetweenComp)
+    recomp  <- acomp(recomp, total = object$CompILR$total)
+    recomp  <- as.data.table(t(recomp))
+    colnames(recomp) <- colnames(mcomp)
   }
   
   # error if delta out of range
-  if(isTRUE(any(delta > min(mcomp)))) {
+  if(isTRUE(any(delta > min(recomp)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
   the amount of composition part available for pairwise substitution.",
-  round(min(mcomp), 2)
+  round(min(recomp), 2)
     ))
   }
   
   # input for substitution model
   ID <- 1 # to make fitted() happy
   delta <- as.integer(delta)
-  recomp <- is.integer(recomp)
   
   # model for no change
-  bilr <- ilr(mcomp, V = object$CompILR$psi)
-  bilr <- as.data.table(t(bilr))
-  wilr <- as.data.table(matrix(0, nrow = nrow(bilr), ncol = ncol(bilr)))
-  colnames(wilr) <- paste0("wilr", seq_len(ncol(wilr)))
-  colnames(bilr) <- paste0("bilr", seq_len(ncol(bilr)))
+  ## bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
+  bilr0 <- ilr(recomp, V = object$CompILR$psi)
+  bilr0 <- as.data.table(t(bilr0))
+  
+  # wilr is the difference between the actual compositional mean of the dataset and bilr
+  # is 0 if ref comp is compositional mean
+  # but is different if not
+  wcomp <- recomp - mcomp
+  wilr0 <- as.data.table(t(ilr(wcomp, V = object$CompILR$psi)))
+  
+  colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+  colnames(wilr0) <- colnames(object$CompILR$WithinILR)
   
   # check covariates
   ilrn <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in brm model
@@ -173,10 +180,10 @@ wsub <- function(object,
       )
     }
     
-    dsame <- cbind(bilr, wilr, ID)
-    ysame <- fitted(
+    dref <- cbind(bilr0, wilr0, ID)
+    yref <- fitted(
       object$Model,
-      newdata = dsame,
+      newdata = dref,
       re_formula = NA,
       summary = FALSE)
     
@@ -186,7 +193,8 @@ wsub <- function(object,
       basesub = basesub,
       mcomp = mcomp,
       delta = delta,
-      ysame = ysame,
+      yref = yref,
+      dref = dref,
       summary = summary,
       level = level,
       type = type)
@@ -210,17 +218,17 @@ wsub <- function(object,
             "  Please provide a different reference grid.",
             sep = "\n"))
       } else {
-        refg <- regrid
+        regrid <- as.data.table(regrid)
       }
     } else {
       # use default rg
-      refg <- rg[, cv, with = FALSE]
+      regrid <- rg[, cv, with = FALSE]
     }
     
-    dsame <- cbind(bilr, wilr, ID, refg)
-    ysame <- fitted(
+    dref <- cbind(bilr0, wilr0, ID, regrid)
+    yref <- fitted(
       object$Model,
-      newdata = dsame,
+      newdata = dref,
       re_formula = NA,
       summary = FALSE)
     
@@ -230,10 +238,11 @@ wsub <- function(object,
       basesub = basesub,
       mcomp = mcomp,
       delta = delta,
-      ysame = ysame,
+      yref = yref,
+      dref = dref,
       summary = summary,
       cv = cv,
-      refg = refg,
+      regrid = regrid,
       level = level,
       type = type)
   }
