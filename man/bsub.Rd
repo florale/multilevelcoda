@@ -6,11 +6,11 @@
 \usage{
 bsub(
   object,
-  delta,
   basesub,
+  delta,
   regrid = NULL,
-  summary = TRUE,
   recomp = NULL,
+  summary = TRUE,
   level = "between",
   type = "conditional",
   ...
@@ -19,22 +19,22 @@ bsub(
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object. Required.}
 
-\item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
-
 \item{basesub}{A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
+
+\item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
 \item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consisting
 of combinations of covariates over which predictions are made.
 If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
 
+\item{recomp}{A numeric or integer vector used as reference composition. If \code{NULL},
+compositional mean is used.}
+
 \item{summary}{A logical value.
 Should the estimate at each level of the reference grid (\code{FALSE})
 or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
-
-\item{recomp}{A numeric or integer vector used as reference composition. If \code{NULL},
-compositional mean is used.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
