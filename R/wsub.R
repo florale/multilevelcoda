@@ -146,12 +146,12 @@ wsub <- function(object,
   ID <- 1 # to make fitted() happy
   delta <- as.integer(delta)
   
-  # model for no change
-  ## bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
+  #### model for no change
+  # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
   bilr0 <- ilr(recomp, V = object$CompILR$psi)
   bilr0 <- as.data.table(t(bilr0))
   
-  # wilr is the difference between the actual compositional mean of the dataset and bilr
+  # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
   # is 0 if ref comp is compositional mean
   # but is different if not
   wcomp <- recomp - mcomp
@@ -161,23 +161,19 @@ wsub <- function(object,
   colnames(wilr0) <- colnames(object$CompILR$WithinILR)
   
   # check covariates
-  ilrn <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in brm model
-  vn <- do.call(rbind, find_predictors(object$Model)) # get all varnames in brm model
+  ilrn <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in model
+  vn <- do.call(rbind, find_predictors(object$Model)) # get all varnames in model
   
   # if there is no covariates
   # number of variables in the brm model = number of ilr coordinates
-  if (isTRUE(identical(length(vn), length(ilrn)))) {
-    # unadj subsitution model
-    if (isFALSE(is.null(regrid))) {
-      warning(
-        paste(
-          "This is an unadjusted model, but a reference grid was provided.",
-          "  Please note that the covariates provided in the reference grid",
-          "  need to be present in 'brmcoda' model object.",
-          "  Unadjusted substitution model was estimated.",
-          sep = "\n"
-        )
-      )
+  if (isTRUE(identical(length(vn), length(ilrn)))) { # unadj subsitution model
+    if (isFALSE(is.null(regrid))) { 
+      warning(paste(
+        "This is an unadjusted model, but a reference grid was provided.",
+        "  Please note that the covariates provided in the reference grid",
+        "  need to be present in 'brmcoda' model object.",
+        "  Unadjusted substitution model was estimated.",
+        sep = "\n"))
     }
     
     dref <- cbind(bilr0, wilr0, ID)
@@ -191,7 +187,7 @@ wsub <- function(object,
     out <- get.wsub(
       object = object,
       basesub = basesub,
-      mcomp = mcomp,
+      recomp = recomp,
       delta = delta,
       yref = yref,
       dref = dref,
@@ -199,29 +195,24 @@ wsub <- function(object,
       level = level,
       type = type)
     
-  } else {
-    # adj subsitution model
+  } else { # adj subsitution model
     # reference grid containing covariates
     rg <- as.data.table(ref_grid(object$Model)@grid)
     cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
     
-    if (isFALSE(is.null(regrid))) {
-      # check user's specified reference grid
-      if (isFALSE(identical(colnames(regrid), cv))) {
-        # ensure all covs are provided
-        stop(
-          paste(
-            "'regrid' should contains information about",
-            "  the covariates in 'brmcoda' model to estimate the substitution model.",
-            "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
-            "  as these variables will be calculated by substitution model.",
-            "  Please provide a different reference grid.",
-            sep = "\n"))
+    if (isFALSE(is.null(regrid))) { # check user's specified reference grid
+      if(isFALSE(identical(colnames(regrid), cv))) { # ensure all covs are provided
+        stop(paste(
+          "'regrid' should contains information about",
+          "  the covariates in 'brmcoda' model to estimate the substitution model.",
+          "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
+          "  as these variables will be calculated by substitution model.",
+          "  Please provide a different reference grid.",
+          sep = "\n"))
       } else {
         regrid <- as.data.table(regrid)
       }
-    } else {
-      # use default rg
+    } else { # use default rg
       regrid <- rg[, cv, with = FALSE]
     }
     
@@ -236,7 +227,7 @@ wsub <- function(object,
     out <- get.wsub(
       object = object,
       basesub = basesub,
-      mcomp = mcomp,
+      recomp = recomp,
       delta = delta,
       yref = yref,
       dref = dref,

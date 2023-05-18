@@ -197,7 +197,7 @@ bsub <- function(object,
     
   } else { # adj subsitution model
     # reference grid containing covariates
-    rg <- as.data.table(ref_grid(object$Model) @grid)
+    rg <- as.data.table(ref_grid(object$Model)@grid)
     cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
     
     if (isFALSE(is.null(regrid))) { # check user's specified reference grid
