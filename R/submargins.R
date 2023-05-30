@@ -75,16 +75,16 @@ submargins <- function(object,
   # model for no change
   tilr0 <- object$CompILR$TotalILR
   
-  dref <- cbind(tilr0, object$CompILR$data)
-  yref <- fitted(object$Model, newdata = dref, re_formula = NA, summary = FALSE)
-  yref <- rowMeans(yref) # average across participants when there is no change
+  d0 <- cbind(tilr0, object$CompILR$data)
+  y0 <- fitted(object$Model, newdata = d0, re_formula = NA, summary = FALSE)
+  y0 <- rowMeans(y0) # average across participants when there is no change
   
   # substitution model
   out <- .get.submargins(
     object = object,
     t = t,
     basesub = basesub,
-    yref = yref,
+    y0 = y0,
     delta = delta,
     level = level,
     type = type)

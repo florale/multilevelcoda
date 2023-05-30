@@ -176,10 +176,10 @@ bsub <- function(object,
         sep = "\n"))
     }
     
-    dref <- cbind(bilr0, wilr0, ID)
-    yref <- fitted(
+    d0 <- cbind(bilr0, wilr0, ID)
+    y0 <- fitted(
       object$Model,
-      newdata = dref,
+      newdata = d0,
       re_formula = NA,
       summary = FALSE)
     
@@ -189,8 +189,8 @@ bsub <- function(object,
       basesub = basesub,
       recomp = recomp,
       delta = delta,
-      yref = yref,
-      dref = dref,
+      y0 = y0,
+      d0 = d0,
       summary = summary,
       level = level,
       type = type)
@@ -216,10 +216,10 @@ bsub <- function(object,
       regrid <- rg[, cv, with = FALSE]
     }
     
-    dref <- cbind(bilr0, wilr0, ID, regrid)
-    yref <- fitted(
+    d0 <- cbind(bilr0, wilr0, ID, regrid)
+    y0 <- fitted(
       object$Model,
-      newdata = dref,
+      newdata = d0,
       re_formula = NA,
       summary = FALSE)
     
@@ -229,8 +229,8 @@ bsub <- function(object,
       basesub = basesub,
       recomp = recomp,
       delta = delta,
-      yref = yref,
-      dref = dref,
+      y0 = y0,
+      d0 = d0,
       summary = summary,
       cv = cv,
       regrid = regrid,

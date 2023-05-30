@@ -14,14 +14,14 @@ utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "b", "t",
 #' @noRd
 # Basic Between-person Substitution model
 get.bsub <- function(object, basesub, recomp, 
-                     yref, dref,
+                     y0, d0,
                      delta, summary,
                      level, type,
                      ID = 1, cv = NULL, regrid = NULL, ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
-    # possible susbstituion of 1 compositional variable
+    # possible substitution of 1 compositional variable
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
@@ -64,7 +64,7 @@ get.bsub <- function(object, basesub, recomp,
     bilr <- ilr(bcomp, V = object$CompILR$psi)
     tilr <- ilr(tcomp, V = object$CompILR$psi)
     
-    wilr <- dref[, colnames(object$CompILR$WithinILR), with = FALSE]
+    wilr <- d0[, colnames(object$CompILR$WithinILR), with = FALSE]
     
     colnames(tilr) <- colnames(object$CompILR$BetweenILR)
     colnames(wilr) <- colnames(object$CompILR$WithinILR)
@@ -74,7 +74,7 @@ get.bsub <- function(object, basesub, recomp,
       dsub <- cbind(dnew, tilr, wilr, ID)
       ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
       
-      ydiff <- apply(ysub, 2, function(y) {y - yref})
+      ydiff <- apply(ysub, 2, function(y) {y - y0})
       suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
@@ -86,7 +86,7 @@ get.bsub <- function(object, basesub, recomp,
         for (h in seq_len(nrow(regrid))) {
           dsub <- cbind(dnew, tilr, wilr, ID, regrid[h, ])
           ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - yref[, h]
+          ydiff <- ysub - y0[, h]
           hout[[h]] <- ydiff
         }
         
@@ -100,7 +100,7 @@ get.bsub <- function(object, basesub, recomp,
         for (h in seq_len(nrow(regrid))) {
           dsub <- cbind(dnew, tilr, wilr, ID, regrid[h, ])
           ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - yref[, h]
+          ydiff <- ysub - y0[, h]
           suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
           ymean <- rbindlist(ymean)
           ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
@@ -122,7 +122,7 @@ get.bsub <- function(object, basesub, recomp,
 
 # Basic Within-person Substitution model
 get.wsub <- function(object, basesub, recomp,
-                     yref, dref,
+                     y0, d0,
                      delta, summary, 
                      level, type,
                      ID = 1, cv = NULL, regrid = NULL, ...) {
@@ -180,7 +180,7 @@ get.wsub <- function(object, basesub, recomp,
       dsub <- cbind(dnew, bilr, wilr, ID)
       ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
       
-      ydiff <- apply(ysub, 2, function(y) {y - yref})
+      ydiff <- apply(ysub, 2, function(y) {y - y0})
       suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       ymean <- rbindlist(ymean)
       ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)], 
@@ -192,7 +192,7 @@ get.wsub <- function(object, basesub, recomp,
         for (h in seq_len(nrow(regrid))) {
           dsub <- cbind(dnew, bilr, wilr, ID, regrid[h, ])
           ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - yref[, h]
+          ydiff <- ysub - y0[, h]
           hout[[h]] <- ydiff
         }
         
@@ -206,7 +206,7 @@ get.wsub <- function(object, basesub, recomp,
         for (h in seq_len(nrow(regrid))) {
           dsub <- cbind(dnew, bilr, wilr, ID, regrid[h, ])
           ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-          ydiff <- ysub - yref[, h]
+          ydiff <- ysub - y0[, h]
           suppressWarnings(ymean <- apply(ydiff, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
           ymean <- rbindlist(ymean)
           ymean <- cbind(ymean[, .(Mean, CI_low, CI_high)],
@@ -228,7 +228,7 @@ get.wsub <- function(object, basesub, recomp,
 
 # Between-person Marginal Substitution Model.
 .get.bsubmargins <- function(object, basesub, b, 
-                             yref, delta, 
+                             y0, delta, 
                              level, type,
                              ...) {
   
@@ -284,7 +284,7 @@ get.wsub <- function(object, basesub, recomp,
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
-        ydiff <- ysub - yref
+        ydiff <- ysub - y0
         
         # posterior means and intervals
         suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
@@ -313,7 +313,7 @@ get.wsub <- function(object, basesub, recomp,
 
 # Within-person Marginal Substitution Model.
 .get.wsubmargins <- function(object, basesub, b,
-                             yref, delta, 
+                             y0, delta, 
                              level, type,
                              ...) {
   
@@ -370,7 +370,7 @@ get.wsub <- function(object, basesub, recomp,
         ysub <- rowMeans(ysub) 
         
         # difference between substitution and no change
-        ydiff <- ysub - yref
+        ydiff <- ysub - y0
         
         # posterior means and intervals
         suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
@@ -400,7 +400,7 @@ get.wsub <- function(object, basesub, recomp,
 
 # Marginal Substitution Model.
 .get.submargins <- function(object, basesub, t,
-                            yref, delta,
+                            y0, delta,
                             level, type,
                             ...) {
   
@@ -450,7 +450,7 @@ get.wsub <- function(object, basesub, recomp,
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
-        ydiff <- ysub - yref
+        ydiff <- ysub - y0
         
         # posterior means and intervals
         suppressWarnings(ymean <- setDT(describe_posterior(ydiff, centrality = "mean", ...)))
