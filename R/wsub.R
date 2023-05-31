@@ -16,18 +16,11 @@
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
-#' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
-#' of combinations of covariates over which predictions are made.
-#' If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
-#' @param  recomp A numeric or integer vector used as reference composition. If \code{NULL},
-#' compositional mean is used.
 #' @param level A character string or vector. 
 #' Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.
-#' @param type A character string or vector. 
-#' Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of multilevel compositional substitution model.
@@ -40,7 +33,6 @@
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
 #'   \item{\code{Level}}{ Level where changes in composition takes place.}
-#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
 #' }
 #' 
 #' @importFrom data.table as.data.table copy :=
@@ -70,11 +62,11 @@
 wsub <- function(object,
                  basesub,
                  delta,
-                 regrid = NULL,
-                 recomp = NULL,
                  summary = TRUE,
+                 ref = "unitmean",
+                 refdata,
                  level = "within",
-                 type = "conditional",
+                 weight = c("equal", "proportional"),
                  ...) {
   
   # compositional mean
@@ -83,42 +75,42 @@ wsub <- function(object,
   mcomp <- acomp(mcomp, total = object$CompILR$total)
   mcomp <- as.data.table(t(mcomp))
   
-  # get refcomp
-  if (is.null(recomp)) {
-    recomp <- mcomp
+  # refcomp --------------------
+  if (is.null(refcomp)) {
+    refcomp <- mcomp
     
   } else {
-    if (isFALSE(identical(length(object$CompILR$parts), length(recomp)))) {
+    if (isFALSE(identical(length(object$CompILR$parts), length(refcomp)))) {
       stop(
         sprintf(
           "The number of values in parts (%d)
-  must be the same as in recomp (%d).",
+  must be the same as in refcomp (%d).",
   length(object$CompILR$parts),
-  length(recomp)
+  length(refcomp)
         ))
     }
     
-    if (isFALSE(class(recomp) %in% c("numeric", "interger"))) {
+    if (isFALSE(class(refcomp) %in% c("numeric", "interger"))) {
       stop(
         sprintf(
-          "recomp (%s) should be a vector of numeric or interger values.",
-          class(recomp)
+          "refcomp (%s) should be a vector of numeric or interger values.",
+          class(refcomp)
         ))
     }
     
-    if(isFALSE(sum(recomp) == object$CompILR$total)) {
+    if(isFALSE(sum(refcomp) == object$CompILR$total)) {
       stop(sprintf(
-        "The total amount of recomp (%s) should be the same as the composition (%s).",
-        sum(recomp),
+        "The total amount of refcomp (%s) should be the same as the composition (%s).",
+        sum(refcomp),
         object$CompILR$total
       ))
     }
     
-    if (isTRUE((any(recomp > apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)) |
-                any(recomp < apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min))))) {
+    if (isTRUE((any(refcomp > apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)) |
+                any(refcomp < apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min))))) {
       stop(paste(
         sprintf(
-          "recomp should be numeric or interger values that are between (%s) and (%s)",
+          "refcomp should be numeric or interger values that are between (%s) and (%s)",
           paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min)), collapse = ", "),
           paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)), collapse = ", ")),
         "\n", 
@@ -127,47 +119,47 @@ wsub <- function(object,
         "respectively"
       ))
     }
-    recomp <- as.integer(recomp)
-    recomp  <- acomp(recomp, total = object$CompILR$total)
-    recomp  <- as.data.table(t(recomp))
-    colnames(recomp) <- colnames(mcomp)
+    refcomp <- as.integer(refcomp)
+    refcomp  <- acomp(refcomp, total = object$CompILR$total)
+    refcomp  <- as.data.table(t(refcomp))
+    colnames(refcomp) <- colnames(mcomp)
   }
   
   # error if delta out of range
-  if(isTRUE(any(delta > min(recomp)))) {
+  if(isTRUE(any(delta > min(refcomp)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
   the amount of composition part available for pairwise substitution.",
-  round(min(recomp), 2)
+  round(min(refcomp), 2)
     ))
   }
   
+  # d0 ---------------------------
   # input for substitution model
   ID <- 1 # to make fitted() happy
   delta <- as.integer(delta)
   
-  #### model for no change
   # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
-  bilr0 <- ilr(recomp, V = object$CompILR$psi)
+  bilr0 <- ilr(refcomp, V = object$CompILR$psi)
   bilr0 <- as.data.table(t(bilr0))
   
   # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
   # is 0 if ref comp is compositional mean
   # but is different if not
-  wcomp <- recomp - mcomp
+  wcomp <- refcomp - mcomp
   wilr0 <- as.data.table(t(ilr(wcomp, V = object$CompILR$psi)))
   
   colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
   colnames(wilr0) <- colnames(object$CompILR$WithinILR)
   
   # check covariates
-  ilrn <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in model
-  vn <- do.call(rbind, find_predictors(object$Model)) # get all varnames in model
+  ilrnames <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in model
+  varnames <- do.call(rbind, find_predictors(object$Model)) # get all varnames in model
   
   # if there is no covariates
   # number of variables in the brm model = number of ilr coordinates
-  if (isTRUE(identical(length(vn), length(ilrn)))) { # unadj subsitution model
-    if (isFALSE(is.null(regrid))) { 
+  if (isTRUE(identical(length(varnames), length(ilrnames)))) { # unadj subsitution model
+    if (isFALSE(is.null(refgrid))) { 
       warning(paste(
         "This is an unadjusted model, but a reference grid was provided.",
         "  Please note that the covariates provided in the reference grid",
@@ -177,52 +169,40 @@ wsub <- function(object,
     }
     
     d0 <- cbind(bilr0, wilr0, ID)
-    y0 <- fitted(
-      object$Model,
-      newdata = d0,
-      re_formula = NA,
-      summary = FALSE)
-    
-    # substitution model
-    out <- get.wsub(
-      object = object,
-      basesub = basesub,
-      recomp = recomp,
-      delta = delta,
-      y0 = y0,
-      d0 = d0,
-      summary = summary,
-      level = level,
-      type = type)
     
   } else { # adj subsitution model
     # reference grid containing covariates
     rg <- as.data.table(ref_grid(object$Model)@grid)
-    cv <- colnames(rg) %snin% c(ilrn, ".wgt.")
+    covnames <- colnames(rg) %snin% c(ilrnames, ".wgt.")
     
-    if (isFALSE(is.null(regrid))) { # check user's specified reference grid
-      if(isFALSE(identical(colnames(regrid), cv))) { # ensure all covs are provided
+    if (isFALSE(is.null(refgrid))) { # check user's specified reference grid
+      if(isFALSE(identical(colnames(refgrid), covnames))) { # ensure all covs are provided
         stop(paste(
-          "'regrid' should contains information about",
+          "'refgrid' should contains information about",
           "  the covariates in 'brmcoda' model to estimate the substitution model.",
           "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
           "  as these variables will be calculated by substitution model.",
           "  Please provide a different reference grid.",
           sep = "\n"))
       } else {
-        regrid <- as.data.table(regrid)
+        refgrid <- as.data.table(refgrid)
       }
     } else { # use default rg
-      regrid <- rg[, cv, with = FALSE]
+      refgrid <- rg[, covnames, with = FALSE]
     }
     
-    d0 <- cbind(bilr0, wilr0, ID, regrid)
-    y0 <- fitted(
-      object$Model,
-      newdata = d0,
-      re_formula = NA,
-      summary = FALSE)
-    
+    d0 <- cbind(bilr0, wilr0, ID, refgrid)
+  }
+  
+  # y0 --------------------------------
+  y0 <- fitted(
+    object$Model,
+    newdata = d0,
+    re_formula = NA,
+    summary = FALSE, 
+    ...)
+  
+  # yw ---------------------------------
     # substitution model
     out <- get.wsub(
       object = object,
@@ -232,9 +212,9 @@ wsub <- function(object,
       y0 = y0,
       d0 = d0,
       summary = summary,
-      cv = cv,
-      regrid = regrid,
+      covnames = covnames,
+      refgrid = refgrid,
       level = level,
       type = type)
-  }
+
 }
