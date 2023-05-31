@@ -69,61 +69,9 @@ wsub <- function(object,
                  weight = c("equal", "proportional"),
                  ...) {
   
-  # compositional mean
-  b <- object$CompILR$BetweenComp
-  mcomp <- mean(b, robust = TRUE)
-  mcomp <- acomp(mcomp, total = object$CompILR$total)
-  mcomp <- as.data.table(t(mcomp))
-  
-  # refcomp --------------------
-  if (is.null(refcomp)) {
-    refcomp <- mcomp
-    
-  } else {
-    if (isFALSE(identical(length(object$CompILR$parts), length(refcomp)))) {
-      stop(
-        sprintf(
-          "The number of values in parts (%d)
-  must be the same as in refcomp (%d).",
-  length(object$CompILR$parts),
-  length(refcomp)
-        ))
-    }
-    
-    if (isFALSE(class(refcomp) %in% c("numeric", "interger"))) {
-      stop(
-        sprintf(
-          "refcomp (%s) should be a vector of numeric or interger values.",
-          class(refcomp)
-        ))
-    }
-    
-    if(isFALSE(sum(refcomp) == object$CompILR$total)) {
-      stop(sprintf(
-        "The total amount of refcomp (%s) should be the same as the composition (%s).",
-        sum(refcomp),
-        object$CompILR$total
-      ))
-    }
-    
-    if (isTRUE((any(refcomp > apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)) |
-                any(refcomp < apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min))))) {
-      stop(paste(
-        sprintf(
-          "refcomp should be numeric or interger values that are between (%s) and (%s)",
-          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min)), collapse = ", "),
-          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)), collapse = ", ")),
-        "\n", 
-        " for",
-        paste0(object$CompILR$parts, collapse = ", "),
-        "respectively"
-      ))
-    }
-    refcomp <- as.integer(refcomp)
-    refcomp  <- acomp(refcomp, total = object$CompILR$total)
-    refcomp  <- as.data.table(t(refcomp))
-    colnames(refcomp) <- colnames(mcomp)
-  }
+  # input for substitution model
+  ID <- 1 # to make fitted() happy
+  delta <- as.integer(delta)
   
   # error if delta out of range
   if(isTRUE(any(delta > min(refcomp)))) {
@@ -134,64 +82,14 @@ wsub <- function(object,
     ))
   }
   
-  # d0 ---------------------------
-  # input for substitution model
-  ID <- 1 # to make fitted() happy
-  delta <- as.integer(delta)
-  
-  # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
-  bilr0 <- ilr(refcomp, V = object$CompILR$psi)
-  bilr0 <- as.data.table(t(bilr0))
-  
-  # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
-  # is 0 if ref comp is compositional mean
-  # but is different if not
-  wcomp <- refcomp - mcomp
-  wilr0 <- as.data.table(t(ilr(wcomp, V = object$CompILR$psi)))
-  
-  colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
-  colnames(wilr0) <- colnames(object$CompILR$WithinILR)
-  
-  # check covariates
-  ilrnames <- c(names(object$CompILR$BetweenILR), names(object$CompILR$WithinILR)) # get ilr names in model
-  varnames <- do.call(rbind, find_predictors(object$Model)) # get all varnames in model
-  
-  # if there is no covariates
-  # number of variables in the brm model = number of ilr coordinates
-  if (isTRUE(identical(length(varnames), length(ilrnames)))) { # unadj subsitution model
-    if (isFALSE(is.null(refgrid))) { 
-      warning(paste(
-        "This is an unadjusted model, but a reference grid was provided.",
-        "  Please note that the covariates provided in the reference grid",
-        "  need to be present in 'brmcoda' model object.",
-        "  Unadjusted substitution model was estimated.",
-        sep = "\n"))
-    }
-    
-    d0 <- cbind(bilr0, wilr0, ID)
-    
-  } else { # adj subsitution model
-    # reference grid containing covariates
-    rg <- as.data.table(ref_grid(object$Model)@grid)
-    covnames <- colnames(rg) %snin% c(ilrnames, ".wgt.")
-    
-    if (isFALSE(is.null(refgrid))) { # check user's specified reference grid
-      if(isFALSE(identical(colnames(refgrid), covnames))) { # ensure all covs are provided
-        stop(paste(
-          "'refgrid' should contains information about",
-          "  the covariates in 'brmcoda' model to estimate the substitution model.",
-          "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
-          "  as these variables will be calculated by substitution model.",
-          "  Please provide a different reference grid.",
-          sep = "\n"))
-      } else {
-        refgrid <- as.data.table(refgrid)
-      }
-    } else { # use default rg
-      refgrid <- rg[, covnames, with = FALSE]
-    }
-    
-    d0 <- cbind(bilr0, wilr0, ID, refgrid)
+  # d0 -------------------------------
+  if (isTRUE(is.null(refdata))) {
+    d0 <- refdata(object = object,
+                  ref = ref,
+                  weight = weight,
+                  build.rg = FALSE)
+  } else {
+    d0 <- refdata
   }
   
   # y0 --------------------------------

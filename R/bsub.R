@@ -64,11 +64,11 @@ bsub <- function(object,
                  delta,
                  summary = TRUE,
                  ref = "unitmean",
-                 refdata,
                  level = "between",
                  weight = c("equal", "proportional"),
+                 refdata = NULL,
                  ...) {
-
+  
   # input for substitution model
   ID <- 1 # to make fitted() happy
   delta <- as.integer(delta)
@@ -82,97 +82,35 @@ bsub <- function(object,
     ))
   }
   
-  # refcomp --------------------
-  if (is.null(refgrid)) {
-    refcomp <- mcomp
+  # d0 -------------------------------
+  if (isTRUE(is.null(refdata))) {
+    d0 <- refdata(object = object,
+                  ref = ref,
+                  weight = weight,
+                  build.rg = FALSE)
   } else {
-    if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
-      refcomp <- refgrid
-    } else {
-      if (object$CompILR$parts %nin% colnames(refgrid)) {
-        stop(
-          sprintf(
-            "A reference composition was provided but some components (%s) are missing.",
-            paste0(object$CompILR$parts %nin% colnames(refgrid), collapse = ", ")
-          ))
-      }
-      refcomp <- refgrid[, object$CompILR$parts, with = FALSE]
-    }
-    
-    if (isFALSE(lapply(refcomp, class) %in% c("numeric", "interger"))) {
-      stop(
-        sprintf(
-          "recomp (%s) should be a vector of numeric or interger values.",
-          class(recomp)
-        ))
-    }
-      
-    if(isFALSE(sum(refcomp) == object$CompILR$total)) {
-      stop(sprintf(
-        "The total amount of refcomp (%s) should be the same as the composition (%s).",
-        sum(refcomp),
-        object$CompILR$total
-      ))
-    }
-    
-    if (isTRUE((any(refcomp > lapply(object$CompILR$data[, object$CompILR$parts, with = FALSE], max)) |
-                any(refcomp < lapply(object$CompILR$data[, object$CompILR$parts, with = FALSE], min))))) {
-      stop(paste(
-        sprintf(
-          "refcomp should be numeric or interger values that are between (%s) and (%s)",
-          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min)), collapse = ", "),
-          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)), collapse = ", ")),
-        "\n", 
-        " for",
-        paste0(object$CompILR$parts, collapse = ", "),
-        "respectively"
-        ))
-    }
-    refcomp  <- acomp(refcomp, total = object$CompILR$total)
-    refcomp  <- as.data.table(t(refcomp))
-    colnames(refcomp) <- colnames(mcomp)
+    d0 <- refdata
   }
   
-  # d0 -------------------------------
-  # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
-  bilr0 <- ilr(refcomp, V = object$CompILR$psi)
-  bilr0 <- as.data.table(t(bilr0))
-  
-  # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
-  # is 0 if ref comp is compositional mean
-  # but is different if not
-  wcomp <- refcomp - mcomp
-  wilr0 <- as.data.table(t(ilr(wcomp, V = object$CompILR$psi)))
-  
-  colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
-  colnames(wilr0) <- colnames(object$CompILR$WithinILR)
-  
-  if (isTRUE(refdata))
-  d0 <- refdata(object = object,
-                ref = ref,
-                weight = weight,
-                build.rg = TRUE)
-  
   # y0 --------------------------------
-    y0 <- fitted(
-      object$Model,
-      newdata = d0,
-      re_formula = NA,
-      summary = FALSE, 
-      ...)
-    
- # yb ---------------------------------
-    out <- get.bsub(
-      object = object,
-      basesub = basesub,
-      refcomp = refcomp,
-      delta = delta,
-      y0 = y0,
-      d0 = d0,
-      summary = summary,
-      covnames = covnames,
-      refgrid = refgrid,
-      level = level,
-      type = type)
-
+  y0 <- fitted(
+    object$Model,
+    newdata = d0,
+    re_formula = NA,
+    summary = FALSE)
+  
+  # yb ---------------------------------
+  out <- get.bsub(
+    object = object,
+    basesub = basesub,
+    refcomp = refcomp,
+    delta = delta,
+    y0 = y0,
+    d0 = d0,
+    summary = summary,
+    covnames = covnames,
+    refgrid = refgrid,
+    level = level,
+    type = type)
+  
 }
