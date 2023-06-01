@@ -18,7 +18,7 @@
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid only applicable to substitution model
 #' using a single reference composition value
-#' (e.g., \code{unitmean} or user's specified). Required
+#' (e.g., \code{unitmean} or user's specified). Required.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -28,7 +28,7 @@
 #' @param level A character string or vector. 
 #' Should the estimate be at the \code{between} and/or \code{within} level? Required.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
-#' \code{weight} can be \code{equal} which gives equal weight across units (e.g., individuals) or
+#' \code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
 #' \code{proportional} which weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals)
 #' Default to \code{equal}.
@@ -178,8 +178,7 @@ substitution <- function(object,
         delta = delta,
         summary = summary,
         ref = "grandmean",
-        level = "between",
-        refdata = refdata)
+        level = "between")
     } 
     else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       bout <- bsub(
@@ -188,8 +187,7 @@ substitution <- function(object,
         delta = delta,
         summary = summary,
         ref = ref,
-        level = "between",
-        refdata = refdata)
+        level = "between")
     }
     if (isTRUE(ref == "unitmean")) {
       bmout <-
@@ -210,8 +208,7 @@ substitution <- function(object,
         delta = delta,
         summary = summary,
         ref = "grandmean",
-        level = "within",
-        refdata = refdata)
+        level = "within")
     } 
     else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       wout <- wsub(
@@ -220,8 +217,7 @@ substitution <- function(object,
         delta = delta,
         summary = summary,
         ref = ref,
-        level = "within",
-        refdata = refdata)
+        level = "within")
     }
     if (isTRUE(ref == "unitmean")) {
       wmout <-

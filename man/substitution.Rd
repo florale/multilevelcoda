@@ -37,13 +37,13 @@ a \code{data.frame} or \code{data.table} of user's specified reference grid cons
 of combinations of covariates over which predictions are made.
 User's specified reference grid only applicable to substitution model
 using a single reference composition value
-(e.g., \code{unitmean} or user's specified). Required}
+(e.g., \code{unitmean} or user's specified). Required.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between} and/or \code{within} level? Required.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
-\code{weight} can be \code{equal} which gives equal weight across units (e.g., individuals) or
+\code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
 \code{proportional} which weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals)
 Default to \code{equal}.}
