@@ -1,11 +1,11 @@
 ## make Rcmd check happy
-utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "b", "t",
+utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "comp0", "t",
                          "Mean",  "CI_low", "CI_high", "From", "Delta",
                          "spread", "value", "variable", "ID", "EffectType", "Level",
                          "update"))
 #' Functions used only internally
 #' @keywords internal
-#' @importFrom data.table as.data.table copy := setDT rbindlist
+#' @importFrom data.table as.data.table data.table copy := setDT rbindlist
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom bayestestR describe_posterior
 #' @importFrom extraoperators %snin% %sin%
@@ -13,15 +13,15 @@ utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "b", "t",
 #' @importFrom stats fitted
 #' @noRd
 # Grandmean Between-person Substitution model
-get.bsub <- function(object, basesub, refcomp, 
-                     y0, d0,
-                     delta, summary,
-                     level, type,
-                     ID = 1, refgrid = refgrid, ...) {
+get.bsub <- function(object, delta, basesub, 
+                     comp0, y0, d0,
+                     summary,
+                     level, ref,
+                     ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
-    # dnew - reallocation data ----------------------------------------------
+    # dnew - reallocation data
     # possible substitution of 1 compositional variable
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
@@ -34,72 +34,73 @@ get.bsub <- function(object, basesub, refcomp,
     kout <- vector("list", length = nrow(posub))
     jout <- vector("list", length = length(delta))
     
-    for (j in seq_along(delta)) {
-      # delta level
+    for (j in seq_along(delta)) { # delta level
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
-        newcomp <- refcomp + sub[k,]
+        newcomp <- comp0 + sub[k,]
         names(newcomp) <- object$CompILR$parts
         Delta <- sub[k, get(i)]
-        kout[[k]] <- cbind(refcomp, newcomp, Delta)
+        kout[[k]] <- cbind(comp0, newcomp, Delta)
       }
       jout[[j]] <- do.call(rbind, kout)
     }
     dnew <- setDT(do.call(rbind, jout))
-
+    
     # useful information for the final results
     dnew[, From := rep(subvar, length.out = nrow(dnew))]
     dnew$To <- iv
     dnew$Delta <- as.numeric(dnew$Delta)
     dnew$Level <- level
-
+    
     # remove impossible reallocation that result in negative values 
     cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
     dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-    tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+    bcomp0 <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+    bcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
     bilr <- ilr(bcomp, V = object$CompILR$psi)
-    tilr <- ilr(tcomp, V = object$CompILR$psi)
+    wilr <- d0[1, colnames(object$CompILR$WithinILR), with = FALSE]
     
-    wilr <- d0[, colnames(object$CompILR$WithinILR), with = FALSE]
-    
-    colnames(tilr) <- colnames(object$CompILR$BetweenILR)
+    colnames(bilr) <- colnames(object$CompILR$BetweenILR)
     colnames(wilr) <- colnames(object$CompILR$WithinILR)
     
-    # prediction of posterior draws ------------------------
-    hout <- vector("list", length = nrow(refgrid))
-    if(isTRUE(by.grid)) { # keeping prediction at each level of reference grid
+    # reference grid 
+    ## get covariate + idvar names
+    covnames <- colnames(d0) %snin% c(colnames(object$CompILR$BetweenILR),
+                                      colnames(object$CompILR$WithinILR),
+                                      colnames(object$CompILR$BetweenComp),
+                                      colnames(object$CompILR$WithinComp)
+    )
+    refgrid <- d0[, covnames, with = FALSE]
+    
+    if(isTRUE(summary)) {
+      dsub <- as.data.table(expand.grid.df(dnew, bilr, wilr, refgrid))
+      ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+      delta_y <- apply(ysub, 2, function(y) {y - y0})
+      suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
+      PD_delta_y <- rbindlist(PD_delta_y)
+      PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
+                          dsub[, .(Delta, To, From, Level)])
+      
+    } else { # keeping prediction at each level of reference grid
       for (h in seq_len(nrow(refgrid))) {
-        dsub <- cbind(dnew, tilr, wilr, ID, refgrid[h, ])
+        dsub <- cbind(dnew, bilr, wilr, ID, refgrid[h, ])
         ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         delta_y <- ysub - y0[, h]
-        
-        suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x)
-          {describe_posterior(x, centrality = "mean", ...)}))
+        suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         PD_delta_y <- rbindlist(PD_delta_y)
         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)],
-                            dsub[, c("Delta", "From", "To", "Level", colnames(refgrid)), with = FALSE])
-        hout[[h]] <- list(delta_y = delta_y,
-                          PD_delta_y = PD_delta_y)
-      }} else {
-        dsub <- expand.grid.df(dnew, tilr, wilr, ID, refgrid)
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-        delta_y <- ysub - y0
+                            dsub[, c("Delta", "From", "To", "Level", colnames(refgrid)),
+                                 with = FALSE])
         
-        suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x)
-          {describe_posterior(x, centrality = "mean", ...)}))
-        PD_delta_y <- rbindlist(PD_delta_y)
-        PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)],
-                            dsub[, c("Delta", "From", "To", "Level", colnames(refgrid)), with = FALSE])
-        hout <- list(delta_y = delta_y,
-                     PD_delta_y = PD_delta_y)
+        hout[[h]] <- PD_delta_y
       }
-
+      PD_delta_y <- rbindlist(hout)
+    }
     # final results for entire composition
-    out <- if(isTRUE(summary)) (hout$PD_delta_y) else (hout$delta_y)
+    out <- list(PD_delta_y)
     names(out) <- i
     out
   }
@@ -107,10 +108,10 @@ get.bsub <- function(object, basesub, refcomp,
 }
 
 # Grandmean Within-person Substitution model
-get.wsub <- function(object, basesub, refcomp,
+get.wsub <- function(object, basesub, comp0,
                      y0, d0,
                      delta, summary, 
-                     level, type,
+                     level, ref,
                      ID = 1, refgrid = NULL, ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
@@ -130,10 +131,10 @@ get.wsub <- function(object, basesub, refcomp,
     for (j in seq_along(delta)) { # delta level
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
-        newcomp <- refcomp + sub[k, ]
+        newcomp <- comp0 + sub[k, ]
         names(newcomp) <- object$CompILR$parts
         Delta <- sub[k, get(i)]
-        kout[[k]] <- cbind(refcomp, newcomp, Delta)
+        kout[[k]] <- cbind(comp0, newcomp, Delta)
       }
       jout[[j]] <- do.call(rbind, kout)
     }
@@ -212,9 +213,9 @@ get.wsub <- function(object, basesub, refcomp,
 }
 
 # UnitMean Between-person Substitution Model.
-.get.bsubmargins <- function(object, basesub, b, 
+.get.bsubmargins <- function(object, basesub, comp0, 
                              y0, delta, 
-                             level, type,
+                             level, ref,
                              ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
@@ -235,12 +236,12 @@ get.wsub <- function(object, basesub, refcomp,
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) { # reallocation level
         subk <- sub[k, ]
-        subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
-        newcomp <- b + subk
+        subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
+        newcomp <- comp0 + subk
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        dnew <- cbind(b, newcomp, object$CompILR$data, Delta)
+        dnew <- cbind(comp0, newcomp, object$CompILR$data, Delta)
         
         # useful information for the final results
         dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
@@ -248,7 +249,7 @@ get.wsub <- function(object, basesub, refcomp,
         dnew$Delta <- as.numeric(dnew$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(dnew) %sin% c(colnames(b), colnames(basesub))
+        cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
@@ -296,9 +297,9 @@ get.wsub <- function(object, basesub, refcomp,
 }
 
 # Unitmean Within-person Substitution Model.
-.get.wsubmargins <- function(object, basesub, b,
+.get.wsubmargins <- function(object, basesub, comp0,
                              y0, delta, 
-                             level, type,
+                             level, ref,
                              ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
@@ -318,12 +319,12 @@ get.wsub <- function(object, basesub, refcomp,
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         subk <- sub[k, ]
-        subk <- subk[rep(seq_len(nrow(subk)), nrow(b)), ]
-        newcomp <- b + subk
+        subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
+        newcomp <- comp0 + subk
         Delta <- subk[, get(i)]
         names(newcomp) <- colnames(basesub)
         
-        dnew <- cbind(b, newcomp, object$CompILR$data, Delta)
+        dnew <- cbind(comp0, newcomp, object$CompILR$data, Delta)
         
         # useful information for the final output
         dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
@@ -331,7 +332,7 @@ get.wsub <- function(object, basesub, refcomp,
         dnew$Delta <- as.numeric(dnew$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(dnew) %sin% c(colnames(b), colnames(basesub))
+        cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
@@ -384,7 +385,7 @@ get.wsub <- function(object, basesub, refcomp,
 # Unitmean Substitution Model.
 .get.submargins <- function(object, basesub, t,
                             y0, delta,
-                            level, type,
+                            level, ref,
                             ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
@@ -461,136 +462,157 @@ get.wsub <- function(object, basesub, refcomp,
 }
 
 # expand grid data frame
-expand.grid.df <- function(...) Reduce(function(...) merge(..., by = NULL, all = TRUE), list(...))
+expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
 
 # reference dataset
 build.rg <- function(object, 
                      ref = c("grandmean", "unitmean"),
-                     weight = NULL, build = FALSE) {
+                     weight = NULL, 
+                     cov.grid = NULL, build = FALSE) {
   
   if(isTRUE(ref == "unitmean")) {
-    refcomp <- object$CompILR$BetweenComp
+    comp0 <- object$CompILR$BetweenComp
+    
+    # d0 ---------------------------
+    bcomp0 <- comp0
+    bilr0 <- object$CompILR$BetweenILR
+    
+    wcomp0 <- as.data.table(matrix(1, nrow = nrow(bcomp0), ncol = ncol(bcomp0)))
+    wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
+    
+    colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+    colnames(wilr0) <- colnames(object$CompILR$WithinILR)
+    colnames(bcomp0) <- colnames(object$CompILR$BetweenComp)
+    colnames(wcomp0) <- colnames(object$CompILR$WithinComp)
+    
+    d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, object$CompILR$data)
   }
   
-  if(identical(ref, "grandmean")) {
+  if(isTRUE(ref == "grandmean")) {
     if(isTRUE(is.null(weight) || weight == "equal")) {
-      refcomp <- cbind(object$CompILR$BetweenComp, 
-                       object$CompILR$data[, object$CompILR$idvar, with = FALSE])
-      refcomp <- refcomp[, .SD[c(1)], by = eval(object$CompILR$idvar)]
-      refcomp <- acomp(refcomp[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
-      refcomp <- mean(refcomp, robust = TRUE)
-      refcomp <- acomp(refcomp, total = object$CompILR$total)
-      refcomp <- as.data.table(t(refcomp))
-      mcomp <- refcomp
+      comp0 <- cbind(object$CompILR$BetweenComp, 
+                     object$CompILR$data[, object$CompILR$idvar, with = FALSE])
+      comp0 <- comp0[, .SD[c(1)], by = eval(object$CompILR$idvar)]
+      comp0 <- acomp(comp0[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
+      comp0 <- mean(comp0, robust = TRUE)
+      comp0 <- acomp(comp0, total = object$CompILR$total)
+      comp0 <- as.data.table(t(comp0))
+      mcomp <- comp0
     }
-    else if (isTRUE(weight == "proportional")) {
-      # compositional mean
-      refcomp <- mean(object$CompILR$BetweenComp, robust = TRUE)
-      refcomp <- acomp(refcomp, total = object$CompILR$total)
-      refcomp <- as.data.table(t(refcomp))
-    }
-  }
-  
-  if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
-    if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
-      refcomp <- refgrid
-    } else {
-      if (object$CompILR$parts %nin% colnames(refgrid)) {
-        stop(
-          sprintf(
-            "The reference grid should include all compositional components but (%s) are missing.",
-            paste0(object$CompILR$parts %nin% colnames(refgrid), collapse = ", ")
-          ))
-      }
-      refcomp <- refgrid[, object$CompILR$parts, with = FALSE]
+    if (isTRUE(weight == "proportional")) {
+      
+      comp0 <- mean(object$CompILR$BetweenComp, robust = TRUE)
+      comp0 <- acomp(comp0, total = object$CompILR$total)
+      comp0 <- as.data.table(t(comp0))
     }
     
-    if(isFALSE(sum(refcomp) == object$CompILR$total)) {
-      stop(sprintf(
-        "The total amount of the reference composition (%s) should be the same as the composition (%s).",
-        sum(refcomp),
-        object$CompILR$total
-      ))
-    }
-    if (isTRUE((any(refcomp > lapply(object$CompILR$data[, object$CompILR$parts, with = FALSE], max)) |
-                any(refcomp < lapply(object$CompILR$data[, object$CompILR$parts, with = FALSE], min))))) {
-      stop(paste(
-        sprintf(
-          "refcomp should be numeric or interger values that are between (%s) and (%s)",
-          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min)), collapse = ", "),
-          paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)), collapse = ", ")),
-        "\n", 
-        " for",
-        paste0(object$CompILR$parts, collapse = ", "),
-        "respectively"
-      ))
-    }
-    refcomp  <- compositions::acomp(refcomp, total = object$CompILR$total)
-    refcomp  <- as.data.table(t(refcomp))
-    colnames(refcomp) <- colnames(object$CompILR$BetweenComp)
-  }
-  
-  # reference grid -------------------
-  # get possible ilr names
-  ilrnames <- c(colnames(object$CompILR$BetweenILR), 
-                colnames(object$CompILR$WithinILR),
-                colnames(object$CompILR$TotalILR))
-  
-  # get all varnames in model
-  varnames <- do.call(rbind, find_predictors(object$Model))
-  
-  if (isTRUE(all(varnames %in% ilrnames))) { # unadj subsitution model
-    # get varnames in model in ilr names
-    refgrid <- NULL
-    
-  } else { # adj subsitution model
-    # default reference grid
-    rg <- as.data.table(ref_grid(object$Model)@grid)
-    covnames <- colnames(rg) %snin% c(ilrnames, ".wgt.")
-    
-    # user's specified reference grid
-    if (isFALSE(is.null(refgrid))) {
-      gridnames <- colnames(refgrid) %snin% object$CompILR$parts
-      if(isFALSE(build)) {
-        if(isFALSE(identical(colnames(refgrid), covnames))) { # ensure all covs are provided
-          stop(paste(
-            "'refgrid' should contains information about",
-            "  the covariates in 'brmcoda' model to estimate the substitution model.",
-            "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
-            "  as these variables will be calculated by substitution model.",
-            "  Please provide a different reference grid.",
-            sep = "\n"))
-        }
-        refgrid <- as.data.table(refgrid)
+    if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+      if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
+        comp0 <- refgrid
       } else {
-        # grab covariates in user's specified reference grid
-        # and use default if not supplied
-        refgrid <- expand.grid.df(refgrid,
-                                  rg[, -gridnames, with = FALSE])}
-    } else {
-      refgrid <- rg[, covnames, with = FALSE]
+        if (object$CompILR$parts %nin% colnames(refgrid)) {
+          stop(
+            sprintf(
+              "The reference grid should include all compositional components but (%s) are missing.",
+              paste0(object$CompILR$parts %nin% colnames(refgrid), collapse = ", ")
+            ))
+        }
+        comp0 <- refgrid[, object$CompILR$parts, with = FALSE]
+      }
+      
+      if(isFALSE(sum(comp0) == object$CompILR$total)) {
+        stop(sprintf(
+          "The total amount of the reference composition (%s) should be the same as the composition (%s).",
+          sum(comp0),
+          object$CompILR$total
+        ))
+      }
+      if (isTRUE((any(comp0 > lapply(object$CompILR$data[, object$CompILR$parts, with = FALSE], max)) |
+                  any(comp0 < lapply(object$CompILR$data[, object$CompILR$parts, with = FALSE], min))))) {
+        stop(paste(
+          sprintf(
+            "comp0 should be numeric or interger values that are between (%s) and (%s)",
+            paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, min)), collapse = ", "),
+            paste0(round(apply(object$CompILR$data[, object$CompILR$parts, with = FALSE], 2, max)), collapse = ", ")),
+          "\n", 
+          " for",
+          paste0(object$CompILR$parts, collapse = ", "),
+          "respectively"
+        ))
+      }
+      comp0  <- compositions::acomp(comp0, total = object$CompILR$total)
+      comp0  <- as.data.table(t(comp0))
+      colnames(comp0) <- colnames(object$CompILR$BetweenComp)
     }
-  }
+    
+    # reference grid -------------------
+    # get possible ilr names
+    ilrnames <- c(colnames(object$CompILR$BetweenILR), 
+                  colnames(object$CompILR$WithinILR),
+                  colnames(object$CompILR$TotalILR))
+    
+    # get all varnames in model
+    varnames <- do.call(rbind, find_predictors(object$Model))
+    
+    if (isTRUE(all(varnames %in% ilrnames))) { # unadj subsitution model
+      # get varnames in model in ilr names
+      refgrid <- NULL
+      
+    } else { # adj subsitution model
+      # default reference grid
+      rg <- as.data.table(ref_grid(object$Model)@grid)
+      covnames <- colnames(rg) %snin% c(ilrnames, ".wgt.")
+      
+      # user's specified reference grid
+      if (isTRUE(is.null(cov.grid))) {
+        refgrid <- rg[, covnames, with = FALSE]
+       } else {
+        gridnames <- colnames(cov.grid) %nin% object$CompILR$parts
+        
+        if(isFALSE(build)) {
+          if(isFALSE(identical(colnames(cov.grid), covnames))) { # ensure all covs are provided
+            stop(paste(
+              "'cov.grid' should contains information about",
+              "  the covariates in 'brmcoda' model to estimate the substitution model.",
+              "  It should not include ILR variables nor any column names starting with 'bilr', 'wilr', or 'ilr',",
+              "  as these variables will be calculated by substitution model.",
+              "  Please provide a different reference grid.",
+              sep = "\n"))
+          }
+          refgrid <- as.data.table(cov.grid)
+        } else {
+          # grab covariates in user's specified reference grid
+          # and use default if not supplied
+          refgrid <- expand.grid.df(cov.grid,
+                                    rg[, -gridnames, with = FALSE])}
+      } 
+    }
+    
+    # d0 ---------------------------
+    # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
+    bcomp0 <- comp0
+    bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
+    bilr0 <- as.data.table(t(bilr0))
+    
+    # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
+    # is 0 if ref comp is compositional mean
+    # but is different if not
+    wcomp0 <- bcomp0 - mcomp
+    wilr0 <- as.data.table(t(ilr(wcomp0, V = object$CompILR$psi)))
+    
+    id <- data.table::data.table(1) # to make fitted() happy
+    
+    colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+    colnames(wilr0) <- colnames(object$CompILR$WithinILR)
+    colnames(bcomp0) <- colnames(object$CompILR$BetweenComp)
+    colnames(wcomp0) <- colnames(object$CompILR$WithinComp)
+    colnames(id) <- object$CompILR$idvar
+    
+    if(is.null(dim(refgrid))) {
+      d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, id)
+    } else {
+      d0 <- expand.grid.df(bilr0, wilr0, bcomp0, wcomp0, id, refgrid)
+    }}
   
-  # d0 ---------------------------
-  # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
-  bilr0 <- ilr(refcomp, V = object$CompILR$psi)
-  bilr0 <- as.data.frame(t(bilr0))
-  
-  # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
-  # is 0 if ref comp is compositional mean
-  # but is different if not
-  wcomp <- refcomp - mcomp
-  wilr0 <- as.data.frame(t(ilr(wcomp, V = object$CompILR$psi)))
-  
-  colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
-  colnames(wilr0) <- colnames(object$CompILR$WithinILR)
-  
-  ID <- 1 # to make fitted() happy
-  
-  if(is.null(dim(refgrid))) {
-    cbind(bilr0, wilr0, ID)
-  } else {
-    expand.grid.df(bilr0, wilr0, ID, refgrid)
-  }
+  as.data.table(d0)
 }
