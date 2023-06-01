@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 
-#' when compositional parts are substituted for specific unit(s) at `within-person` level. 
+#' when compositional parts are substituted for specific unit(s) at `within` level. 
 #' The \code{wsubmargins} output encapsulates 
 #' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
@@ -12,23 +12,21 @@
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
-#' @param level A character string or vector. 
-#' Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.
-#' @param type A character string or vector. 
-#' Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.
+#' @param ref A character string. Default to \code{unitmean}.
+#' @param level A character string. Default to \code{within}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of multilevel compositional substitution model.
 #' Each element of the list is the estimation for a compositional part 
-#' and include at least six elements.
+#' and include at least eight elements.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
 #'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{ Level where changes in composition takes place.}
-#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
+#'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
 #' }
 #'
 #' @importFrom data.table as.data.table copy :=
@@ -55,42 +53,46 @@
 wsubmargins <- function (object,
                          delta,
                          basesub,
+                         ref = "unitmean",
                          level = "within",
-                         type = "marginal",
                          ...) {
   
-  # between-person composition
-  b <- object$CompILR$BetweenComp
-  b <- as.data.table(clo(b, total = object$CompILR$total))
+  d0 <- build.rg(object = object,
+                 ref = ref,
+                 weight = weight,
+                 build = FALSE)
   
   # error if delta out of range
-  if(isTRUE(any(delta > apply(b, 2, min)))) {
+  comp0 <- d0[, object$CompILR$BetweenComp, with = FALSE]
+  
+  if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
   the amount of composition part available for pairwise substitution.",
-  paste0(round(min(apply(b, 2, min))), collapse = ", ")
+  paste0(round(min(lapply(comp0, min))), collapse = ", ")
     ))
   }
   delta <- as.integer(delta)
   
-  # model for no change
-  bilr0 <- object$CompILR$BetweenILR
-  wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
-  
-  colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
-  colnames(wilr0) <- colnames(object$CompILR$WithinILR)
-  
-  d0 <- cbind(bilr0, wilr0, object$CompILR$data)
-  y0 <- fitted(object$Model, newdata = d0, re_formula = NA, summary = FALSE)
+  # y0margins --------------------------------
+  y0 <- fitted(
+    object$Model,
+    newdata = d0,
+    re_formula = NA,
+    summary = FALSE
+  )
   y0 <- rowMeans(y0) # average across participants when there is no change
   
+  # ywmargins ---------------------------------
   # substitution model
   out <- .get.wsubmargins(
     object = object,
-    b = b,
-    basesub = basesub,
-    y0 = y0,
     delta = delta,
+    basesub = basesub,
+    comp0 = comp0,
+    d0 = d0,
+    y0 = y0,
     level = level,
-    type = type)
+    ref = ref
+  )
 }

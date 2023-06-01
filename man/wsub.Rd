@@ -8,11 +8,10 @@ wsub(
   object,
   basesub,
   delta,
-  regrid = NULL,
-  recomp = NULL,
   summary = TRUE,
+  ref,
   level = "within",
-  type = "conditional",
+  weight = c("equal", "proportional"),
   ...
 )
 }
@@ -25,49 +24,53 @@ If \code{NULL}, all possible pairwise substitution of compositional parts are us
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
-\item{regrid}{If non-\code{NULL}, a \code{data.table} of reference grid consisting
-of combinations of covariates over which predictions are made.
-If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.}
-
-\item{recomp}{A numeric or integer vector used as reference composition. If \code{NULL},
-compositional mean is used.}
-
 \item{summary}{A logical value.
 Should the estimate at each level of the reference grid (\code{FALSE})
-or their average (\code{TRUE}) be returned? Default to \code{TRUE}.}
+or their average (\code{TRUE}) be returned?
+Default to \code{TRUE}.
+Only applicable for model with covariates in addition to
+the isometric log-ratio coordinates (i.e., adjusted model).}
+
+\item{ref}{Either a character value or vector or a dataset.
+\code{ref} can be \code{grandmean} or
+a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
+of combinations of covariates over which predictions are made.
+User's specified reference grid only applicable to substitution model
+using a single reference composition value
+(e.g., \code{unitmean} or user's specified). Required.}
 
 \item{level}{A character string or vector.
-Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
+Should the estimate be at the \code{between} and/or \code{within} level?
+Default to \code{within}.}
 
-\item{type}{A character string or vector.
-Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
+\item{weight}{A character value specifying the weight to use in calculation of the reference composition.
+\code{weight} can be \code{equal} which gives equal weight across units (e.g., individuals) or
+\code{proportional} which weights in proportion to the frequencies of units being averaged
+(e.g., observations across individuals)
+Default to \code{equal}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
 A list containing the result of multilevel compositional substitution model.
 Each element of the list is the estimation for a compositional part
-and include at least six elements.
+and include at least eight elements.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
 \item{\code{Delta}}{ Amount substituted across compositional parts.}
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{ Level where changes in composition takes place.}
-\item{\code{EffectType}}{ Either estimated \code{conditional} or average \code{marginal} changes.}
+\item{\code{Level}}{ Level where changes in composition takes place. Either }
+\item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
 }
 }
 \description{
 Using a fitted model object, estimate the difference in outcomes
-when compositional parts are substituted for specific unit(s) at \code{within-person} level.
+when compositional parts are substituted for specific unit(s) at \code{within} level.
 The \code{wsub} output encapsulates
 the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
-
-Notes: The reference composition for substitution model
-is the compositional mean of the data set provided.
-For average marginal effect, use \code{\link{wsubmargins}}.
 }
 \examples{
 \dontrun{

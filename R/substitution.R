@@ -12,26 +12,31 @@
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
-#' @param regrid If non-\code{NULL}, a \code{data.table} of reference grid consisting 
-#' of combinations of covariates over which predictions are made. 
-#' If \code{NULL}, the reference grid is constructed via \code{\link{ref_grid}}.
-#' Only applicable to basic substitution model.
+#' @param ref Either a character value or vector or a dataset.
+#' \code{ref} can be \code{grandmean} and/or \code{unitmean}, or
+#' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
+#' of combinations of covariates over which predictions are made.
+#' User's specified reference grid only applicable to substitution model
+#' using a single reference composition value
+#' (e.g., \code{unitmean} or user's specified). Required
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
-#' or their average (\code{TRUE}) be returned? Default to \code{TRUE}.
-#' Only applicable to basic substitution model.
-#' @param  recomp A numeric or integer vector used as reference composition. If \code{NULL},
-#' compositional mean is used.
-#' Only applicable to basic substitution model.
+#' or their average (\code{TRUE}) be returned? 
+#' Default to \code{TRUE}.
+#' Only applicable for model with covariates in addition to
+#' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.
-#' @param type A character string or vector. 
-#' Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.
+#' Should the estimate be at the \code{between} and/or \code{within} level? Required.
+#' @param weight A character value specifying the weight to use in calculation of the reference composition.
+#' \code{weight} can be \code{equal} which gives equal weight across units (e.g., individuals) or
+#' \code{proportional} which weights in proportion to the frequencies of units being averaged 
+#' (e.g., observations across individuals)
+#' Default to \code{equal}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of multilevel compositional substitution model.
 #' Each element of the list is the estimation for a compositional part 
-#' and include at least six elements.
+#' and include at least eight elements.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
 #'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
@@ -39,8 +44,9 @@
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
 #'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
-#'   \item{\code{EffectType}}{ Either estimated `conditional` or average `marginal` changes.}
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
 #' }
+#' 
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom extraoperators %snin% %sin%
@@ -69,11 +75,10 @@
 substitution <- function(object,
                          delta,
                          basesub = NULL,
-                         regrid = NULL,
                          summary = TRUE,
-                         recomp = NULL,
+                         ref = c("grandmean", "unitmean"),
                          level = c("between", "within"),
-                         type = c("conditional", "marginal"),
+                         weight = c("equal", "proportional"),
                          ...) {
   
   if (isTRUE(missing(object))) {
@@ -106,16 +111,22 @@ substitution <- function(object,
       sep = "\n"))
   }
   
-  if (isFALSE(is.null(regrid))) {
-    if(any(c(colnames(object$CompILR$BetweenILR), colnames(object$CompILR$WithinILR))
-           %in% c(colnames(regrid)))) {
+  if (isFALSE(is.null(refgrid))) {
+    if (isFALSE(inherits(refgrid, c("data.table", "data.frame")))) {
+      stop("refgrid must be a data table or a data frame.")
+    }
+    if(any(c(colnames(object$CompILR$BetweenILR), 
+             colnames(object$CompILR$WithinILR),
+             colnames(object$CompILR$TotalILR))
+           %in% c(colnames(refgrid)))) {
       stop(paste(
-        "'regrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
+        "'refgrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
         "  These variables will be calculated by substitution model.",
         "  Reference grid should contain information about the covariates used in 'brmcoda'.",
         "  Please provide a different reference grid.",
         sep = "\n"))
     }
+    refgrid <- as.data.table(refgrid)
   }
   
   if (isTRUE(missing(basesub))) {
@@ -160,48 +171,66 @@ substitution <- function(object,
   }
   
   if ("between" %in% level) {
-    if("conditional" %in% type) {
+    if (isTRUE(ref == "grandmean")) {
       bout <- bsub(
         object = object,
         basesub = basesub,
         delta = delta,
-        regrid = regrid,
-        recomp = recomp,
         summary = summary,
+        ref = "grandmean",
         level = "between",
-        type = "conditional")
+        refdata = refdata)
+    } 
+    else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+      bout <- bsub(
+        object = object,
+        basesub = basesub,
+        delta = delta,
+        summary = summary,
+        ref = ref,
+        level = "between",
+        refdata = refdata)
     }
-    if("marginal" %in% type) {
+    if (isTRUE(ref == "unitmean")) {
       bmout <-
         bsubmargins(
           object = object,
           basesub = basesub,
           delta = delta,
-          level = "between",
-          type = "marginal")
+          ref = "unitmean",
+          level = "between")
     }
   }
   
   if ("within" %in% level) {
-    if("conditional" %in% type) {
+    if (isTRUE(ref == "grandmean")) {
       wout <- wsub(
         object = object,
         basesub = basesub,
         delta = delta,
-        regrid = regrid,
-        recomp = recomp,
         summary = summary,
+        ref = "grandmean",
         level = "within",
-        type = "conditional")
+        refdata = refdata)
+    } 
+    else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+      wout <- wsub(
+        object = object,
+        basesub = basesub,
+        delta = delta,
+        summary = summary,
+        ref = ref,
+        level = "within",
+        refdata = refdata)
     }
-    if("marginal" %in% type) {
+    if (isTRUE(ref == "unitmean")) {
       wmout <-
         wsubmargins(
           object = object,
           basesub = basesub,
           delta = delta,
-          level = "within",
-          type = "marginal")
+          ref = "unitmean",
+          level = "within")
     }
   }
   
