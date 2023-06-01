@@ -461,28 +461,29 @@ get.wsub <- function(object, basesub, refcomp,
 }
 
 # expand grid data frame
-expand.grid.df <- function(...) Reduce(function(...) merge(..., by = NULL), list(...))
+expand.grid.df <- function(...) Reduce(function(...) merge(..., by = NULL, all = TRUE), list(...))
 
 # reference dataset
-refdata <- function(object, ref, 
-                    weight, build.rg = FALSE) {
-
-  if(ref == "unitmean") {
+build.rg <- function(object, 
+                     ref = c("grandmean", "unitmean"),
+                     weight = NULL, build = FALSE) {
+  
+  if(isTRUE(ref == "unitmean")) {
     refcomp <- object$CompILR$BetweenComp
   }
   
-  if(ref == "grandmean") {
-    if(isTRUE(is.null(weight)) | weight == "equal") {
+  if(identical(ref, "grandmean")) {
+    if(isTRUE(is.null(weight) || weight == "equal")) {
       refcomp <- cbind(object$CompILR$BetweenComp, 
                        object$CompILR$data[, object$CompILR$idvar, with = FALSE])
-      refcomp <- refcomp[, .SD[c(1)], by = object$CompILR$idvar]
+      refcomp <- refcomp[, .SD[c(1)], by = eval(object$CompILR$idvar)]
+      refcomp <- acomp(refcomp[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
       refcomp <- mean(refcomp, robust = TRUE)
       refcomp <- acomp(refcomp, total = object$CompILR$total)
       refcomp <- as.data.table(t(refcomp))
       mcomp <- refcomp
     }
-    
-    if(weight == "proportional") {
+    else if (isTRUE(weight == "proportional")) {
       # compositional mean
       refcomp <- mean(object$CompILR$BetweenComp, robust = TRUE)
       refcomp <- acomp(refcomp, total = object$CompILR$total)
@@ -491,7 +492,6 @@ refdata <- function(object, ref,
   }
   
   if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
-    # refcomp --------------------
     if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
       refcomp <- refgrid
     } else {
@@ -525,9 +525,9 @@ refdata <- function(object, ref,
         "respectively"
       ))
     }
-    refcomp  <- acomp(refcomp, total = object$CompILR$total)
+    refcomp  <- compositions::acomp(refcomp, total = object$CompILR$total)
     refcomp  <- as.data.table(t(refcomp))
-    colnames(refcomp) <- colnames(mcomp)
+    colnames(refcomp) <- colnames(object$CompILR$BetweenComp)
   }
   
   # reference grid -------------------
@@ -541,7 +541,7 @@ refdata <- function(object, ref,
   
   if (isTRUE(all(varnames %in% ilrnames))) { # unadj subsitution model
     # get varnames in model in ilr names
-    refgrid <- data.frame()
+    refgrid <- NULL
     
   } else { # adj subsitution model
     # default reference grid
@@ -551,7 +551,7 @@ refdata <- function(object, ref,
     # user's specified reference grid
     if (isFALSE(is.null(refgrid))) {
       gridnames <- colnames(refgrid) %snin% object$CompILR$parts
-      if(isFALSE(build.rg)) {
+      if(isFALSE(build)) {
         if(isFALSE(identical(colnames(refgrid), covnames))) { # ensure all covs are provided
           stop(paste(
             "'refgrid' should contains information about",
@@ -575,17 +575,22 @@ refdata <- function(object, ref,
   # d0 ---------------------------
   # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
   bilr0 <- ilr(refcomp, V = object$CompILR$psi)
-  bilr0 <- as.data.table(t(bilr0))
+  bilr0 <- as.data.frame(t(bilr0))
   
   # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
   # is 0 if ref comp is compositional mean
   # but is different if not
   wcomp <- refcomp - mcomp
-  wilr0 <- as.data.table(t(ilr(wcomp, V = object$CompILR$psi)))
+  wilr0 <- as.data.frame(t(ilr(wcomp, V = object$CompILR$psi)))
   
   colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
   colnames(wilr0) <- colnames(object$CompILR$WithinILR)
   
-  d0 <- expand.grid.df(bilr0, wilr0, ID, refgrid)
-  d0
+  ID <- 1 # to make fitted() happy
+  
+  if(is.null(dim(refgrid))) {
+    cbind(bilr0, wilr0, ID)
+  } else {
+    expand.grid.df(bilr0, wilr0, ID, refgrid)
+  }
 }
