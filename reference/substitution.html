@@ -92,11 +92,10 @@ present in the <code><a href="brmcoda.html">brmcoda</a></code> object.</p>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  basesub <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  regrid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  recomp <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grandmean"</span>, <span class="st">"unitmean"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
+<span>  weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -117,34 +116,36 @@ This data set can be computed using function <code><a href="basesub.html">basesu
 If <code>NULL</code>, all possible pairwise substitution of compositional parts are used.</p></dd>
 
 
-<dt>regrid</dt>
-<dd><p>If non-<code>NULL</code>, a <code>data.table</code> of reference grid consisting
-of combinations of covariates over which predictions are made.
-If <code>NULL</code>, the reference grid is constructed via <code>ref_grid</code>.
-Only applicable to basic substitution model.</p></dd>
-
-
 <dt>summary</dt>
 <dd><p>A logical value.
 Should the estimate at each level of the reference grid (<code>FALSE</code>)
-or their average (<code>TRUE</code>) be returned? Default to <code>TRUE</code>.
-Only applicable to basic substitution model.</p></dd>
+or their average (<code>TRUE</code>) be returned?
+Default to <code>TRUE</code>.
+Only applicable for model with covariates in addition to
+the isometric log-ratio coordinates (i.e., adjusted model).</p></dd>
 
 
-<dt>recomp</dt>
-<dd><p>A numeric or integer vector used as reference composition. If <code>NULL</code>,
-compositional mean is used.
-Only applicable to basic substitution model.</p></dd>
+<dt>ref</dt>
+<dd><p>Either a character value or vector or a dataset.
+<code>ref</code> can be <code>grandmean</code> and/or <code>unitmean</code>, or
+a <code>data.frame</code> or <code>data.table</code> of user's specified reference grid consisting
+of combinations of covariates over which predictions are made.
+User's specified reference grid only applicable to substitution model
+using a single reference composition value
+(e.g., <code>unitmean</code> or user's specified). Required</p></dd>
 
 
 <dt>level</dt>
 <dd><p>A character string or vector.
-Should the estimate be at the <code>between</code>-person and/or <code>within</code>-person level? Required.</p></dd>
+Should the estimate be at the <code>between</code> and/or <code>within</code> level? Required.</p></dd>
 
 
-<dt>type</dt>
-<dd><p>A character string or vector.
-Should the estimate be <code>conditional</code> mean or average <code>marginal</code> mean? Required.</p></dd>
+<dt>weight</dt>
+<dd><p>A character value specifying the weight to use in calculation of the reference composition.
+<code>weight</code> can be <code>equal</code> which gives equal weight across units (e.g., individuals) or
+<code>proportional</code> which weights in proportion to the frequencies of units being averaged
+(e.g., observations across individuals)
+Default to <code>equal</code>.</p></dd>
 
 
 <dt>...</dt>
@@ -157,14 +158,14 @@ Should the estimate be <code>conditional</code> mean or average <code>marginal</
 
 <p>A list containing the result of multilevel compositional substitution model.
 Each element of the list is the estimation for a compositional part
-and include at least six elements.</p><ul><li><p><code>Mean</code> Posterior means.</p></li>
+and include at least eight elements.</p><ul><li><p><code>Mean</code> Posterior means.</p></li>
 <li><p><code>CI_low</code> and</p></li>
 <li><p><code>CI_high</code> 95% credible intervals.</p></li>
 <li><p><code>Delta</code> Amount substituted across compositional parts.</p></li>
 <li><p><code>From</code> Compositional part that is substituted from.</p></li>
 <li><p><code>To</code> Compositional parts that is substituted to.</p></li>
 <li><p><code>Level</code> Level where changes in composition takes place. Either</p></li>
-<li><p><code>EffectType</code> Either estimated <code>conditional</code> or average <code>marginal</code> changes.</p></li>
+<li><p><code>Reference</code> Either <code>grandmean</code>, <code>unitmean</code>, or <code>users</code></p></li>
 </ul></div>
 
     <div class="section level2">

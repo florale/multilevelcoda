@@ -88,7 +88,7 @@ present in the <code><a href="brmcoda.html">brmcoda</a></code> object.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bsubmargins</span><span class="op">(</span><span class="va">object</span>, <span class="va">delta</span>, <span class="va">basesub</span>, level <span class="op">=</span> <span class="st">"between"</span>, type <span class="op">=</span> <span class="st">"marginal"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bsubmargins</span><span class="op">(</span><span class="va">object</span>, <span class="va">delta</span>, <span class="va">basesub</span>, ref <span class="op">=</span> <span class="st">"unitmean"</span>, level <span class="op">=</span> <span class="st">"between"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -107,14 +107,12 @@ This data set can be computed using function <code><a href="basesub.html">basesu
 If <code>NULL</code>, all possible pairwise substitution of compositional parts are used.</p></dd>
 
 
+<dt>ref</dt>
+<dd><p>A character string. Default to <code>unitmean</code>.</p></dd>
+
+
 <dt>level</dt>
-<dd><p>A character string or vector.
-Should the estimate be at the <code>between</code>-person and/or <code>within</code>-person level? Required.</p></dd>
-
-
-<dt>type</dt>
-<dd><p>A character string or vector.
-Should the estimate be <code>conditional</code> mean or average <code>marginal</code> mean? Required.</p></dd>
+<dd><p>A character string. Default to <code>between</code>.</p></dd>
 
 
 <dt>...</dt>
@@ -127,14 +125,14 @@ Should the estimate be <code>conditional</code> mean or average <code>marginal</
 
 <p>A list containing the result of multilevel compositional substitution model.
 Each element of the list is the estimation for a compositional part
-and include at least six elements.</p><ul><li><p><code>Mean</code> Posterior means.</p></li>
+and include at least eight elements.</p><ul><li><p><code>Mean</code> Posterior means.</p></li>
 <li><p><code>CI_low</code> and</p></li>
 <li><p><code>CI_high</code> 95% credible intervals.</p></li>
 <li><p><code>Delta</code> Amount substituted across compositional parts.</p></li>
 <li><p><code>From</code> Compositional part that is substituted from.</p></li>
 <li><p><code>To</code> Compositional parts that is substituted to.</p></li>
-<li><p><code>Level</code> Level where changes in composition takes place.</p></li>
-<li><p><code>EffectType</code> Either estimated <code>conditional</code> or average <code>marginal</code> changes.</p></li>
+<li><p><code>Level</code> Level where changes in composition takes place. Either</p></li>
+<li><p><code>Reference</code> Either <code>grandmean</code>, <code>unitmean</code>, or <code>users</code></p></li>
 </ul></div>
 
     <div class="section level2">
