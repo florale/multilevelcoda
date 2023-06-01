@@ -4,7 +4,7 @@
 \alias{bsubmargins}
 \title{Between-person Average Marginal Substitution Model.}
 \usage{
-bsubmargins(object, delta, basesub, level = "between", type = "marginal", ...)
+bsubmargins(object, delta, basesub, ref = "unitmean", level = "between", ...)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object. Required.}
@@ -15,26 +15,24 @@ bsubmargins(object, delta, basesub, level = "between", type = "marginal", ...)
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{level}{A character string or vector.
-Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
+\item{ref}{A character string. Default to \code{unitmean}.}
 
-\item{type}{A character string or vector.
-Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
+\item{level}{A character string. Default to \code{between}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
 A list containing the result of multilevel compositional substitution model.
 Each element of the list is the estimation for a compositional part
-and include at least six elements.
+and include at least eight elements.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
 \item{\code{Delta}}{ Amount substituted across compositional parts.}
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{ Level where changes in composition takes place.}
-\item{\code{EffectType}}{ Either estimated \code{conditional} or average \code{marginal} changes.}
+\item{\code{Level}}{ Level where changes in composition takes place. Either }
+\item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
 }
 }
 \description{
