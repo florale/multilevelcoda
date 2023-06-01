@@ -13,7 +13,7 @@ utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "comp0", "t",
 #' @importFrom stats fitted
 #' @noRd
 # Grandmean Between-person Substitution model
-get.bsub <- function(object, delta, basesub, 
+get.bsub <- function(object, delta, basesub,
                      comp0, y0, d0,
                      summary,
                      level, ref,
@@ -51,6 +51,7 @@ get.bsub <- function(object, delta, basesub,
     dnew$To <- iv
     dnew$Delta <- as.numeric(dnew$Delta)
     dnew$Level <- level
+    dnew$Reference <- ref
     
     # remove impossible reallocation that result in negative values 
     cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
@@ -58,13 +59,13 @@ get.bsub <- function(object, delta, basesub,
     
     # compositions and ilrs for predictions
     bcomp0 <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-    bcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+    bcompsub  <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
-    bilr <- ilr(bcomp, V = object$CompILR$psi)
-    wilr <- d0[1, colnames(object$CompILR$WithinILR), with = FALSE]
+    bilrsub <- ilr(bcompsub, V = object$CompILR$psi)
+    wilr0 <- d0[1, colnames(object$CompILR$WithinILR), with = FALSE]
     
-    colnames(bilr) <- colnames(object$CompILR$BetweenILR)
-    colnames(wilr) <- colnames(object$CompILR$WithinILR)
+    colnames(bilrsub) <- colnames(object$CompILR$BetweenILR)
+    colnames(wilr0) <- colnames(object$CompILR$WithinILR)
     
     # reference grid 
     ## get covariate + idvar names
@@ -75,25 +76,32 @@ get.bsub <- function(object, delta, basesub,
     )
     refgrid <- d0[, covnames, with = FALSE]
     
-    if(isTRUE(summary)) {
-      dsub <- as.data.table(expand.grid.df(dnew, bilr, wilr, refgrid))
-      ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-      delta_y <- apply(ysub, 2, function(y) {y - y0})
+    # predictions
+    hout <- vector("list", length = nrow(refgrid))
+    if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
+      for (h in seq_len(nrow(refgrid))) {
+        dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        delta_y <- ysub - y0[, h]
+        hout[[h]] <- delta_y
+      }
+      
+      PD_delta_y <- Reduce(`+`, hout) / length(hout)
       suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       PD_delta_y <- rbindlist(PD_delta_y)
       PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
-                          dsub[, .(Delta, To, From, Level)])
+                          dsub[, .(Delta, From, To, Level, Reference)])
       
-    } else { # keeping prediction at each level of reference grid
+    } else { # adj keeping prediction at each level of reference grid
       for (h in seq_len(nrow(refgrid))) {
-        dsub <- cbind(dnew, bilr, wilr, ID, refgrid[h, ])
+        dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
         ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         delta_y <- ysub - y0[, h]
         suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         PD_delta_y <- rbindlist(PD_delta_y)
-        PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)],
-                            dsub[, c("Delta", "From", "To", "Level", colnames(refgrid)),
-                                 with = FALSE])
+        PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
+                            dsub[, .(Delta, From, To, Level, Reference)],
+                            dsub[, colnames(refgrid) %snin% object$CompILR$idvar, with = FALSE])
         
         hout[[h]] <- PD_delta_y
       }
@@ -108,11 +116,11 @@ get.bsub <- function(object, delta, basesub,
 }
 
 # Grandmean Within-person Substitution model
-get.wsub <- function(object, basesub, comp0,
-                     y0, d0,
-                     delta, summary, 
+get.wsub <- function(object, delta, basesub,
+                     comp0, y0, d0,
+                     summary,
                      level, ref,
-                     ID = 1, refgrid = NULL, ...) {
+                     ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
@@ -145,64 +153,62 @@ get.wsub <- function(object, basesub, comp0,
     dnew$To <- iv
     dnew$Delta <- as.numeric(dnew$Delta)
     dnew$Level <- level
-
+    dnew$Reference <- ref
+    
     # remove impossible reallocation that result in negative values 
     cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
     dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-    tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+    bcomp0   <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+    bcompsub <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
-    bilr <- ilr(bcomp, V = object$CompILR$psi)
-    tilr <- ilr(tcomp, V = object$CompILR$psi)
-    wilr <- tilr - bilr
+    bilr0   <- ilr(bcomp0, V = object$CompILR$psi)
+    bilrsub <- ilr(bcompsub, V = object$CompILR$psi)
+    wilrsub <- bilrsub - bilr0
     
-    colnames(bilr) <- colnames(object$CompILR$BetweenILR)
-    colnames(wilr) <- colnames(object$CompILR$WithinILR)
+    colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+    colnames(wilrsub) <- colnames(object$CompILR$WithinILR)
     
-    # prediction
-    if(is.null(refgrid)) { # unadjusted
-      dsub <- cbind(dnew, bilr, wilr, ID)
-      ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+    # reference grid 
+    ## get covariate + idvar names
+    covnames <- colnames(d0) %snin% c(colnames(object$CompILR$BetweenILR),
+                                      colnames(object$CompILR$WithinILR),
+                                      colnames(object$CompILR$BetweenComp),
+                                      colnames(object$CompILR$WithinComp)
+    )
+    refgrid <- d0[, covnames, with = FALSE]
+    
+    # predictions
+    hout <- vector("list", length = nrow(refgrid))
+    if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
+      for (h in seq_len(nrow(refgrid))) {
+        dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        delta_y <- ysub - y0[, h]
+        hout[[h]] <- delta_y
+      }
       
-      delta_y <- apply(ysub, 2, function(y) {y - y0})
+      PD_delta_y <- Reduce(`+`, hout) / length(hout)
       suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
       PD_delta_y <- rbindlist(PD_delta_y)
       PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
-                     dsub[, .(Delta, To, From, Level)])
+                          dsub[, .(Delta, From, To, Level, Reference)])
       
-    } else { # adjusted
-      hout <- vector("list", length = nrow(refgrid))
-      if(isTRUE(summary)) { # averaging over reference grid
-        for (h in seq_len(nrow(refgrid))) {
-          dsub <- cbind(dnew, bilr, wilr, ID, refgrid[h, ])
-          ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-          delta_y <- ysub - y0[, h]
-          hout[[h]] <- delta_y
-        }
-        
-        PD_delta_y <- Reduce(`+`, hout) / length(hout)
+    } else { # adj keeping prediction at each level of reference grid
+      for (h in seq_len(nrow(refgrid))) {
+        dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        delta_y <- ysub - y0[, h]
         suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
         PD_delta_y <- rbindlist(PD_delta_y)
         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
-                       dsub[, .(Delta, To, From, Level)])
+                            dsub[, .(Delta, From, To, Level, Reference)],
+                            dsub[, colnames(refgrid) %snin% object$CompILR$idvar, with = FALSE])
         
-      } else { # keeping prediction at each level of reference grid
-        for (h in seq_len(nrow(refgrid))) {
-          dsub <- cbind(dnew, bilr, wilr, ID, refgrid[h, ])
-          ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
-          delta_y <- ysub - y0[, h]
-          suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
-          PD_delta_y <- rbindlist(PD_delta_y)
-          PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)],
-                         dsub[, c("Delta", "From", "To", "Level", colnames(refgrid)),
-                              with = FALSE])
-          
-          hout[[h]] <- PD_delta_y
-        }
-        PD_delta_y <- rbindlist(hout)
+        hout[[h]] <- PD_delta_y
       }
+      PD_delta_y <- rbindlist(hout)
     }
     # final results for entire composition
     out <- list(PD_delta_y)
@@ -213,8 +219,8 @@ get.wsub <- function(object, basesub, comp0,
 }
 
 # UnitMean Between-person Substitution Model.
-.get.bsubmargins <- function(object, basesub, comp0, 
-                             y0, delta, 
+.get.bsubmargins <- function(object, delta, basesub,
+                             comp0, y0, d0,
                              level, ref,
                              ...) {
   
@@ -253,19 +259,19 @@ get.wsub <- function(object, basesub, comp0,
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-        tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        bcomp0 <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        bcompsub  <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         
-        bilr <- ilr(bcomp, V = object$CompILR$psi)
-        tilr <- ilr(tcomp, V = object$CompILR$psi)
+        bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
+        bilrsub  <- ilr(bcompsub, V = object$CompILR$psi)
         
-        wilr <- as.data.table(matrix(0, nrow = nrow(tilr), ncol = ncol(tilr)))
+        wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
         
-        colnames(tilr) <- colnames(object$CompILR$BetweenILR)
-        colnames(wilr) <- colnames(object$CompILR$WithinILR)
+        colnames(bilrsub) <- colnames(object$CompILR$BetweenILR)
+        colnames(wilr0) <- colnames(object$CompILR$WithinILR)
         
         # prediction
-        dsub <- cbind(dnew, tilr, wilr)
+        dsub <- cbind(dnew, bilrsub, wilr0)
         ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub)
         
@@ -284,9 +290,10 @@ get.wsub <- function(object, basesub, comp0,
     jout$To <- iv
     jout[, From := rep(subvar, length.out = nrow(jout))]
     jout$Level <- level
-
+    jout$Reference <- ref
+    
     names(jout) <- c("Mean", "CI_low", "CI_high", 
-                     "Delta", "To", "From", "Level")
+                     "Delta", "To", "From", "Level", "Reference")
     
     # store final results for entire composition
     jout <- list(jout)
@@ -297,8 +304,8 @@ get.wsub <- function(object, basesub, comp0,
 }
 
 # Unitmean Within-person Substitution Model.
-.get.wsubmargins <- function(object, basesub, comp0,
-                             y0, delta, 
+.get.wsubmargins <- function(object, delta, basesub,
+                             comp0, y0, d0,
                              level, ref,
                              ...) {
   
@@ -336,19 +343,19 @@ get.wsub <- function(object, basesub, comp0,
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
-        bcomp <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
-        tcomp <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
+        bcomp0 <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        bcompsub <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         
-        bilr <- ilr(bcomp, V = object$CompILR$psi)
-        tilr <- ilr(tcomp, V = object$CompILR$psi)
+        bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
+        bilrsub <- ilr(bcompsub, V = object$CompILR$psi)
         
-        wilr <- tilr - bilr 
+        wilrsub <- bilrsub - bilr0 
         
-        colnames(bilr) <- colnames(object$CompILR$BetweenILR)
-        colnames(wilr) <- colnames(object$CompILR$WithinILR)
+        colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+        colnames(wilrsub) <- colnames(object$CompILR$WithinILR)
         
         # substitution data
-        dsub <- cbind(dnew, bilr, wilr)
+        dsub <- cbind(dnew, bilr0, wilrsub)
         
         # prediction
         ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
@@ -370,9 +377,10 @@ get.wsub <- function(object, basesub, comp0,
     jout$To <- iv
     jout[, From := rep(subvar, length.out = nrow(jout))]
     jout$Level <- level
-
+    jout$Reference <- ref
+    
     names(jout) <- c("Mean", "CI_low", "CI_high", 
-                     "Delta", "To", "From", "Level")
+                     "Delta", "To", "From", "Level", "Reference")
     
     # final results for entire composition
     jout <- list(jout)
@@ -589,12 +597,12 @@ build.rg <- function(object,
     }
     
     # d0 ---------------------------
-    # bilr is between-person ilr of the ref comp (doesn't have to be compositional mean)
+    # bilr0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
     bcomp0 <- comp0
     bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
     bilr0 <- as.data.table(t(bilr0))
     
-    # wcomp and wilr are the difference between the actual compositional mean of the dataset and bilr
+    # wcomp0 and wilr0 are the difference between the actual compositional mean of the dataset and bilr
     # is 0 if ref comp is compositional mean
     # but is different if not
     wcomp0 <- bcomp0 - mcomp
