@@ -479,7 +479,17 @@ build.rg <- function(object,
                      cov.grid = NULL, build = FALSE) {
   
   if(isTRUE(ref == "unitmean")) {
-    comp0 <- object$CompILR$BetweenComp
+    if(isTRUE(weight == "equal")) {
+      comp0 <- object$CompILR$BetweenComp
+      comp0 <- cbind(object$CompILR$BetweenComp, 
+                     object$CompILR$data[, object$CompILR$idvar, with = FALSE])
+      comp0 <- comp0[, .SD[c(1)], by = eval(object$CompILR$idvar)]
+      comp0 <- acomp(comp0[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
+      
+    }
+    if (isTRUE(is.null(weight) || weight == "proportional")) {
+      comp0 <- object$CompILR$BetweenComp
+    }
     
     # d0 ---------------------------
     bcomp0 <- comp0
@@ -574,7 +584,7 @@ build.rg <- function(object,
       # user's specified reference grid
       if (isTRUE(is.null(cov.grid))) {
         refgrid <- rg[, covnames, with = FALSE]
-       } else {
+      } else {
         gridnames <- colnames(cov.grid) %nin% object$CompILR$parts
         
         if(isFALSE(build)) {

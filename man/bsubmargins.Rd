@@ -4,7 +4,15 @@
 \alias{bsubmargins}
 \title{Between-person Average Marginal Substitution Model.}
 \usage{
-bsubmargins(object, delta, basesub, ref = "unitmean", level = "between", ...)
+bsubmargins(
+  object,
+  delta,
+  basesub,
+  ref = "unitmean",
+  level = "between",
+  weight = c("equal", "proportional"),
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object. Required.}
@@ -18,6 +26,12 @@ If \code{NULL}, all possible pairwise substitution of compositional parts are us
 \item{ref}{A character string. Default to \code{unitmean}.}
 
 \item{level}{A character string. Default to \code{between}.}
+
+\item{weight}{A character value specifying the weight to use in calculation of the reference composition.
+\code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
+\code{proportional} which weights in proportion to the frequencies of units being averaged
+(e.g., observations across individuals)
+Default to \code{equal}.}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
