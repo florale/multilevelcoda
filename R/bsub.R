@@ -78,7 +78,7 @@ bsub <- function(object,
                  summary = TRUE,
                  ref = "grandmean",
                  level = "between",
-                 weight = NULL,
+                 weight,
                  ...) {
   
   # d0 -------------------------------

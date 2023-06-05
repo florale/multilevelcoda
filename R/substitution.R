@@ -70,7 +70,7 @@
 #'              backend = "cmdstanr")
 #'              
 #' subm <- substitution(object = m, delta = 5,
-#'                      ref = "grandmean", level = c("between", "within"))
+#'                      ref = "unitmean", level = c("between", "within"))
 #' }
 substitution <- function(object,
                          delta,

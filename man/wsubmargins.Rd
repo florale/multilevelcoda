@@ -10,7 +10,7 @@ wsubmargins(
   basesub,
   ref = "unitmean",
   level = "within",
-  weight = NULL,
+  weight,
   ...
 )
 }

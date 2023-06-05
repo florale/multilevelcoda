@@ -60,7 +60,7 @@ wsubmargins <- function (object,
                          basesub,
                          ref = "unitmean",
                          level = "within",
-                         weight = NULL,
+                         weight,
                          ...) {
   
   d0 <- build.rg(object = object,
@@ -69,7 +69,7 @@ wsubmargins <- function (object,
                  build = FALSE)
   
   # error if delta out of range
-  comp0 <- d0[, object$CompILR$BetweenComp, with = FALSE]
+  comp0 <- d0[, colnames(object$CompILR$BetweenComp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
