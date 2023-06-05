@@ -1,5 +1,5 @@
 ## make Rcmd check happy
-utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "comp0", "t",
+utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "t",
                          "Mean",  "CI_low", "CI_high", "From", "Delta",
                          "spread", "value", "variable", "ID", "EffectType", "Level",
                          "update"))
@@ -475,7 +475,7 @@ expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = 
 # reference dataset
 build.rg <- function(object, 
                      ref = c("grandmean", "unitmean"),
-                     weight = NULL, 
+                     weight = weight, 
                      cov.grid = NULL, build = FALSE) {
   
   if(isTRUE(ref == "unitmean")) {

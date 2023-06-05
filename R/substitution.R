@@ -156,29 +156,32 @@ substitution <- function(object,
     if (isTRUE(ref == "grandmean")) {
       bout <- bsub(
         object = object,
-        basesub = basesub,
         delta = delta,
+        basesub = basesub,
         summary = summary,
         ref = "grandmean",
-        level = "between")
+        level = "between",
+        weight = weight)
     } 
     else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       bout <- bsub(
         object = object,
-        basesub = basesub,
         delta = delta,
+        basesub = basesub,
         summary = summary,
         ref = ref,
-        level = "between")
+        level = "between",
+        weight = weight)
     }
     if (isTRUE(ref == "unitmean")) {
       bmout <-
         bsubmargins(
           object = object,
-          basesub = basesub,
           delta = delta,
+          basesub = basesub,
           ref = "unitmean",
-          level = "between")
+          level = "between",
+          weight = weight)
     }
   }
   
@@ -186,29 +189,32 @@ substitution <- function(object,
     if (isTRUE(ref == "grandmean")) {
       wout <- wsub(
         object = object,
-        basesub = basesub,
         delta = delta,
+        basesub = basesub,
         summary = summary,
         ref = "grandmean",
-        level = "within")
+        level = "within",
+        weight = weight)
     } 
     else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       wout <- wsub(
         object = object,
-        basesub = basesub,
         delta = delta,
+        basesub = basesub,
         summary = summary,
         ref = ref,
-        level = "within")
+        level = "within",
+        weight = weight)
     }
     if (isTRUE(ref == "unitmean")) {
       wmout <-
         wsubmargins(
           object = object,
-          basesub = basesub,
           delta = delta,
+          basesub = basesub,
           ref = "unitmean",
-          level = "within")
+          level = "within",
+          weight = weight)
     }
   }
   
