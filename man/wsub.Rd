@@ -2,14 +2,14 @@
 % Please edit documentation in R/wsub.R
 \name{wsub}
 \alias{wsub}
-\title{Within-person Basic Substitution Model}
+\title{Within-person Substitution Model.}
 \usage{
 wsub(
   object,
   basesub,
   delta,
   summary = TRUE,
-  ref,
+  ref = "grandmean",
   level = "within",
   weight = c("equal", "proportional"),
   ...
@@ -37,7 +37,7 @@ a \code{data.frame} or \code{data.table} of user's specified reference grid cons
 of combinations of covariates over which predictions are made.
 User's specified reference grid only applicable to substitution model
 using a single reference composition value
-(e.g., \code{unitmean} or user's specified). Required.}
+(e.g., \code{unitmean} or user's specified). Default to \code{grandmean}.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between} and/or \code{within} level?

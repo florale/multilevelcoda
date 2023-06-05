@@ -11,7 +11,7 @@ substitution(
   summary = TRUE,
   ref = c("grandmean", "unitmean"),
   level = c("between", "within"),
-  weight = c("equal", "proportional"),
+  weight = NULL,
   ...
 )
 }
@@ -86,7 +86,7 @@ m <- brmcoda(compilr = cilr,
              chain = 1, iter = 500,
              backend = "cmdstanr")
              
-subm <- substitution(object = m, delta = c(1, 10),
-                     type = "conditional", level = c("between", "within"))
+subm <- substitution(object = m, delta = 5,
+                     ref = "grandmean", level = c("between", "within"))
 }
 }

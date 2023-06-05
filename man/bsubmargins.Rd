@@ -2,7 +2,7 @@
 % Please edit documentation in R/bsubmargins.R
 \name{bsubmargins}
 \alias{bsubmargins}
-\title{Between-person Average Marginal Substitution Model.}
+\title{Average Marginal Between-person Substitution Model.}
 \usage{
 bsubmargins(
   object,
@@ -10,7 +10,7 @@ bsubmargins(
   basesub,
   ref = "unitmean",
   level = "between",
-  weight = c("equal", "proportional"),
+  weight = NULL,
   ...
 )
 }

@@ -2,14 +2,14 @@
 % Please edit documentation in R/bsub.R
 \name{bsub}
 \alias{bsub}
-\title{Between-person Basic Substitution Model.}
+\title{Between-person Substitution Model.}
 \usage{
 bsub(
   object,
   delta,
   basesub,
   summary = TRUE,
-  ref,
+  ref = "grandmean",
   level = "between",
   weight = NULL,
   ...
@@ -37,7 +37,7 @@ a \code{data.frame} or \code{data.table} of user's specified reference grid cons
 of combinations of covariates over which predictions are made.
 User's specified reference grid only applicable to substitution model
 using a single reference composition value
-(e.g., \code{unitmean} or user's specified). Required.}
+(e.g., \code{unitmean} or user's specified). Default to \code{grandmean}.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between} and/or \code{within} level?
