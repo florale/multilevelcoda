@@ -153,7 +153,7 @@ substitution <- function(object,
   }
   
   if (isTRUE("between" %in% level)) {
-    if (isTRUE(ref == "grandmean")) {
+    if (isTRUE("grandmean" %in% ref)) {
       bout <- bsub(
         object = object,
         delta = delta,
@@ -173,7 +173,7 @@ substitution <- function(object,
         level = "between",
         weight = weight)
     }
-    if (isTRUE(ref == "unitmean")) {
+    if (isTRUE("unitmean" %in% ref)) {
       bmout <-
         bsubmargins(
           object = object,
@@ -186,7 +186,7 @@ substitution <- function(object,
   }
   
   if (isTRUE("within" %in% level)) {
-    if (isTRUE(ref == "grandmean")) {
+    if (isTRUE("grandmean" %in% ref)) {
       wout <- wsub(
         object = object,
         delta = delta,
@@ -206,7 +206,7 @@ substitution <- function(object,
         level = "within",
         weight = weight)
     }
-    if (isTRUE(ref == "unitmean")) {
+    if (isTRUE("unitmean" %in% ref)) {
       wmout <-
         wsubmargins(
           object = object,
