@@ -265,7 +265,7 @@ The below example examines the changes in stress for different pairwise substitu
 
 ```{r bsub}
 bsubm <- substitution(object = m, delta = 5, 
-                      level = "between", type = "conditional")
+                      level = "between", ref = "grandmean")
 ```
 
 The output contains multiple data sets of results for all compositional components. 
@@ -286,7 +286,7 @@ substituted for 5 minutes, at within-person level.
 ```{r wsub}
 # Within-person substitution
 wsubm <- substitution(object = m, delta = 5, 
-                      level = "within", type = "conditional")
+                      level = "within", ref = "grandmean")
 ``` 
 
 Results for 5 minute substitution.

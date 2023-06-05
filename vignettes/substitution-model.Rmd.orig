@@ -100,7 +100,7 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 `multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Conditional substitution models:
+Basic substitution models:
 
 - *Between-person* substitution
 - *Within-person* substitution
@@ -112,16 +112,16 @@ Average marginal substitution models:
 
 *Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
-## Conditional substitution model
+## Basic Substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
 We specify `level = between` to indicate substitutional change would be at the between-person level, 
-and `type = conditional` to indicate conditional substitution model.
+and `ref = "grandmean"` to indicate substitution model using the grand compositional mean as reference composition.
 If your model contains covariates, `substitution()` 
 will average predictions across levels of covariates as the default.
 
 ```{r bsub}
 subm1 <- substitution(object = m, delta = 1:10,
-                      type = "conditional", level = c("between", "within"))
+                      ref = "grandmean", level = c("between", "within"))
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -197,13 +197,14 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress") +
 
 ## Average Marginal Substitution Effects
 
-The average marginal models use the group- level compositional mean as the reference composition 
-to obtain the average of the predicted group-level changes in the outcome when every person in the sample 
+The average marginal models use the unit compositional mean as the reference composition 
+to obtain the average of the predicted group-level changes in the outcome when every unit
+(e.g., individual) in the sample 
 reallocates a specific unit from one compositional part to another. 
-This is difference from the conditional substitution model which yields prediction conditioned on 
-an "average" person in the data set (by using the population- level compositional mean
+This is difference from the basic substitution model which yields prediction conditioned on 
+an "average" person in the data set (e.g., by using the grand compositional mean
 as the reference composition). 
-Average substitution models models are generally more computationally expensive than conditional subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
 In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
@@ -212,7 +213,7 @@ registerDoFuture()
 plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
-                      type = "marginal", level = c("between", "within"))
+                      ref = "unitmean", level = c("between", "within"))
 registerDoSEQ()
 ```
 
