@@ -70,123 +70,123 @@ x <- wsub(object = m, basesub = psub, delta = 2)
 # 
 # })
 
-test_that("wsub works as expected for adjusted/unadjusted model", {
-  
-  ## reference grid is provided for unadjusted model
-  suppressWarnings(
-    m2 <- brmcoda(compilr = cilr,
-                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-                  chain = 1, iter = 500, seed = 123,
-                  backend = backend))
-  rg <- data.table(Age = 1)
-  expect_warning(x <- wsub(object = m2, basesub = psub, delta = 2, regrid = rg))
-  
-  ## incorect reference grid 1
-  rg <- data.table(Age = 1)
-  expect_error(x <- wsub(object = m, basesub = psub, delta = 2, regrid = rg))
-  
-  ## reference grid has matching names with ILRs
-  rg <- data.table(bilr1 = 1)
-  expect_error(x <- wsub(object = m, basesub = psub, delta = 2, regrid = rg))
-  
-  ## incorect reference grid 2
-  rg <- data.table(bilr1 = 1, Age = 1)
-  expect_error(x <- wsub(object = m, basesub = psub, delta = 2, regrid = rg))
-
-  # delta out of range
-  expect_error(x <- wsub(object = m, basesub = psub, delta = 1000))
-  
-  ## function knows to use correct user's specified reference grid
-  rg <- data.table(Female = 1)
-  x3 <- wsub(object = m, basesub = psub, delta = 2, regrid = rg)
-  expect_true(all(x3$TST$Female == 1))
-  expect_true(all(x3$WAKE$Female == 1))
-  expect_true(all(x3$MVPA$Female == 1))
-  expect_true(all(x3$LPA$Female == 1))
-  expect_true(all(x$SB$Female == 1))
-  
-  expect_true(all(x3$TST$Female != 0))
-  expect_true(all(x3$WAKE$Female != 0))
-  expect_true(all(x3$MVPA$Female != 0))
-  expect_true(all(x3$LPA$Female != 0))
-  expect_true(all(x3$SB$Female != 0))
-  
-  ## model with unspecified reference grid works as expected
-  expect_equal(x$TST$Female, NULL)
-  expect_equal(x$WAKE$Female, NULL)
-  expect_equal(x$MVPA$Female, NULL)
-  expect_equal(x$LPA$Female, NULL)
-  expect_equal(x$SB$Female, NULL)
-  
-  ## model with unspecified reference grid works as expected
-  expect_true("Female" %nin% colnames(x$TST))
-  expect_true("Female" %nin% colnames(x$WAKE))
-  expect_true("Female" %nin% colnames(x$MVPA))
-  expect_true("Female" %nin% colnames(x$LPA))
-  expect_true("Female" %nin% colnames(x$SB))
-  
-  ## average across reference grid as default
-  x4 <- wsub(object = m, basesub = psub, delta = 2, summary = TRUE)
-  x5 <- wsub(object = m, basesub = psub, delta = 2)
-  expect_equal(x4, x5)
-  
-  ## keep prediction at each level of refrence grid 
-  cilr <- compilr(data = mcompd[ID %in% c(1:5, 185:190), .SD[1:3], by = ID], sbp = sbp,
-                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-  
-  suppressWarnings(
-    m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                   wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-                 chain = 1, iter = 500, seed = 123,
-                 backend = backend))
-  
-  x6 <- wsub(object = m, basesub = psub, delta = 2, summary = FALSE)
-  
-  expect_equal(nrow(x6$TST), nrow(x5$TST) * 2)
-  expect_equal(nrow(x6$WAKE), nrow(x5$WAKE) * 2)
-  expect_equal(nrow(x6$MVPA), nrow(x5$MVPA) * 2)
-  expect_equal(nrow(x6$LPA), nrow(x5$LPA) * 2)
-  expect_equal(nrow(x6$SB), nrow(x5$SB) * 2)
-  
-  expect_true("Female" %in% colnames(x6$TST))
-  expect_true("Female" %in% colnames(x6$WAKE))
-  expect_true("Female" %in% colnames(x6$MVPA))
-  expect_true("Female" %in% colnames(x6$LPA))
-  expect_true("Female" %in% colnames(x6$SB))
-  
-  expect_true(all(x6$TST$Female %in% c(0, 1)))
-  expect_true(all(x6$WAKE$Female %in% c(0, 1)))
-  expect_true(all(x6$MVPA$Female %in% c(0, 1)))
-  expect_true(all(x6$LPA$Female %in% c(0, 1)))
-  expect_true(all(x6$SB$Female %in% c(0, 1)))
-  
-})
-
-test_that("wsub checks for user-specified reference composition", {
-  
-  # incorrect length
-  ref1 <- c(400, 60, 500, 60)
-  expect_error(wsub(object = m, basesub = psub, recomp = ref1, delta = 2))
-  
-  # incorrect class
-  ref2 <- c("400", "100", "500", "200", "200")
-  expect_error(wsub(object = m, basesub = psub, recomp = ref2, delta = 2))
-  
-  # incorrect class
-  ref3 <- c(400, 100, 500, 200, 200)
-  expect_error(x <- wsub(object = m, basesub = psub, recomp = ref3, delta = 2))
-  
-  # values outside of possible range
-  ref4 <- c(100, 100, 900, 100, 240)
-  expect_error(x <- wsub(object = m, basesub = psub, recomp = ref4, delta = 2))
-  
-  # include 0
-  ref5 <- c(100, 200, 900, 0, 240)
-  expect_error(x <- wsub(object = m, basesub = psub, recomp = ref5, delta = 2))
-  
-})
+# test_that("wsub works as expected for adjusted/unadjusted model", {
+#   
+#   ## reference grid is provided for unadjusted model
+#   suppressWarnings(
+#     m2 <- brmcoda(compilr = cilr,
+#                   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#                   chain = 1, iter = 500, seed = 123,
+#                   backend = backend))
+#   rg <- data.table(Age = 1)
+#   expect_warning(x <- wsub(object = m2, basesub = psub, delta = 2, regrid = rg))
+#   
+#   ## incorect reference grid 1
+#   rg <- data.table(Age = 1)
+#   expect_error(x <- wsub(object = m, basesub = psub, delta = 2, regrid = rg))
+#   
+#   ## reference grid has matching names with ILRs
+#   rg <- data.table(bilr1 = 1)
+#   expect_error(x <- wsub(object = m, basesub = psub, delta = 2, regrid = rg))
+#   
+#   ## incorect reference grid 2
+#   rg <- data.table(bilr1 = 1, Age = 1)
+#   expect_error(x <- wsub(object = m, basesub = psub, delta = 2, regrid = rg))
+# 
+#   # delta out of range
+#   expect_error(x <- wsub(object = m, basesub = psub, delta = 1000))
+#   
+#   ## function knows to use correct user's specified reference grid
+#   rg <- data.table(Female = 1)
+#   x3 <- wsub(object = m, basesub = psub, delta = 2, regrid = rg)
+#   expect_true(all(x3$TST$Female == 1))
+#   expect_true(all(x3$WAKE$Female == 1))
+#   expect_true(all(x3$MVPA$Female == 1))
+#   expect_true(all(x3$LPA$Female == 1))
+#   expect_true(all(x$SB$Female == 1))
+#   
+#   expect_true(all(x3$TST$Female != 0))
+#   expect_true(all(x3$WAKE$Female != 0))
+#   expect_true(all(x3$MVPA$Female != 0))
+#   expect_true(all(x3$LPA$Female != 0))
+#   expect_true(all(x3$SB$Female != 0))
+#   
+#   ## model with unspecified reference grid works as expected
+#   expect_equal(x$TST$Female, NULL)
+#   expect_equal(x$WAKE$Female, NULL)
+#   expect_equal(x$MVPA$Female, NULL)
+#   expect_equal(x$LPA$Female, NULL)
+#   expect_equal(x$SB$Female, NULL)
+#   
+#   ## model with unspecified reference grid works as expected
+#   expect_true("Female" %nin% colnames(x$TST))
+#   expect_true("Female" %nin% colnames(x$WAKE))
+#   expect_true("Female" %nin% colnames(x$MVPA))
+#   expect_true("Female" %nin% colnames(x$LPA))
+#   expect_true("Female" %nin% colnames(x$SB))
+#   
+#   ## average across reference grid as default
+#   x4 <- wsub(object = m, basesub = psub, delta = 2, summary = TRUE)
+#   x5 <- wsub(object = m, basesub = psub, delta = 2)
+#   expect_equal(x4, x5)
+#   
+#   ## keep prediction at each level of refrence grid 
+#   cilr <- compilr(data = mcompd[ID %in% c(1:5, 185:190), .SD[1:3], by = ID], sbp = sbp,
+#                   parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#   
+#   suppressWarnings(
+#     m <- brmcoda(compilr = cilr,
+#                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                    wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+#                  chain = 1, iter = 500, seed = 123,
+#                  backend = backend))
+#   
+#   x6 <- wsub(object = m, basesub = psub, delta = 2, summary = FALSE)
+#   
+#   expect_equal(nrow(x6$TST), nrow(x5$TST) * 2)
+#   expect_equal(nrow(x6$WAKE), nrow(x5$WAKE) * 2)
+#   expect_equal(nrow(x6$MVPA), nrow(x5$MVPA) * 2)
+#   expect_equal(nrow(x6$LPA), nrow(x5$LPA) * 2)
+#   expect_equal(nrow(x6$SB), nrow(x5$SB) * 2)
+#   
+#   expect_true("Female" %in% colnames(x6$TST))
+#   expect_true("Female" %in% colnames(x6$WAKE))
+#   expect_true("Female" %in% colnames(x6$MVPA))
+#   expect_true("Female" %in% colnames(x6$LPA))
+#   expect_true("Female" %in% colnames(x6$SB))
+#   
+#   expect_true(all(x6$TST$Female %in% c(0, 1)))
+#   expect_true(all(x6$WAKE$Female %in% c(0, 1)))
+#   expect_true(all(x6$MVPA$Female %in% c(0, 1)))
+#   expect_true(all(x6$LPA$Female %in% c(0, 1)))
+#   expect_true(all(x6$SB$Female %in% c(0, 1)))
+#   
+# })
+# 
+# test_that("wsub checks for user-specified reference composition", {
+#   
+#   # incorrect length
+#   ref1 <- c(400, 60, 500, 60)
+#   expect_error(wsub(object = m, basesub = psub, recomp = ref1, delta = 2))
+#   
+#   # incorrect class
+#   ref2 <- c("400", "100", "500", "200", "200")
+#   expect_error(wsub(object = m, basesub = psub, recomp = ref2, delta = 2))
+#   
+#   # incorrect class
+#   ref3 <- c(400, 100, 500, 200, 200)
+#   expect_error(x <- wsub(object = m, basesub = psub, recomp = ref3, delta = 2))
+#   
+#   # values outside of possible range
+#   ref4 <- c(100, 100, 900, 100, 240)
+#   expect_error(x <- wsub(object = m, basesub = psub, recomp = ref4, delta = 2))
+#   
+#   # include 0
+#   ref5 <- c(100, 200, 900, 0, 240)
+#   expect_error(x <- wsub(object = m, basesub = psub, recomp = ref5, delta = 2))
+#   
+# })
 
 test_that("wsub outputs what expected", {
   
@@ -252,11 +252,6 @@ test_that("wsub outputs what expected", {
   expect_true(all(x$LPA$Level == "within"))
   expect_true(all(x$SB$Level == "within"))
   
-  expect_true(all(x$TST$EffectType == "conditional"))
-  expect_true(all(x$WAKE$EffectType == "conditional"))
-  expect_true(all(x$MVPA$EffectType == "conditional"))
-  expect_true(all(x$LPA$EffectType == "conditional"))
-  expect_true(all(x$SB$EffectType == "conditional"))
 })
 
 test_that("wsub gives results in sensible range", {

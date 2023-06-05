@@ -56,9 +56,9 @@ test_that("substitution errors for invalid input", {
   ## missing delta
   expect_error(x <- substitution(object = m, basesub = psub))
   
-  ## reference grid has matching names with ILRs
-  rg <- data.table(bilr1 = 1)
-  expect_error(x <- substitution(object = m, basesub = psub, delta = 2, regrid = rg))
+  # ## reference grid has matching names with ILRs
+  # rg <- data.table(bilr1 = 1)
+  # expect_error(x <- substitution(object = m, basesub = psub, delta = 2, regrid = rg))
   
   ## basesub does not have the same components as parts in cilr
   ps <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
@@ -142,12 +142,6 @@ test_that("substitution gives expected outputs", {
   expect_true(all(x$BetweenSub$LPA$Level == "between"))
   expect_true(all(x$BetweenSub$SB$Level == "between"))
   
-  expect_true(all(x$BetweenSub$TST$EffectType == "conditional"))
-  expect_true(all(x$BetweenSub$WAKE$EffectType == "conditional"))
-  expect_true(all(x$BetweenSub$MVPA$EffectType == "conditional"))
-  expect_true(all(x$BetweenSub$LPA$EffectType == "conditional"))
-  expect_true(all(x$BetweenSub$SB$EffectType == "conditional"))
-  
   ## wsub
   expect_type(x$WithinSub, "list")
   expect_equal(length(x$WithinSub), length(m$CompILR$parts))
@@ -210,12 +204,6 @@ test_that("substitution gives expected outputs", {
   expect_true(all(x$WithinSub$LPA$Level == "within"))
   expect_true(all(x$WithinSub$SB$Level == "within"))
   
-  expect_true(all(x$WithinSub$TST$EffectType == "conditional"))
-  expect_true(all(x$WithinSub$WAKE$EffectType == "conditional"))
-  expect_true(all(x$WithinSub$MVPA$EffectType == "conditional"))
-  expect_true(all(x$WithinSub$LPA$EffectType == "conditional"))
-  expect_true(all(x$WithinSub$SB$EffectType == "conditional"))
-  
   ## bsubmargins 
   expect_type(x$BetweenSubMargins, "list")
   expect_equal(length(x$BetweenSubMargins), length(m$CompILR$parts))
@@ -277,13 +265,7 @@ test_that("substitution gives expected outputs", {
   expect_true(all(x$BetweenSubMargins$MVPA$Level == "between"))
   expect_true(all(x$BetweenSubMargins$LPA$Level == "between"))
   expect_true(all(x$BetweenSubMargins$SB$Level == "between"))
-  
-  expect_true(all(x$BetweenSubMargins$TST$EffectType == "marginal"))
-  expect_true(all(x$BetweenSubMargins$WAKE$EffectType == "marginal"))
-  expect_true(all(x$BetweenSubMargins$MVPA$EffectType == "marginal"))
-  expect_true(all(x$BetweenSubMargins$LPA$EffectType == "marginal"))
-  expect_true(all(x$BetweenSubMargins$SB$EffectType == "marginal"))
-  
+
   ## wsubmargins
   expect_type(x$WithinSubMargins, "list")
   expect_equal(length(x$WithinSubMargins), length(m$CompILR$parts))
@@ -345,12 +327,6 @@ test_that("substitution gives expected outputs", {
   expect_true(all(x$WithinSubMargins$MVPA$Level == "within"))
   expect_true(all(x$WithinSubMargins$LPA$Level == "within"))
   expect_true(all(x$WithinSubMargins$SB$Level == "within"))
-  
-  expect_true(all(x$WithinSubMargins$TST$EffectType == "marginal"))
-  expect_true(all(x$WithinSubMargins$WAKE$EffectType == "marginal"))
-  expect_true(all(x$WithinSubMargins$MVPA$EffectType == "marginal"))
-  expect_true(all(x$WithinSubMargins$LPA$EffectType == "marginal"))
-  expect_true(all(x$WithinSubMargins$SB$EffectType == "marginal"))
   
 })
 

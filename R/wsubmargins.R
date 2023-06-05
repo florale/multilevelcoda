@@ -1,4 +1,4 @@
-#' @title Between-person Average Marginal Substitution Model.
+#' @title Average Marginal Within-person Substitution Model.
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 
@@ -60,7 +60,7 @@ wsubmargins <- function (object,
                          basesub,
                          ref = "unitmean",
                          level = "within",
-                         weight = c("equal", "proportional"),
+                         weight = NULL,
                          ...) {
   
   d0 <- build.rg(object = object,
@@ -71,6 +71,7 @@ wsubmargins <- function (object,
   # error if delta out of range
   comp0 <- d0[, object$CompILR$BetweenComp, with = FALSE]
   
+  delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
@@ -78,8 +79,7 @@ wsubmargins <- function (object,
   paste0(round(min(lapply(comp0, min))), collapse = ", ")
     ))
   }
-  delta <- as.integer(delta)
-  
+
   # y0margins --------------------------------
   y0 <- fitted(
     object$Model,

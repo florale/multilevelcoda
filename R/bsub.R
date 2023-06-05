@@ -1,4 +1,4 @@
-#' @title Between-person Basic Substitution Model.
+#' @title Between-person Substitution Model.
 #' 
 #' @description 
 #' Estimate the difference in outcomes
@@ -18,7 +18,7 @@
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid only applicable to substitution model
 #' using a single reference composition value
-#' (e.g., \code{unitmean} or user's specified). Required.
+#' (e.g., \code{unitmean} or user's specified). Default to \code{grandmean}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -76,7 +76,7 @@ bsub <- function(object,
                  delta,
                  basesub,
                  summary = TRUE,
-                 ref,
+                 ref = "grandmean",
                  level = "between",
                  weight = NULL,
                  ...) {
@@ -108,6 +108,7 @@ bsub <- function(object,
   # error if delta out of range
   comp0 <- d0[1, colnames(object$CompILR$BetweenComp), with = FALSE]
   
+  delta <- as.integer(delta)
   if(isTRUE(any(delta > min(comp0)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
@@ -115,8 +116,7 @@ bsub <- function(object,
   round(min(comp0), 2)
     ))
   }
-  delta <- as.integer(delta)
-  
+
   # y0 --------------------------------
   y0 <- fitted(
     object$Model,

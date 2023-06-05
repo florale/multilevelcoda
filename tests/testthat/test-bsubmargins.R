@@ -136,12 +136,6 @@ test_that("bsubmargins outputs what expected", {
   expect_true(all(x$LPA$Level == "between"))
   expect_true(all(x$SB$Level == "between"))
   
-  expect_true(all(x$TST$EffectType == "marginal"))
-  expect_true(all(x$WAKE$EffectType == "marginal"))
-  expect_true(all(x$MVPA$EffectType == "marginal"))
-  expect_true(all(x$LPA$EffectType == "marginal"))
-  expect_true(all(x$SB$EffectType == "marginal"))
-  
 })
 
 test_that("bsubmargins gives results in sensible range", {

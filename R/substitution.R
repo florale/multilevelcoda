@@ -78,7 +78,7 @@ substitution <- function(object,
                          summary = TRUE,
                          ref = c("grandmean", "unitmean"),
                          level = c("between", "within"),
-                         weight = c("equal", "proportional"),
+                         weight = NULL,
                          ...) {
   
   if (isTRUE(missing(object))) {
