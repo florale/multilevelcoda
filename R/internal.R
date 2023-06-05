@@ -474,10 +474,10 @@ expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = 
 
 # reference dataset
 build.rg <- function(object, 
-                     ref = c("grandmean", "unitmean"),
+                     ref,
                      weight = weight, 
                      cov.grid = NULL, build = FALSE) {
-  
+
   if(isTRUE(ref == "unitmean")) {
     if(isTRUE(weight == "equal")) {
       comp0 <- object$CompILR$BetweenComp

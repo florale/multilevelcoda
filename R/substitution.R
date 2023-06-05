@@ -110,6 +110,12 @@ substitution <- function(object,
       "  to specify the change in units across compositional parts", 
       sep = "\n"))
   }
+  if (weight == c("grandmean", "unitmean")) {
+    stop(paste(
+      "'weight' should be either grandmean of unitmean",
+      "  If interested in both, please run two separate models.", 
+      sep = "\n"))
+  }
   
   if (isTRUE(missing(basesub))) {
     count <- length(object$CompILR$parts)
