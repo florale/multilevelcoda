@@ -69,8 +69,8 @@
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
-#' subm <- substitution(object = m, delta = c(1, 10),
-#'                      type = "conditional", level = c("between", "within"))
+#' subm <- substitution(object = m, delta = 5,
+#'                      ref = "grandmean", level = c("between", "within"))
 #' }
 substitution <- function(object,
                          delta,
@@ -109,24 +109,6 @@ substitution <- function(object,
       "  it should be interger, numeric positive value or vector", 
       "  to specify the change in units across compositional parts", 
       sep = "\n"))
-  }
-  
-  if (isFALSE(is.null(refgrid))) {
-    if (isFALSE(inherits(refgrid, c("data.table", "data.frame")))) {
-      stop("refgrid must be a data table or a data frame.")
-    }
-    if(any(c(colnames(object$CompILR$BetweenILR), 
-             colnames(object$CompILR$WithinILR),
-             colnames(object$CompILR$TotalILR))
-           %in% c(colnames(refgrid)))) {
-      stop(paste(
-        "'refgrid' should not have any column names starting with 'bilr', 'wilr', or 'ilr'.",
-        "  These variables will be calculated by substitution model.",
-        "  Reference grid should contain information about the covariates used in 'brmcoda'.",
-        "  Please provide a different reference grid.",
-        sep = "\n"))
-    }
-    refgrid <- as.data.table(refgrid)
   }
   
   if (isTRUE(missing(basesub))) {
@@ -170,7 +152,7 @@ substitution <- function(object,
     }
   }
   
-  if ("between" %in% level) {
+  if (isTRUE("between" %in% level)) {
     if (isTRUE(ref == "grandmean")) {
       bout <- bsub(
         object = object,
@@ -200,7 +182,7 @@ substitution <- function(object,
     }
   }
   
-  if ("within" %in% level) {
+  if (isTRUE("within" %in% level)) {
     if (isTRUE(ref == "grandmean")) {
       wout <- wsub(
         object = object,
