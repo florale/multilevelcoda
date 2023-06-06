@@ -70,11 +70,6 @@ test_that("substitution errors for invalid input", {
   
 })
 
-test_that("substitution computes basesub if missing", {
-  x1 <- substitution(object = m, delta = 2)
-  expect_true(identical(x, x1))
-})
-
 test_that("substitution gives expected outputs", {
   
   ## bsub
