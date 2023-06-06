@@ -11,7 +11,7 @@ wsub(
   summary = TRUE,
   ref = "grandmean",
   level = "within",
-  weight,
+  weight = NULL,
   ...
 )
 }

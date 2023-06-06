@@ -78,7 +78,7 @@ wsub <- function(object,
                  summary = TRUE,
                  ref = "grandmean",
                  level = "within",
-                 weight,
+                 weight = NULL,
                  ...) {
   # d0 -------------------------------
   if (isTRUE(ref == "grandmean")) {

@@ -11,7 +11,7 @@ bsub(
   summary = TRUE,
   ref = "grandmean",
   level = "between",
-  weight,
+  weight = NULL,
   ...
 )
 }
