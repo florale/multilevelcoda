@@ -10,7 +10,7 @@ bsubmargins(
   basesub,
   ref = "unitmean",
   level = "between",
-  weight,
+  weight = NULL,
   ...
 )
 }

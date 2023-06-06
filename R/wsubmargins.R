@@ -60,7 +60,7 @@ wsubmargins <- function (object,
                          basesub,
                          ref = "unitmean",
                          level = "within",
-                         weight,
+                         weight = NULL,
                          ...) {
   
   d0 <- build.rg(object = object,
