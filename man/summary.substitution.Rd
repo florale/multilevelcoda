@@ -11,13 +11,16 @@
 
 \item{delta}{A integer, numeric value or vector indicating the desired \code{delta}
 at which substitution results should be summarised.
-Default to all \code{delta} available in  \code{\link{substitution}} object.}
+Default to all \code{delta} available in the \code{\link{substitution}} object.}
+
+\item{specs}{A character value or vector specifying the names of the compositional parts of the desired results.
+Default to all compositional parts used in the \code{\link{substitution}} object.}
 
 \item{ref}{Either a character value or vector ((\code{grandmean} and/or \code{unitmean} or \code{users}),
-Default to all \code{ref} available in  \code{\link{substitution}} object .}
+Default to all \code{ref} available in the \code{\link{substitution}} object .}
 
 \item{level}{A character string or vector (\code{between} and/or \code{within}).
-Default to all \code{level} available in  \code{\link{substitution}} object .}
+Default to all \code{level} available in the \code{\link{substitution}} object .}
 
 \item{digits}{A integer value used for number formatting. Default to 3.}
 
