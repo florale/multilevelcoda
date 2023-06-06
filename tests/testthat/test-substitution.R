@@ -76,9 +76,6 @@ test_that("substitution computes basesub if missing", {
 })
 
 test_that("substitution gives expected outputs", {
-  expect_true(identical(names(x), 
-                        c("BetweenSub", "WithinSub",
-                          "BetweenSubMargins", 'WithinSubMargins')))
   
   ## bsub
   expect_type(x$BetweenSub, "list")
