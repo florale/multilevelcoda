@@ -1,7 +1,7 @@
 ## make Rcmd check happy
 utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "t",
                          "Mean",  "CI_low", "CI_high", "From", "Delta",
-                         "spread", "value", "variable", "ID", "EffectType", "Level",
+                         "spread", "value", "variable", "ID", "EffectType", "Level", "Reference",
                          "update"))
 #' Functions used only internally
 #' @keywords internal
