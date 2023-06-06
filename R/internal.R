@@ -469,9 +469,6 @@ get.wsub <- function(object, delta, basesub,
   iout
 }
 
-# expand grid data frame
-expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
-
 # reference dataset
 build.rg <- function(object, 
                      ref,
@@ -634,3 +631,6 @@ build.rg <- function(object,
   
   as.data.table(d0)
 }
+
+# expand grid data frame
+expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))

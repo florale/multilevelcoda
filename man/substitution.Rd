@@ -51,8 +51,8 @@ Default to \code{equal}.}
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list containing the result of multilevel compositional substitution model.
-Each element of the list is the estimation for a compositional part
+A list containing the results of multilevel compositional substitution model.
+Each element of the list is the substitution estimation for a compositional part
 and include at least eight elements.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
@@ -83,10 +83,10 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-             chain = 1, iter = 500,
-             backend = "cmdstanr")
+             chain = 1, iter = 500, backend = "cmdstanr")
              
 subm <- substitution(object = m, delta = 5,
-                     ref = "unitmean", level = c("between", "within"))
+                     ref = c("grandmean", "unitmean"), 
+                     level = c("between", "within"))
 }
 }

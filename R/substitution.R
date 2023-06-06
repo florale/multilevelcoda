@@ -34,8 +34,8 @@
 #' Default to \code{equal}.
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
-#' @return A list containing the result of multilevel compositional substitution model.
-#' Each element of the list is the estimation for a compositional part 
+#' @return A list containing the results of multilevel compositional substitution model.
+#' Each element of the list is the substitution estimation for a compositional part 
 #' and include at least eight elements.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
@@ -66,11 +66,11 @@
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'              chain = 1, iter = 500,
-#'              backend = "cmdstanr")
+#'              chain = 1, iter = 500, backend = "cmdstanr")
 #'              
 #' subm <- substitution(object = m, delta = 5,
-#'                      ref = "unitmean", level = c("between", "within"))
+#'                      ref = c("grandmean", "unitmean"), 
+#'                      level = c("between", "within"))
 #' }
 substitution <- function(object,
                          delta,
@@ -110,9 +110,9 @@ substitution <- function(object,
       "  to specify the change in units across compositional parts", 
       sep = "\n"))
   }
-  if (weight == c("grandmean", "unitmean")) {
+  if (identical(weight, c("equal", "proportional"))) {
     stop(paste(
-      "'weight' should be either grandmean of unitmean",
+      "'weight' should be either equal of proportional",
       "  If interested in both, please run two separate models.", 
       sep = "\n"))
   }
@@ -224,9 +224,17 @@ substitution <- function(object,
     }
   }
   
-  out <- list(BetweenSub = if(exists("bout")) (bout) else (NULL),
-              WithinSub = if(exists("wout")) (wout) else (NULL),
-              BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
-              WithinSubMargins = if(exists("wmout")) (wmout) else (NULL))
-  out
+  structure(
+    list(
+      BetweenSub = if(exists("bout")) (bout) else (NULL),
+      WithinSub = if(exists("wout")) (wout) else (NULL),
+      BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
+      WithinSubMargins = if(exists("wmout")) (wmout) else (NULL),
+      delta = delta,
+      ref = ref,
+      level = level,
+      weight = weight,
+      parts = object$CompILR$parts,
+      summary = summary),
+    class = "substitution")
 }
