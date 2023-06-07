@@ -472,8 +472,8 @@ get.wsub <- function(object, delta, basesub,
 # reference dataset
 build.rg <- function(object, 
                      ref,
-                     weight = weight, 
-                     cov.grid = NULL, build = FALSE) {
+                     weight, 
+                     fill = FALSE) {
 
   if(isTRUE(ref == "unitmean")) {
     if(isTRUE(weight == "equal")) {
@@ -524,6 +524,7 @@ build.rg <- function(object,
     if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
         comp0 <- refgrid
+        cov.grid <- NULL
       } else {
         if (object$CompILR$parts %nin% colnames(refgrid)) {
           stop(
@@ -533,6 +534,7 @@ build.rg <- function(object,
             ))
         }
         comp0 <- refgrid[, object$CompILR$parts, with = FALSE]
+        cov.grid <- refgrid[, -object$CompILR$parts, with = FALSE]
       }
       
       if(isFALSE(sum(comp0) == object$CompILR$total)) {
@@ -584,7 +586,7 @@ build.rg <- function(object,
       } else {
         gridnames <- colnames(cov.grid) %nin% object$CompILR$parts
         
-        if(isFALSE(build)) {
+        if(isFALSE(fill)) {
           if(isFALSE(identical(colnames(cov.grid), covnames))) { # ensure all covs are provided
             stop(paste(
               "'cov.grid' should contains information about",
