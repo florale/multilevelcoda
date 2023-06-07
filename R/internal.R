@@ -480,7 +480,7 @@ build.rg <- function(object,
       comp0 <- object$CompILR$BetweenComp
       comp0 <- cbind(object$CompILR$BetweenComp, 
                      object$CompILR$data[, object$CompILR$idvar, with = FALSE])
-      comp0 <- comp0[, .SD[c(1)], by = eval(object$CompILR$idvar)]
+      comp0 <- comp0[, head(.SD, 1), by = eval(object$CompILR$idvar)]
       comp0 <- acomp(comp0[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
       
     }
@@ -507,7 +507,7 @@ build.rg <- function(object,
     if(isTRUE(is.null(weight) || weight == "equal")) {
       comp0 <- cbind(object$CompILR$BetweenComp, 
                      object$CompILR$data[, object$CompILR$idvar, with = FALSE])
-      comp0 <- comp0[, .SD[c(1)], by = eval(object$CompILR$idvar)]
+      comp0 <- comp0[, head(.SD, 1), by = eval(object$CompILR$idvar)]
       comp0 <- acomp(comp0[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
       comp0 <- mean(comp0, robust = TRUE)
       comp0 <- acomp(comp0, total = object$CompILR$total)
