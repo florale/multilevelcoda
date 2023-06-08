@@ -475,6 +475,8 @@ build.rg <- function(object,
                      weight, 
                      fill = FALSE) {
 
+  cov.grid <- NULL
+  
   if(isTRUE(ref == "clustermean")) {
     if(isTRUE(weight == "equal")) {
       comp0 <- object$CompILR$BetweenComp
@@ -524,7 +526,7 @@ build.rg <- function(object,
     if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
         comp0 <- refgrid
-        cov.grid <- NULL
+        
       } else {
         if (object$CompILR$parts %nin% colnames(refgrid)) {
           stop(
