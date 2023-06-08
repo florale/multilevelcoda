@@ -92,7 +92,7 @@ present in the <code><a href="brmcoda.html">brmcoda</a></code> object.</p>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  <span class="va">basesub</span>,</span>
-<span>  ref <span class="op">=</span> <span class="st">"unitmean"</span>,</span>
+<span>  ref <span class="op">=</span> <span class="st">"clustermean"</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"within"</span>,</span>
 <span>  weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -116,7 +116,7 @@ If <code>NULL</code>, all possible pairwise substitution of compositional parts 
 
 
 <dt>ref</dt>
-<dd><p>A character string. Default to <code>unitmean</code>.</p></dd>
+<dd><p>A character string. Default to <code>clustermean</code>.</p></dd>
 
 
 <dt>level</dt>
@@ -148,7 +148,7 @@ and include at least eight elements.</p><ul><li><p><code>Mean</code> Posterior m
 <li><p><code>From</code> Compositional part that is substituted from.</p></li>
 <li><p><code>To</code> Compositional parts that is substituted to.</p></li>
 <li><p><code>Level</code> Level where changes in composition takes place. Either</p></li>
-<li><p><code>Reference</code> Either <code>grandmean</code>, <code>unitmean</code>, or <code>users</code></p></li>
+<li><p><code>Reference</code> Either <code>grandmean</code>, <code>clustermean</code>, or <code>users</code></p></li>
 </ul></div>
 
     <div class="section level2">
