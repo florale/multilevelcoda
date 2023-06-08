@@ -13,12 +13,12 @@
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
 #' @param ref Either a character value or vector or a dataset.
-#' \code{ref} can be \code{grandmean} and/or \code{unitmean}, or
+#' \code{ref} can be \code{grandmean} and/or \code{clustermean}, or
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid only applicable to substitution model
 #' using a single reference composition value
-#' (e.g., \code{unitmean} or user's specified). Required.
+#' (e.g., \code{clustermean} or user's specified). Required.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -44,7 +44,7 @@
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
 #'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
-#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
 #' }
 #' 
 #' @importFrom data.table as.data.table copy :=
@@ -69,14 +69,14 @@
 #'              chain = 1, iter = 500, backend = "cmdstanr")
 #'              
 #' subm <- substitution(object = m, delta = 5,
-#'                      ref = c("grandmean", "unitmean"), 
+#'                      ref = c("grandmean", "clustermean"), 
 #'                      level = c("between", "within"))
 #' }
 substitution <- function(object,
                          delta,
                          basesub = NULL,
                          summary = TRUE,
-                         ref = c("grandmean", "unitmean"),
+                         ref = c("grandmean", "clustermean"),
                          level = c("between", "within"),
                          weight = NULL,
                          ...) {
@@ -179,13 +179,13 @@ substitution <- function(object,
         level = "between",
         weight = weight)
     }
-    if (isTRUE("unitmean" %in% ref)) {
+    if (isTRUE("clustermean" %in% ref)) {
       bmout <-
         bsubmargins(
           object = object,
           delta = delta,
           basesub = basesub,
-          ref = "unitmean",
+          ref = "clustermean",
           level = "between",
           weight = weight)
     }
@@ -212,13 +212,13 @@ substitution <- function(object,
         level = "within",
         weight = weight)
     }
-    if (isTRUE("unitmean" %in% ref)) {
+    if (isTRUE("clustermean" %in% ref)) {
       wmout <-
         wsubmargins(
           object = object,
           delta = delta,
           basesub = basesub,
-          ref = "unitmean",
+          ref = "clustermean",
           level = "within",
           weight = weight)
     }

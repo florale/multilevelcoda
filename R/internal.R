@@ -218,7 +218,7 @@ get.wsub <- function(object, delta, basesub,
   iout
 }
 
-# UnitMean Between-person Substitution Model.
+# clustermean Between-person Substitution Model.
 .get.bsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
                              level, ref,
@@ -303,7 +303,7 @@ get.wsub <- function(object, delta, basesub,
   iout
 }
 
-# Unitmean Within-person Substitution Model.
+# clustermean Within-person Substitution Model.
 .get.wsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
                              level, ref,
@@ -390,7 +390,7 @@ get.wsub <- function(object, delta, basesub,
   iout
 }
 
-# Unitmean Substitution Model.
+# clustermean Substitution Model.
 .get.submargins <- function(object, basesub, t,
                             y0, delta,
                             level, ref,
@@ -475,7 +475,7 @@ build.rg <- function(object,
                      weight, 
                      fill = FALSE) {
 
-  if(isTRUE(ref == "unitmean")) {
+  if(isTRUE(ref == "clustermean")) {
     if(isTRUE(weight == "equal")) {
       comp0 <- object$CompILR$BetweenComp
       comp0 <- cbind(object$CompILR$BetweenComp, 

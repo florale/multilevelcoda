@@ -8,7 +8,7 @@
 #' Default to all \code{delta} available in the \code{\link{substitution}} object.
 #' @param to and @param from A character value or vector specifying the names of the compositional parts
 #' that were reallocated to/from in the model.
-#' @param ref Either a character value or vector ((\code{grandmean} and/or \code{unitmean} or \code{users}),
+#' @param ref Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
 #' Default to all \code{ref} available in the \code{\link{substitution}} object .
 #' @param level A character string or vector (\code{between} and/or \code{within}).
 #' Default to all \code{level} available in the \code{\link{substitution}} object .
@@ -48,8 +48,8 @@ summary.substitution <- function(object, delta, to, from,
   if (isTRUE(missing(ref))) {
     ref <- object$ref
   } else {
-    if (isFALSE(any(c("grandmean", "unitmean", "users") %in% ref))) {
-      stop("'ref' should be grandmean and/or unitmean or users.")
+    if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
+      stop("'ref' should be grandmean and/or clustermean or users.")
     }
     ref <- as.character(ref)
   }

@@ -8,7 +8,7 @@ bsubmargins(
   object,
   delta,
   basesub,
-  ref = "unitmean",
+  ref = "clustermean",
   level = "between",
   weight = NULL,
   ...
@@ -23,7 +23,7 @@ bsubmargins(
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{ref}{A character string. Default to \code{unitmean}.}
+\item{ref}{A character string. Default to \code{clustermean}.}
 
 \item{level}{A character string. Default to \code{between}.}
 
@@ -46,7 +46,7 @@ and include at least eight elements.
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
 \item{\code{Level}}{ Level where changes in composition takes place. Either }
-\item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
+\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
 }
 }
 \description{

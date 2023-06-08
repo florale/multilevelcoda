@@ -16,7 +16,7 @@ Default to all \code{delta} available in the \code{\link{substitution}} object.}
 \item{to}{and @param from A character value or vector specifying the names of the compositional parts
 that were reallocated to/from in the model.}
 
-\item{ref}{Either a character value or vector ((\code{grandmean} and/or \code{unitmean} or \code{users}),
+\item{ref}{Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
 Default to all \code{ref} available in the \code{\link{substitution}} object .}
 
 \item{level}{A character string or vector (\code{between} and/or \code{within}).

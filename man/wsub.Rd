@@ -37,7 +37,7 @@ a \code{data.frame} or \code{data.table} of user's specified reference grid cons
 of combinations of covariates over which predictions are made.
 User's specified reference grid only applicable to substitution model
 using a single reference composition value
-(e.g., \code{unitmean} or user's specified). Default to \code{grandmean}.}
+(e.g., \code{clustermean} or user's specified). Default to \code{grandmean}.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between} and/or \code{within} level?
@@ -62,7 +62,7 @@ and include at least eight elements.
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
 \item{\code{Level}}{ Level where changes in composition takes place. Either }
-\item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
+\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
 }
 }
 \description{

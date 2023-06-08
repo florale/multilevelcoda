@@ -12,7 +12,7 @@
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
-#' @param ref A character string. Default to \code{unitmean}.
+#' @param ref A character string. Default to \code{clustermean}.
 #' @param level A character string. Default to \code{between}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' \code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
@@ -31,7 +31,7 @@
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
 #'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
-#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
 #' }
 #'
 #' @importFrom data.table as.data.table copy :=
@@ -57,7 +57,7 @@
 bsubmargins <- function (object,
                          delta,
                          basesub,
-                         ref = "unitmean",
+                         ref = "clustermean",
                          level = "between",
                          weight = NULL,
                          ...) {

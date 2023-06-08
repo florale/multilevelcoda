@@ -9,7 +9,7 @@ substitution(
   delta,
   basesub = NULL,
   summary = TRUE,
-  ref = c("grandmean", "unitmean"),
+  ref = c("grandmean", "clustermean"),
   level = c("between", "within"),
   weight = NULL,
   ...
@@ -32,12 +32,12 @@ Only applicable for model with covariates in addition to
 the isometric log-ratio coordinates (i.e., adjusted model).}
 
 \item{ref}{Either a character value or vector or a dataset.
-\code{ref} can be \code{grandmean} and/or \code{unitmean}, or
+\code{ref} can be \code{grandmean} and/or \code{clustermean}, or
 a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
 User's specified reference grid only applicable to substitution model
 using a single reference composition value
-(e.g., \code{unitmean} or user's specified). Required.}
+(e.g., \code{clustermean} or user's specified). Required.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{between} and/or \code{within} level? Required.}
@@ -61,7 +61,7 @@ and include at least eight elements.
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
 \item{\code{Level}}{ Level where changes in composition takes place. Either }
-\item{\code{Reference}}{ Either \code{grandmean}, \code{unitmean}, or \code{users}}
+\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
 }
 }
 \description{
@@ -86,7 +86,7 @@ m <- brmcoda(compilr = cilr,
              chain = 1, iter = 500, backend = "cmdstanr")
              
 subm <- substitution(object = m, delta = 5,
-                     ref = c("grandmean", "unitmean"), 
+                     ref = c("grandmean", "clustermean"), 
                      level = c("between", "within"))
 }
 }
