@@ -272,7 +272,7 @@ get.wsub <- function(object, delta, basesub,
         
         # prediction
         dsub <- cbind(dnew, bilrsub, wilr0)
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NULL, summary = FALSE)
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
@@ -358,7 +358,7 @@ get.wsub <- function(object, delta, basesub,
         dsub <- cbind(dnew, bilr0, wilrsub)
         
         # prediction
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NULL, summary = FALSE)
         ysub <- rowMeans(ysub) 
         
         # difference between substitution and no change
@@ -438,7 +438,7 @@ get.wsub <- function(object, delta, basesub,
         
         # prediction
         dsub <- cbind(dnew, tilr)
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NULL, summary = FALSE)
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
