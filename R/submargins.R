@@ -1,4 +1,4 @@
-#' @title Average Marginal Substitution Model.
+#' @title Average Marginal Substitution.
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 

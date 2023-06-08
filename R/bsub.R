@@ -1,4 +1,4 @@
-#' @title Between-person Substitution Model.
+#' @title Between-person Simple Substitution.
 #' 
 #' @description 
 #' Estimate the difference in outcomes
@@ -86,7 +86,7 @@ bsub <- function(object,
     d0 <- build.rg(object = object,
                    ref = ref,
                    weight = weight,
-                   build = FALSE)
+                   fill = FALSE)
   } else {
     if (isFALSE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       stop("ref must be 'grandmean' or a data table, data frame or matrix.")

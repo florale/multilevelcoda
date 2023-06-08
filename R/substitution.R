@@ -1,4 +1,4 @@
-#' @title Substitution Model.
+#' @title Multilevel Compositional Substitution Model.
 #' 
 #' @description 
 #' Estimate the difference in an outcome

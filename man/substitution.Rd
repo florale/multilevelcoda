@@ -2,7 +2,7 @@
 % Please edit documentation in R/substitution.R
 \name{substitution}
 \alias{substitution}
-\title{Substitution Model.}
+\title{Multilevel Compositional Substitution Model.}
 \usage{
 substitution(
   object,

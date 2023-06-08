@@ -2,7 +2,7 @@
 % Please edit documentation in R/wsub.R
 \name{wsub}
 \alias{wsub}
-\title{Within-person Substitution Model.}
+\title{Within-person Simple Substitution.}
 \usage{
 wsub(
   object,

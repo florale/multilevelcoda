@@ -2,7 +2,7 @@
 % Please edit documentation in R/bsub.R
 \name{bsub}
 \alias{bsub}
-\title{Between-person Substitution Model.}
+\title{Between-person Simple Substitution.}
 \usage{
 bsub(
   object,

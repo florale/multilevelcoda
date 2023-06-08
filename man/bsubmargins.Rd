@@ -2,7 +2,7 @@
 % Please edit documentation in R/bsubmargins.R
 \name{bsubmargins}
 \alias{bsubmargins}
-\title{Average Marginal Between-person Substitution Model.}
+\title{Between-person Average Marginal Substitution.}
 \usage{
 bsubmargins(
   object,

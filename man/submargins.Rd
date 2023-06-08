@@ -2,7 +2,7 @@
 % Please edit documentation in R/submargins.R
 \name{submargins}
 \alias{submargins}
-\title{Average Marginal Substitution Model.}
+\title{Average Marginal Substitution.}
 \usage{
 submargins(object, delta, basesub, level = "total", type = "marginal", ...)
 }

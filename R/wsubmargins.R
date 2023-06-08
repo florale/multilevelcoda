@@ -1,4 +1,4 @@
-#' @title Average Marginal Within-person Substitution Model.
+#' @title Within-person Average Marginal Substitution.
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 
@@ -66,7 +66,7 @@ wsubmargins <- function (object,
   d0 <- build.rg(object = object,
                  ref = ref,
                  weight = weight,
-                 build = FALSE)
+                 fill = FALSE)
   
   # error if delta out of range
   comp0 <- d0[, colnames(object$CompILR$BetweenComp), with = FALSE]

@@ -1,4 +1,4 @@
-#' @title Within-person Substitution Model.
+#' @title Within-person Simple Substitution.
 #' 
 #' @description
 #' Using a fitted model object, estimate the difference in outcomes
@@ -85,7 +85,7 @@ wsub <- function(object,
     d0 <- build.rg(object = object,
                    ref = ref,
                    weight = weight,
-                   build = FALSE)
+                   fill = FALSE)
   } else {
     if (isFALSE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       stop("ref must be 'grandmean' or a data table, data frame or matrix.")
