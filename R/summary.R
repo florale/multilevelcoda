@@ -6,8 +6,8 @@
 #' @param delta A integer, numeric value or vector indicating the desired \code{delta} 
 #' at which substitution results should be summarised.
 #' Default to all \code{delta} available in the \code{\link{substitution}} object.
-#' @param specs A character value or vector specifying the names of the compositional parts of the desired results.
-#' Default to all compositional parts used in the \code{\link{substitution}} object.
+#' @param to and @param from A character value or vector specifying the names of the compositional parts
+#' that were reallocated to/from in the model.
 #' @param ref Either a character value or vector ((\code{grandmean} and/or \code{unitmean} or \code{users}),
 #' Default to all \code{ref} available in the \code{\link{substitution}} object .
 #' @param level A character string or vector (\code{between} and/or \code{within}).
@@ -35,7 +35,7 @@
 #' }
 #' 
 #' @exportS3Method summary substitution
-summary.substitution <- function(object, delta, specs,
+summary.substitution <- function(object, delta, to, from,
                                  ref, level,
                                  digits = 2, ...) { 
   
@@ -62,13 +62,21 @@ summary.substitution <- function(object, delta, specs,
     level <- as.character(level)
   }
   
-  if (isTRUE(missing(specs))) {
-    specs <- object$parts
+  if (isTRUE(missing(to))) {
+    to <- object$parts
   } else {
-    if (isFALSE(any(object$parts %in% specs))) {
-      stop("'specs' should be names of one or more compositional parts present in the substitution model.")
+    if (isFALSE(any(object$parts %in% to))) {
+      stop("'to' should be names of one or more compositional parts present in the substitution model.")
     }
-    specs <- as.character(specs)
+    to <- as.character(to)
+  }
+  if (isTRUE(missing(from))) {
+    from <- object$parts
+  } else {
+    if (isFALSE(any(object$parts %in% from))) {
+      stop("'from' should be names of one or more compositional parts present in the substitution model.")
+    }
+    from <- as.character(from)
   }
   
   out <- lapply(lapply(object[1:4], function(x) {
@@ -80,7 +88,7 @@ summary.substitution <- function(object, delta, specs,
   }), rbindlist)
   
   out <- rbindlist(out, use.names = TRUE)
-  out <- out[To %in% specs]
+  out <- out[To %in% to & From %in% from]
   
   out
   

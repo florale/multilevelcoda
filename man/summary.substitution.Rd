@@ -4,7 +4,7 @@
 \alias{summary.substitution}
 \title{Summary \code{\link{substitution}}}
 \usage{
-\method{summary}{substitution}(object, delta, specs, ref, level, digits = 2, ...)
+\method{summary}{substitution}(object, delta, to, from, ref, level, digits = 2, ...)
 }
 \arguments{
 \item{object}{A \code{\link{substitution}} object containing the output of substitution models.}
@@ -13,8 +13,8 @@
 at which substitution results should be summarised.
 Default to all \code{delta} available in the \code{\link{substitution}} object.}
 
-\item{specs}{A character value or vector specifying the names of the compositional parts of the desired results.
-Default to all compositional parts used in the \code{\link{substitution}} object.}
+\item{to}{and @param from A character value or vector specifying the names of the compositional parts
+that were reallocated to/from in the model.}
 
 \item{ref}{Either a character value or vector ((\code{grandmean} and/or \code{unitmean} or \code{users}),
 Default to all \code{ref} available in the \code{\link{substitution}} object .}
