@@ -6,8 +6,10 @@
 #' @param delta A integer, numeric value or vector indicating the desired \code{delta} 
 #' at which substitution results should be summarised.
 #' Default to all \code{delta} available in the \code{\link{substitution}} object.
-#' @param to and @param from A character value or vector specifying the names of the compositional parts
-#' that were reallocated to/from in the model.
+#' @param to A character value or vector specifying the names of the compositional parts
+#' that were reallocated to in the model.
+#' @param from A character value or vector specifying the names of the compositional parts
+#' that were reallocated from in the model.
 #' @param ref Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
 #' Default to all \code{ref} available in the \code{\link{substitution}} object .
 #' @param level A character string or vector (\code{between} and/or \code{within}).
