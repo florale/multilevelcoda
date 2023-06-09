@@ -2,7 +2,7 @@
 % Please edit documentation in R/wsubmargins.R
 \name{wsubmargins}
 \alias{wsubmargins}
-\title{Within-person Average Marginal Substitution.}
+\title{Within-person Average Substitution.}
 \usage{
 wsubmargins(
   object,

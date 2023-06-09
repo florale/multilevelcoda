@@ -1,4 +1,4 @@
-#' @title Within-person Average Marginal Substitution.
+#' @title Within-person Average Substitution.
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 
