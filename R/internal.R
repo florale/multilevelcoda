@@ -361,7 +361,7 @@ get.wsub <- function(object, delta, basesub,
         dsub <- cbind(dnew, bilr0, wilrsub)
         
         # prediction
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NULL, summary = FALSE)
+        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
         ysub <- rowMeans(ysub) 
         
         # difference between substitution and no change
