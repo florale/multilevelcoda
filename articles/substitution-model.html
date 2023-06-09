@@ -124,18 +124,7 @@ substitution).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://florale.github.io/multilevelcoda/">multilevelcoda</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: Rcpp</span></span>
-<span><span class="co">#&gt; Loading 'brms' package (version 2.19.0). Useful instructions</span></span>
-<span><span class="co">#&gt; can be found by typing help('brms'). A more detailed introduction</span></span>
-<span><span class="co">#&gt; to the package is available through vignette('brms_overview').</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'brms'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     ar</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://doFuture.futureverse.org" class="external-link">doFuture</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: foreach</span></span>
-<span><span class="co">#&gt; Loading required package: future</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"mcompd"</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sbp"</span><span class="op">)</span></span>
@@ -263,9 +252,7 @@ reference composition. If your model contains covariates,
 covariates as the default.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
-<span>                      ref <span class="op">=</span> <span class="st">"grandmean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: executing %dopar% sequentially: no parallel backend</span></span>
-<span><span class="co">#&gt; registered</span></span></code></pre></div>
+<span>                      ref <span class="op">=</span> <span class="st">"grandmean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Output from <code><a href="../reference/substitution.html">substitution()</a></code> contains multiple data set of
 results for all available compositional component. Here are the results
 for changes in stress when sleep (TST) is substituted for 10
@@ -432,12 +419,105 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">subm2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
-<span>                      ref <span class="op">=</span> <span class="st">"unitmean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
+<span>                      ref <span class="op">=</span> <span class="st">"clustermean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/foreach/man/registerDoSEQ.html" class="external-link">registerDoSEQ</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Below are the results.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">subm2</span>, delta <span class="op">=</span> <span class="fl">10</span>, to <span class="op">=</span> <span class="st">"TST"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in .checkTypos(e, names_x): Object 'To' not found amongst</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">subm2</span>, delta <span class="op">=</span> <span class="fl">10</span>, to <span class="op">=</span> <span class="st">"TST"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">Mean</th>
+<th align="right">CI_low</th>
+<th align="right">CI_high</th>
+<th align="right">Delta</th>
+<th align="left">To</th>
+<th align="left">From</th>
+<th align="left">Level</th>
+<th align="left">Reference</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.09</td>
+<td align="right">-0.05</td>
+<td align="right">0.24</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">WAKE</td>
+<td align="left">between</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="even">
+<td align="right">0.02</td>
+<td align="right">-0.10</td>
+<td align="right">0.15</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">MVPA</td>
+<td align="left">between</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="odd">
+<td align="right">0.03</td>
+<td align="right">-0.09</td>
+<td align="right">0.15</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">LPA</td>
+<td align="left">between</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="even">
+<td align="right">0.03</td>
+<td align="right">-0.09</td>
+<td align="right">0.15</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">SB</td>
+<td align="left">between</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="odd">
+<td align="right">0.05</td>
+<td align="right">0.01</td>
+<td align="right">0.08</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">WAKE</td>
+<td align="left">within</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="even">
+<td align="right">-0.01</td>
+<td align="right">-0.02</td>
+<td align="right">0.01</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">MVPA</td>
+<td align="left">within</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="odd">
+<td align="right">-0.01</td>
+<td align="right">-0.02</td>
+<td align="right">0.00</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">LPA</td>
+<td align="left">within</td>
+<td align="left">clustermean</td>
+</tr>
+<tr class="even">
+<td align="right">0.00</td>
+<td align="right">-0.01</td>
+<td align="right">0.01</td>
+<td align="right">10</td>
+<td align="left">TST</td>
+<td align="left">SB</td>
+<td align="left">within</td>
+<td align="left">clustermean</td>
+</tr>
+</tbody>
+</table>
 <p>A comparison between between- and within-person substitution model of
 sleep on stress, plot using <code><a href="../reference/plotsub.html">plotsub()</a></code> and
 <code>ggpubr::ggarrange()</code> functions.</p>
@@ -448,14 +528,11 @@ sleep on stress, plot using <code><a href="../reference/plotsub.html">plotsub()<
 <span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, </span>
 <span>          ncol <span class="op">=</span> <span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'ggpubr'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:cowplot':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     get_legend</span></span>
-<span><span class="co">#&gt; Error in plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.</span></span>
-<span><span class="co">#&gt; Error in plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.</span></span>
-<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'p1' not found</span></span></code></pre>
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"><p class="caption">
+Example of Average Marginal Substitution Model
+</p>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
