@@ -245,10 +245,11 @@ get.wsub <- function(object, delta, basesub,
         subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
         newcomp <- comp0 + subk
         Delta <- subk[, get(i)]
-        names(newcomp) <- colnames(basesub)
+        names(newcomp) <- object$CompILR$parts
         
-        dnew <- cbind(comp0, newcomp, object$CompILR$data, Delta)
-        
+        dnew <- cbind(comp0, newcomp, 
+                      d0[, colnames(d0) %in% colnames(object$CompILR$data[, -object$CompILR$part, with = FALSE]), with = FALSE], 
+                      Delta)
         # useful information for the final results
         dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
         dnew$To <- iv
@@ -259,16 +260,16 @@ get.wsub <- function(object, delta, basesub,
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        bcomp0 <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        bcomp0    <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
         bcompsub  <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         
-        bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
+        bilr0    <- ilr(bcomp0, V = object$CompILR$psi)
         bilrsub  <- ilr(bcompsub, V = object$CompILR$psi)
         
         wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
         
         colnames(bilrsub) <- colnames(object$CompILR$BetweenILR)
-        colnames(wilr0) <- colnames(object$CompILR$WithinILR)
+        colnames(wilr0)   <- colnames(object$CompILR$WithinILR)
         
         # prediction
         dsub <- cbind(dnew, bilrsub, wilr0)
@@ -329,9 +330,11 @@ get.wsub <- function(object, delta, basesub,
         subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
         newcomp <- comp0 + subk
         Delta <- subk[, get(i)]
-        names(newcomp) <- colnames(basesub)
+        names(newcomp) <- object$CompILR$parts
         
-        dnew <- cbind(comp0, newcomp, object$CompILR$data, Delta)
+        dnew <- cbind(comp0, newcomp, 
+                      d0[, colnames(d0) %in% colnames(object$CompILR$data[, -object$CompILR$part, with = FALSE]), with = FALSE], 
+                      Delta)
         
         # useful information for the final output
         dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
@@ -343,15 +346,15 @@ get.wsub <- function(object, delta, basesub,
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
-        bcomp0 <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
+        bcomp0   <- acomp(dnew[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
         bcompsub <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
         
-        bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
+        bilr0   <- ilr(bcomp0, V = object$CompILR$psi)
         bilrsub <- ilr(bcompsub, V = object$CompILR$psi)
         
         wilrsub <- bilrsub - bilr0 
         
-        colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
+        colnames(bilr0)   <- colnames(object$CompILR$BetweenILR)
         colnames(wilrsub) <- colnames(object$CompILR$WithinILR)
         
         # substitution data
@@ -417,7 +420,7 @@ get.wsub <- function(object, delta, basesub,
         subk <- subk[rep(seq_len(nrow(subk)), nrow(t)), ]
         newcomp <- t + subk
         Delta <- subk[, get(i)]
-        names(newcomp) <- colnames(basesub)
+        names(newcomp) <- object$CompILR$parts
         
         dnew <- cbind(newcomp, object$CompILR$data, Delta)
         
@@ -503,9 +506,8 @@ build.rg <- function(object,
     colnames(bcomp0) <- colnames(object$CompILR$BetweenComp)
     colnames(wcomp0) <- colnames(object$CompILR$WithinComp)
     
-    suppressWarnings(
-      d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, d0[, -c(colnames(object$CompILR$BetweenComp),
-                                                        colnames(object$CompILR$TotalComp)), with = FALSE]))
+    d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, 
+                d0[, colnames(d0) %in% colnames(object$CompILR$data), with = FALSE])
   }
   
   if(isTRUE(ref == "grandmean")) {
