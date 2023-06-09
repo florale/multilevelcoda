@@ -13,7 +13,8 @@
 * Add method `update` to support update an existing `compilr` or `brmcoda` objects.
 * Add method `summary` to `substitution` to summarise output produced by function `substitution`.
 * Add argument `weight` to `substitution` to allow for different methods for calculating reference compostion.
-* Add user control over specifying reference composition for `substitution` model.
+* Add user control over specifying reference composition and reference grid in `substitution` model.
+* Ensure that `complir` throws errors for missing data and 0s in input compositional data.
 
 ### Other Changes
 
