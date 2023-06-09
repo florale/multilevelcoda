@@ -213,7 +213,7 @@ registerDoFuture()
 plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
-                      ref = "unitmean", level = c("between", "within"))
+                      ref = "clustermean", level = c("between", "within"))
 registerDoSEQ()
 ```
 

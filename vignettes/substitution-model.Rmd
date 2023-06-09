@@ -38,18 +38,7 @@ and data sets `mcompd` (simulated compositional sleep and wake variables),
 ```r
 library(multilevelcoda)
 library(brms)
-#> Loading required package: Rcpp
-#> Loading 'brms' package (version 2.19.0). Useful instructions
-#> can be found by typing help('brms'). A more detailed introduction
-#> to the package is available through vignette('brms_overview').
-#> 
-#> Attaching package: 'brms'
-#> The following object is masked from 'package:stats':
-#> 
-#>     ar
 library(doFuture)
-#> Loading required package: foreach
-#> Loading required package: future
 
 data("mcompd") 
 data("sbp")
@@ -171,8 +160,6 @@ will average predictions across levels of covariates as the default.
 ```r
 subm1 <- substitution(object = m, delta = 1:10,
                       ref = "grandmean", level = c("between", "within"))
-#> Warning: executing %dopar% sequentially: no parallel backend
-#> registered
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -265,7 +252,7 @@ registerDoFuture()
 plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
-                      ref = "unitmean", level = c("between", "within"))
+                      ref = "clustermean", level = c("between", "within"))
 registerDoSEQ()
 ```
 
@@ -274,8 +261,22 @@ Below are the results.
 
 ```r
 knitr::kable(summary(subm2, delta = 10, to = "TST"))
-#> Error in .checkTypos(e, names_x): Object 'To' not found amongst
 ```
+
+
+
+|  Mean| CI_low| CI_high| Delta|To  |From |Level   |Reference   |
+|-----:|------:|-------:|-----:|:---|:----|:-------|:-----------|
+|  0.09|  -0.05|    0.24|    10|TST |WAKE |between |clustermean |
+|  0.02|  -0.10|    0.15|    10|TST |MVPA |between |clustermean |
+|  0.03|  -0.09|    0.15|    10|TST |LPA  |between |clustermean |
+|  0.03|  -0.09|    0.15|    10|TST |SB   |between |clustermean |
+|  0.05|   0.01|    0.08|    10|TST |WAKE |within  |clustermean |
+| -0.01|  -0.02|    0.01|    10|TST |MVPA |within  |clustermean |
+| -0.01|  -0.02|    0.00|    10|TST |LPA  |within  |clustermean |
+|  0.00|  -0.01|    0.01|    10|TST |SB   |within  |clustermean |
+
+
 
 A comparison between between- and within-person substitution model of sleep on stress, 
 plot using `plotsub()` and `ggpubr::ggarrange()` functions.
@@ -291,14 +292,7 @@ ggarrange(p1, p2,
 ```
 
 
-
-```
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
-#> Error in plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
-#> Error in plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
-#> Error in eval(expr, envir, enclos): object 'p1' not found
-```
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"  />
+<p class="caption">Example of Average Marginal Substitution Model</p>
+</div>
