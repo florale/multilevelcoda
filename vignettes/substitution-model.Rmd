@@ -38,7 +38,18 @@ and data sets `mcompd` (simulated compositional sleep and wake variables),
 ```r
 library(multilevelcoda)
 library(brms)
+#> Loading required package: Rcpp
+#> Loading 'brms' package (version 2.19.0). Useful instructions
+#> can be found by typing help('brms'). A more detailed introduction
+#> to the package is available through vignette('brms_overview').
+#> 
+#> Attaching package: 'brms'
+#> The following object is masked from 'package:stats':
+#> 
+#>     ar
 library(doFuture)
+#> Loading required package: foreach
+#> Loading required package: future
 
 data("mcompd") 
 data("sbp")
@@ -160,6 +171,8 @@ will average predictions across levels of covariates as the default.
 ```r
 subm1 <- substitution(object = m, delta = 1:10,
                       ref = "grandmean", level = c("between", "within"))
+#> Warning: executing %dopar% sequentially: no parallel backend
+#> registered
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -167,14 +180,19 @@ Here are the results for changes in stress when sleep (TST) is substituted for 1
 
 
 ```r
-summary(subm1, delta = 10, level = "between", to = "TST")
+knitr::kable(summary(subm1, delta = 10, level = "between", to = "TST"))
 ```
 
-   Mean CI_low CI_high Delta From  To   Level Reference
-1: 0.06   0.00    0.13    10 WAKE TST between grandmean
-2: 0.00  -0.03    0.04    10 MVPA TST between grandmean
-3: 0.01  -0.01    0.04    10  LPA TST between grandmean
-4: 0.01  -0.02    0.04    10   SB TST between grandmean
+
+
+| Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
+|----:|------:|-------:|-----:|:----|:---|:-------|:---------|
+| 0.06|   0.00|    0.13|    10|WAKE |TST |between |grandmean |
+| 0.00|  -0.03|    0.04|    10|MVPA |TST |between |grandmean |
+| 0.01|  -0.01|    0.04|    10|LPA  |TST |between |grandmean |
+| 0.01|  -0.02|    0.04|    10|SB   |TST |between |grandmean |
+
+
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
@@ -197,14 +215,19 @@ Here are the results for within-person level.
 
 
 ```r
-summary(subm1, delta = 10, level = "within", to = "TST")
+knitr::kable(summary(subm1, delta = 10, level = "within", to = "TST"))
 ```
 
-    Mean CI_low CI_high Delta From  To  Level Reference
-1:  0.04   0.00    0.07    10 WAKE TST within grandmean
-2: -0.01  -0.02    0.01    10 MVPA TST within grandmean
-3: -0.01  -0.02    0.00    10  LPA TST within grandmean
-4:  0.00  -0.01    0.01    10   SB TST within grandmean
+
+
+|  Mean| CI_low| CI_high| Delta|From |To  |Level  |Reference |
+|-----:|------:|-------:|-----:|:----|:---|:------|:---------|
+|  0.04|   0.00|    0.07|    10|WAKE |TST |within |grandmean |
+| -0.01|  -0.02|    0.01|    10|MVPA |TST |within |grandmean |
+| -0.01|  -0.02|    0.00|    10|LPA  |TST |within |grandmean |
+|  0.00|  -0.01|    0.01|    10|SB   |TST |within |grandmean |
+
+
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
@@ -250,10 +273,8 @@ Below are the results.
 
 
 ```r
-summary(subm2, delta = 10, level, to = "TST")
-#> Error in eval(expr, envir, enclos): object 'level' not found
-summary(subm2, delta = 10, level, to = "TST")
-#> Error in eval(expr, envir, enclos): object 'level' not found
+knitr::kable(summary(subm2, delta = 10, to = "TST"))
+#> Error in .checkTypos(e, names_x): Object 'To' not found amongst
 ```
 
 A comparison between between- and within-person substitution model of sleep on stress, 
@@ -272,6 +293,11 @@ ggarrange(p1, p2,
 
 
 ```
+#> 
+#> Attaching package: 'ggpubr'
+#> The following object is masked from 'package:cowplot':
+#> 
+#>     get_legend
 #> Error in plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
 #> Error in plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
 #> Error in eval(expr, envir, enclos): object 'p1' not found
