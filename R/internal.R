@@ -474,25 +474,26 @@ build.rg <- function(object,
                      ref,
                      weight, 
                      fill = FALSE) {
-
+  
   cov.grid <- NULL
   
   if(isTRUE(ref == "clustermean")) {
     if(isTRUE(weight == "equal")) {
       comp0 <- object$CompILR$BetweenComp
-      comp0 <- cbind(object$CompILR$BetweenComp, 
-                     object$CompILR$data[, object$CompILR$idvar, with = FALSE])
-      comp0 <- comp0[, head(.SD, 1), by = eval(object$CompILR$idvar)]
-      comp0 <- acomp(comp0[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
-      
+      d0 <- cbind(object$CompILR$BetweenComp, object$CompILR$data)
+      d0 <- d0[, head(.SD, 1), by = eval(object$CompILR$idvar)]
+      comp0 <- acomp(d0[, colnames(object$CompILR$BetweenComp), with = FALSE], total = object$CompILR$total)
     }
     if (isTRUE(is.null(weight) || weight == "proportional")) {
       comp0 <- object$CompILR$BetweenComp
+      d0 <- object$CompILR$data
+      
     }
     
     # d0 ---------------------------
     bcomp0 <- comp0
-    bilr0 <- object$CompILR$BetweenILR
+    bilr0 <- ilr(bcomp0, V = object$CompILR$psi)
+    bilr0 <- as.data.table(bilr0)
     
     wcomp0 <- as.data.table(matrix(1, nrow = nrow(bcomp0), ncol = ncol(bcomp0)))
     wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
@@ -502,7 +503,9 @@ build.rg <- function(object,
     colnames(bcomp0) <- colnames(object$CompILR$BetweenComp)
     colnames(wcomp0) <- colnames(object$CompILR$WithinComp)
     
-    d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, object$CompILR$data)
+    suppressWarnings(
+      d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, d0[, -c(colnames(object$CompILR$BetweenComp),
+                                                        colnames(object$CompILR$TotalComp)), with = FALSE]))
   }
   
   if(isTRUE(ref == "grandmean")) {
@@ -517,26 +520,35 @@ build.rg <- function(object,
       mcomp <- comp0
     }
     if (isTRUE(weight == "proportional")) {
-      
       comp0 <- mean(object$CompILR$BetweenComp, robust = TRUE)
       comp0 <- acomp(comp0, total = object$CompILR$total)
       comp0 <- as.data.table(t(comp0))
+      mcomp <- comp0
     }
     
     if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
-      if (isTRUE(identical(length(object$CompILR$parts), ncol(refgrid)))) {
-        comp0 <- refgrid
+      # get compositional mean
+      mcomp <- cbind(object$CompILR$BetweenComp, 
+                     object$CompILR$data[, object$CompILR$idvar, with = FALSE])
+      mcomp <- mcomp[, head(.SD, 1), by = eval(object$CompILR$idvar)]
+      mcomp <- acomp(mcomp[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
+      mcomp <- mean(mcomp, robust = TRUE)
+      mcomp <- acomp(mcomp, total = object$CompILR$total)
+      mcomp <- as.data.table(t(mcomp))
+      
+      if (isTRUE(identical(length(object$CompILR$parts), ncol(ref)))) {
+        comp0 <- ref
         
       } else {
-        if (object$CompILR$parts %nin% colnames(refgrid)) {
+        if (object$CompILR$parts %nin% colnames(ref)) {
           stop(
             sprintf(
               "The reference grid should include all compositional components but (%s) are missing.",
-              paste0(object$CompILR$parts %nin% colnames(refgrid), collapse = ", ")
+              paste0(object$CompILR$parts %nin% colnames(ref), collapse = ", ")
             ))
         }
-        comp0 <- refgrid[, object$CompILR$parts, with = FALSE]
-        cov.grid <- refgrid[, -object$CompILR$parts, with = FALSE]
+        comp0 <- ref[, object$CompILR$parts, with = FALSE]
+        cov.grid <- ref[, -object$CompILR$parts, with = FALSE]
       }
       
       if(isFALSE(sum(comp0) == object$CompILR$total)) {
@@ -559,7 +571,7 @@ build.rg <- function(object,
           "respectively"
         ))
       }
-      comp0  <- compositions::acomp(comp0, total = object$CompILR$total)
+      comp0  <- acomp(comp0, total = object$CompILR$total)
       comp0  <- as.data.table(t(comp0))
       colnames(comp0) <- colnames(object$CompILR$BetweenComp)
     }
