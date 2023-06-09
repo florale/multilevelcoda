@@ -128,7 +128,7 @@ Output from `substitution()` contains multiple data set of results for all avail
 Here are the results for changes in stress when sleep (TST) is substituted for 10 minutes.
 
 ```{r bsubm, results = "asis"}
-knitr::kable(subm1$BetweenSub$TST[abs(Delta) == 10])
+summary(subm1, delta = 10, level = "between", to = "TST")
 ```
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
@@ -163,7 +163,7 @@ plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress") +
 Here are the results for within-person level.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(subm1$WithinSub$TST[abs(Delta) == 10])
+summary(subm1, delta = 10, level = "within", to = "TST")
 ```
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
@@ -220,8 +220,8 @@ registerDoSEQ()
 Below are the results.
 
 ```{r submarginsout}
-knitr::kable(subm2$BetweenSubMargins$TST[abs(Delta) == 10])
-knitr::kable(subm2$WithinSubMargins$TST[abs(Delta) == 10])
+summary(subm2, delta = 10, level, to = "TST")
+summary(subm2, delta = 10, level, to = "TST")
 ```
 
 A comparison between between- and within-person substitution model of sleep on stress, 

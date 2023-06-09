@@ -61,10 +61,6 @@ m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
-#> Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.
-#> If your model failed to compile please run rebuild_cmdstan().
-#> If the issue persists please open a bug report.
-#> Error: An error occured during compilation! See the message above for more information.
 ```
 
 A `summary()` of the model results.
@@ -72,35 +68,47 @@ A `summary()` of the model results.
 
 ```r
 summary(m$Model)
-#> Warning: Parts of the model have not converged (some Rhats are > 1.05). Be careful when
-#> analysing the results! We recommend running more iterations and/or setting stronger priors.
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
-#> Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID) 
+#> Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) 
 #>    Data: tmp (Number of observations: 3540) 
-#>   Draws: 1 chains, each with iter = 500; warmup = 250; thin = 1;
-#>          total post-warmup draws = 250
+#>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 4000
 #> 
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     0.99      0.07     0.87     1.12 1.00      112      183
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179
+#>               Tail_ESS
+#> sd(Intercept)     2176
 #> 
 #> Population-Level Effects: 
-#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept     2.51      0.45     1.70     3.42 1.06       49      125
-#> bilr1         0.20      0.30    -0.45     0.75 1.11       10       71
-#> bilr2         0.44      0.30    -0.28     0.89 1.12        8       99
-#> bilr3         0.12      0.22    -0.29     0.51 1.01       81      175
-#> bilr4        -0.02      0.32    -0.58     0.63 1.00       85      118
-#> wilr1        -0.36      0.12    -0.59    -0.12 1.01      162      155
-#> wilr2         0.04      0.13    -0.22     0.27 1.00      100      154
-#> wilr3        -0.11      0.08    -0.26     0.04 1.02       96      114
-#> wilr4         0.25      0.09     0.07     0.41 1.01      133      113
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> Intercept     2.64      0.47     1.68     3.57 1.00     1429
+#> bilr1         0.12      0.33    -0.54     0.77 1.00      971
+#> bilr2         0.53      0.35    -0.16     1.21 1.00     1124
+#> bilr3         0.13      0.21    -0.29     0.55 1.00     1052
+#> bilr4        -0.01      0.29    -0.57     0.55 1.00     1021
+#> wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990
+#> wilr2         0.05      0.13    -0.21     0.31 1.00     3396
+#> wilr3        -0.10      0.08    -0.25     0.04 1.00     2900
+#> wilr4         0.23      0.10     0.04     0.43 1.00     2894
+#> Female       -0.39      0.17    -0.74    -0.08 1.00     1405
+#>           Tail_ESS
+#> Intercept     2263
+#> bilr1         1409
+#> bilr2         1679
+#> bilr3         1809
+#> bilr4         1941
+#> wilr1         3206
+#> wilr2         3077
+#> wilr3         3218
+#> wilr4         3220
+#> Female        1697
 #> 
 #> Family Specific Parameters: 
 #>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sigma     2.36      0.03     2.30     2.42 1.01      393      187
+#> sigma     2.37      0.03     2.31     2.43 1.00     4462     2814
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -159,21 +167,14 @@ Here are the results for changes in stress when sleep (TST) is substituted for 1
 
 
 ```r
-knitr::kable(subm1$BetweenSub$TST[abs(Delta) == 10])
+summary(subm1, delta = 10, level = "between", to = "TST")
 ```
 
-
-
-|   Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
-|------:|------:|-------:|-----:|:----|:---|:-------|:---------|
-|  0.045| -0.019|   0.105|    10|WAKE |TST |between |grandmean |
-|  0.008| -0.027|   0.038|    10|MVPA |TST |between |grandmean |
-|  0.012| -0.014|   0.033|    10|LPA  |TST |between |grandmean |
-|  0.014| -0.013|   0.036|    10|SB   |TST |between |grandmean |
-| -0.040| -0.092|   0.016|   -10|WAKE |TST |between |grandmean |
-| -0.008| -0.037|   0.026|   -10|MVPA |TST |between |grandmean |
-| -0.012| -0.033|   0.014|   -10|LPA  |TST |between |grandmean |
-| -0.014| -0.036|   0.013|   -10|SB   |TST |between |grandmean |
+   Mean CI_low CI_high Delta From  To   Level Reference
+1: 0.06   0.00    0.13    10 WAKE TST between grandmean
+2: 0.00  -0.03    0.04    10 MVPA TST between grandmean
+3: 0.01  -0.01    0.04    10  LPA TST between grandmean
+4: 0.01  -0.02    0.04    10   SB TST between grandmean
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
@@ -187,27 +188,23 @@ plotsub(data = subm1$BetweenSub$TST,
 ```
 
 
-<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model" style="display: block; margin: auto;" />
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model"  />
+<p class="caption">Example of Between-person Substitution Model</p>
+</div>
 
 Here are the results for within-person level.
 
 
 ```r
-knitr::kable(subm1$WithinSub$TST[abs(Delta) == 10])
+summary(subm1, delta = 10, level = "within", to = "TST")
 ```
 
-
-
-|   Mean| CI_low| CI_high| Delta|From |To  |Level  |Reference |
-|------:|------:|-------:|-----:|:----|:---|:------|:---------|
-|  0.036|  0.006|   0.066|    10|WAKE |TST |within |grandmean |
-| -0.006| -0.019|   0.006|    10|MVPA |TST |within |grandmean |
-| -0.010| -0.018|  -0.002|    10|LPA  |TST |within |grandmean |
-| -0.004| -0.013|   0.006|    10|SB   |TST |within |grandmean |
-| -0.030| -0.055|  -0.003|   -10|WAKE |TST |within |grandmean |
-|  0.006| -0.006|   0.018|   -10|MVPA |TST |within |grandmean |
-|  0.010|  0.002|   0.018|   -10|LPA  |TST |within |grandmean |
-|  0.004| -0.006|   0.013|   -10|SB   |TST |within |grandmean |
+    Mean CI_low CI_high Delta From  To  Level Reference
+1:  0.04   0.00    0.07    10 WAKE TST within grandmean
+2: -0.01  -0.02    0.01    10 MVPA TST within grandmean
+3: -0.01  -0.02    0.00    10  LPA TST within grandmean
+4:  0.00  -0.01    0.01    10   SB TST within grandmean
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
@@ -221,7 +218,10 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress")
 ```
 
 
-<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model" style="display: block; margin: auto;" />
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model"  />
+<p class="caption">Example of Within-person Substitution Model</p>
+</div>
 
 ## Average Marginal Substitution Effects
 
@@ -243,7 +243,6 @@ plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
                       ref = "unitmean", level = c("between", "within"))
-#> Error in `[.data.table`(d0, , object$CompILR$BetweenComp, with = FALSE): Item 1 of j is 494 which is outside the column number range [1,ncol=27]
 registerDoSEQ()
 ```
 
@@ -251,10 +250,10 @@ Below are the results.
 
 
 ```r
-knitr::kable(subm2$BetweenSubMargins$TST[abs(Delta) == 10])
-#> Error in eval(expr, envir, enclos): object 'Delta' not found
-knitr::kable(subm2$WithinSubMargins$TST[abs(Delta) == 10])
-#> Error in eval(expr, envir, enclos): object 'Delta' not found
+summary(subm2, delta = 10, level, to = "TST")
+#> Error in eval(expr, envir, enclos): object 'level' not found
+summary(subm2, delta = 10, level, to = "TST")
+#> Error in eval(expr, envir, enclos): object 'level' not found
 ```
 
 A comparison between between- and within-person substitution model of sleep on stress, 
@@ -273,13 +272,7 @@ ggarrange(p1, p2,
 
 
 ```
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
 #> Error in plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
 #> Error in plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", : data must be a data table or data frame,and is an element of a wsub, bsub, wsubmargins, bsubmargins object.
+#> Error in eval(expr, envir, enclos): object 'p1' not found
 ```
-
-<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model" style="display: block; margin: auto;" />
