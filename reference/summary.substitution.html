@@ -124,21 +124,14 @@ Default to all <code>level</code> available in the <code><a href="substitution.h
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A summary of <code><a href="substitution.html">substitution</a></code> object with twelve elements.</p><ul><li><p><code>BetweenComp</code> A vector of class <code>acomp</code> representing one closed between-person composition
-or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></li>
-<li><p><code>WithinComp</code> A vector of class <code>acomp</code> representing one closed within-person composition
-or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></li>
-<li><p><code>TotalComp</code> A vector of class <code>acomp</code> representing one closed total composition
-or a matrix of class <code>acomp</code> representing multiple closed total compositions each in one row.</p></li>
-<li><p><code>BetweenILR</code> Isometric log ratio transform of between-person composition.</p></li>
-<li><p><code>WithinILR</code> Isometric log ratio transform of within-person composition.</p></li>
-<li><p><code>TotalILR</code> Isometric log ratio transform of total composition.</p></li>
-<li><p><code>data</code> The user's dataset or imputed dataset if the input data contains zeros.</p></li>
-<li><p><code>psi</code> A ILR matrix associated with user-defined partition structure.</p></li>
-<li><p><code>sbp</code> The user-defined sequential binary partition matrix.</p></li>
-<li><p><code>parts</code> Names of compositional variables.</p></li>
-<li><p><code>idvar</code> Name of the variable containing IDs.</p></li>
-<li><p><code>total</code> Total amount to which the compositions is closed.</p></li>
+<p>A summary of <code><a href="substitution.html">substitution</a></code> object.</p><ul><li><p><code>Mean</code> Posterior means.</p></li>
+<li><p><code>CI_low</code> and</p></li>
+<li><p><code>CI_high</code> 95% credible intervals.</p></li>
+<li><p><code>Delta</code> Amount substituted across compositional parts.</p></li>
+<li><p><code>From</code> Compositional part that is substituted from.</p></li>
+<li><p><code>To</code> Compositional parts that is substituted to.</p></li>
+<li><p><code>Level</code> Level where changes in composition takes place. Either</p></li>
+<li><p><code>Reference</code> Either <code>grandmean</code>, <code>clustermean</code>, or <code>users</code></p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
