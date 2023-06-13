@@ -52,8 +52,7 @@ Default to \code{equal}.}
 }
 \value{
 A list containing the results of multilevel compositional substitution model.
-Each element of the list is the substitution estimation for a compositional part
-and include at least eight elements.
+The first four lists contain the results of the substitution estimation for a compositional part.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
