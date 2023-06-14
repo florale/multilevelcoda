@@ -73,7 +73,7 @@ the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 }
 \examples{
-\dontrun{
+\donttest{
 data(mcompd)
 data(sbp)
 data(psub)
@@ -85,7 +85,8 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
-             chain = 1, iter = 500)
+             chain = 1, iter = 500,
+             backend = "cmdstanr")
 subm <- bsub(object = m, basesub = psub, delta = 5)
 }
 }
