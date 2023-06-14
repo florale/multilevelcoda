@@ -84,8 +84,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 m <- brmcoda(compilr = cilr, 
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-             chain = 1, iter = 500,
-             backend = "cmdstanr")
+             chain = 1, iter = 500)
              
 subm <- wsub(object = m, basesub = psub, delta = 5)
 }

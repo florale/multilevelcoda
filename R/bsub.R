@@ -56,7 +56,7 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
@@ -68,8 +68,7 @@
 #' m <- brmcoda(compilr = cilr, 
 #'              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + 
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
-#'              chain = 1, iter = 500,
-#'              backend = "cmdstanr")
+#'              chain = 1, iter = 500)
 #' subm <- bsub(object = m, basesub = psub, delta = 5)
 #' }
 bsub <- function(object,
