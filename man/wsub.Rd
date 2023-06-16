@@ -73,7 +73,8 @@ the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 }
 \examples{
-\dontrun{
+\donttest{
+if(requireNamespace("cmdstanr")){
 data(mcompd)
 data(sbp)
 data(psub)
@@ -88,5 +89,5 @@ m <- brmcoda(compilr = cilr,
              backend = "cmdstanr")
              
 subm <- wsub(object = m, basesub = psub, delta = 5)
-}
+}}
 }

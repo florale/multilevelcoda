@@ -56,7 +56,8 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
@@ -71,7 +72,7 @@
 #'              backend = "cmdstanr")
 #'              
 #' subm <- wsub(object = m, basesub = psub, delta = 5)
-#' }
+#' }}
 wsub <- function(object,
                  basesub,
                  delta,

@@ -54,7 +54,8 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)
@@ -70,7 +71,7 @@
 #' subm <- substitution(object = m, delta = 5,
 #'                      ref = c("grandmean", "clustermean"), 
 #'                      level = c("between", "within"))
-#' }
+#' }}
 substitution <- function(object,
                          delta,
                          basesub = NULL,

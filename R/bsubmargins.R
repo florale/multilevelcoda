@@ -39,7 +39,8 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
 #' data(psub)
 #' data(mcompd)
 #' data(psub)
@@ -53,7 +54,7 @@
 #'              backend = "cmdstanr")
 #'              
 #' subm <- bsubmargins(object = m, basesub = psub, delta = 5)
-#' }
+#' }}
 bsubmargins <- function (object,
                          delta,
                          basesub,

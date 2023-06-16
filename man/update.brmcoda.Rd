@@ -32,7 +32,8 @@ along with many other useful information about the model.}
 This method allows for updating an existing \code{\link{brmcoda}} object.
 }
 \examples{
-\dontrun{
+\donttest{
+if(requireNamespace("cmdstanr")){
 data(mcompd)
 data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, 
@@ -50,5 +51,5 @@ fit1 <- update(fit, formula. = ~ . - wilr1)
 
 # using only a subset
 fit2 <- update(fit, newdata = mcompd[ID != 1])
-}
+}}
 }

@@ -95,7 +95,8 @@ update.compilr <- function(object, newdata, ...) {
 #'  
 #' @exportS3Method update brmcoda
 #' @examples 
-#' \dontrun{
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
 #' data(mcompd)
 #' data(sbp)
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
@@ -113,7 +114,7 @@ update.compilr <- function(object, newdata, ...) {
 #' 
 #' # using only a subset
 #' fit2 <- update(fit, newdata = mcompd[ID != 1])
-#' }
+#' }}
 update.brmcoda <- function(object,
                            formula. = NULL,
                            newdata = NULL,
