@@ -23,7 +23,7 @@ that were reallocated from in the model.}
 Default to all \code{ref} available in the \code{\link{substitution}} object .}
 
 \item{level}{A character string or vector (\code{between} and/or \code{within}).
-Default to all \code{level} available in the \code{\link{substitution}} object .}
+Default to all \code{level} available in the \code{\link{substitution}} object.}
 
 \item{digits}{A integer value used for number formatting. Default to 3.}
 
@@ -33,12 +33,12 @@ Default to all \code{level} available in the \code{\link{substitution}} object .
 A summary of \code{\link{substitution}} object.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
-\item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
-\item{\code{Delta}}{ Amount substituted across compositional parts.}
-\item{\code{From}}{ Compositional part that is substituted from.}
-\item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{ Level where changes in composition takes place. Either }
-\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
+\item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
+  \item{\code{Delta}}{ Amount substituted across compositional parts.}
+  \item{\code{From}}{ Compositional part that is substituted from.}
+  \item{\code{To}}{ Compositional parts that is substituted to.}
+  \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+  \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 }
 }
 \description{

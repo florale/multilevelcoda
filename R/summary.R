@@ -13,19 +13,19 @@
 #' @param ref Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
 #' Default to all \code{ref} available in the \code{\link{substitution}} object .
 #' @param level A character string or vector (\code{between} and/or \code{within}).
-#' Default to all \code{level} available in the \code{\link{substitution}} object .
+#' Default to all \code{level} available in the \code{\link{substitution}} object.
 #' @param digits A integer value used for number formatting. Default to 3.
 #' @param ... generic argument, not in use.
 #' 
 #' @return A summary of \code{\link{substitution}} object.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
-#'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
+#'   \item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
-#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
+#'   \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 #' }
 #' 
 #' @exportS3Method summary substitution
@@ -73,17 +73,13 @@ summary.substitution <- function(object, delta, to, from,
     from <- as.character(from)
   }
   
-  out <- lapply(lapply(object[1:4], function(x) {
-    lapply(x, function(y) {
-      y <- y[Delta %in% delta & Level %in% level & Reference %in% ref]
-      y[, 1:3] <- round(y[, 1:3], digits)
-      y
-    })
-  }), rbindlist)
-  
+  out <- lapply(object[1:4], rbindlist)
   out <- rbindlist(out, use.names = TRUE)
-  out <- out[To %in% to & From %in% from]
+  out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   
+  if(isFALSE(digits == "asis")) {
+    out[, 1:3] <- round(out[, 1:3], digits)
+  }
   out
   
 }
