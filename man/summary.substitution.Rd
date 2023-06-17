@@ -7,7 +7,7 @@
 \method{summary}{substitution}(object, delta, to, from, ref, level, digits = 2, ...)
 }
 \arguments{
-\item{object}{A \code{\link{substitution}} object containing the output of substitution models.}
+\item{object}{A \code{\link{substitution}} class object.}
 
 \item{delta}{A integer, numeric value or vector indicating the desired \code{delta}
 at which substitution results should be summarised.

@@ -7,8 +7,7 @@
 \method{update}{compilr}(object, newdata, ...)
 }
 \arguments{
-\item{object}{A \code{\link{compilr}} object containing data of composition,
-ILR coordinates, and other variables to be updated.}
+\item{object}{A \code{\link{compilr}} class object to be updated.}
 
 \item{newdata}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.

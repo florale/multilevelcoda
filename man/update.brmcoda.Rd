@@ -7,7 +7,7 @@
 \method{update}{brmcoda}(object, formula. = NULL, newdata = NULL, newcilr = NULL, ...)
 }
 \arguments{
-\item{object}{A fitted \code{\link{brmcoda}} object to be updated. Required.}
+\item{object}{A fitted \code{\link{brmcoda}} object to be updated.}
 
 \item{formula.}{Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.}
 

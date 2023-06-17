@@ -2,8 +2,7 @@
 #' 
 #' This method allows for updating an existing \code{\link{compilr}} object.
 #' 
-#' @param object A \code{\link{compilr}} object containing data of composition, 
-#' ILR coordinates, and other variables to be updated.
+#' @param object A \code{\link{compilr}} class object to be updated.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
@@ -77,7 +76,7 @@ update.compilr <- function(object, newdata, ...) {
 #' 
 #' This method allows for updating an existing \code{\link{brmcoda}} object.
 #' 
-#' @param object A fitted \code{\link{brmcoda}} object to be updated. Required.
+#' @param object A fitted \code{\link{brmcoda}} object to be updated.
 #' @param formula. Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.
 #' @param newcilr A \code{\link{compilr}} object containing data of composition, 
 #' ILR coordinates, and other variables used in the updated model.

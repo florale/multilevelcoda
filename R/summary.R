@@ -2,7 +2,7 @@
 #' 
 #' This method allows for summarising an existing \code{\link{substitution}} object.
 #' 
-#' @param object A \code{\link{substitution}} object containing the output of substitution models.
+#' @param object A \code{\link{substitution}} class object.
 #' @param delta A integer, numeric value or vector indicating the desired \code{delta} 
 #' at which substitution results should be summarised.
 #' Default to all \code{delta} available in the \code{\link{substitution}} object.
@@ -77,9 +77,14 @@ summary.substitution <- function(object, delta, to, from,
   out <- rbindlist(out, use.names = TRUE)
   out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   
+  if(isTRUE(dim(out)[1] == 0)) {
+    stop("An empty data.table returned. Are you sure your arguments are correct?")
+  }
+    
   if(isFALSE(digits == "asis")) {
     out[, 1:3] <- round(out[, 1:3], digits)
   }
+  
   out
   
 }

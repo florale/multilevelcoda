@@ -4,10 +4,10 @@
 \alias{plot.substitution}
 \title{Substitution plot}
 \usage{
-\method{plot}{substitution}(object, to, ref, level, ...)
+\method{plot}{substitution}(x, to, ref, level, ...)
 }
 \arguments{
-\item{object}{A \code{\link{substitution}} object containing the output of substitution models.}
+\item{x}{A \code{\link{substitution}} class object.}
 
 \item{to}{A character value or vector specifying the names of the compositional parts
 that were reallocated to in the model.}

@@ -3,7 +3,7 @@
 #' @description
 #' Make a plot of \code{\link{substitution}} model results.
 #'
-#' @param object A \code{\link{substitution}} object containing the output of substitution models.
+#' @param x A \code{\link{substitution}} class object.
 #' @param to A character value or vector specifying the names of the compositional parts
 #' that were reallocated to in the model.
 #' @param ref A character value of ((\code{grandmean} or \code{clustermean} or \code{users}),
@@ -17,7 +17,7 @@
 #' @importFrom data.table copy
 #' 
 #' @exportS3Method plot substitution
-plot.substitution <- function(object, to,
+plot.substitution <- function(x, to,
                               ref, level, ...) {
   
   if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref)) ||
@@ -33,20 +33,21 @@ plot.substitution <- function(object, to,
   level <- as.character(level)
   
   # extract delta
-  delta.pos <- object$delta
-  delta.neg <- -1*abs(object$delta)
+  delta.pos <- x$delta
+  delta.neg <- -1*abs(x$delta)
   delta <- c(delta.pos, delta.neg)
   
   # extract data
+  tmp <- summary(object = x,
+                 delta = delta,
+                 to = to,
+                 ref = ref,
+                 level = level,
+                 digits = "asis"
+  )
+  
+  # plot
   if (isTRUE(is.sequential(delta.pos))) {
-    tmp <- summary(object = object,
-                   delta = delta,
-                   to = to,
-                   ref = ref,
-                   level = level,
-                   digits = "asis"
-    )
-    
     plotsub <- ggplot(tmp, 
                       aes(x = Delta, y = Mean)) +
       geom_line(aes(colour = From), linewidth = 1) +
@@ -64,14 +65,6 @@ plot.substitution <- function(object, to,
       facet_grid( ~ From)
     
   } else {
-    tmp <- summary(object = object,
-                   delta = delta,
-                   to = to,
-                   ref = ref,
-                   level = level,
-                   digits = "asis"
-    )
-    
     plotsub <- ggplot(tmp,
                       aes(x = Delta, y = Mean)) +
       geom_line(aes(colour = From)) +
