@@ -1,4 +1,4 @@
-#' @title Multilevel Compositional Substitution Model.
+#' @title Multilevel Compositional Substitution Model
 #' 
 #' @description 
 #' Estimate the difference in an outcome
@@ -7,7 +7,7 @@
 #' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
 #' 
-#' @param object A fitted \code{\link{brmcoda}} object. Required.
+#' @param object A fitted \code{\link{brmcoda}} object.
 #' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
@@ -17,8 +17,7 @@
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid only applicable to substitution model
-#' using a single reference composition value
-#' (e.g., \code{clustermean} or user's specified). Required.
+#' using a single reference composition value (e.g., user's specified).
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -26,7 +25,7 @@
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate be at the \code{between} and/or \code{within} level? Required.
+#' Should the estimate be at the \code{between} and/or \code{within} level?
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' \code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
 #' \code{proportional} which weights in proportion to the frequencies of units being averaged 
@@ -38,12 +37,12 @@
 #' The first four lists contain the results of the substitution estimation for a compositional part. 
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
-#'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
+#'   \item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
-#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
+#'   \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 #' }
 #' 
 #' @importFrom data.table as.data.table copy :=

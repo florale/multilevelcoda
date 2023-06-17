@@ -7,11 +7,11 @@
 \format{
 A data table containing 5 variables.
 \describe{
-\item{V1}{first compositional variable}
-\item{V2}{second compositional variable}
-\item{V3}{third compositional variable}
-\item{V4}{fourth compositional variable}
-\item{V5}{fifth compositional variable}
+\item{TST}{first compositional variable}
+\item{WAKE}{second compositional variable}
+\item{MVPA}{third compositional variable}
+\item{LPA}{fourth compositional variable}
+\item{SB}{fifth compositional variable}
 }
 }
 \usage{

@@ -652,3 +652,8 @@ build.rg <- function(object,
 
 # expand grid data frame
 expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
+
+# check sequence of number
+is.sequential <- function(x) {
+  all(length(x) > 2 & all(abs(diff(x)) == 1))
+}

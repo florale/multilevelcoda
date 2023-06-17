@@ -2,7 +2,7 @@
 % Please edit documentation in R/substitution.R
 \name{substitution}
 \alias{substitution}
-\title{Multilevel Compositional Substitution Model.}
+\title{Multilevel Compositional Substitution Model}
 \usage{
 substitution(
   object,
@@ -16,7 +16,7 @@ substitution(
 )
 }
 \arguments{
-\item{object}{A fitted \code{\link{brmcoda}} object. Required.}
+\item{object}{A fitted \code{\link{brmcoda}} object.}
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
@@ -36,11 +36,10 @@ the isometric log-ratio coordinates (i.e., adjusted model).}
 a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
 User's specified reference grid only applicable to substitution model
-using a single reference composition value
-(e.g., \code{clustermean} or user's specified). Required.}
+using a single reference composition value (e.g., user's specified).}
 
 \item{level}{A character string or vector.
-Should the estimate be at the \code{between} and/or \code{within} level? Required.}
+Should the estimate be at the \code{between} and/or \code{within} level?}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 \code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
@@ -55,12 +54,12 @@ A list containing the results of multilevel compositional substitution model.
 The first four lists contain the results of the substitution estimation for a compositional part.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
-\item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
-\item{\code{Delta}}{ Amount substituted across compositional parts.}
-\item{\code{From}}{ Compositional part that is substituted from.}
-\item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{ Level where changes in composition takes place. Either }
-\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
+\item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
+  \item{\code{Delta}}{ Amount substituted across compositional parts.}
+  \item{\code{From}}{ Compositional part that is substituted from.}
+  \item{\code{To}}{ Compositional parts that is substituted to.}
+  \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+  \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 }
 }
 \description{

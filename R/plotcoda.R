@@ -6,10 +6,8 @@
 #' @param object A \code{\link{substitution}} object containing the output of substitution models.
 #' @param to A character value or vector specifying the names of the compositional parts
 #' that were reallocated to in the model.
-#' @param ref Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
-#' Default to all \code{ref} available in the \code{\link{substitution}} object .
-#' @param level A character string or vector (\code{between} and/or \code{within}).
-#' Default to all \code{level} available in the \code{\link{substitution}} object. 
+#' @param ref A character value of ((\code{grandmean} or \code{clustermean} or \code{users}),
+#' @param level A character value of (\code{between} or \code{within}).
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
@@ -27,12 +25,12 @@ plot.substitution <- function(object, to,
   }
   
   if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
-    stop("'ref' should be grandmean and/or clustermean or users.")
+    stop("'ref' should be grandmean or clustermean or users.")
   }
   ref <- as.character(ref)
   
   if (isFALSE(any(c("between", "within") %in% level))) {
-    stop("'level' should be between and/or within.")
+    stop("'level' should be between or within.")
   }
   level <- as.character(level)
   

@@ -3,7 +3,7 @@
 \name{brmcoda}
 \alias{brmcoda}
 \title{Fit Bayesian generalised (non-)linear multilevel compositional model
-via full Bayesian inference using brms,}
+via full Bayesian inference}
 \usage{
 brmcoda(compilr, formula, ...)
 }
@@ -26,7 +26,7 @@ along with many other useful information about the model.}
 }
 }
 \description{
-This function fits a \code{brm} model with multilevel ILR coordinates.
+Fit a \code{brm} model with multilevel ILR coordinates.
 }
 \examples{
 \dontrun{

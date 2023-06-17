@@ -2,7 +2,7 @@
 % Please edit documentation in R/bsub.R
 \name{bsub}
 \alias{bsub}
-\title{Between-person Simple Substitution.}
+\title{Between-person Simple Substitution}
 \usage{
 bsub(
   object,
@@ -16,7 +16,7 @@ bsub(
 )
 }
 \arguments{
-\item{object}{A fitted \code{\link{brmcoda}} object. Required.}
+\item{object}{A fitted \code{\link{brmcoda}} object.}
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
@@ -57,12 +57,12 @@ Each element of the list is the estimation for a compositional part
 and include at least eight elements.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
-\item{\code{CI_low}} and \item{\code{CI_high}}{ 95\% credible intervals.}
-\item{\code{Delta}}{ Amount substituted across compositional parts.}
-\item{\code{From}}{ Compositional part that is substituted from.}
-\item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{ Level where changes in composition takes place. Either }
-\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
+\item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
+  \item{\code{Delta}}{ Amount substituted across compositional parts.}
+  \item{\code{From}}{ Compositional part that is substituted from.}
+  \item{\code{To}}{ Compositional parts that is substituted to.}
+  \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+  \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 }
 }
 \description{
@@ -71,6 +71,7 @@ when compositional parts are substituted for specific unit(s) at \code{between} 
 The \code{bsub} output encapsulates
 the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
+It is recommended that users run substitution model using the \code{\link{substitution}} function.
 }
 \examples{
 \donttest{

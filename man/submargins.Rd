@@ -2,12 +2,12 @@
 % Please edit documentation in R/submargins.R
 \name{submargins}
 \alias{submargins}
-\title{Average Marginal Substitution.}
+\title{Average Marginal Substitution}
 \usage{
 submargins(object, delta, basesub, level = "total", type = "marginal", ...)
 }
 \arguments{
-\item{object}{A fitted \code{\link{brmcoda}} object. Required.}
+\item{object}{A fitted \code{\link{brmcoda}} object.}
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
@@ -15,11 +15,10 @@ submargins(object, delta, basesub, level = "total", type = "marginal", ...)
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{level}{A character string or vector.
-Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.}
+\item{level}{A character string or vector. Default to \code{total}.}
 
 \item{type}{A character string or vector.
-Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.}
+Should the estimate be \code{conditional} mean or average \code{marginal} mean?}
 
 \item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
 }

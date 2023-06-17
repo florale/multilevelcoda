@@ -42,7 +42,7 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 }
 }
 \description{
-Computes sets of compositions and IRLs for Multilevel Compositional Data models.
+Compute sets of compositions and IRLs for Multilevel Compositional Data models.
 }
 \examples{
 data(mcompd)

@@ -1,13 +1,14 @@
-#' @title Within-person Average Substitution.
+#' @title Within-person Average Substitution
 #'
 #' @description
-#' Using a fitted model object, estimates the the average marginal difference 
+#' Using a fitted model object, estimates the the average difference 
 #' when compositional parts are substituted for specific unit(s) at `within` level. 
 #' The \code{wsubmargins} output encapsulates 
 #' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
+#' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #'
-#' @param object A fitted \code{\link{brmcoda}} object. Required.
+#' @param object A fitted \code{\link{brmcoda}} object.
 #' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
@@ -26,12 +27,12 @@
 #' and include at least eight elements.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
-#'   \item{\code{CI_low}} and \item{\code{CI_high}}{ 95% credible intervals.}
+#'   \item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{ Level where changes in composition takes place. Either }
-#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}}
+#'   \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+#'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 #' }
 #'
 #' @importFrom data.table as.data.table copy :=

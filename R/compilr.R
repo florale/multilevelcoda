@@ -1,6 +1,6 @@
 #' Compute useful indices from a (dataset of) multilevel composition(s)
 #'
-#' Computes sets of compositions and IRLs for Multilevel Compositional Data models. 
+#' Compute sets of compositions and IRLs for Multilevel Compositional Data models. 
 #'
 #' @param data A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 

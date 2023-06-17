@@ -1,7 +1,7 @@
 #' Base Pairwise Substitution 
 #'
 #' @description
-#' Makes a data set of all possible pairwise substitution of a composition which can be used as 
+#' Make a data set of all possible pairwise substitution of a composition which can be used as 
 #' the base for substitution models.
 #' @param parts A character vector specifying the names of compositional variables to be used.
 #' 

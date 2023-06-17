@@ -1,4 +1,4 @@
-#' @title Average Marginal Substitution.
+#' @title Average Marginal Substitution
 #'
 #' @description
 #' Using a fitted model object, estimates the the average marginal difference 
@@ -7,15 +7,14 @@
 #' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
 #'
-#' @param object A fitted \code{\link{brmcoda}} object. Required.
+#' @param object A fitted \code{\link{brmcoda}} object.
 #' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
-#' @param level A character string or vector. 
-#' Should the estimate be at the \code{between}-person and/or \code{within}-person level? Required.
+#' @param level A character string or vector. Default to \code{total}. 
 #' @param type A character string or vector. 
-#' Should the estimate be \code{conditional} mean or average \code{marginal} mean? Required.
+#' Should the estimate be \code{conditional} mean or average \code{marginal} mean?
 #' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of multilevel compositional substitution model.
