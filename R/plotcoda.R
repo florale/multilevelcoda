@@ -1,46 +1,93 @@
 #' @title Substitution plot
 #'
 #' @description
-#' This function is useful for visualising the
-#' estimated differences in outcomes when compositional variables
-#' are substituted for a specific period of time.
+#' Make a plot of \code{\link{substitution}} model results.
 #'
-#' @param data A dataset to use for plot.
-#' It must be a component of a list resulted from one of the following functions:
-#' \code{\link{wsub}}, \code{\link{bsub}}, \code{\link{wsubmargins}}, \code{\link{bsubmargins}}.
-#' @param x A character string specifying name of the compostional predictor variable.
-#' @param y A character string specifying the name of the outcome variable.
+#' @param object A \code{\link{substitution}} object containing the output of substitution models.
+#' @param to A character value or vector specifying the names of the compositional parts
+#' that were reallocated to in the model.
+#' @param ref Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
+#' Default to all \code{ref} available in the \code{\link{substitution}} object .
+#' @param level A character string or vector (\code{between} and/or \code{within}).
+#' Default to all \code{level} available in the \code{\link{substitution}} object. 
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
 #' each pair of compositional variables are substituted for a specific time.
-#' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_ribbon facet_grid xlab ylab
+#' 
+#' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_pointrange geom_ribbon facet_grid xlab ylab
 #' @importFrom data.table copy
-#' @export
-plotsub <- function(data, x, y, ...) {
-
-  if (isFALSE(inherits(data, c("data.table", "data.frame")))) {
-    stop(
-      "data must be a data table or data frame,",
-      "and is an element of a wsub, bsub, wsubmargins, bsubmargins object.")
+#' 
+#' @exportS3Method plot substitution
+plot.substitution <- function(object, to,
+                              ref, level, ...) {
+  
+  if (isFALSE(is.vector(subm$delta))) {
+    stop("'plotsub' requires delta' of substitution to be a numeric sequence vector (e.g., 1:10).")
   }
   
-  tmp <- copy(data)
-
-  ggplot(tmp, aes(x = Delta, y = Mean)) +
-    geom_hline(yintercept = 0,
-               linewidth = 0.2,
-               linetype = 2) +
-    geom_vline(xintercept = 0,
-               linewidth = 0.2,
-               linetype = 2) +
-    geom_line(aes(colour = From), linewidth = 1) +
-    geom_ribbon(
-      aes(ymin = CI_low,
-          ymax = CI_high, fill = From),
-      alpha = 1 / 10,
-      linewidth = 1 / 10) +
-    facet_grid( ~ From) +
-    xlab(paste("Change to", eval(x), sep = " ")) +
-    ylab(paste("Change in", eval(y), sep = " "))
+  if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
+    stop("'ref' should be grandmean and/or clustermean or users.")
+  }
+  ref <- as.character(ref)
+  
+  if (isFALSE(any(c("between", "within") %in% level))) {
+    stop("'level' should be between and/or within.")
+  }
+  level <- as.character(level)
+  
+  # extract delta
+  delta.pos <- object$delta
+  delta.neg <- -1*abs(object$delta)
+  delta <- c(delta.pos, delta.neg)
+  
+  # extract data
+  if (isTRUE(is.sequential(delta.pos))) {
+    tmp <- summary(object = object,
+                   delta = delta,
+                   to = to,
+                   ref = ref,
+                   level = level,
+                   digits = "asis"
+    )
+    
+    plotsub <- ggplot(tmp, 
+                      aes(x = Delta, y = Mean)) +
+      geom_line(aes(colour = From), linewidth = 1) +
+      geom_ribbon(
+        aes(ymin = CI_low,
+            ymax = CI_high, fill = From),
+        alpha = 1 / 10,
+        linewidth = 1 / 10) +
+      geom_hline(yintercept = 0,
+                 linewidth = 0.2,
+                 linetype = 2) +
+      geom_vline(xintercept = 0,
+                 linewidth = 0.2,
+                 linetype = 2) +
+      facet_grid( ~ From)
+    
+  } else {
+    tmp <- summary(object = object,
+                   delta = delta,
+                   to = to,
+                   ref = ref,
+                   level = level,
+                   digits = "asis"
+    )
+    
+    plotsub <- ggplot(tmp,
+                      aes(x = Delta, y = Mean)) +
+      geom_line(aes(colour = From)) +
+      geom_pointrange(aes(ymin = CI_low, ymax = CI_high, colour = From)) +
+      geom_hline(yintercept = 0,
+                 linewidth = 0.2,
+                 linetype = 2) +
+      geom_vline(xintercept = 0,
+                 linewidth = 0.2,
+                 linetype = 2) +
+      facet_grid( ~ From)
+    
+  }
+  plotsub
 }
