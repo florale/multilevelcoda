@@ -317,9 +317,9 @@ minutes.</p>
 not cross 0, showing that increasing sleep (TST) at the expense of any
 other behaviours was not associated in changes in stress at
 between-person level. These results can be plotted to see the patterns
-more easily using the <code><a href="../reference/plotsub.html">plotsub()</a></code> function.</p>
+more easily using the <code>plotsub()</code> function.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenSub</span><span class="op">$</span><span class="va">TST</span>, </span>
+<code class="sourceCode R"><span><span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenSub</span><span class="op">$</span><span class="va">TST</span>, </span>
 <span>        x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model"><p class="caption">
@@ -391,7 +391,7 @@ of time spent awake in bed predicted 0.04 higher stress [95% CI 0.01,
 predicted less stress (b = -0.03 [95% CI -0.06, -0.01]). Let’s also plot
 theses results.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">WithinSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">WithinSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model"><p class="caption">
 Example of Within-person Substitution Model
@@ -519,12 +519,12 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tbody>
 </table>
 <p>A comparison between between- and within-person substitution model of
-sleep on stress, plot using <code><a href="../reference/plotsub.html">plotsub()</a></code> and
+sleep on stress, plot using <code>plotsub()</code> and
 <code>ggpubr::ggarrange()</code> functions.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/" class="external-link">ggpubr</a></span><span class="op">)</span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">BetweenSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"between-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotsub.html">plotsub</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">WithinSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"within-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">BetweenSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"between-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">WithinSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"within-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, </span>
 <span>          ncol <span class="op">=</span> <span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
