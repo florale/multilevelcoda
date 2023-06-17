@@ -20,7 +20,7 @@
 #' @return A summary of \code{\link{substitution}} object.
 #' \itemize{
 #'   \item{\code{Mean}}{ Posterior means.}
-#'   \item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
+#'   \item{\code{CI_low} and \code{CI_high}}{ 95% credible intervals.}
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}

@@ -54,12 +54,12 @@ A list containing the results of multilevel compositional substitution model.
 The first four lists contain the results of the substitution estimation for a compositional part.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
-\item{\code{CI_low}} and \code{CI_high}{ 95% credible intervals.}
-  \item{\code{Delta}}{ Amount substituted across compositional parts.}
-  \item{\code{From}}{ Compositional part that is substituted from.}
-  \item{\code{To}}{ Compositional parts that is substituted to.}
-  \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
-  \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
+\item{\code{CI_low} and \code{CI_high}}{ 95\% credible intervals.}
+\item{\code{Delta}}{ Amount substituted across compositional parts.}
+\item{\code{From}}{ Compositional part that is substituted from.}
+\item{\code{To}}{ Compositional parts that is substituted to.}
+\item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 }
 }
 \description{
