@@ -20,17 +20,15 @@
 plot.substitution <- function(object, to,
                               ref, level, ...) {
   
-  if (isFALSE(is.vector(subm$delta))) {
-    stop("'plotsub' requires delta' of substitution to be a numeric sequence vector (e.g., 1:10).")
-  }
-  
-  if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
-    stop("'ref' should be grandmean or clustermean or users.")
+  if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref)) ||
+      isTRUE(length(ref) > 1)) {
+    stop("'ref' should be either grandmean or clustermean or users.")
   }
   ref <- as.character(ref)
   
-  if (isFALSE(any(c("between", "within") %in% level))) {
-    stop("'level' should be between or within.")
+  if (isFALSE(any(c("between", "within") %in% level)) ||
+      isTRUE(length(level) > 1)) {
+    stop("'level' should be either between or within.")
   }
   level <- as.character(level)
   

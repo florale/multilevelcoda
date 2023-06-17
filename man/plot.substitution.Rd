@@ -12,11 +12,9 @@
 \item{to}{A character value or vector specifying the names of the compositional parts
 that were reallocated to in the model.}
 
-\item{ref}{Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
-Default to all \code{ref} available in the \code{\link{substitution}} object .}
+\item{ref}{A character value of ((\code{grandmean} or \code{clustermean} or \code{users}),}
 
-\item{level}{A character string or vector (\code{between} and/or \code{within}).
-Default to all \code{level} available in the \code{\link{substitution}} object.}
+\item{level}{A character value of (\code{between} or \code{within}).}
 
 \item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }
