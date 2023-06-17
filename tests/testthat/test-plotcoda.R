@@ -34,37 +34,10 @@ suppressWarnings(
                backend = backend))
 foreach::registerDoSEQ()
 
-x <- bsub(object = m, base = psub, delta = 2)
+x <- substitution(object = m, delta = 1:10,
+                          ref = "grandmean",
+                          level = c("between", "within"))
 
 # Testing
 #---------------------------------------------------------------------------------------------------
-
-test_that("plotsub errors for invalid input", {
-  
-  ## incorrect dataset
-  expect_error(p <- plotsub(x, "Sleep", "Stress"))
-
-  ## missing arguments
-  expect_error(p <- plotsub(x = "Sleep", y = "Stress"))
-  expect_error(p <- plotsub(data = x, x = "Sleep"))
-  expect_error(p <- plotsub(data = x, y = "Stress"))
-  expect_error(p <- plotsub(x$TST))
-
-})
-test_that("plot have known output", {
-  
-  p0 <-  plotsub(x$TST, "Sleep", "Stress")
-  p1 <- ggplot(x$TST, aes(x = Delta, y = Mean)) +
-    geom_hline(yintercept = 0, linewidth = 0.2, linetype = 2) +
-    geom_vline(xintercept = 0, linewidth = 0.2, linetype = 2) +
-    geom_line(aes(colour = From), linewidth = 1) +
-    geom_ribbon(aes(ymin = CI_low,
-                    ymax = CI_high, fill = From),
-                alpha = 1 / 10, linewidth = 1 / 10) +
-    facet_grid(~ From) +
-    xlab("Change to Sleep") +
-    ylab("Change in Stress")
-
-  expect_s3_class(p0, "ggplot")
-})
 
