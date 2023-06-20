@@ -69,7 +69,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-             cores = 8, seed = 123, backend = "cmdstanr")
+             cores = 8, seed = 123)
 ```
 
 A `summary()` of the model results.
@@ -100,19 +100,19 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 `multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Basic substitution models:
+Simple substitution models:
 
 - *Between-person* substitution
 - *Within-person* substitution
 
-Average marginal substitution models:
+Average substitution models:
 
-- Average marginal *between-person* substitution
-- Average marginal *within-person* substitution
+- Average *between-person* substitution
+- Average *within-person* substitution
 
 *Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
-## Basic Substitution model
+## Simple Substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
 We specify `level = between` to indicate substitutional change would be at the between-person level, 
 and `ref = "grandmean"` to indicate substitution model using the grand compositional mean as reference composition.
@@ -195,16 +195,16 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress") +
        )
 ``` 
 
-## Average Marginal Substitution Effects
+## Average Substitution Effects
 
-The average marginal models use the unit compositional mean as the reference composition 
-to obtain the average of the predicted group-level changes in the outcome when every unit
+The average models use the cluster compositional mean as the reference composition 
+to obtain the average of the predicted group-level changes in the outcome when every cluster
 (e.g., individual) in the sample 
 reallocates a specific unit from one compositional part to another. 
-This is difference from the basic substitution model which yields prediction conditioned on 
+This is difference from the simple substitution model which yields prediction conditioned on 
 an "average" person in the data set (e.g., by using the grand compositional mean
 as the reference composition). 
-Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+Average substitution models models are generally more computationally expensive than simple subsitution models. All models can be run faster in shorter walltime using parallel execution. 
 In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
@@ -236,7 +236,7 @@ ggarrange(p1, p2,
 ```
 
 
-```{r mlmcoda-submargins, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
+```{r mlmcoda-submargins, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Substitution Model"}
 library(ggpubr)
 p1 <- plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", y = "stress") +
   scale_color_jco() +
