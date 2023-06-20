@@ -147,7 +147,8 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span>
 <span>                                <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
-<span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></code></pre></div>
+<span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span></code></pre></div>
 <p>A <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model results.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
@@ -160,34 +161,21 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Group-Level Effects: </span></span>
 <span><span class="co">#&gt; ~ID (Number of levels: 266) </span></span>
-<span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179</span></span>
-<span><span class="co">#&gt;               Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)     2176</span></span>
+<span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179     2176</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Population-Level Effects: </span></span>
-<span><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS</span></span>
-<span><span class="co">#&gt; Intercept     2.64      0.47     1.68     3.57 1.00     1429</span></span>
-<span><span class="co">#&gt; bilr1         0.12      0.33    -0.54     0.77 1.00      971</span></span>
-<span><span class="co">#&gt; bilr2         0.53      0.35    -0.16     1.21 1.00     1124</span></span>
-<span><span class="co">#&gt; bilr3         0.13      0.21    -0.29     0.55 1.00     1052</span></span>
-<span><span class="co">#&gt; bilr4        -0.01      0.29    -0.57     0.55 1.00     1021</span></span>
-<span><span class="co">#&gt; wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990</span></span>
-<span><span class="co">#&gt; wilr2         0.05      0.13    -0.21     0.31 1.00     3396</span></span>
-<span><span class="co">#&gt; wilr3        -0.10      0.08    -0.25     0.04 1.00     2900</span></span>
-<span><span class="co">#&gt; wilr4         0.23      0.10     0.04     0.43 1.00     2894</span></span>
-<span><span class="co">#&gt; Female       -0.39      0.17    -0.74    -0.08 1.00     1405</span></span>
-<span><span class="co">#&gt;           Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept     2263</span></span>
-<span><span class="co">#&gt; bilr1         1409</span></span>
-<span><span class="co">#&gt; bilr2         1679</span></span>
-<span><span class="co">#&gt; bilr3         1809</span></span>
-<span><span class="co">#&gt; bilr4         1941</span></span>
-<span><span class="co">#&gt; wilr1         3206</span></span>
-<span><span class="co">#&gt; wilr2         3077</span></span>
-<span><span class="co">#&gt; wilr3         3218</span></span>
-<span><span class="co">#&gt; wilr4         3220</span></span>
-<span><span class="co">#&gt; Female        1697</span></span>
+<span><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; Intercept     2.64      0.47     1.68     3.57 1.00     1429     2263</span></span>
+<span><span class="co">#&gt; bilr1         0.12      0.33    -0.54     0.77 1.00      971     1409</span></span>
+<span><span class="co">#&gt; bilr2         0.53      0.35    -0.16     1.21 1.00     1124     1679</span></span>
+<span><span class="co">#&gt; bilr3         0.13      0.21    -0.29     0.55 1.00     1052     1809</span></span>
+<span><span class="co">#&gt; bilr4        -0.01      0.29    -0.57     0.55 1.00     1021     1941</span></span>
+<span><span class="co">#&gt; wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990     3206</span></span>
+<span><span class="co">#&gt; wilr2         0.05      0.13    -0.21     0.31 1.00     3396     3077</span></span>
+<span><span class="co">#&gt; wilr3        -0.10      0.08    -0.25     0.04 1.00     2900     3218</span></span>
+<span><span class="co">#&gt; wilr4         0.23      0.10     0.04     0.43 1.00     2894     3220</span></span>
+<span><span class="co">#&gt; Female       -0.39      0.17    -0.74    -0.08 1.00     1405     1697</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family Specific Parameters: </span></span>
 <span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
@@ -223,23 +211,23 @@ package.</p>
 <p><code>multilevelcoda</code> package provides <code>2</code> different
 methods to compute substitution models, via the
 <code><a href="../reference/substitution.html">substitution()</a></code> function.</p>
-<p>Basic substitution models:</p>
+<p>Simple substitution models:</p>
 <ul>
 <li>
 <em>Between-person</em> substitution</li>
 <li>
 <em>Within-person</em> substitution</li>
 </ul>
-<p>Average marginal substitution models:</p>
+<p>Average substitution models:</p>
 <ul>
-<li>Average marginal <em>between-person</em> substitution</li>
-<li>Average marginal <em>within-person</em> substitution</li>
+<li>Average <em>between-person</em> substitution</li>
+<li>Average <em>within-person</em> substitution</li>
 </ul>
 <p><em>Tips: Substitution models are often computationally demanding
 tasks. You can speed up the models using parallel execution, for
 example, using <code>doFuture</code> package.</em></p>
 <div class="section level3">
-<h3 id="basic-substitution-model">Basic Substitution model<a class="anchor" aria-label="anchor" href="#basic-substitution-model"></a>
+<h3 id="simple-substitution-model">Simple Substitution model<a class="anchor" aria-label="anchor" href="#simple-substitution-model"></a>
 </h3>
 <p>The below example examines the changes in stress for different
 pairwise substitution of sleep-wake behaviours for a period of 1 to 5
@@ -321,13 +309,9 @@ more easily using the <code>plotsub()</code> function.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">BetweenSub</span><span class="op">$</span><span class="va">TST</span>, </span>
 <span>        x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model"><p class="caption">
-Example of Between-person Substitution Model
-</p>
-</div>
+<pre><code><span><span class="co">#&gt; Error in plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress"): could not find function "plotsub"</span></span></code></pre>
 <p>Here are the results for within-person level.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">subm1</span>, delta <span class="op">=</span> <span class="fl">10</span>, level <span class="op">=</span> <span class="st">"within"</span>, to <span class="op">=</span> <span class="st">"TST"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -390,31 +374,27 @@ of time spent awake in bed predicted 0.04 higher stress [95% CI 0.01,
 0.7], on a given day. Conversely, less sleep and more time awake in bed
 predicted less stress (b = -0.03 [95% CI -0.06, -0.01]). Let’s also plot
 theses results.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm1</span><span class="op">$</span><span class="va">WithinSub</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model"><p class="caption">
-Example of Within-person Substitution Model
-</p>
-</div>
+<pre><code><span><span class="co">#&gt; Error in plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress"): could not find function "plotsub"</span></span></code></pre>
 </div>
 <div class="section level3">
-<h3 id="average-marginal-substitution-effects">Average Marginal Substitution Effects<a class="anchor" aria-label="anchor" href="#average-marginal-substitution-effects"></a>
+<h3 id="average-substitution-effects">Average Substitution Effects<a class="anchor" aria-label="anchor" href="#average-substitution-effects"></a>
 </h3>
-<p>The average marginal models use the unit compositional mean as the
+<p>The average models use the cluster compositional mean as the
 reference composition to obtain the average of the predicted group-level
-changes in the outcome when every unit (e.g., individual) in the sample
-reallocates a specific unit from one compositional part to another. This
-is difference from the basic substitution model which yields prediction
-conditioned on an “average” person in the data set (e.g., by using the
-grand compositional mean as the reference composition). Average
-substitution models models are generally more computationally expensive
-than basic subsitution models. All models can be run faster in shorter
-walltime using parallel execution. In this example, we use package
-<code>doFuture</code> to parallel our models.
+changes in the outcome when every cluster (e.g., individual) in the
+sample reallocates a specific unit from one compositional part to
+another. This is difference from the simple substitution model which
+yields prediction conditioned on an “average” person in the data set
+(e.g., by using the grand compositional mean as the reference
+composition). Average substitution models models are generally more
+computationally expensive than simple subsitution models. All models can
+be run faster in shorter walltime using parallel execution. In this
+example, we use package <code>doFuture</code> to parallel our models.
 <code><a href="../reference/substitution.html">substitution()</a></code> will run 5 substitution models for 5
 sleep-wake behaviours, so we will parallel them across 5 workers.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://doFuture.futureverse.org/reference/registerDoFuture.html" class="external-link">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
@@ -422,7 +402,7 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <span>                      ref <span class="op">=</span> <span class="st">"clustermean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/foreach/man/registerDoSEQ.html" class="external-link">registerDoSEQ</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Below are the results.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">subm2</span>, delta <span class="op">=</span> <span class="fl">10</span>, to <span class="op">=</span> <span class="st">"TST"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -521,16 +501,23 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <p>A comparison between between- and within-person substitution model of
 sleep on stress, plot using <code>plotsub()</code> and
 <code>ggpubr::ggarrange()</code> functions.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/" class="external-link">ggpubr</a></span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">BetweenSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"between-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu">plotsub</span><span class="op">(</span>data <span class="op">=</span> <span class="va">subm2</span><span class="op">$</span><span class="va">WithinSubMargins</span><span class="op">$</span><span class="va">TST</span>, x <span class="op">=</span> <span class="st">"within-person sleep"</span>, y <span class="op">=</span> <span class="st">"stress"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, </span>
 <span>          ncol <span class="op">=</span> <span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'ggpubr'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:cowplot':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     get_legend</span></span>
+<span><span class="co">#&gt; Error in plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", : could not find function "plotsub"</span></span>
+<span><span class="co">#&gt; Error in plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", : could not find function "plotsub"</span></span></code></pre>
 <div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"><p class="caption">
-Example of Average Marginal Substitution Model
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Substitution Model"><p class="caption">
+Example of Average Substitution Model
 </p>
 </div>
 </div>

@@ -142,8 +142,19 @@ backend</td>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://florale.github.io/multilevelcoda/">multilevelcoda</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: Rcpp</span></span>
+<span><span class="co">#&gt; Loading 'brms' package (version 2.19.0). Useful instructions</span></span>
+<span><span class="co">#&gt; can be found by typing help('brms'). A more detailed introduction</span></span>
+<span><span class="co">#&gt; to the package is available through vignette('brms_overview').</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'brms'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     ar</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://easystats.github.io/bayestestR/" class="external-link">bayestestR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://doFuture.futureverse.org" class="external-link">doFuture</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: foreach</span></span>
+<span><span class="co">#&gt; Loading required package: future</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="co"># reduce number of digits shown</span></span></code></pre></div>
 <p>For the examples, we make use of three built in datasets:</p>
@@ -265,7 +276,15 @@ compositional variables, used for substitution analyses</td>
 in <code>sbp</code>. Columns correspond to the composition variables
 (TST, WAKE, MVPA, LPA, SB). Rows correspond to distinct ILR
 coordinates.</p>
-<table class="table"><tbody>
+<table class="table">
+<thead><tr class="header">
+<th align="right">TST</th>
+<th align="right">WAKE</th>
+<th align="right">MVPA</th>
+<th align="right">LPA</th>
+<th align="right">SB</th>
+</tr></thead>
+<tbody>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">1</td>
@@ -294,7 +313,8 @@ coordinates.</p>
 <td align="right">1</td>
 <td align="right">-1</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>The following table shows how all the possible binary substitutions
 contrasts are setup. Time substitutions work by taking time from the -1
 variable and adding time to the +1 variable.</p>
@@ -523,43 +543,39 @@ coordinates to <code>brms</code> model.</em></p>
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span>
 <span>               <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
-<span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
-<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
-<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
-<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span></code></pre></div>
+<span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span></code></pre></div>
 <p>Here is a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model results.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Parts of the model have not converged (some Rhats are &gt; 1.05). Be careful when</span></span>
-<span><span class="co">#&gt; analysing the results! We recommend running more iterations and/or setting stronger priors.</span></span>
 <span><span class="co">#&gt;  Family: gaussian </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = identity </span></span>
-<span><span class="co">#&gt; Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID) </span></span>
+<span><span class="co">#&gt; Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) </span></span>
 <span><span class="co">#&gt;    Data: tmp (Number of observations: 3540) </span></span>
-<span><span class="co">#&gt;   Draws: 1 chains, each with iter = 500; warmup = 250; thin = 1;</span></span>
-<span><span class="co">#&gt;          total post-warmup draws = 250</span></span>
+<span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Group-Level Effects: </span></span>
 <span><span class="co">#&gt; ~ID (Number of levels: 266) </span></span>
 <span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)     0.99      0.07     0.87     1.12 1.00      112      183</span></span>
+<span><span class="co">#&gt; sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179     2176</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Population-Level Effects: </span></span>
 <span><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept     2.51      0.45     1.70     3.42 1.06       49      125</span></span>
-<span><span class="co">#&gt; bilr1         0.20      0.30    -0.45     0.75 1.11       10       71</span></span>
-<span><span class="co">#&gt; bilr2         0.44      0.30    -0.28     0.89 1.12        8       99</span></span>
-<span><span class="co">#&gt; bilr3         0.12      0.22    -0.29     0.51 1.01       81      175</span></span>
-<span><span class="co">#&gt; bilr4        -0.02      0.32    -0.58     0.63 1.00       85      118</span></span>
-<span><span class="co">#&gt; wilr1        -0.36      0.12    -0.59    -0.12 1.01      162      155</span></span>
-<span><span class="co">#&gt; wilr2         0.04      0.13    -0.22     0.27 1.00      100      154</span></span>
-<span><span class="co">#&gt; wilr3        -0.11      0.08    -0.26     0.04 1.02       96      114</span></span>
-<span><span class="co">#&gt; wilr4         0.25      0.09     0.07     0.41 1.01      133      113</span></span>
+<span><span class="co">#&gt; Intercept     2.64      0.47     1.68     3.57 1.00     1429     2263</span></span>
+<span><span class="co">#&gt; bilr1         0.12      0.33    -0.54     0.77 1.00      971     1409</span></span>
+<span><span class="co">#&gt; bilr2         0.53      0.35    -0.16     1.21 1.00     1124     1679</span></span>
+<span><span class="co">#&gt; bilr3         0.13      0.21    -0.29     0.55 1.00     1052     1809</span></span>
+<span><span class="co">#&gt; bilr4        -0.01      0.29    -0.57     0.55 1.00     1021     1941</span></span>
+<span><span class="co">#&gt; wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990     3206</span></span>
+<span><span class="co">#&gt; wilr2         0.05      0.13    -0.21     0.31 1.00     3396     3077</span></span>
+<span><span class="co">#&gt; wilr3        -0.10      0.08    -0.25     0.04 1.00     2900     3218</span></span>
+<span><span class="co">#&gt; wilr4         0.23      0.10     0.04     0.43 1.00     2894     3220</span></span>
+<span><span class="co">#&gt; Female       -0.39      0.17    -0.74    -0.08 1.00     1405     1697</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family Specific Parameters: </span></span>
 <span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sigma     2.36      0.03     2.30     2.42 1.01      393      187</span></span>
+<span><span class="co">#&gt; sigma     2.37      0.03     2.31     2.43 1.00     4462     2814</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -669,72 +685,46 @@ must be fitted with an additional non-default argument
 <span><span class="va">m0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>             backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
-<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
-<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
-<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span>
+<span>             save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span>
 <span></span>
 <span><span class="co"># between-person composition only model</span></span>
 <span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>             backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
-<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
-<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
-<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span>
+<span>             save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span>
 <span></span>
 <span><span class="co"># within-person composition only model</span></span>
 <span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>             backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
-<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
-<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
-<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span>
+<span>             save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span>
 <span></span>
 <span><span class="co"># full model</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span>
 <span>               <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>             backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
-<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
-<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
-<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span></code></pre></div>
+<span>             save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span></code></pre></div>
 <p>We can now compare these models with the
 <code><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models()</a></code> function, using the intercept-only
 model as reference.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">Model</span>, <span class="va">m1</span><span class="op">$</span><span class="va">Model</span>, <span class="va">m2</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">m0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Bayes factors might not be precise.</span></span>
-<span><span class="co">#&gt;   For precise Bayes factors, sampling at least 40,000 posterior samples is recommended.</span></span>
-<span><span class="co">#&gt; Error: Bridgesampling failed. Perhaps you did not set 'save_pars = save_pars(all = TRUE)' when fitting your model? If you are running bridge sampling on another machine than the one used to fit the model, you may need to set recompile = TRUE.</span></span></code></pre></div>
+<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'm1' not found</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span></span>
-<span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Model       BF</span></span>
-<span><span class="co">#&gt; [1]       2.90e-05</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; * Against Denominator: [2]</span></span>
-<span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
+<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'comparison' not found</span></span></code></pre></div>
 <p>We can see that model with only within-person composition is the best
 model - with <span class="math inline">\(BF\)</span> = 11.86 compared to
 the null (intercept only).</p>
 <p>Let’s compare these models against the full model.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">comparison</span>, reference <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Model       BF</span></span>
-<span><span class="co">#&gt; [2]       3.45e+04</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; * Against Denominator: [1]</span></span>
-<span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
+<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'comparison' not found</span></span></code></pre></div>
 <p>Again, our data favours the within-person composition only model over
 the full model, giving 2.93 times more support.</p>
 </div>
@@ -821,7 +811,8 @@ pairwise substitution of sleep-wake behaviours for 5 minutes, at
 between-person level.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">5</span>, </span>
-<span>                      level <span class="op">=</span> <span class="st">"between"</span>, ref <span class="op">=</span> <span class="st">"grandmean"</span><span class="op">)</span></span></code></pre></div>
+<span>                      level <span class="op">=</span> <span class="st">"between"</span>, ref <span class="op">=</span> <span class="st">"grandmean"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: executing %dopar% sequentially: no parallel backend registered</span></span></code></pre></div>
 <p>The output contains multiple data sets of results for all
 compositional components. Here are the results for changes in stress
 when sleep (TST) is substituted for 5 minutes, averaged across levels of
@@ -841,9 +832,9 @@ covariates.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">0.022</td>
-<td align="right">-0.009</td>
-<td align="right">0.051</td>
+<td align="right">0.031</td>
+<td align="right">-0.002</td>
+<td align="right">0.064</td>
 <td align="right">5</td>
 <td align="left">WAKE</td>
 <td align="left">TST</td>
@@ -851,8 +842,8 @@ covariates.</p>
 <td align="left">grandmean</td>
 </tr>
 <tr class="even">
-<td align="right">0.004</td>
-<td align="right">-0.013</td>
+<td align="right">0.003</td>
+<td align="right">-0.014</td>
 <td align="right">0.019</td>
 <td align="right">5</td>
 <td align="left">MVPA</td>
@@ -863,7 +854,7 @@ covariates.</p>
 <tr class="odd">
 <td align="right">0.006</td>
 <td align="right">-0.007</td>
-<td align="right">0.017</td>
+<td align="right">0.018</td>
 <td align="right">5</td>
 <td align="left">LPA</td>
 <td align="left">TST</td>
@@ -872,8 +863,8 @@ covariates.</p>
 </tr>
 <tr class="even">
 <td align="right">0.007</td>
-<td align="right">-0.006</td>
-<td align="right">0.018</td>
+<td align="right">-0.008</td>
+<td align="right">0.021</td>
 <td align="right">5</td>
 <td align="left">SB</td>
 <td align="left">TST</td>
@@ -881,9 +872,9 @@ covariates.</p>
 <td align="left">grandmean</td>
 </tr>
 <tr class="odd">
-<td align="right">-0.021</td>
-<td align="right">-0.047</td>
-<td align="right">0.008</td>
+<td align="right">-0.029</td>
+<td align="right">-0.060</td>
+<td align="right">0.002</td>
 <td align="right">-5</td>
 <td align="left">WAKE</td>
 <td align="left">TST</td>
@@ -891,9 +882,9 @@ covariates.</p>
 <td align="left">grandmean</td>
 </tr>
 <tr class="even">
-<td align="right">-0.004</td>
-<td align="right">-0.018</td>
-<td align="right">0.013</td>
+<td align="right">-0.003</td>
+<td align="right">-0.019</td>
+<td align="right">0.014</td>
 <td align="right">-5</td>
 <td align="left">MVPA</td>
 <td align="left">TST</td>
@@ -902,7 +893,7 @@ covariates.</p>
 </tr>
 <tr class="odd">
 <td align="right">-0.006</td>
-<td align="right">-0.017</td>
+<td align="right">-0.018</td>
 <td align="right">0.007</td>
 <td align="right">-5</td>
 <td align="left">LPA</td>
@@ -912,8 +903,8 @@ covariates.</p>
 </tr>
 <tr class="even">
 <td align="right">-0.007</td>
-<td align="right">-0.018</td>
-<td align="right">0.006</td>
+<td align="right">-0.021</td>
+<td align="right">0.008</td>
 <td align="right">-5</td>
 <td align="left">SB</td>
 <td align="left">TST</td>
@@ -956,7 +947,7 @@ level.</p>
 <tr class="odd">
 <td align="right">0.017</td>
 <td align="right">0.002</td>
-<td align="right">0.031</td>
+<td align="right">0.032</td>
 <td align="right">5</td>
 <td align="left">WAKE</td>
 <td align="left">TST</td>
@@ -976,7 +967,7 @@ level.</p>
 <tr class="odd">
 <td align="right">-0.005</td>
 <td align="right">-0.009</td>
-<td align="right">-0.001</td>
+<td align="right">0.000</td>
 <td align="right">5</td>
 <td align="left">LPA</td>
 <td align="left">TST</td>
@@ -985,7 +976,7 @@ level.</p>
 </tr>
 <tr class="even">
 <td align="right">-0.002</td>
-<td align="right">-0.006</td>
+<td align="right">-0.007</td>
 <td align="right">0.003</td>
 <td align="right">5</td>
 <td align="left">SB</td>
@@ -995,7 +986,7 @@ level.</p>
 </tr>
 <tr class="odd">
 <td align="right">-0.016</td>
-<td align="right">-0.029</td>
+<td align="right">-0.030</td>
 <td align="right">-0.002</td>
 <td align="right">-5</td>
 <td align="left">WAKE</td>
@@ -1015,7 +1006,7 @@ level.</p>
 </tr>
 <tr class="odd">
 <td align="right">0.005</td>
-<td align="right">0.001</td>
+<td align="right">0.000</td>
 <td align="right">0.009</td>
 <td align="right">-5</td>
 <td align="left">LPA</td>
@@ -1026,7 +1017,7 @@ level.</p>
 <tr class="even">
 <td align="right">0.002</td>
 <td align="right">-0.003</td>
-<td align="right">0.006</td>
+<td align="right">0.007</td>
 <td align="right">-5</td>
 <td align="left">SB</td>
 <td align="left">TST</td>
