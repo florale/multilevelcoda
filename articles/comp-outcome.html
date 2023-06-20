@@ -151,13 +151,68 @@ of predictors. Our <code>brms</code> model can be then fitted using the
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">STRESS</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
-<span>              cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span></code></pre></div>
+<span>              cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus</span></span>
+<span><span class="co">#&gt; recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
+<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
+<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
+<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
+<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span></code></pre></div>
 <p>Here is a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model. We can see that stress
 significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'mv' not found</span></span></code></pre></div>
+<span><span class="co">#&gt;  Family: MV(gaussian, gaussian, gaussian, gaussian) </span></span>
+<span><span class="co">#&gt;   Links: mu = identity; sigma = identity</span></span>
+<span><span class="co">#&gt;          mu = identity; sigma = identity</span></span>
+<span><span class="co">#&gt;          mu = identity; sigma = identity</span></span>
+<span><span class="co">#&gt;          mu = identity; sigma = identity </span></span>
+<span><span class="co">#&gt; Formula: ilr1 ~ STRESS + (1 | ID) </span></span>
+<span><span class="co">#&gt;          ilr2 ~ STRESS + (1 | ID) </span></span>
+<span><span class="co">#&gt;          ilr3 ~ STRESS + (1 | ID) </span></span>
+<span><span class="co">#&gt;          ilr4 ~ STRESS + (1 | ID) </span></span>
+<span><span class="co">#&gt;    Data: tmp (Number of observations: 3540) </span></span>
+<span><span class="co">#&gt;   Draws: 8 chains, each with iter = 6000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 40000</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Group-Level Effects: </span></span>
+<span><span class="co">#&gt; ~ID (Number of levels: 266) </span></span>
+<span><span class="co">#&gt;                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; sd(ilr1_Intercept)     0.33      0.02     0.30     0.37 1.00    13574    21989</span></span>
+<span><span class="co">#&gt; sd(ilr2_Intercept)     0.30      0.02     0.28     0.34 1.00    11200    19827</span></span>
+<span><span class="co">#&gt; sd(ilr3_Intercept)     0.39      0.02     0.35     0.43 1.00    17013    24936</span></span>
+<span><span class="co">#&gt; sd(ilr4_Intercept)     0.30      0.02     0.27     0.33 1.00    16596    25482</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Population-Level Effects: </span></span>
+<span><span class="co">#&gt;                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; ilr1_Intercept    -0.43      0.02    -0.48    -0.39 1.00    11069    19841</span></span>
+<span><span class="co">#&gt; ilr2_Intercept     1.47      0.02     1.42     1.51 1.00     9583    18405</span></span>
+<span><span class="co">#&gt; ilr3_Intercept    -0.87      0.03    -0.93    -0.81 1.00    17975    27392</span></span>
+<span><span class="co">#&gt; ilr4_Intercept     0.65      0.02     0.60     0.69 1.00    18563    26992</span></span>
+<span><span class="co">#&gt; ilr1_STRESS       -0.01      0.00    -0.02    -0.00 1.00    64970    35109</span></span>
+<span><span class="co">#&gt; ilr2_STRESS        0.01      0.00     0.00     0.01 1.00    56689    36287</span></span>
+<span><span class="co">#&gt; ilr3_STRESS        0.00      0.01    -0.01     0.01 1.00    67676    33111</span></span>
+<span><span class="co">#&gt; ilr4_STRESS        0.01      0.00    -0.00     0.01 1.00    62003    35093</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Family Specific Parameters: </span></span>
+<span><span class="co">#&gt;            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; sigma_ilr1     0.44      0.01     0.43     0.45 1.00    57828    33519</span></span>
+<span><span class="co">#&gt; sigma_ilr2     0.38      0.00     0.37     0.39 1.00    59436    34195</span></span>
+<span><span class="co">#&gt; sigma_ilr3     0.70      0.01     0.68     0.71 1.00    52722    34899</span></span>
+<span><span class="co">#&gt; sigma_ilr4     0.53      0.01     0.51     0.54 1.00    52690    33648</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual Correlations: </span></span>
+<span><span class="co">#&gt;                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; rescor(ilr1,ilr2)    -0.54      0.01    -0.57    -0.52 1.00    57259    33739</span></span>
+<span><span class="co">#&gt; rescor(ilr1,ilr3)    -0.18      0.02    -0.21    -0.14 1.00    56781    34166</span></span>
+<span><span class="co">#&gt; rescor(ilr2,ilr3)    -0.05      0.02    -0.09    -0.02 1.00    56093    32472</span></span>
+<span><span class="co">#&gt; rescor(ilr1,ilr4)     0.11      0.02     0.07     0.14 1.00    56993    31275</span></span>
+<span><span class="co">#&gt; rescor(ilr2,ilr4)    -0.05      0.02    -0.08    -0.01 1.00    54469    33148</span></span>
+<span><span class="co">#&gt; rescor(ilr3,ilr4)     0.56      0.01     0.54     0.58 1.00    53173    34399</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
+<span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
+<span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -186,22 +241,37 @@ be fitted with an additional non-default argument
 <span><span class="va">mv0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>               formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>               iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>               save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span>
+<span>               backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus</span></span>
+<span><span class="co">#&gt; recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
+<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
+<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
+<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
+<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span>
 <span><span class="co"># full model</span></span>
 <span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">STRESS</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>              iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>              save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in unserialize(socklist[[n]]): error reading from connection</span></span></code></pre></div>
+<span>              backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.</span></span>
+<span><span class="co">#&gt; If your model failed to compile please run rebuild_cmdstan().</span></span>
+<span><span class="co">#&gt; If the issue persists please open a bug report.</span></span>
+<span><span class="co">#&gt; Error: An error occured during compilation! See the message above for more information.</span></span></code></pre></div>
 <p>We can now compare these models with the
 <code><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models()</a></code> function</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'mv' not found</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span></span>
-<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'comparison' not found</span></span></code></pre></div>
+<span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     Model       BF</span></span>
+<span><span class="co">#&gt; [1]       2.90e-05</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; * Against Denominator: [2]</span></span>
+<span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
 <p>With a <span class="math inline">\(BF\)</span> &lt; 1, our data
 favours the intercept only model, showing that there is insufficient
 evidence for stress predicting the overall sleep-wake composition.</p>
