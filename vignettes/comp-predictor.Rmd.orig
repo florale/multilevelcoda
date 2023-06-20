@@ -126,11 +126,11 @@ from between- and within-person sleep-wake behaviours (expressed as ILR coordina
 
 *Notes: make sure you pass the correct names of the ILR coordinates to `brms` model.*
 
-```{r brmcoda, results = "hide", message=FALSE, warning=FALSE}
+```{r brmcoda, results = "hide", message=FALSE}
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-             cores = 8, seed = 123)
+             cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
 Here is a `summary()` of the model results.
@@ -190,37 +190,37 @@ For precise Bayes factors, we will use 40,000 posterior draws for each model.
 *Notes* : To use Bayes factors, `brmsfit` models must be fitted with an additional non-default argument
 `save_pars = save_pars(all = TRUE)`.
 
-```{r bfmodel, results = "hide", message=FALSE, warning=FALSE}
+```{r bfmodel, results = "hide", message=FALSE}
 # intercept only model
 m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-             save_pars = save_pars(all = TRUE))
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 
 # between-person composition only model
 m1 <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-             save_pars = save_pars(all = TRUE))
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 
 # within-person composition only model
 m2 <- brmcoda(compilr = cilr,
              formula = STRESS ~ wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-             save_pars = save_pars(all = TRUE))
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 
 # full model
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-             save_pars = save_pars(all = TRUE))
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 ```
 
 We can now compare these models with the `bayesfactor_models()` function, using the intercept-only 
 model as reference.
 
-```{r bf1, results='hide', message=FALSE, warning=FALSE}
+```{r bf1, results='hide', message=FALSE}
 comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
 ```
 

@@ -67,8 +67,13 @@ Our `brms` model can be then fitted using the `brmcoda()` function.
 ```r
 mv <- brmcoda(compilr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
-              cores = 8, seed = 123)
-#> Error in unserialize(socklist[[n]]): error reading from connection
+              cores = 8, seed = 123, backend = "cmdstanr")
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus
+#> recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+#> Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.
+#> If your model failed to compile please run rebuild_cmdstan().
+#> If the issue persists please open a bug report.
+#> Error: An error occured during compilation! See the message above for more information.
 ```
 
 Here is a `summary()` of the model. 
@@ -77,7 +82,57 @@ We can see that stress significantly predicted `ilr1` and `ilr2`.
 
 ```r
 summary(mv$Model)
-#> Error in eval(expr, envir, enclos): object 'mv' not found
+#>  Family: MV(gaussian, gaussian, gaussian, gaussian) 
+#>   Links: mu = identity; sigma = identity
+#>          mu = identity; sigma = identity
+#>          mu = identity; sigma = identity
+#>          mu = identity; sigma = identity 
+#> Formula: ilr1 ~ STRESS + (1 | ID) 
+#>          ilr2 ~ STRESS + (1 | ID) 
+#>          ilr3 ~ STRESS + (1 | ID) 
+#>          ilr4 ~ STRESS + (1 | ID) 
+#>    Data: tmp (Number of observations: 3540) 
+#>   Draws: 8 chains, each with iter = 6000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 40000
+#> 
+#> Group-Level Effects: 
+#> ~ID (Number of levels: 266) 
+#>                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(ilr1_Intercept)     0.33      0.02     0.30     0.37 1.00    13574    21989
+#> sd(ilr2_Intercept)     0.30      0.02     0.28     0.34 1.00    11200    19827
+#> sd(ilr3_Intercept)     0.39      0.02     0.35     0.43 1.00    17013    24936
+#> sd(ilr4_Intercept)     0.30      0.02     0.27     0.33 1.00    16596    25482
+#> 
+#> Population-Level Effects: 
+#>                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> ilr1_Intercept    -0.43      0.02    -0.48    -0.39 1.00    11069    19841
+#> ilr2_Intercept     1.47      0.02     1.42     1.51 1.00     9583    18405
+#> ilr3_Intercept    -0.87      0.03    -0.93    -0.81 1.00    17975    27392
+#> ilr4_Intercept     0.65      0.02     0.60     0.69 1.00    18563    26992
+#> ilr1_STRESS       -0.01      0.00    -0.02    -0.00 1.00    64970    35109
+#> ilr2_STRESS        0.01      0.00     0.00     0.01 1.00    56689    36287
+#> ilr3_STRESS        0.00      0.01    -0.01     0.01 1.00    67676    33111
+#> ilr4_STRESS        0.01      0.00    -0.00     0.01 1.00    62003    35093
+#> 
+#> Family Specific Parameters: 
+#>            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma_ilr1     0.44      0.01     0.43     0.45 1.00    57828    33519
+#> sigma_ilr2     0.38      0.00     0.37     0.39 1.00    59436    34195
+#> sigma_ilr3     0.70      0.01     0.68     0.71 1.00    52722    34899
+#> sigma_ilr4     0.53      0.01     0.51     0.54 1.00    52690    33648
+#> 
+#> Residual Correlations: 
+#>                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> rescor(ilr1,ilr2)    -0.54      0.01    -0.57    -0.52 1.00    57259    33739
+#> rescor(ilr1,ilr3)    -0.18      0.02    -0.21    -0.14 1.00    56781    34166
+#> rescor(ilr2,ilr3)    -0.05      0.02    -0.09    -0.02 1.00    56093    32472
+#> rescor(ilr1,ilr4)     0.11      0.02     0.07     0.14 1.00    56993    31275
+#> rescor(ilr2,ilr4)    -0.05      0.02    -0.08    -0.01 1.00    54469    33148
+#> rescor(ilr3,ilr4)     0.56      0.01     0.54     0.58 1.00    53173    34399
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 # Bayes Factor for compositional multilevel modelling
@@ -104,14 +159,24 @@ Let's examine whether stress predicts the overall sleep-wake composition.
 mv0 <- brmcoda(compilr = cilr,
                formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),
                iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-               save_pars = save_pars(all = TRUE))
-#> Error in unserialize(socklist[[n]]): error reading from connection
+               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus
+#> recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+#> Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.
+#> If your model failed to compile please run rebuild_cmdstan().
+#> If the issue persists please open a bug report.
+#> Error: An error occured during compilation! See the message above for more information.
 # full model
 mv <- brmcoda(compilr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
-              save_pars = save_pars(all = TRUE))
-#> Error in unserialize(socklist[[n]]): error reading from connection
+              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+
+#> Warning: CmdStan's precompiled header (PCH) files may need to be rebuilt.
+#> If your model failed to compile please run rebuild_cmdstan().
+#> If the issue persists please open a bug report.
+#> Error: An error occured during compilation! See the message above for more information.
 ```
 
 We can now compare these models with the `bayesfactor_models()` function
@@ -119,14 +184,19 @@ We can now compare these models with the `bayesfactor_models()` function
 
 ```r
 comparison <- bayesfactor_models(mv$Model, denominator = mv0$Model)
-#> Error in eval(expr, envir, enclos): object 'mv' not found
 ```
 
 
 
 ```r
 comparison
-#> Error in eval(expr, envir, enclos): object 'comparison' not found
+#> Bayes Factors for Model Comparison
+#> 
+#>     Model       BF
+#> [1]       2.90e-05
+#> 
+#> * Against Denominator: [2]
+#> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 
 With a $BF$ < 1, our data favours the intercept only model, showing that there is 

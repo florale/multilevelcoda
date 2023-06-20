@@ -60,8 +60,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-             cores = 8, seed = 123)
-#> Error in unserialize(socklist[[n]]): error reading from connection
+             cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
 A `summary()` of the model results.
@@ -78,21 +77,34 @@ summary(m$Model)
 #> 
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179     2176
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179
+#>               Tail_ESS
+#> sd(Intercept)     2176
 #> 
 #> Population-Level Effects: 
-#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept     2.64      0.47     1.68     3.57 1.00     1429     2263
-#> bilr1         0.12      0.33    -0.54     0.77 1.00      971     1409
-#> bilr2         0.53      0.35    -0.16     1.21 1.00     1124     1679
-#> bilr3         0.13      0.21    -0.29     0.55 1.00     1052     1809
-#> bilr4        -0.01      0.29    -0.57     0.55 1.00     1021     1941
-#> wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990     3206
-#> wilr2         0.05      0.13    -0.21     0.31 1.00     3396     3077
-#> wilr3        -0.10      0.08    -0.25     0.04 1.00     2900     3218
-#> wilr4         0.23      0.10     0.04     0.43 1.00     2894     3220
-#> Female       -0.39      0.17    -0.74    -0.08 1.00     1405     1697
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> Intercept     2.64      0.47     1.68     3.57 1.00     1429
+#> bilr1         0.12      0.33    -0.54     0.77 1.00      971
+#> bilr2         0.53      0.35    -0.16     1.21 1.00     1124
+#> bilr3         0.13      0.21    -0.29     0.55 1.00     1052
+#> bilr4        -0.01      0.29    -0.57     0.55 1.00     1021
+#> wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990
+#> wilr2         0.05      0.13    -0.21     0.31 1.00     3396
+#> wilr3        -0.10      0.08    -0.25     0.04 1.00     2900
+#> wilr4         0.23      0.10     0.04     0.43 1.00     2894
+#> Female       -0.39      0.17    -0.74    -0.08 1.00     1405
+#>           Tail_ESS
+#> Intercept     2263
+#> bilr1         1409
+#> bilr2         1679
+#> bilr3         1809
+#> bilr4         1941
+#> wilr1         3206
+#> wilr2         3077
+#> wilr3         3218
+#> wilr4         3220
+#> Female        1697
 #> 
 #> Family Specific Parameters: 
 #>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
@@ -125,19 +137,19 @@ post-hoc analyses using the substitution models from our `multilevel` package.
 `multilevelcoda` package provides `2` different methods to compute substitution models, via the
 `substitution()` function.
 
-Simple substitution models:
+Basic substitution models:
 
 - *Between-person* substitution
 - *Within-person* substitution
 
-Average substitution models:
+Average marginal substitution models:
 
-- Average *between-person* substitution
-- Average *within-person* substitution
+- Average marginal *between-person* substitution
+- Average marginal *within-person* substitution
 
 *Tips: Substitution models are often computationally demanding tasks. You can speed up the models using parallel execution, for example, using `doFuture` package.*
 
-## Simple Substitution model
+## Basic Substitution model
 The below example examines the changes in stress for different pairwise substitution of sleep-wake behaviours for a period of 1 to 5 minutes, at between-person level. 
 We specify `level = between` to indicate substitutional change would be at the between-person level, 
 and `ref = "grandmean"` to indicate substitution model using the grand compositional mean as reference composition.
@@ -181,10 +193,10 @@ plotsub(data = subm1$BetweenSub$TST,
 ```
 
 
-
-```
-#> Error in plotsub(data = subm1$BetweenSub$TST, x = "sleep", y = "stress"): could not find function "plotsub"
-```
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model"  />
+<p class="caption">Example of Between-person Substitution Model</p>
+</div>
 
 Here are the results for within-person level.
 
@@ -216,21 +228,21 @@ plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress")
 ```
 
 
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model"  />
+<p class="caption">Example of Within-person Substitution Model</p>
+</div>
 
-```
-#> Error in plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress"): could not find function "plotsub"
-```
+## Average Marginal Substitution Effects
 
-## Average Substitution Effects
-
-The average models use the cluster compositional mean as the reference composition 
-to obtain the average of the predicted group-level changes in the outcome when every cluster
+The average marginal models use the unit compositional mean as the reference composition 
+to obtain the average of the predicted group-level changes in the outcome when every unit
 (e.g., individual) in the sample 
 reallocates a specific unit from one compositional part to another. 
-This is difference from the simple substitution model which yields prediction conditioned on 
+This is difference from the basic substitution model which yields prediction conditioned on 
 an "average" person in the data set (e.g., by using the grand compositional mean
 as the reference composition). 
-Average substitution models models are generally more computationally expensive than simple subsitution models. All models can be run faster in shorter walltime using parallel execution. 
+Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
 In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
@@ -280,18 +292,7 @@ ggarrange(p1, p2,
 ```
 
 
-
-```
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
-#> Error in plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", : could not find function "plotsub"
-#> Error in plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", : could not find function "plotsub"
-```
-
 <div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Substitution Model"  />
-<p class="caption">Example of Average Substitution Model</p>
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"  />
+<p class="caption">Example of Average Marginal Substitution Model</p>
 </div>
