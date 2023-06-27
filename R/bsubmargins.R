@@ -85,7 +85,7 @@ bsubmargins <- function (object,
   y0 <- fitted(
     object$Model,
     newdata = d0,
-    re_formula = NA,
+    re_formula = NULL,
     summary = FALSE
   )
   y0 <- rowMeans(y0) # average across participants when there is no change

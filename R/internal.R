@@ -81,13 +81,22 @@ get.bsub <- function(object, delta, basesub,
     if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
       for (h in seq_len(nrow(refgrid))) {
         dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <-
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NA,
+            summary = FALSE
+          )
         delta_y <- ysub - y0[, h]
         hout[[h]] <- delta_y
       }
       
       PD_delta_y <- Reduce(`+`, hout) / length(hout)
-      suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
+      suppressWarnings(
+        PD_delta_y <- apply(delta_y, 2, function(x) {
+          describe_posterior(x, centrality = "mean", ...)
+          }))
       PD_delta_y <- rbindlist(PD_delta_y)
       PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
                           dsub[, .(Delta, From, To, Level, Reference)])
@@ -95,9 +104,18 @@ get.bsub <- function(object, delta, basesub,
     } else { # adj keeping prediction at each level of reference grid
       for (h in seq_len(nrow(refgrid))) {
         dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <-
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NA,
+            summary = FALSE
+          )
         delta_y <- ysub - y0[, h]
-        suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
+        suppressWarnings(
+          PD_delta_y <- apply(delta_y, 2, function(x) {
+            describe_posterior(x, centrality = "mean", ...)
+            }))
         PD_delta_y <- rbindlist(PD_delta_y)
         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
                             dsub[, .(Delta, From, To, Level, Reference)],
@@ -184,23 +202,41 @@ get.wsub <- function(object, delta, basesub,
     if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
       for (h in seq_len(nrow(refgrid))) {
         dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <-
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NA,
+            summary = FALSE
+          )
         delta_y <- ysub - y0[, h]
         hout[[h]] <- delta_y
       }
       
       PD_delta_y <- Reduce(`+`, hout) / length(hout)
-      suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
+      suppressWarnings(
+        PD_delta_y <- apply(delta_y, 2, function(x) {
+        describe_posterior(x, centrality = "mean", ...)
+          }))
       PD_delta_y <- rbindlist(PD_delta_y)
-      PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
+      PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)],
                           dsub[, .(Delta, From, To, Level, Reference)])
       
     } else { # adj keeping prediction at each level of reference grid
       for (h in seq_len(nrow(refgrid))) {
         dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <-
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NA,
+            summary = FALSE
+          )
         delta_y <- ysub - y0[, h]
-        suppressWarnings(PD_delta_y <- apply(delta_y, 2, function(x) {describe_posterior(x, centrality = "mean", ...)}))
+        suppressWarnings(
+          PD_delta_y <- apply(delta_y, 2, function(x) {
+            describe_posterior(x, centrality = "mean", ...)
+          }))
         PD_delta_y <- rbindlist(PD_delta_y)
         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
                             dsub[, .(Delta, From, To, Level, Reference)],
@@ -273,7 +309,13 @@ get.wsub <- function(object, delta, basesub,
         
         # prediction
         dsub <- cbind(dnew, bilrsub, wilr0)
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NULL, summary = FALSE)
+        ysub <-
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NULL,
+            summary = FALSE
+          )
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
@@ -361,7 +403,13 @@ get.wsub <- function(object, delta, basesub,
         dsub <- cbind(dnew, bilr0, wilrsub)
         
         # prediction
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NA, summary = FALSE)
+        ysub <-
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NULL,
+            summary = FALSE
+          )
         ysub <- rowMeans(ysub) 
         
         # difference between substitution and no change
@@ -480,8 +528,8 @@ build.rg <- function(object,
   
   cov.grid <- NULL
   
-  if(isTRUE(ref == "clustermean")) {
-    if(isTRUE(weight == "equal")) {
+  if (isTRUE(ref == "clustermean")) {
+    if (isTRUE(weight == "equal")) {
       comp0 <- object$CompILR$BetweenComp
       d0 <- cbind(object$CompILR$BetweenComp, object$CompILR$data)
       d0 <- d0[, head(.SD, 1), by = eval(object$CompILR$idvar)]
@@ -510,31 +558,31 @@ build.rg <- function(object,
                 d0[, colnames(d0) %in% colnames(object$CompILR$data), with = FALSE])
   }
   
-  if(isTRUE(ref == "grandmean")) {
-    if(isTRUE(is.null(weight) || weight == "equal")) {
+  if (isTRUE(ref == "grandmean")) {
+    if (isTRUE(is.null(weight) || weight == "equal")) {
       comp0 <- cbind(object$CompILR$BetweenComp, 
                      object$CompILR$data[, object$CompILR$idvar, with = FALSE])
       comp0 <- comp0[, head(.SD, 1), by = eval(object$CompILR$idvar)]
       comp0 <- acomp(comp0[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
-      comp0 <- mean(comp0, robust = TRUE)
+      comp0 <- mean.acomp(comp0, robust = TRUE)
       comp0 <- acomp(comp0, total = object$CompILR$total)
       comp0 <- as.data.table(t(comp0))
       mcomp <- comp0
     }
     if (isTRUE(weight == "proportional")) {
-      comp0 <- mean(object$CompILR$BetweenComp, robust = TRUE)
+      comp0 <- mean.acomp(object$CompILR$BetweenComp, robust = TRUE)
       comp0 <- acomp(comp0, total = object$CompILR$total)
       comp0 <- as.data.table(t(comp0))
       mcomp <- comp0
     }
     
-    if(isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+    if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       # get compositional mean
       mcomp <- cbind(object$CompILR$BetweenComp, 
                      object$CompILR$data[, object$CompILR$idvar, with = FALSE])
       mcomp <- mcomp[, head(.SD, 1), by = eval(object$CompILR$idvar)]
       mcomp <- acomp(mcomp[, -object$CompILR$idvar, with = FALSE], total = object$CompILR$total)
-      mcomp <- mean(mcomp, robust = TRUE)
+      mcomp <- mean.acomp(mcomp, robust = TRUE)
       mcomp <- acomp(mcomp, total = object$CompILR$total)
       mcomp <- as.data.table(t(mcomp))
       
@@ -602,8 +650,9 @@ build.rg <- function(object,
       } else {
         gridnames <- colnames(cov.grid) %nin% object$CompILR$parts
         
-        if(isFALSE(fill)) {
-          if(isFALSE(identical(colnames(cov.grid), covnames))) { # ensure all covs are provided
+        if (isFALSE(fill)) {
+          if (isFALSE(identical(colnames(cov.grid), covnames))) {
+            # ensure all covs are provided
             stop(paste(
               "'cov.grid' should contains information about",
               "  the covariates in 'brmcoda' model to estimate the substitution model.",
@@ -635,13 +684,13 @@ build.rg <- function(object,
     
     id <- data.table::data.table(1) # to make fitted() happy
     
-    colnames(bilr0) <- colnames(object$CompILR$BetweenILR)
-    colnames(wilr0) <- colnames(object$CompILR$WithinILR)
+    colnames(bilr0)  <- colnames(object$CompILR$BetweenILR)
+    colnames(wilr0)  <- colnames(object$CompILR$WithinILR)
     colnames(bcomp0) <- colnames(object$CompILR$BetweenComp)
     colnames(wcomp0) <- colnames(object$CompILR$WithinComp)
-    colnames(id) <- object$CompILR$idvar
+    colnames(id)     <- object$CompILR$idvar
     
-    if(is.null(dim(refgrid))) {
+    if (is.null(dim(refgrid))) {
       d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, id)
     } else {
       d0 <- expand.grid.df(bilr0, wilr0, bcomp0, wcomp0, id, refgrid)
