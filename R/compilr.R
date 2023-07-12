@@ -100,7 +100,6 @@ compilr <- function(data, sbp, parts, total = 1440, idvar = "ID") {
 
   # within-person 
   wcomp <- tcomp - bcomp
-  wcomp <- clo(wcomp, total = total)
   wilr <- ilr(wcomp, V = psi)
   
   # name them for later use
