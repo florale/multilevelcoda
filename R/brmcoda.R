@@ -19,7 +19,7 @@
 #' @importFrom brms brm
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' if(requireNamespace("cmdstanr")){
 #' data(mcompd)
 #' data(sbp)

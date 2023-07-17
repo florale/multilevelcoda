@@ -35,7 +35,7 @@
 #' @importFrom stats fitted
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(mcompd)
 #' data(sbp)
 #' data(psub)

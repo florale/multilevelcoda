@@ -29,7 +29,7 @@ along with many other useful information about the model.}
 Fit a \code{brm} model with multilevel ILR coordinates.
 }
 \examples{
-\dontrun{
+\donttest{
 if(requireNamespace("cmdstanr")){
 data(mcompd)
 data(sbp)
