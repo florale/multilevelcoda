@@ -23,17 +23,17 @@ wsubmargins(
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{ref}{A character string. Default to \code{clustermean}.}
+\item{ref}{A character string. Default is \code{"clustermean"}.}
 
-\item{level}{A character string. Default to \code{within}.}
+\item{level}{A character string. Default is \code{"within"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
-\code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
-\code{proportional} which weights in proportion to the frequencies of units being averaged
+\code{weight} can be \code{"equal"} which gives equal weight to units (e.g., individuals) or
+\code{"proportional"} which weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals)
-Default to \code{equal}.}
+Default is \code{"equal"}.}
 
-\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
+\item{...}{Additional arguments passed to \code{\link{describe_posterior}}.}
 }
 \value{
 A list containing the result of multilevel compositional substitution model.

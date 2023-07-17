@@ -1,7 +1,7 @@
 #' Fit Bayesian generalised (non-)linear multilevel compositional model 
 #' via full Bayesian inference
 #' 
-#' Fit a \code{brm} model with multilevel ILR coordinates.
+#' Fit a \code{brm} model with multilevel ILR coordinates
 #' 
 #' @param formula A object of class \code{formula}, \code{brmsformula}:
 #' A symbolic description of the model to be fitted. 

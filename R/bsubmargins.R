@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Using a fitted model object, estimates the average difference 
-#' when compositional parts are substituted for specific unit(s) at `between-person` level. 
+#' when compositional parts are substituted for specific unit(s) at \code{between} level. 
 #' The \code{bsubmargins} output encapsulates 
 #' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
@@ -13,14 +13,14 @@
 #' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
-#' @param ref A character string. Default to \code{clustermean}.
-#' @param level A character string. Default to \code{between}.
+#' @param ref A character string. Default is \code{"clustermean"}.
+#' @param level A character string. Default is \code{"between"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
-#' \code{weight} can be \code{equal} which gives equal weight to units (e.g., individuals) or
-#' \code{proportional} which weights in proportion to the frequencies of units being averaged 
+#' \code{weight} can be \code{"equal"} which gives equal weight to units (e.g., individuals) or
+#' \code{"proportional"} which weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals)
-#' Default to \code{equal}.
-#' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
+#' Default is \code{"equal"}.
+#' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of multilevel compositional substitution model.
 #' Each element of the list is the estimation for a compositional part 

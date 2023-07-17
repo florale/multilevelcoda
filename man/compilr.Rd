@@ -16,10 +16,10 @@ It must include a composition and a ID variable. Required.}
 \item{parts}{A character vector specifying the names of compositional variables to be used.}
 
 \item{total}{A numeric value of the total amount to which the compositions should be closed.
-Default to \code{1}.}
+Default is \code{1}.}
 
 \item{idvar}{A character string specifying the name of the variable containing IDs.
-Default to \code{"ID"}.}
+Default is \code{"ID"}.}
 }
 \value{
 A \code{\link{compilr}} object with twelve elements.
@@ -42,7 +42,7 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 }
 }
 \description{
-Compute sets of compositions and IRLs for Multilevel Compositional Data models.
+Compute sets of compositions and IRLs for multilevel compositional data
 }
 \examples{
 data(mcompd)

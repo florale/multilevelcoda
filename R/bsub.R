@@ -2,7 +2,7 @@
 #' 
 #' @description 
 #' Estimate the difference in outcomes
-#' when compositional parts are substituted for specific unit(s) at `between` level. 
+#' when compositional parts are substituted for specific unit(s) at \code{between} level. 
 #' The \code{bsub} output encapsulates
 #' the substitution results for all compositional parts
 #' present in the \code{\link{brmcoda}} object.
@@ -14,27 +14,27 @@
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
 #' @param ref Either a character value or vector or a dataset.
-#' \code{ref} can be \code{grandmean} or
+#' \code{ref} can be \code{"grandmean"} or
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid only applicable to substitution model
 #' using a single reference composition value
-#' (e.g., \code{clustermean} or user's specified). Default to \code{grandmean}.
+#' (e.g., \code{clustermean} or user's specified). Default is \code{"grandmean"}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
-#' Default to \code{TRUE}.
+#' Default is \code{TRUE}.
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate be at the \code{between} and/or \code{within} level?
-#' Default to \code{between}.
+#' Should the estimate be at the \code{"between"} and/or \code{"within"} level?
+#' Default is \code{"between"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
-#' \code{weight} can be \code{equal} which gives equal weight across units (e.g., individuals) or
-#' \code{proportional} which weights in proportion to the frequencies of units being averaged 
+#' \code{weight} can be \code{"equal"} which gives equal weight across units (e.g., individuals) or
+#' \code{"proportional"} which weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals)
-#' Default to \code{equal}.
-#' @param ... Additional arguments to be passed to \code{\link{describe_posterior}}.
+#' Default is \code{"equal"}.
+#' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the result of multilevel compositional substitution model.
 #' Each element of the list is the estimation for a compositional part 

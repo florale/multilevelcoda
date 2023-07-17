@@ -34,11 +34,11 @@ print.brmcoda <- function(x, ...) {
 #' that were reallocated to in the model.
 #' @param from A character value or vector specifying the names of the compositional parts
 #' that were reallocated from in the model.
-#' @param ref Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
+#' @param ref Either a character value or vector ((\code{"grandmean"} and/or \code{"clustermean"} or \code{"users"}),
 #' Default to all \code{ref} available in the \code{\link{substitution}} object .
-#' @param level A character string or vector (\code{between} and/or \code{within}).
+#' @param level A character string or vector (\code{"between"} and/or \code{"within"}).
 #' Default to all \code{level} available in the \code{\link{substitution}} object.
-#' @param digits A integer value used for number formatting. Default to 3.
+#' @param digits A integer value used for number formatting. Default is \coda{2}.
 #' @param ... generic argument, not in use.
 #' 
 #' @return A summary of \code{\link{substitution}} object.
@@ -107,7 +107,8 @@ summary.substitution <- function(object, delta, to, from,
   }
     
   if(isFALSE(digits == "asis")) {
-    out[, 1:3] <- round(out[, 1:3], digits)
+    # out[, 1:3] <- round(out[, 1:3], digits)
+    out[] <- lapply(out, function(x) if(is.numeric(x)) round(x, digits) else x)
   }
   
   out

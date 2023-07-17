@@ -1,6 +1,6 @@
 #' Compute useful indices from a (dataset of) multilevel composition(s)
 #'
-#' Compute sets of compositions and IRLs for Multilevel Compositional Data models. 
+#' Compute sets of compositions and IRLs for multilevel compositional data
 #'
 #' @param data A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
@@ -8,9 +8,9 @@
 #' @param sbp A signary matrix indicating sequential binary partition. Required.
 #' @param parts A character vector specifying the names of compositional variables to be used.
 #' @param idvar A character string specifying the name of the variable containing IDs. 
-#' Default to \code{"ID"}.
+#' Default is \code{"ID"}.
 #' @param total A numeric value of the total amount to which the compositions should be closed.
-#' Default to \code{1}.
+#' Default is \code{1}.
 #'
 #' @return A \code{\link{compilr}} object with twelve elements.
 #' \itemize{

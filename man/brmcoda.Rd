@@ -26,7 +26,7 @@ along with many other useful information about the model.}
 }
 }
 \description{
-Fit a \code{brm} model with multilevel ILR coordinates.
+Fit a \code{brm} model with multilevel ILR coordinates
 }
 \examples{
 \donttest{

@@ -19,13 +19,13 @@ that were reallocated to in the model.}
 \item{from}{A character value or vector specifying the names of the compositional parts
 that were reallocated from in the model.}
 
-\item{ref}{Either a character value or vector ((\code{grandmean} and/or \code{clustermean} or \code{users}),
+\item{ref}{Either a character value or vector ((\code{"grandmean"} and/or \code{"clustermean"} or \code{"users"}),
 Default to all \code{ref} available in the \code{\link{substitution}} object .}
 
-\item{level}{A character string or vector (\code{between} and/or \code{within}).
+\item{level}{A character string or vector (\code{"between"} and/or \code{"within"}).
 Default to all \code{level} available in the \code{\link{substitution}} object.}
 
-\item{digits}{A integer value used for number formatting. Default to 3.}
+\item{digits}{A integer value used for number formatting. Default is \coda{2}.}
 
 \item{...}{generic argument, not in use.}
 }
