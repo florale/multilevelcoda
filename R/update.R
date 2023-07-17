@@ -28,7 +28,8 @@
 #' }
 #' 
 #' @importFrom extraoperators %ain% %snin% %nin%
-#' @exportS3Method update compilr
+#' @method update compilr
+#' @export
 #' @examples 
 #' data(mcompd)
 #' data(sbp)
@@ -92,7 +93,8 @@ update.compilr <- function(object, newdata, ...) {
 #'   along with many other useful information about the model.}
 #'   }
 #'  
-#' @exportS3Method update brmcoda
+#' @method update brmcoda
+#' @export
 #' @examples 
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){

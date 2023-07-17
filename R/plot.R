@@ -80,3 +80,35 @@ plot.substitution <- function(x, to,
   }
   plotsub
 }
+#' @title Trace and Density Plots for MCMC Draws plot
+#'
+#' @description
+#' Make a plot of \code{\link{brmcoda}} model results.
+#'
+#' @param x A \code{\link{brmcoda}} class object.
+#' @param ... Further arguments passed to \code{\link{plot.brmsfit}}.
+#'
+#' @return An invisible list of
+#'   \code{\link[gtable:gtable]{gtable}} objects.
+#'
+#' @examples
+#' \donttest{
+#' data(mcompd)
+#' data(sbp)
+#' cilr <- compilr(data = mcompd, sbp = sbp,
+#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'
+#' # model with compositional predictor at between and within-person levels
+#' fit <- brmcoda(compilr = cilr,
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                chain = 1, iter = 500)
+#' plot(fit)
+#' }
+#' 
+#' @exportS3Method plot brmcoda
+plot.brmcoda <- function(x) {
+  if (inherits(x$Model, "brmsfit")) {
+    plot(x$Model)
+  }
+}

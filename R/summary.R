@@ -1,6 +1,30 @@
-#' Summary \code{\link{substitution}} 
+#' Create a summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
-#' This method allows for summarising an existing \code{\link{substitution}} object.
+#' @param object An object of class \code{brmcoda}.
+#' @param ... Other arguments passed to \code{summary.brmsfit}
+#' 
+#' @method summary brmcoda
+#' @export
+summary.brmcoda <- function(object, ...) {
+  if (inherits(object$Model, "brmsfit")) {
+    summary(object$Model, ...)
+  }
+}
+
+#' Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
+#' 
+#' @param x A \code{brmcoda} object.
+#' @param ... Additional arguments to be passed to to method \code{summary} of \code{brmsfit}.
+#' 
+#' @seealso \code{\link{summary.brmcoda}}
+#' 
+#' @export
+print.brmcoda <- function(x, ...) {
+  print(summary(x$Model, ...), ...)
+  
+}
+
+#' Create a summary of a substitution model represented by a \code{\link{substitution}} object
 #' 
 #' @param object A \code{\link{substitution}} class object.
 #' @param delta A integer, numeric value or vector indicating the desired \code{delta} 
@@ -28,7 +52,8 @@
 #'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 #' }
 #' 
-#' @exportS3Method summary substitution
+#' @method summary substitution
+#' @export
 summary.substitution <- function(object, delta, to, from,
                                  ref, level,
                                  digits = 2, ...) { 
@@ -87,4 +112,16 @@ summary.substitution <- function(object, delta, to, from,
   
   out
   
+}
+
+#' Print a summary for a \code{substitution} object
+#' 
+#' @param x A \code{substitution} object.
+#' @param ... Additional arguments to be passed to to method \code{summary} of \code{substitution}.
+#' 
+#' @seealso \code{\link{summary.substitution}}
+#' 
+#' @export
+print.substitution <- function(x, ...) {
+  print(summary(object, ...), ...)
 }

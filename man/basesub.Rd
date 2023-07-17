@@ -20,7 +20,7 @@ the base for substitution models.
 
 data(mcompd)
 
-ps <- basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+ps1 <- basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 ps2 <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
 
 print(ps2)
