@@ -4,7 +4,7 @@
 \alias{compilr}
 \title{Compute useful indices from a (dataset of) multilevel composition(s)}
 \usage{
-compilr(data, sbp, parts, total = 1440, idvar = "ID")
+compilr(data, sbp, parts, total = 1, idvar = "ID")
 }
 \arguments{
 \item{data}{A \code{data.frame} or \code{data.table}
@@ -16,10 +16,10 @@ It must include a composition and a ID variable. Required.}
 \item{parts}{A character vector specifying the names of compositional variables to be used.}
 
 \item{total}{A numeric value of the total amount to which the compositions should be closed.
-Default to \code{1440}.}
+Default to \code{1}.}
 
 \item{idvar}{A character string specifying the name of the variable containing IDs.
-Default to \code{ID}.}
+Default to \code{"ID"}.}
 }
 \value{
 A \code{\link{compilr}} object with twelve elements.
@@ -48,7 +48,7 @@ Compute sets of compositions and IRLs for Multilevel Compositional Data models.
 data(mcompd)
 data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, 
-                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 str(cilr)
 
 ## cleanup
