@@ -166,7 +166,7 @@ fitted.brmcoda <- function(object,
   out
 }
 
-#' Extract Population-Level Estimates
+#' Population-Level Estimates
 #' 
 #' Extract the population-level ('fixed') effects
 #' from a \code{brmsfit} in the \code{brmcoda} object.
@@ -206,7 +206,7 @@ vcov.brmcoda <- function(object, ...) {
   vcov(object$Model, ...)
 }
 
-#' Extract Group-Level Estimates
+#' Group-Level Estimates
 #'
 #' Extract the group-level ('random') effects of each level
 #' 
@@ -232,7 +232,7 @@ ranef.brmcoda <- function(object, ...) {
   ranef(object$Model, ...)
 }
 
-#' Extract Model Coefficients
+#' Model Coefficients
 #'
 #' Extract model coefficients, which are the sum of population-level
 #' effects and corresponding group-level effects
@@ -264,9 +264,9 @@ coef.brmcoda <- function(object, ...) {
 #' in a multilevel model of class \code{brmsfit}.
 #' For linear models, the residual standard deviations,
 #' correlations and covariances are also returned.
-#'
-#' @aliases VarCorr
 #' 
+#' @inheritParams predict.brmcoda
+##' 
 #' @return A list of lists (one per grouping factor), each with
 #' three elements: a matrix containing the standard deviations,
 #' an array containing the correlation matrix, and an array
@@ -278,4 +278,17 @@ coef.brmcoda <- function(object, ...) {
 #' @export
 VarCorr.brmcoda <- function(object, ...) {
   VarCorr(object$Model, ...)
+}
+
+#' Posterior Draws of Residuals/Predictive Errors
+#' 
+#' Compute posterior draws of residuals/predictive errors
+#' 
+#' @return An S x N \code{array} of predictive error draws, where S is the
+#' number of posterior draws and N is the number of observations.
+#'   
+#' @method residuals brmcoda
+#' @export
+residuals.brmcoda <- function(object, ...) {
+  residuals(object$Model, ...)
 }

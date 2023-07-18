@@ -2,10 +2,15 @@
 % Please edit documentation in R/posterior.R
 \name{VarCorr.brmcoda}
 \alias{VarCorr.brmcoda}
-\alias{VarCorr}
 \title{Extract Variance and Correlation Components}
 \usage{
 \method{VarCorr}{brmcoda}(object, ...)
+}
+\arguments{
+\item{object}{An object of class \code{brmcoda}.}
+
+\item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
+that control additional aspects of prediction.}
 }
 \value{
 A list of lists (one per grouping factor), each with
