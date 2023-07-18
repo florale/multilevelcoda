@@ -9,12 +9,11 @@ is.brmcoda <- function(x) {
   inherits(x, "brmcoda")
 }
 #' Extract Number of Observations from \pkg{brmcoda} Models
-#' 
+#'
 #' @param object A \code{brmcoda} object.
-#' 
+#'
 #' @method nobs brmcoda
 #' @export
-#' 
 nobs.brmcoda <- function(x) {
   nobs(x$Model)
 }
@@ -44,17 +43,17 @@ as.array.brmcoda <- function(x) {
 }
 
 #' Index \code{brmcoda} objects
-#' 
+#'
 #' @param x An object of class \code{brmcoda}.
-#' 
+#'
 #' @name draws-index-brmcoda
 NULL
 
 #' @rdname draws-index-brmcoda
 #' @importFrom brms variables
 #' @method variables brmcoda
-#' @export
 #' @export variables
+#' @export
 variables.brmcoda <- function(x, ...) {
   variables(x$Model)
 }
@@ -62,8 +61,8 @@ variables.brmcoda <- function(x, ...) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms nvariables
 #' @method nvariables brmcoda
-#' @export
 #' @export nvariables
+#' @export
 nvariables.brmcoda <- function(x, ...) {
   nvariables(x$Model)
 }
@@ -71,8 +70,8 @@ nvariables.brmcoda <- function(x, ...) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms niterations
 #' @method niterations brmcoda
-#' @export
 #' @export niterations
+#' @export
 niterations.brmcoda <- function(x) {
   niterations(x$Model)
 }
@@ -80,8 +79,8 @@ niterations.brmcoda <- function(x) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms nchains
 #' @method nchains brmcoda
-#' @export
 #' @export nchains
+#' @export 
 nchains.brmcoda <- function(x) {
   nchains(x$Model)
 }
@@ -89,8 +88,8 @@ nchains.brmcoda <- function(x) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms ndraws
 #' @method ndraws brmcoda
-#' @export
 #' @export ndraws
+#' @export
 ndraws.brmcoda <- function(x) {
   ndraws(x$Model)
 }
@@ -100,7 +99,7 @@ ndraws.brmcoda <- function(x) {
 #     nwarmup(x$Model)
 #   }
 # }
-# 
+#
 # nthin.brmcoda <- function(x) {
 #   if (inherits(x$Model, "brmcoda")) {
 #     nthin(x$Model)
@@ -108,31 +107,28 @@ ndraws.brmcoda <- function(x) {
 # }
 
 #' Extract Diagnostic Quantities from \pkg{brmcoda} Models
-#' 
+#'
 #' @name diagnostic-quantities
 #' @aliases log_posterior nuts_params rhat neff_ratio
-#' 
+#'
 #' @param x A \code{brmcoda} object.
 #' @param ... Arguments passed to individual methods.
-#' 
+#'
 #' @return The exact form of the output depends on the method.
-#' 
+#'
 NULL
 
 #' @rdname diagnostic-quantities
 #' @importFrom brms log_posterior
 #' @export log_posterior
 #' @export
-#' 
 log_posterior.brmcoda <- function(x) {
   log_posterior(x$Model)
 }
 
 #' @rdname diagnostic-quantities
 #' @importFrom brms nuts_params
-#' @export nuts_params
 #' @export
-#' 
 nuts_params.brmcoda <- function(x) {
   nuts_params(x$Model)
 }
@@ -141,7 +137,6 @@ nuts_params.brmcoda <- function(x) {
 #' @importFrom brms rhat
 #' @export rhat
 #' @export
-#' 
 rhat.brmcoda <- function(x) {
   rhat(x$Model)
 }
@@ -150,8 +145,28 @@ rhat.brmcoda <- function(x) {
 #' @importFrom brms neff_ratio
 #' @export neff_ratio
 #' @export
-#' 
 neff_ratio.brmcoda <- function(x) {
   neff_ratio(x$Model)
 }
 
+#' Interface to \pkg{shinystan}
+#' 
+#' Provide an interface to \pkg{shinystan} for models fitted with \pkg{brms}
+#' 
+#' @aliases launch_shinystan
+#' 
+#' @param object A fitted model object typically of class \code{brmcoda}.
+#' @param ... Optional arguments to pass to 
+#' \code{\link{launch_shinystan.brmsfit}} or \code{\link[shiny:runApp]{runApp}}
+#'
+#' @seealso \code{\link[shinystan:launch_shinystan]{launch_shinystan}}
+#' 
+#' @return An S4 shinystan object
+#' 
+#' @method launch_shinystan brmcoda
+#' @importFrom shinystan launch_shinystan
+#' @export launch_shinystan
+#' @export
+launch_shinystan.brmcoda <- function(object, ...) {
+  launch_shinystan(object$Model, ...)
+}
