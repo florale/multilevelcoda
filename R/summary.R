@@ -1,3 +1,132 @@
+#' Create a summary of a \code{compilr} object
+#' 
+#' @param object An object of class \code{compilr}.
+#' @param x  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
+#' specify the geometry of the composition.
+#' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
+#' indicating the level of the geometry.
+#' @param digits A integer value used for number formatting. Default is \coda{3}.
+#' 
+#' @importFrom compositions summary.acomp summary.rmult
+#' @method summary compilr
+#' @export
+summary.compilr <- function(object,
+                            x = c("composition", "logratio"),
+                            level = c("between", "within", "total"),
+                            digits = 3,
+                            ...) {
+  # General info
+  cat("  Compositional components are: ")
+  cat(paste(object$parts, collapse = ", "), "\n")
+  cat("  Composition is closed to    : ")
+  cat(object$total, "\n")
+  cat("  Number of observations      : ")
+  cat(nrow(object$data), "\n")
+  cat("  Number of levels            : ")
+  cat(length(unique(object$data[[object$idvar]])), "\n")
+
+  # comp
+  sumc <- list(
+    summary(object$BetweenComp, robust = TRUE),
+    summary(object$WithinComp, robust = TRUE),
+    summary(object$TotalComp, robust = TRUE)
+  )
+  names(sumc) <- c("bcomp", "wcomp", "tcomp")
+  
+  varn <- c("Compositional Mean",
+            "Geometric Mean of the Pairwise Ratios",
+            "Variation Matrix",
+            "One-sigma Factor of Pairwise Ratios",
+            "Inverse of One-sigma Factor of Pairwise Ratios",
+            "Min of Pairwise Ratios",
+            "Q1 of Pairwise Ratios",
+            "Median of Pairwise Ratios",
+            "Q3 of Pairwise Ratios",
+            "Max of Pairwise Ratios",
+            "Missingness")
+  
+  sumc <- lapply(sumc, function(X) {
+    x1 <- list(as.matrix(t(X[[1]])))
+    x2 <- X[-c(1, length(X))]
+    x3 <- tail(X, 1)
+    
+    names(x1) <- head(varn, 1)
+    names(x2) <- varn[-c(1, length(varn))]
+    names(x3) <- tail(varn, 1)
+    
+    unlist(list(x1,
+                x2,
+                x3), recursive = FALSE)
+  })
+  
+  if ("composition" %in% x) {
+    if ("between" %in% level) {
+      cat("\n", "——— Composition at between-level ———", "\n")
+      for (i in seq_along(sumc$bcomp)) {
+        cat(paste0("\n", names(sumc$bcomp)[i], ":\n"))
+        print(sumc$bcomp[[i]], digits = digits)
+      }
+    }
+    if ("within" %in% level) {
+      cat("\n", "——— Composition at within-level ———", "\n")
+      for (i in seq_along(sumc$wcomp)) {
+        cat(paste0("\n", names(sumc$wcomp)[i], ":\n"))
+        print(sumc$wcomp[[i]], digits = digits)
+      }
+    }
+    if ("total" %in% level) {
+      cat("\n", "——— Composition with total variance ———", "\n")
+      for (i in seq_along(sumc$tcomp)) {
+        cat(paste0("\n", names(sumc$tcomp)[i], ":\n"))
+        print(sumc$tcomp[[i]], digits = digits)
+      }
+    }
+  }
+  
+  # log ratio
+  sumlr <- list(
+    data.frame(summary(object$BetweenILR)),
+    data.frame(summary(object$WithinILR)),
+    data.frame(summary(object$TotalILR))
+  )
+  
+  names(sumlr) <- c("bilr", "wilr", "tilr")
+  
+  if ("logratio" %in% x) {
+    if ("between" %in% level) {
+      cat("\n", "——— Log-ratio at between-level ———", "\n")
+      print(sumlr$bilr, digits = digits)
+    }
+    if ("within" %in% level) {
+      cat("\n", "——— Log-ratio at within-level ———", "\n")
+      print(sumlr$wilr, digits = digits)
+    }
+    if ("total" %in% level) {
+      cat("\n", "——— Log-ratio with total variance ———", "\n")
+      print(sumlr$tilr, digits = digits)
+    }
+  }
+  
+  ### Return output invisibly
+  output <- lapply(X = list(sumc, sumlr), FUN = function(x) {
+    row.names(x) <- NULL
+    return(x)
+  })
+  return(invisible(output))
+
+}
+
+#' Print a summary for a \code{compilr} object
+#' 
+#' @inheritParams summary.compilr
+#' 
+#' @seealso \code{\link{summary.compilr}}
+#' 
+#' @export
+print.compilr <- function(x, ...) {
+  summary(object <- x, ...)
+  
+}
 #' Create a summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
 #' @param object An object of class \code{brmcoda}.
@@ -13,8 +142,7 @@ summary.brmcoda <- function(object, ...) {
 
 #' Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
-#' @param x A \code{brmcoda} object.
-#' @param ... Additional arguments to be passed to to method \code{summary} of \code{brmsfit}.
+#' @inheritParams summary.brmcoda
 #' 
 #' @seealso \code{\link{summary.brmcoda}}
 #' 
