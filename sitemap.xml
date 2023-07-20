@@ -49,13 +49,16 @@
     <loc>https://florale.github.io/multilevelcoda/reference/bsubmargins.html</loc>
   </url>
   <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/build.rg.html</loc>
+  </url>
+  <url>
     <loc>https://florale.github.io/multilevelcoda/reference/coef.brmcoda.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/diagnostic-quantities.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.html</loc>
@@ -74,6 +77,9 @@
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/is.compilr.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/is.substitution.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/launch_shinystan.brmcoda.html</loc>

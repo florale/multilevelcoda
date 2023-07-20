@@ -100,7 +100,7 @@ It must include a composition and the same ID variable as the existing <code><a 
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A updated <code><a href="compilr.html">compilr</a></code> object with twelve elements.</p><ul><li><p><code>BetweenComp</code> A vector of class <code>acomp</code> representing one closed between-person composition
+<p>A <code><a href="compilr.html">compilr</a></code> object with twelve elements.</p><ul><li><p><code>BetweenComp</code> A vector of class <code>acomp</code> representing one closed between-person composition
 or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></li>
 <li><p><code>WithinComp</code> A vector of class <code>acomp</code> representing one closed within-person composition
 or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></li>
@@ -116,6 +116,10 @@ or a matrix of class <code>acomp</code> representing multiple closed total compo
 <li><p><code>idvar</code> Name of the variable containing IDs.</p></li>
 <li><p><code>total</code> Total amount to which the compositions is closed.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code>compilr</code></p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -127,10 +131,6 @@ or a matrix of class <code>acomp</code> representing multiple closed total compo
 <span class="r-in"><span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="va">mcompd</span><span class="op">[</span><span class="va">ID</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">]</span> <span class="co"># excluding ID 1</span></span></span>
 <span class="r-in"><span><span class="va">cilr_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">cilr</span>, newdata <span class="op">=</span> <span class="va">newdat</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## cleanup</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">cilr</span>, <span class="va">mcompd</span>, <span class="va">sbp</span>, <span class="va">cilr_new</span>, <span class="va">newdat</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>object 'mcompd' not found</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>object 'sbp' not found</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -79,8 +79,9 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for compilr</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
-<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"composition"</span>, <span class="st">"logratio"</span><span class="op">)</span>,</span>
+<span>  class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"composition"</span>, <span class="st">"logratio"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span>, <span class="st">"total"</span><span class="op">)</span>,</span>
+<span>  weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -90,6 +91,28 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>object</dt>
 <dd><p>An object of class <code>compilr</code>.</p></dd>
+
+
+<dt>class</dt>
+<dd><p>Optional. Can be <code>"composition"</code> and/or <code>"logratio"</code> to
+specify the geometry of the composition.</p></dd>
+
+
+<dt>level</dt>
+<dd><p>Optional. Can be <code>"between"</code>, <code>"within"</code>, and/or <code>total</code>
+indicating the level of the geometry.</p></dd>
+
+
+<dt>weight</dt>
+<dd><p>A character value specifying the weight to use in calculation of the reference composition.
+If <code>"equal"</code>, give equal weight to units (e.g., individuals).
+If <code>"proportional"</code>, weights in proportion to the frequencies of units being averaged
+(e.g., observations across individuals).
+Default is <code>equal</code>.</p></dd>
+
+
+<dt>digits</dt>
+<dd><p>A integer value used for number formatting. Default is <code>3</code>.</p></dd>
 
 </dl></div>
 
