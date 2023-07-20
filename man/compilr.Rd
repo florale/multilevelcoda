@@ -2,7 +2,7 @@
 % Please edit documentation in R/compilr.R
 \name{compilr}
 \alias{compilr}
-\title{Compute useful indices from a (dataset of) multilevel composition(s)}
+\title{Indices from a (dataset of) Multilevel Composition(s)}
 \usage{
 compilr(data, sbp, parts, total = 1, idvar = "ID")
 }

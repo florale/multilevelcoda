@@ -9,7 +9,7 @@ is.brmcoda <- function(x) {
   inherits(x, "brmcoda")
 }
 
-#' Extract Number of Observations from \pkg{brmcoda} Models
+#' Extract Number of Observations from \pkg{brmcoda} object
 #'
 #' @param object A \code{brmcoda} object.
 #'

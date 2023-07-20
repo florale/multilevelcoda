@@ -1,6 +1,5 @@
-#' @title Substitution plot
+#' Substitution Plot
 #'
-#' @description
 #' Make a plot of \code{\link{substitution}} model results.
 #'
 #' @param x A \code{\link{substitution}} class object.
@@ -81,9 +80,8 @@ plot.substitution <- function(x, to,
   }
   plotsub
 }
-#' @title Trace and Density Plots for MCMC Draws plot
+#' Trace and Density Plots for MCMC Draws plot
 #'
-#' @description
 #' Make a plot of \code{\link{brmcoda}} model results.
 #'
 #' @param x A \code{\link{brmcoda}} class object.

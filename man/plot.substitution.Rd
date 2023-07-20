@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R, R/plotcoda.R
 \name{plot.substitution}
 \alias{plot.substitution}
-\title{Substitution plot}
+\title{Substitution Plot}
 \usage{
 \method{plot}{substitution}(x, to, ref, level, ...)
 

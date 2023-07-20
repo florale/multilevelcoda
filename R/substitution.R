@@ -1,6 +1,5 @@
-#' @title Multilevel Compositional Substitution Model
+#' Multilevel Compositional Substitution Model
 #' 
-#' @description 
 #' Estimate the difference in an outcome
 #' when compositional parts are substituted for specific unit(s). 
 #' The \code{substitution} output encapsulates
@@ -106,7 +105,7 @@ substitution <- function(object,
       "  to specify the change in units across compositional parts", 
       sep = "\n"))
   }
-  if (weight == "proportional") {
+  if (identical(weight, "proportional")) {
     weight <- "proportional"
   } else {
     weight <- "equal"

@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{print.brmcoda}
 \alias{print.brmcoda}
-\title{Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object}
+\title{Print a Summary for a fitted \code{brmsfit} model in a \code{brmcoda} object}
 \usage{
 \method{print}{brmcoda}(x, ...)
 }
@@ -12,7 +12,7 @@
 \item{...}{Other arguments passed to \code{summary.brmsfit}}
 }
 \description{
-Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
+Print a Summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
 }
 \seealso{
 \code{\link{summary.brmcoda}}

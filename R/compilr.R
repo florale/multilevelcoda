@@ -1,4 +1,4 @@
-#' Compute useful indices from a (dataset of) multilevel composition(s)
+#' Indices from a (dataset of) Multilevel Composition(s)
 #'
 #' Compute sets of compositions and IRLs for multilevel compositional data
 #'

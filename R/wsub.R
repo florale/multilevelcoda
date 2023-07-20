@@ -1,6 +1,5 @@
-#' @title Within-person Simple Substitution
+#' Within-person Simple Substitution
 #' 
-#' @description
 #' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
 #' when compositional parts are substituted for specific unit(s) at \emph{within} level
 #' using a single reference composition (e.g., compositional mean at sample level).
@@ -94,7 +93,7 @@ wsub <- function(object,
   
   # yw ---------------------------------
     # substitution model
-    out <- get.wsub(
+    out <- .get.wsub(
       object = object,
       basesub = basesub,
       comp0 = comp0,

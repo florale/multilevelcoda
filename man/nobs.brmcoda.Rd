@@ -2,7 +2,7 @@
 % Please edit documentation in R/brmcoda-methods.R
 \name{nobs.brmcoda}
 \alias{nobs.brmcoda}
-\title{Extract Number of Observations from \pkg{brmcoda} Models}
+\title{Extract Number of Observations from \pkg{brmcoda} object}
 \usage{
 \method{nobs}{brmcoda}(x)
 }
@@ -10,5 +10,5 @@
 \item{object}{A \code{brmcoda} object.}
 }
 \description{
-Extract Number of Observations from \pkg{brmcoda} Models
+Extract Number of Observations from \pkg{brmcoda} object
 }

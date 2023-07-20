@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{summary.compilr}
 \alias{summary.compilr}
-\title{Create a summary of a \code{compilr} object}
+\title{Create a Summary of a \code{compilr} object}
 \usage{
 \method{summary}{compilr}(
   object,
@@ -31,5 +31,5 @@ Default is \code{equal}.}
 \item{digits}{A integer value used for number formatting. Default is \code{3}.}
 }
 \description{
-Create a summary of a \code{compilr} object
+Create a Summary of a \code{compilr} object
 }

@@ -1,6 +1,5 @@
-#' @title Between-person Simple Substitution
+#' Between-person Simple Substitution
 #' 
-#' @description 
 #' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
 #' when compositional parts are substituted for specific unit(s) at \emph{between} level
 #' using a single reference composition (e.g., compositional mean at sample level).
@@ -93,7 +92,7 @@ bsub <- function(object,
     summary = FALSE)
   
   # yb ---------------------------------
-  out <- get.bsub(
+  out <- .get.bsub(
     object = object,
     basesub = basesub,
     comp0 = comp0,

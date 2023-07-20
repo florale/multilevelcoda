@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{print.compilr}
 \alias{print.compilr}
-\title{Print a summary for a \code{compilr} object}
+\title{Print a Summary for a \code{compilr} object}
 \usage{
 \method{print}{compilr}(x, ...)
 }
@@ -12,7 +12,7 @@
 \item{...}{Other arguments passed to \code{summary.compilr}}
 }
 \description{
-Print a summary for a \code{compilr} object
+Print a Summary for a \code{compilr} object
 }
 \seealso{
 \code{\link{summary.compilr}}

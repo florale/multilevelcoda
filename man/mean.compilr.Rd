@@ -2,12 +2,13 @@
 % Please edit documentation in R/compilr-methods.R
 \name{mean.compilr}
 \alias{mean.compilr}
-\title{Mean amounts and mean compositions presented in an \code{compilr} object.}
+\title{Mean amounts and mean compositions presented in a \code{compilr} object.}
 \usage{
 \method{mean}{compilr}(
   x,
   class = c("composition", "logratio"),
   level = c("between", "within", "total"),
+  weight = c("equal", "proportional"),
   digits = 3,
   ...
 )
@@ -24,5 +25,5 @@ indicating the level of the geometry.}
 \item{digits}{A integer value used for number formatting. Default is \coda{3}.}
 }
 \description{
-Mean amounts and mean compositions presented in an \code{compilr} object.
+Mean amounts and mean compositions presented in a \code{compilr} object.
 }

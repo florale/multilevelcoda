@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{print.substitution}
 \alias{print.substitution}
-\title{Print a summary for a \code{substitution} object}
+\title{Print a Summary for a \code{substitution} object}
 \usage{
 \method{print}{substitution}(x, ...)
 }
@@ -12,7 +12,7 @@
 \item{...}{Additional arguments to be passed to to method \code{summary} of \code{substitution}.}
 }
 \description{
-Print a summary for a \code{substitution} object
+Print a Summary for a \code{substitution} object
 }
 \seealso{
 \code{\link{summary.substitution}}

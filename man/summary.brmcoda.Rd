@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{summary.brmcoda}
 \alias{summary.brmcoda}
-\title{Create a summary of a fitted \code{brmsfit} model in a \code{brmcoda} object}
+\title{Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object}
 \usage{
 \method{summary}{brmcoda}(object, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{Other arguments passed to \code{summary.brmsfit}}
 }
 \description{
-Create a summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
+Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 }

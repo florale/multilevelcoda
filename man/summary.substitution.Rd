@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{summary.substitution}
 \alias{summary.substitution}
-\title{Create a summary of a substitution model represented by a \code{\link{substitution}} object}
+\title{Create a Summary of a Substitution Model represented by a \code{\link{substitution}} object}
 \usage{
 \method{summary}{substitution}(object, delta, to, from, ref, level, digits = 2, ...)
 }
@@ -42,5 +42,5 @@ A summary of \code{\link{substitution}} object.
 }
 }
 \description{
-Create a summary of a substitution model represented by a \code{\link{substitution}} object
+Create a Summary of a Substitution Model represented by a \code{\link{substitution}} object
 }
