@@ -1,4 +1,4 @@
-#' Create a summary of a \code{compilr} object
+#' Create a Summary of a \code{compilr} object
 #' 
 #' @param object An object of class \code{compilr}.
 #' @param class  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
@@ -23,42 +23,7 @@ summary.compilr <- function(object,
                             ...) {
   
   ## Assemble
-  if (weight == "proportional") {
-    weight <- "proportional"
-  } else {
-    weight <- "equal"
-  }
-  
-  if (weight == "equal") {
-    bcomp <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenComp)[!duplicated(get(object$idvar))]
-    wcomp <- cbind(object$data[, object$idvar, with = FALSE], object$WithinComp)[!duplicated(get(object$idvar))]
-    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$TotalComp)[!duplicated(get(object$idvar))]
-    
-    bilr <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenILR)[!duplicated(get(object$idvar))]
-    wilr <- cbind(object$data[, object$idvar, with = FALSE], object$WithinILR)[!duplicated(get(object$idvar))]
-    tilr <- cbind(object$data[, object$idvar, with = FALSE], object$TotalILR)[!duplicated(get(object$idvar))]
-    
-    output <- list(
-      summary(acomp(bcomp[, -1]), robust = TRUE),
-      summary(acomp(wcomp[, -1]), robust = TRUE),
-      summary(acomp(tcomp[, -1]), robust = TRUE),
-      data.frame(summary(rmult(bilr[, -1]))),
-      data.frame(summary(rmult(wilr[, -1]))),
-      data.frame(summary(rmult(tilr[, -1])))
-    )
-    
-  } else if (weight == "proportional") {
-    output <- list(
-      summary(object$BetweenComp, robust = TRUE),
-      summary(object$WithinComp, robust = TRUE),
-      summary(object$TotalComp, robust = TRUE),
-      data.frame(summary(object$BetweenILR)),
-      data.frame(summary(object$WithinILR)),
-      data.frame(summary(object$TotalILR))
-    )
-  }
-  
-  names(output) <- c("bcomp", "wcomp", "tcomp", "bilr", "wilr", "tilr")
+  output <- .get.compilr(object)
   
   varn <- c("Compositional Mean", #keep
             "Geometric Mean of the Pairwise Ratios", 
@@ -152,7 +117,7 @@ summary.compilr <- function(object,
 
 }
 
-#' Print a summary for a \code{compilr} object
+#' Print a Summary for a \code{compilr} object
 #' 
 #' @param x An object of class \code{compilr}.
 #' @param ... Other arguments passed to \code{summary.compilr}
@@ -164,7 +129,7 @@ print.compilr <- function(x, ...) {
   summary(object <- x, ...)
   
 }
-#' Create a summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
+#' Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
 #' @param object An object of class \code{brmcoda}.
 #' @param ... Other arguments passed to \code{summary.brmsfit}
@@ -177,7 +142,7 @@ summary.brmcoda <- function(object, ...) {
   }
 }
 
-#' Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
+#' Print a Summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
 #' @param x An object of class \code{brmcoda}.
 #' @inheritParams summary.brmcoda
@@ -190,7 +155,7 @@ print.brmcoda <- function(x, ...) {
   
 }
 
-#' Create a summary of a substitution model represented by a \code{\link{substitution}} object
+#' Create a Summary of a Substitution Model represented by a \code{\link{substitution}} object
 #' 
 #' @param object A \code{\link{substitution}} class object.
 #' @param delta A integer, numeric value or vector indicating the desired \code{delta} 
@@ -281,7 +246,7 @@ summary.substitution <- function(object, delta, to, from,
   
 }
 
-#' Print a summary for a \code{substitution} object
+#' Print a Summary for a \code{substitution} object
 #' 
 #' @param x A \code{substitution} object.
 #' @param ... Additional arguments to be passed to to method \code{summary} of \code{substitution}.
