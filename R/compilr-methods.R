@@ -16,7 +16,7 @@ is.compilr <- function(x) {
 #' specify the geometry of the composition.
 #' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
 #' indicating the level of the geometry.
-#' @param digits A integer value used for number formatting. Default is \coda{3}.
+#' @param digits A integer value used for number formatting. Default is \code{3}.
 #' 
 #' @method mean compilr
 #' @export

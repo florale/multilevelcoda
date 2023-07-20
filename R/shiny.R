@@ -13,7 +13,7 @@
 #' @return An S4 shinystan object
 #' 
 #' @method launch_shinystan brmcoda
-#' @importFrom shinystan launch_shinystan
+#' @importFrom brms launch_shinystan.brmsfit
 #' @export
 launch_shinystan.brmcoda <- function(object, ...) {
   launch_shinystan(object$Model, ...)

@@ -22,7 +22,7 @@ specify the geometry of the composition.}
 \item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
 indicating the level of the geometry.}
 
-\item{digits}{A integer value used for number formatting. Default is \coda{3}.}
+\item{digits}{A integer value used for number formatting. Default is \code{3}.}
 }
 \description{
 Mean amounts and mean compositions presented in a \code{compilr} object.
