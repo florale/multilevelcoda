@@ -1,41 +1,68 @@
 #' Create a summary of a \code{compilr} object
 #' 
 #' @param object An object of class \code{compilr}.
-#' @param x  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
+#' @param class  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 #' specify the geometry of the composition.
 #' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
 #' indicating the level of the geometry.
+#' @param weight A character value specifying the weight to use in calculation of the reference composition.
+#' If \code{"equal"}, give equal weight to units (e.g., individuals).
+#' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
+#' (e.g., observations across individuals)
+#' Default is \code{equal}.
 #' @param digits A integer value used for number formatting. Default is \coda{3}.
 #' 
-#' @importFrom compositions summary.acomp summary.rmult
+#' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
 #' @method summary compilr
 #' @export
 summary.compilr <- function(object,
-                            x = c("composition", "logratio"),
+                            class = c("composition", "logratio"),
                             level = c("between", "within", "total"),
+                            weight = c("equal", "proportional"),
                             digits = 3,
                             ...) {
-  # General info
-  cat("  Compositional components are: ")
-  cat(paste(object$parts, collapse = ", "), "\n")
-  cat("  Composition is closed to    : ")
-  cat(object$total, "\n")
-  cat("  Number of observations      : ")
-  cat(nrow(object$data), "\n")
-  cat("  Number of levels            : ")
-  cat(length(unique(object$data[[object$idvar]])), "\n")
-
-  # comp
-  sumc <- list(
-    summary(object$BetweenComp, robust = TRUE),
-    summary(object$WithinComp, robust = TRUE),
-    summary(object$TotalComp, robust = TRUE)
-  )
-  names(sumc) <- c("bcomp", "wcomp", "tcomp")
   
-  varn <- c("Compositional Mean",
-            "Geometric Mean of the Pairwise Ratios",
-            "Variation Matrix",
+  ## Assemble
+  if (weight == "proportional") {
+    weight <- "proportional"
+  } else {
+    weight <- "equal"
+  }
+  
+  if (weight == "equal") {
+    bcomp <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenComp)[!duplicated(get(object$idvar))]
+    wcomp <- cbind(object$data[, object$idvar, with = FALSE], object$WithinComp)[!duplicated(get(object$idvar))]
+    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$TotalComp)[!duplicated(get(object$idvar))]
+    
+    bilr <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenILR)[!duplicated(get(object$idvar))]
+    wilr <- cbind(object$data[, object$idvar, with = FALSE], object$WithinILR)[!duplicated(get(object$idvar))]
+    tilr <- cbind(object$data[, object$idvar, with = FALSE], object$TotalILR)[!duplicated(get(object$idvar))]
+    
+    output <- list(
+      summary(acomp(bcomp[, -1]), robust = TRUE),
+      summary(acomp(wcomp[, -1]), robust = TRUE),
+      summary(acomp(tcomp[, -1]), robust = TRUE),
+      data.frame(summary(rmult(bilr[, -1]))),
+      data.frame(summary(rmult(wilr[, -1]))),
+      data.frame(summary(rmult(tilr[, -1])))
+    )
+    
+  } else if (weight == "proportional") {
+    output <- list(
+      summary(object$BetweenComp, robust = TRUE),
+      summary(object$WithinComp, robust = TRUE),
+      summary(object$TotalComp, robust = TRUE),
+      data.frame(summary(object$BetweenILR)),
+      data.frame(summary(object$WithinILR)),
+      data.frame(summary(object$TotalILR))
+    )
+  }
+  
+  names(output) <- c("bcomp", "wcomp", "tcomp", "bilr", "wilr", "tilr")
+  
+  varn <- c("Compositional Mean", #keep
+            "Geometric Mean of the Pairwise Ratios", 
+            "Variation Matrix", #keep
             "One-sigma Factor of Pairwise Ratios",
             "Inverse of One-sigma Factor of Pairwise Ratios",
             "Min of Pairwise Ratios",
@@ -43,10 +70,11 @@ summary.compilr <- function(object,
             "Median of Pairwise Ratios",
             "Q3 of Pairwise Ratios",
             "Max of Pairwise Ratios",
-            "Missingness")
+            "Missingness" #keep
+  )
   
-  sumc <- lapply(sumc, function(X) {
-    x1 <- list(as.matrix(t(X[[1]])))
+  output[1:3] <- lapply(output[1:3], function(X) {
+    x1 <- list(clo(X[[1]]))
     x2 <- X[-c(1, length(X))]
     x3 <- tail(X, 1)
     
@@ -54,63 +82,71 @@ summary.compilr <- function(object,
     names(x2) <- varn[-c(1, length(varn))]
     names(x3) <- tail(varn, 1)
     
-    unlist(list(x1,
-                x2,
-                x3), recursive = FALSE)
+    unlist(list(x1, x2, x3), recursive = FALSE)
   })
+  output[1:3] <- lapply(output[1:3], "[", c("Compositional Mean", 
+                                            "Variation Matrix",
+                                            "Missingness"))
   
-  if ("composition" %in% x) {
+  ## Summary
+  # General info
+  cat("  Compositional components are: ")
+  cat(paste(object$parts, collapse = ", "), "\n")
+  cat("  Composition is closed to    : ")
+  cat(object$total, "\n")
+  cat("  Geometry                    : ")
+  cat("relative composition ('acomp') and isometric log-ratios ('real multivariate')", "\n")
+  cat("  Number of observations      : ")
+  cat(nrow(object$data), "\n")
+  cat("  Number of levels            : ")
+  cat(length(unique(object$data[[object$idvar]])), "\n")
+  
+  # cat("\n", "———— Arithmetic Statistics ————", "\n")
+  # print(JWileymisc::egltable(bcomp[, -1], ...))
+  
+  if ("composition" %in% class) {
+    if ("total" %in% level) {
+      cat("\n", "———— Raw Composition Statistics ————", "\n")
+      for (i in seq_along(output$tcomp)) {
+        cat(paste0("\n", names(output$tcomp)[i], ":\n"))
+        print(output$tcomp[[i]], digits = digits)
+      }
+    }
     if ("between" %in% level) {
-      cat("\n", "——— Composition at between-level ———", "\n")
-      for (i in seq_along(sumc$bcomp)) {
-        cat(paste0("\n", names(sumc$bcomp)[i], ":\n"))
-        print(sumc$bcomp[[i]], digits = digits)
+      cat("\n", "——— Between-level Composition ———", "\n")
+      for (i in seq_along(output$bcomp)) {
+        cat(paste0("\n", names(output$bcomp)[i], ":\n"))
+        print(output$bcomp[[i]], digits = digits)
       }
     }
     if ("within" %in% level) {
-      cat("\n", "——— Composition at within-level ———", "\n")
-      for (i in seq_along(sumc$wcomp)) {
-        cat(paste0("\n", names(sumc$wcomp)[i], ":\n"))
-        print(sumc$wcomp[[i]], digits = digits)
-      }
-    }
-    if ("total" %in% level) {
-      cat("\n", "——— Composition with total variance ———", "\n")
-      for (i in seq_along(sumc$tcomp)) {
-        cat(paste0("\n", names(sumc$tcomp)[i], ":\n"))
-        print(sumc$tcomp[[i]], digits = digits)
+      cat("\n", "——— Within-level Composition ———", "\n")
+      for (i in seq_along(output$wcomp)) {
+        cat(paste0("\n", names(output$wcomp)[i], ":\n"))
+        print(output$wcomp[[i]], digits = digits)
       }
     }
   }
   
-  # log ratio
-  sumlr <- list(
-    data.frame(summary(object$BetweenILR)),
-    data.frame(summary(object$WithinILR)),
-    data.frame(summary(object$TotalILR))
-  )
-  
-  names(sumlr) <- c("bilr", "wilr", "tilr")
-  
-  if ("logratio" %in% x) {
+  if ("logratio" %in% class) {
+    if ("total" %in% level) {
+      cat("\n", "———— Raw Isometric Log-ratios ————", "\n")
+      print(output$tilr, digits = digits)
+    }
     if ("between" %in% level) {
-      cat("\n", "——— Log-ratio at between-level ———", "\n")
-      print(sumlr$bilr, digits = digits)
+      cat("\n", "——— Between-level Isometric Log-ratios ———", "\n")
+      print(output$bilr, digits = digits)
     }
     if ("within" %in% level) {
-      cat("\n", "——— Log-ratio at within-level ———", "\n")
-      print(sumlr$wilr, digits = digits)
-    }
-    if ("total" %in% level) {
-      cat("\n", "——— Log-ratio with total variance ———", "\n")
-      print(sumlr$tilr, digits = digits)
+      cat("\n", "——— Within-level Isometric Log-ratios ———", "\n")
+      print(output$wilr, digits = digits)
     }
   }
   
   ### Return output invisibly
-  output <- lapply(X = list(sumc, sumlr), FUN = function(x) {
-    row.names(x) <- NULL
-    return(x)
+  output <- lapply(output, function(X) {
+    row.names(X) <- NULL
+    return(X)
   })
   return(invisible(output))
 
@@ -236,7 +272,7 @@ summary.substitution <- function(object, delta, to, from,
     
   if(isFALSE(digits == "asis")) {
     # out[, 1:3] <- round(out[, 1:3], digits)
-    out[] <- lapply(out, function(x) if(is.numeric(x)) round(x, digits) else x)
+    out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
   }
   
   out
