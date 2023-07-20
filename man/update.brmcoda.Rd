@@ -23,7 +23,7 @@ ILR coordinates, and other variables used in the updated model.}
 \value{
 A \code{\link{brmcoda}} with two elements
 \itemize{
-\item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
+\item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
@@ -52,4 +52,7 @@ fit1 <- update(fit, formula. = ~ . - wilr1)
 # using only a subset
 fit2 <- update(fit, newdata = mcompd[ID != 1])
 }}
+}
+\seealso{
+\code{\link[brmcoda]{brmcoda}}
 }

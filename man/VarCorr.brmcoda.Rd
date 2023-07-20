@@ -9,8 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
-that control additional aspects of prediction.}
+\item{...}{Further arguments passed to \code{\link{VarCorr.brmsfit}}}
 }
 \value{
 A list of lists (one per grouping factor), each with
@@ -19,9 +18,10 @@ an array containing the correlation matrix, and an array
 containing the covariance matrix with variances on the diagonal.
 }
 \description{
-This function calculates the estimated standard deviations,
+Calculates the estimated standard deviations,
 correlations and covariances of the group-level terms
-in a multilevel model of class \code{brmsfit}.
-For linear models, the residual standard deviations,
-correlations and covariances are also returned.
+of the \code{brmsfit} object in a \code{brmcoda} object.
+}
+\seealso{
+\code{\link[brms:VarCorr.brmsfit]{VarCorr.brmsfit}}
 }

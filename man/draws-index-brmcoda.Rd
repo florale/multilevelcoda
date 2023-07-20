@@ -25,3 +25,14 @@
 \description{
 Index \code{brmcoda} objects
 }
+\seealso{
+\code{\link[brms:variables]{variables.brmsfit}}
+
+\code{\link[brms:nvariables.brmsfit]{nvariables.brmsfit}}
+
+\code{\link[brms:niterations.brmsfit]{niterations.brmsfit}}
+
+\code{\link[brms:nchains.brmsfit]{nchains.brmsfit}}
+
+\code{\link[brms:ndraws.brmsfit]{ndraws.brmsfit}}
+}

@@ -40,9 +40,6 @@
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' str(cilr)
-#' 
-#' ## cleanup
-#' rm(cilr, mcompd, sbp)
 compilr <- function(data, sbp, parts, total = 1, idvar = "ID") {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {

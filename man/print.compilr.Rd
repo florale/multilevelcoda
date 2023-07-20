@@ -6,6 +6,11 @@
 \usage{
 \method{print}{compilr}(x, ...)
 }
+\arguments{
+\item{x}{An object of class \code{compilr}.}
+
+\item{...}{Other arguments passed to \code{summary.compilr}}
+}
 \description{
 Print a summary for a \code{compilr} object
 }

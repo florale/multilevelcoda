@@ -6,8 +6,8 @@
 #' @param x A \code{\link{substitution}} class object.
 #' @param to A character value or vector specifying the names of the compositional parts
 #' that were reallocated to in the model.
-#' @param ref A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),
-#' @param level A character value of (\code{"between"} or \code{"within"}).
+#' @param ref A character value of ((\code{grandmean} or \code{clustermean} or \code{users}),
+#' @param level A character value of (\code{between} or \code{within}).
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
@@ -16,8 +16,7 @@
 #' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_pointrange geom_ribbon facet_grid xlab ylab
 #' @importFrom data.table copy
 #' 
-#' @method plot substitution
-#' @export
+#' @exportS3Method plot substitution
 plot.substitution <- function(x, to,
                               ref, level, ...) {
   
@@ -80,33 +79,4 @@ plot.substitution <- function(x, to,
     
   }
   plotsub
-}
-#' @title Trace and Density Plots for MCMC Draws plot
-#'
-#' @description
-#' Make a plot of \code{\link{brmcoda}} model results.
-#'
-#' @param x A \code{\link{brmcoda}} class object.
-#' @param ... Further arguments passed to \code{\link{plot.brmsfit}}.
-#'
-#' @inherit brms::plot.brmsfit return
-#'
-#' @method plot brmcoda
-#' @export
-#' @examples
-#' \donttest{
-#' data(mcompd)
-#' data(sbp)
-#' cilr <- compilr(data = mcompd, sbp = sbp,
-#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-#'
-#' # model with compositional predictor at between and within-person levels
-#' fit <- brmcoda(compilr = cilr,
-#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-#'                chain = 1, iter = 500)
-#' plot(fit)
-#' }
-plot.brmcoda <- function(x) {
-  plot(x$Model)
 }

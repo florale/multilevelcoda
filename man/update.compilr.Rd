@@ -16,7 +16,7 @@ It must include a composition and the same ID variable as the existing \code{\li
 \item{...}{generic argument, not in use.}
 }
 \value{
-A updated \code{\link{compilr}} object with twelve elements.
+A \code{\link{compilr}} object with twelve elements.
 \itemize{
 \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
@@ -47,7 +47,8 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 newdat <- mcompd[ID != 1] # excluding ID 1
 cilr_new <- update(object = cilr, newdata = newdat)
 
-## cleanup
-rm(cilr, mcompd, sbp, cilr_new, newdat)
 
+}
+\seealso{
+\code{\link[compilr]{compilr}}
 }

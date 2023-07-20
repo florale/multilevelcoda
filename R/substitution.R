@@ -13,11 +13,10 @@
 #' This data set can be computed using function \code{\link{basesub}}. 
 #' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
 #' @param ref Either a character value or vector or a dataset.
-#' \code{ref} can be \code{"grandmean"} and/or \code{"clustermean"}, or
+#' Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
-#' User's specified reference grid only applicable to substitution model
-#' using a single reference composition value (e.g., user's specified).
+#' User's specified reference grid is only possible for simple substitution. 
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -27,8 +26,8 @@
 #' @param level A character string or vector. 
 #' Should the estimate be at the \code{"between"} and/or \code{"within"} level?
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
-#' \code{weight} can be \code{"equal"} which gives equal weight to units (e.g., individuals) or
-#' \code{"proportional"} which weights in proportion to the frequencies of units being averaged 
+#' If \code{"equal"}, give equal weight to units (e.g., individuals).
+#' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals)
 #' Default is \code{equal}.
 #' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
@@ -59,7 +58,7 @@
 #' data(sbp)
 #' data(psub)
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' 
 #' # model with compositional predictor at between and between-person levels
 #' m <- brmcoda(compilr = cilr, 
@@ -67,9 +66,7 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500, backend = "cmdstanr")
 #'              
-#' subm <- substitution(object = m, delta = 5,
-#'                      ref = c("grandmean", "clustermean"), 
-#'                      level = c("between", "within"))
+#' subm <- substitution(object = m, delta = 5)
 #' }}
 substitution <- function(object,
                          delta,
@@ -77,7 +74,7 @@ substitution <- function(object,
                          summary = TRUE,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within"),
-                         weight = NULL,
+                         weight = c("equal", "proportional"),
                          ...) {
   
   if (isTRUE(missing(object))) {
@@ -109,11 +106,10 @@ substitution <- function(object,
       "  to specify the change in units across compositional parts", 
       sep = "\n"))
   }
-  if (identical(weight, c("equal", "proportional"))) {
-    stop(paste(
-      "'weight' should be either equal of proportional",
-      "  If interested in both, please run two separate models.", 
-      sep = "\n"))
+  if (weight == "proportional") {
+    weight <- "proportional"
+  } else {
+    weight <- "equal"
   }
   
   if (isTRUE(missing(basesub))) {

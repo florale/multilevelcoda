@@ -1,32 +1,28 @@
 #' Draws from the Posterior Predictive Distribution
 #' 
-#' Compute posterior draws of the posterior predictive distribution. Can be
-#' performed for the data used to fit the model (posterior predictive checks) or
+#' Compute posterior draws of the posterior predictive distribution
+#' of a \code{brmsfit} model in the \code{brmcoda} object.
+#' Can be performed for the data used to fit the model (posterior predictive checks) or
 #' for new data. By definition, these draws have higher variance than draws
 #' of the expected value of the posterior predictive distribution computed by
-#' \code{\link{posterior_epred.brmsfit}}. This is because the residual error
+#' \code{\link{fitted.brmcoda}}. This is because the residual error
 #' is incorporated in \code{posterior_predict}. However, the estimated means of
 #' both methods averaged across draws should be very similar.
 #' 
+#' @inheritParams brms::predict.brmsfit
 #' @param object An object of class \code{brmcoda}.
-#' @param newdata An optional data.frame for which to evaluate predictions. If
-#' \code{NULL} (default), the original data of the model is used.
-#' \code{NA} values within factors are interpreted as if all dummy
-#' variables of this factor are zero. This allows, for instance, to make
-#' predictions of the grand mean when using sum coding.
-#' @param re_formula formula containing group-level effects to be considered in
-#' the prediction. If \code{NULL} (default), include all group-level effects;
-#' if \code{NA}, include no group-level effects.
 #' @param scale Either \code{"response"} or \code{"linear"} or \code{"comp"}.
 #' If either \code{"response"} or \code{"linear"},
 #' results are returned using the corresponding method in \code{predict.brmsfit}.
 #' \code{"comp"} is only relevant to multivariate models of class \code{mvbrmsformula}
-#' (i.e., when response is composition). If \code{"comp"} is specified,
+#' (i.e., when response is composition). If \code{"comp"},
 #' results are returned on the compositional scale of the response variable.
-#' @param summary Should summary statistics be returned instead of the raw values?
-#' Default is \code{TRUE}.
 #' @param ... Further arguments passed to \code{\link{predict.brmsfit}}
 #' that control additional aspects of prediction.
+#' 
+#' @inherit brms::predict.brmsfit return
+#' 
+#' @seealso \code{\link[brms:predict.brmsfit]{predict.brmsfit}}
 #' 
 #' @importFrom compositions ilrInv
 #' @importFrom brms posterior_summary do_call
@@ -92,18 +88,23 @@ predict.brmcoda <- function(object,
 #' Expected Values of the Posterior Predictive Distribution
 #' 
 #' Compute posterior draws of the expected value of the posterior predictive
-#' distribution. Can be performed for the data used to fit the model (posterior
+#' distribution of a \code{brmsfit} model in the \code{brmcoda} object.
+#' Can be performed for the data used to fit the model (posterior
 #' predictive checks) or for new data. By definition, these predictions have
 #' smaller variance than the posterior predictions performed by the
-#' \code{\link{posterior_predict.brmsfit}} method. This is because only the
+#' \code{\link{predict.brmcoda}} method. This is because only the
 #' uncertainty in the expected value of the posterior predictive distribution is
-#' incorporated in the draws computed by \code{posterior_epred} while the
+#' incorporated in the draws computed by \code{fitted} while the
 #' residual error is ignored there. However, the estimated means of both methods
 #' averaged across draws should be very similar.
 #' 
 #' @inheritParams predict.brmcoda
 #' @param ... Further arguments passed to \code{\link{fitted.brmsfit}}
 #' that control additional aspects of prediction.
+#' 
+#' @inherit brms::fitted.brmsfit return
+#'   
+#' @seealso \code{\link[brms:fitted.brmsfit]{fitted.brmsfit}}
 #' 
 #' @importFrom compositions ilrInv
 #' @importFrom brms posterior_summary do_call
@@ -169,16 +170,16 @@ fitted.brmcoda <- function(object,
 #' Population-Level Estimates
 #' 
 #' Extract the population-level ('fixed') effects
-#' from a \code{brmsfit} in the \code{brmcoda} object.
+#' from the \code{brmsfit} object in a \code{brmcoda} object.
 #' 
 #' @aliases fixef
 #' 
-#' @inheritParams predict.brmcoda
+#' @param object An object of class \code{brmcoda}.
+#' @param ... Further arguments passed to \code{\link{fixef.brmsfit}}
 #' 
-#' @return If \code{summary} is \code{TRUE}, a matrix returned
-#' by \code{\link{posterior_summary}} for the population-level effects.
-#' If \code{summary} is \code{FALSE}, a matrix with one row per
-#' posterior draw and one column per population-level effect.
+#' @inherit brms::fixef.brmsfit return
+#' 
+#' @seealso \code{\link[brms:fixef.brmsfit]{fixef.brmsfit}}
 #' 
 #' @importFrom brms fixef
 #' @method fixef brmcoda
@@ -192,13 +193,14 @@ fixef.brmcoda <- function(object, ...) {
 #'
 #' Get a point estimate of the covariance or
 #' correlation matrix of population-level parameters
+#' of the \code{brmsfit} object in a \code{brmcoda} object.
 #'
-#' @inheritParams predict.brmcoda
+#' @inheritParams fixef.brmcoda
+#' @param ... Further arguments passed to \code{\link{vcov.brmsfit}}
 #' 
-#' @param correlation Logical; if \code{FALSE} (the default), compute
-#'   the covariance matrix, if \code{TRUE}, compute the correlation matrix.
+#' @inherit brms::vcov.brmsfit return
 #' 
-#' @return covariance or correlation matrix of population-level parameters
+#' @seealso \code{\link[brms:vcov.brmsfit]{vcov.brmsfit}}
 #' 
 #' @method vcov brmcoda
 #' @export
@@ -209,21 +211,17 @@ vcov.brmcoda <- function(object, ...) {
 #' Group-Level Estimates
 #'
 #' Extract the group-level ('random') effects of each level
+#' of the \code{brmsfit} object in a \code{brmcoda} object.
 #' 
 #' @aliases ranef
 #' 
-#' @inheritParams predict.brmcoda
+#' @inheritParams fixef.brmcoda
+#' @param ... Further arguments passed to \code{\link{ranef.brmsfit}}
 #' 
-#' @return A list of 3D arrays (one per grouping factor).
-#' If \code{summary} is \code{TRUE},
-#' the 1st dimension contains the factor levels,
-#' the 2nd dimension contains the summary statistics
-#' (see \code{\link{posterior_summary}}), and
-#' the 3rd dimension contains the group-level effects.
-#' If \code{summary} is \code{FALSE}, the 1st dimension contains
-#' the posterior draws, the 2nd dimension contains the factor levels,
-#' and the 3rd dimension contains the group-level effects.
+#' @inherit brms::ranef.brmsfit return
 #'
+#' @seealso \code{\link[brms:ranef.brmsfit]{ranef.brmsfit}}
+#' 
 #' @importFrom brms ranef
 #' @method ranef brmcoda
 #' @export ranef
@@ -236,21 +234,17 @@ ranef.brmcoda <- function(object, ...) {
 #'
 #' Extract model coefficients, which are the sum of population-level
 #' effects and corresponding group-level effects
+#' of the \code{brmsfit} object in a \code{brmcoda} object.
 #' 
 #' @aliases coef
 #' 
-#' @inheritParams predict.brmcoda
+#' @inheritParams fixef.brmcoda
+#' @param ... Further arguments passed to \code{\link{coef.brmsfit}}
 #' 
-#' @return A list of 3D arrays (one per grouping factor).
-#' If \code{summary} is \code{TRUE},
-#' the 1st dimension contains the factor levels,
-#' the 2nd dimension contains the summary statistics
-#' (see \code{\link{posterior_summary}}), and
-#' the 3rd dimension contains the group-level effects.
-#' If \code{summary} is \code{FALSE}, the 1st dimension contains
-#' the posterior draws, the 2nd dimension contains the factor levels,
-#' and the 3rd dimension contains the group-level effects.
+#' @inherit brms::coef.brmsfit return
 #'
+#' @seealso \code{\link[brms:coef.brmsfit]{coef.brmsfit}}
+#' 
 #' @method coef brmcoda
 #' @export
 coef.brmcoda <- function(object, ...) {
@@ -259,19 +253,17 @@ coef.brmcoda <- function(object, ...) {
 
 #' Extract Variance and Correlation Components
 #'
-#' This function calculates the estimated standard deviations,
+#' Calculates the estimated standard deviations,
 #' correlations and covariances of the group-level terms
-#' in a multilevel model of class \code{brmsfit}.
-#' For linear models, the residual standard deviations,
-#' correlations and covariances are also returned.
+#' of the \code{brmsfit} object in a \code{brmcoda} object.
 #' 
-#' @inheritParams predict.brmcoda
-##' 
-#' @return A list of lists (one per grouping factor), each with
-#' three elements: a matrix containing the standard deviations,
-#' an array containing the correlation matrix, and an array
-#' containing the covariance matrix with variances on the diagonal.
-#'
+#' @inheritParams fixef.brmcoda
+#' @param ... Further arguments passed to \code{\link{VarCorr.brmsfit}}
+#' 
+#' @inherit brms::VarCorr.brmsfit return
+#' 
+#' @seealso \code{\link[brms:VarCorr.brmsfit]{VarCorr.brmsfit}}
+#' 
 #' @importFrom brms VarCorr
 #' @method VarCorr brmcoda
 #' @export VarCorr
@@ -284,9 +276,11 @@ VarCorr.brmcoda <- function(object, ...) {
 #' 
 #' Compute posterior draws of residuals/predictive errors
 #' 
-#' @return An S x N \code{array} of predictive error draws, where S is the
-#' number of posterior draws and N is the number of observations.
+#' @inheritParams fixef.brmcoda
+#' @param ... Further arguments passed to \code{\link{residuals.brmsfit}}
+#' @inherit brms::residuals.brmsfit return
 #'   
+#' @seealso \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}
 #' @method residuals brmcoda
 #' @export
 residuals.brmcoda <- function(object, ...) {

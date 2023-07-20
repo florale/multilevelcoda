@@ -3,28 +3,31 @@
 \name{coef.brmcoda}
 \alias{coef.brmcoda}
 \alias{coef}
-\title{Extract Model Coefficients}
+\title{Model Coefficients}
 \usage{
 \method{coef}{brmcoda}(object, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
-that control additional aspects of prediction.}
+\item{...}{Further arguments passed to \code{\link{coef.brmsfit}}}
 }
 \value{
 A list of 3D arrays (one per grouping factor).
-If \code{summary} is \code{TRUE},
-the 1st dimension contains the factor levels,
-the 2nd dimension contains the summary statistics
-(see \code{\link{posterior_summary}}), and
-the 3rd dimension contains the group-level effects.
-If \code{summary} is \code{FALSE}, the 1st dimension contains
-the posterior draws, the 2nd dimension contains the factor levels,
-and the 3rd dimension contains the group-level effects.
+ If \code{summary} is \code{TRUE},
+ the 1st dimension contains the factor levels,
+ the 2nd dimension contains the summary statistics
+ (see \code{\link[brms]{posterior_summary}}), and
+ the 3rd dimension contains the group-level effects.
+ If \code{summary} is \code{FALSE}, the 1st dimension contains
+ the posterior draws, the 2nd dimension contains the factor levels,
+ and the 3rd dimension contains the group-level effects.
 }
 \description{
 Extract model coefficients, which are the sum of population-level
 effects and corresponding group-level effects
+of the \code{brmsfit} object in a \code{brmcoda} object.
+}
+\seealso{
+\code{\link[brms:coef.brmsfit]{coef.brmsfit}}
 }

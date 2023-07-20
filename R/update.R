@@ -8,24 +8,9 @@
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
 #' @param ... generic argument, not in use.
 #' 
-#' @return A updated \code{\link{compilr}} object with twelve elements.
-#' \itemize{
-#'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
-#'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-#'   \item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
-#'   or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-#'   \item{\code{TotalComp}}{ A vector of class \code{acomp} representing one closed total composition
-#'   or a matrix of class \code{acomp} representing multiple closed total compositions each in one row.}
-#'   \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
-#'   \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-#'   \item{\code{TotalILR}}{ Isometric log ratio transform of total composition.}
-#'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
-#'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
-#'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
-#'   \item{\code{parts}}{ Names of compositional variables.}
-#'   \item{\code{idvar}}{ Name of the variable containing IDs.}
-#'   \item{\code{total}}{ Total amount to which the compositions is closed.}
-#' }
+#' @inherit compilr return
+#' 
+#' @seealso \code{\link[compilr]{compilr}}
 #' 
 #' @importFrom extraoperators %ain% %snin% %nin%
 #' @method update compilr
@@ -39,8 +24,6 @@
 #' newdat <- mcompd[ID != 1] # excluding ID 1
 #' cilr_new <- update(object = cilr, newdata = newdat)
 #' 
-#' ## cleanup
-#' rm(cilr, mcompd, sbp, cilr_new, newdat)
 #' 
 update.compilr <- function(object, newdata, ...) { 
   
@@ -86,13 +69,10 @@ update.compilr <- function(object, newdata, ...) {
 #' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
-#' @return A \code{\link{brmcoda}} with two elements
-#' \itemize{
-#'   \item{\code{CompIlr}}{ An object of class \code{compilr} used in the \code{brm} model. }
-#'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
-#'   along with many other useful information about the model.}
-#'   }
+#' @inherit brmcoda return
 #'  
+#' @seealso \code{\link[brmcoda]{brmcoda}}
+#' 
 #' @method update brmcoda
 #' @export
 #' @examples 

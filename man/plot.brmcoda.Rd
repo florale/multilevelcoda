@@ -13,7 +13,7 @@
 }
 \value{
 An invisible list of
-\code{\link[gtable:gtable]{gtable}} objects.
+  \code{\link[gtable:gtable]{gtable}} objects.
 }
 \description{
 Make a plot of \code{\link{brmcoda}} model results.
@@ -32,5 +32,4 @@ fit <- brmcoda(compilr = cilr,
                chain = 1, iter = 500)
 plot(fit)
 }
-
 }

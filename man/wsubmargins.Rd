@@ -23,22 +23,26 @@ wsubmargins(
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{ref}{A character string. Default is \code{"clustermean"}.}
+\item{ref}{Either a character value or vector or a dataset.
+Can be \code{"grandmean"} and/or \code{"clustermean"}, or
+a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
+of combinations of covariates over which predictions are made.
+User's specified reference grid is only possible for simple substitution.}
 
-\item{level}{A character string. Default is \code{"within"}.}
+\item{level}{A character string or vector.
+Should the estimate be at the \code{"between"} and/or \code{"within"} level?}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
-\code{weight} can be \code{"equal"} which gives equal weight to units (e.g., individuals) or
-\code{"proportional"} which weights in proportion to the frequencies of units being averaged
+If \code{"equal"}, give equal weight to units (e.g., individuals).
+If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals)
-Default is \code{"equal"}.}
+Default is \code{equal}.}
 
 \item{...}{Additional arguments passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list containing the result of multilevel compositional substitution model.
-Each element of the list is the estimation for a compositional part
-and include at least eight elements.
+A list containing the results of multilevel compositional substitution model.
+The first four lists contain the results of the substitution estimation for a compositional part.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low} and \code{CI_high}}{ 95\% credible intervals.}
@@ -50,11 +54,9 @@ and include at least eight elements.
 }
 }
 \description{
-Using a fitted model object, estimates the the average difference
-when compositional parts are substituted for specific unit(s) at \code{within} level.
-The \code{wsubmargins} output encapsulates
-the substitution results for all compositional parts
-present in the \code{\link{brmcoda}} object.
+This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
+when compositional parts are substituted for specific unit(s) at \emph{within} level
+using cluster mean (e.g., compositional mean at individual level) as reference composition.
 It is recommended that users run substitution model using the \code{\link{substitution}} function.
 }
 \examples{
@@ -64,7 +66,7 @@ data(mcompd)
 data(sbp)
 data(psub)
 cilr <- compilr(data = mcompd, sbp = sbp, 
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 # model with compositional predictor at between and within-person levels
 m <- brmcoda(compilr = cilr, 
@@ -75,4 +77,7 @@ m <- brmcoda(compilr = cilr,
                      
 subm <- wsubmargins(object = m, basesub = psub, delta = 5)
 }}
+}
+\seealso{
+\code{\link{substitution}}
 }

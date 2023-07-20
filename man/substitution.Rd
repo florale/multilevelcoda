@@ -11,7 +11,7 @@ substitution(
   summary = TRUE,
   ref = c("grandmean", "clustermean"),
   level = c("between", "within"),
-  weight = NULL,
+  weight = c("equal", "proportional"),
   ...
 )
 }
@@ -32,18 +32,17 @@ Only applicable for model with covariates in addition to
 the isometric log-ratio coordinates (i.e., adjusted model).}
 
 \item{ref}{Either a character value or vector or a dataset.
-\code{ref} can be \code{"grandmean"} and/or \code{"clustermean"}, or
+Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
-User's specified reference grid only applicable to substitution model
-using a single reference composition value (e.g., user's specified).}
+User's specified reference grid is only possible for simple substitution.}
 
 \item{level}{A character string or vector.
 Should the estimate be at the \code{"between"} and/or \code{"within"} level?}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
-\code{weight} can be \code{"equal"} which gives equal weight to units (e.g., individuals) or
-\code{"proportional"} which weights in proportion to the frequencies of units being averaged
+If \code{"equal"}, give equal weight to units (e.g., individuals).
+If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals)
 Default is \code{equal}.}
 
@@ -76,7 +75,7 @@ data(mcompd)
 data(sbp)
 data(psub)
 cilr <- compilr(data = mcompd, sbp = sbp, 
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 # model with compositional predictor at between and between-person levels
 m <- brmcoda(compilr = cilr, 
@@ -84,8 +83,6 @@ m <- brmcoda(compilr = cilr,
                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
              chain = 1, iter = 500, backend = "cmdstanr")
              
-subm <- substitution(object = m, delta = 5,
-                     ref = c("grandmean", "clustermean"), 
-                     level = c("between", "within"))
+subm <- substitution(object = m, delta = 5)
 }}
 }

@@ -7,9 +7,9 @@
 \method{print}{brmcoda}(x, ...)
 }
 \arguments{
-\item{x}{A \code{brmcoda} object.}
+\item{x}{An object of class \code{brmcoda}.}
 
-\item{...}{Additional arguments to be passed to to method \code{summary} of \code{brmsfit}.}
+\item{...}{Other arguments passed to \code{summary.brmsfit}}
 }
 \description{
 Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object

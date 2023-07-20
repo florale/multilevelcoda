@@ -9,11 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
-that control additional aspects of prediction.}
-
-\item{correlation}{Logical; if \code{FALSE} (the default), compute
-the covariance matrix, if \code{TRUE}, compute the correlation matrix.}
+\item{...}{Further arguments passed to \code{\link{vcov.brmsfit}}}
 }
 \value{
 covariance or correlation matrix of population-level parameters
@@ -21,4 +17,8 @@ covariance or correlation matrix of population-level parameters
 \description{
 Get a point estimate of the covariance or
 correlation matrix of population-level parameters
+of the \code{brmsfit} object in a \code{brmcoda} object.
+}
+\seealso{
+\code{\link[brms:vcov.brmsfit]{vcov.brmsfit}}
 }

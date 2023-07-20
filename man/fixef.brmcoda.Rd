@@ -3,23 +3,25 @@
 \name{fixef.brmcoda}
 \alias{fixef.brmcoda}
 \alias{fixef}
-\title{Extract Population-Level Estimates}
+\title{Population-Level Estimates}
 \usage{
 \method{fixef}{brmcoda}(object, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
-that control additional aspects of prediction.}
+\item{...}{Further arguments passed to \code{\link{fixef.brmsfit}}}
 }
 \value{
 If \code{summary} is \code{TRUE}, a matrix returned
-by \code{\link{posterior_summary}} for the population-level effects.
-If \code{summary} is \code{FALSE}, a matrix with one row per
-posterior draw and one column per population-level effect.
+  by \code{\link[brms]{posterior_summary}} for the population-level effects.
+  If \code{summary} is \code{FALSE}, a matrix with one row per
+  posterior draw and one column per population-level effect.
 }
 \description{
 Extract the population-level ('fixed') effects
-from a \code{brmsfit} in the \code{brmcoda} object.
+from the \code{brmsfit} object in a \code{brmcoda} object.
+}
+\seealso{
+\code{\link[brms:fixef.brmsfit]{fixef.brmsfit}}
 }

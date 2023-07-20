@@ -9,15 +9,6 @@ is.compilr <- function(x) {
   inherits(x, "compilr")
 }
 
-#' Checks if argument is a \code{substitution} object
-#'
-#' @param x An object of class \code{substitution}.
-#'
-#' @export
-is.substitution <- function(x) {
-  inherits(x, "substitution")
-}
-
 #' Mean amounts and mean compositions presented in an \code{compilr} object.
 #' 
 #' @param x An object of class \code{compilr}.

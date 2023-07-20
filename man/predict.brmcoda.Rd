@@ -30,21 +30,42 @@ if \code{NA}, include no group-level effects.}
 If either \code{"response"} or \code{"linear"},
 results are returned using the corresponding method in \code{predict.brmsfit}.
 \code{"comp"} is only relevant to multivariate models of class \code{mvbrmsformula}
-(i.e., when response is composition). If \code{"comp"} is specified,
+(i.e., when response is composition). If \code{"comp"},
 results are returned on the compositional scale of the response variable.}
 
-\item{summary}{Should summary statistics be returned instead of the raw values?
-Default is \code{TRUE}.}
+\item{summary}{Should summary statistics be returned
+instead of the raw values? Default is \code{TRUE}.}
 
 \item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
 that control additional aspects of prediction.}
 }
+\value{
+An \code{array} of predicted response values.
+  If \code{summary = FALSE} the output resembles those of
+  \code{\link[brms]{posterior_predict.brmsfit}}.
+
+  If \code{summary = TRUE} the output depends on the family: For categorical
+  and ordinal families, the output is an N x C matrix, where N is the number
+  of observations, C is the number of categories, and the values are
+  predicted category probabilities. For all other families, the output is a N
+  x E matrix where E = \code{2 + length(probs)} is the number of summary
+  statistics: The \code{Estimate} column contains point estimates (either
+  mean or median depending on argument \code{robust}), while the
+  \code{Est.Error} column contains uncertainty estimates (either standard
+  deviation or median absolute deviation depending on argument
+  \code{robust}). The remaining columns starting with \code{Q} contain
+  quantile estimates as specified via argument \code{probs}.
+}
 \description{
-Compute posterior draws of the posterior predictive distribution. Can be
-performed for the data used to fit the model (posterior predictive checks) or
+Compute posterior draws of the posterior predictive distribution
+of a \code{brmsfit} model in the \code{brmcoda} object.
+Can be performed for the data used to fit the model (posterior predictive checks) or
 for new data. By definition, these draws have higher variance than draws
 of the expected value of the posterior predictive distribution computed by
-\code{\link{posterior_epred.brmsfit}}. This is because the residual error
+\code{\link{fitted.brmcoda}}. This is because the residual error
 is incorporated in \code{posterior_predict}. However, the estimated means of
 both methods averaged across draws should be very similar.
+}
+\seealso{
+\code{\link[brms:predict.brmsfit]{predict.brmsfit}}
 }

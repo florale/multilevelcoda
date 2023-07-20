@@ -3,27 +3,30 @@
 \name{ranef.brmcoda}
 \alias{ranef.brmcoda}
 \alias{ranef}
-\title{Extract Group-Level Estimates}
+\title{Group-Level Estimates}
 \usage{
 \method{ranef}{brmcoda}(object, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
-that control additional aspects of prediction.}
+\item{...}{Further arguments passed to \code{\link{ranef.brmsfit}}}
 }
 \value{
 A list of 3D arrays (one per grouping factor).
-If \code{summary} is \code{TRUE},
-the 1st dimension contains the factor levels,
-the 2nd dimension contains the summary statistics
-(see \code{\link{posterior_summary}}), and
-the 3rd dimension contains the group-level effects.
-If \code{summary} is \code{FALSE}, the 1st dimension contains
-the posterior draws, the 2nd dimension contains the factor levels,
-and the 3rd dimension contains the group-level effects.
+ If \code{summary} is \code{TRUE},
+ the 1st dimension contains the factor levels,
+ the 2nd dimension contains the summary statistics
+ (see \code{\link[brms]{posterior_summary}}), and
+ the 3rd dimension contains the group-level effects.
+ If \code{summary} is \code{FALSE}, the 1st dimension contains
+ the posterior draws, the 2nd dimension contains the factor levels,
+ and the 3rd dimension contains the group-level effects.
 }
 \description{
 Extract the group-level ('random') effects of each level
+of the \code{brmsfit} object in a \code{brmcoda} object.
+}
+\seealso{
+\code{\link[brms:ranef.brmsfit]{ranef.brmsfit}}
 }

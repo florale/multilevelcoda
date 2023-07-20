@@ -50,7 +50,4 @@ data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, 
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 str(cilr)
-
-## cleanup
-rm(cilr, mcompd, sbp)
 }

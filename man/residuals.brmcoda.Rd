@@ -6,10 +6,21 @@
 \usage{
 \method{residuals}{brmcoda}(object, ...)
 }
+\arguments{
+\item{object}{An object of class \code{brmcoda}.}
+
+\item{...}{Further arguments passed to \code{\link{residuals.brmsfit}}}
+}
 \value{
-An S x N \code{array} of predictive error draws, where S is the
-number of posterior draws and N is the number of observations.
+An \code{array} of predictive error/residual draws. If
+  \code{summary = FALSE} the output resembles those of
+  \code{\link[brms]{predictive_error.brmsfit}}. If \code{summary = TRUE} the output
+  is an N x E matrix, where N is the number of observations and E denotes
+  the summary statistics computed from the draws.
 }
 \description{
 Compute posterior draws of residuals/predictive errors
+}
+\seealso{
+\code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}
 }

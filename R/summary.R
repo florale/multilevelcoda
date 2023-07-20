@@ -8,9 +8,9 @@
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
-#' (e.g., observations across individuals)
+#' (e.g., observations across individuals).
 #' Default is \code{equal}.
-#' @param digits A integer value used for number formatting. Default is \coda{3}.
+#' @param digits A integer value used for number formatting. Default is \code{3}.
 #' 
 #' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
 #' @method summary compilr
@@ -154,7 +154,8 @@ summary.compilr <- function(object,
 
 #' Print a summary for a \code{compilr} object
 #' 
-#' @inheritParams summary.compilr
+#' @param x An object of class \code{compilr}.
+#' @param ... Other arguments passed to \code{summary.compilr}
 #' 
 #' @seealso \code{\link{summary.compilr}}
 #' 
@@ -178,6 +179,7 @@ summary.brmcoda <- function(object, ...) {
 
 #' Print a summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
+#' @param x An object of class \code{brmcoda}.
 #' @inheritParams summary.brmcoda
 #' 
 #' @seealso \code{\link{summary.brmcoda}}

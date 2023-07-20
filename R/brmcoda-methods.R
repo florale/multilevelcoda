@@ -8,10 +8,12 @@
 is.brmcoda <- function(x) {
   inherits(x, "brmcoda")
 }
+
 #' Extract Number of Observations from \pkg{brmcoda} Models
 #'
 #' @param object A \code{brmcoda} object.
 #'
+#' @importFrom stats nobs
 #' @method nobs brmcoda
 #' @export
 nobs.brmcoda <- function(x) {
@@ -47,12 +49,15 @@ as.array.brmcoda <- function(x) {
 #' @param x An object of class \code{brmcoda}.
 #'
 #' @name draws-index-brmcoda
+#' 
 NULL
 
 #' @rdname draws-index-brmcoda
 #' @importFrom brms variables
 #' @method variables brmcoda
-#' @export variables
+#' 
+#' @seealso \code{\link[brms:variables]{variables.brmsfit}}
+#' 
 #' @export
 variables.brmcoda <- function(x, ...) {
   variables(x$Model)
@@ -61,7 +66,9 @@ variables.brmcoda <- function(x, ...) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms nvariables
 #' @method nvariables brmcoda
-#' @export nvariables
+#' 
+#' @seealso \code{\link[brms:nvariables.brmsfit]{nvariables.brmsfit}}
+#' 
 #' @export
 nvariables.brmcoda <- function(x, ...) {
   nvariables(x$Model)
@@ -70,7 +77,9 @@ nvariables.brmcoda <- function(x, ...) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms niterations
 #' @method niterations brmcoda
-#' @export niterations
+#' 
+#' @seealso \code{\link[brms:niterations.brmsfit]{niterations.brmsfit}}
+#' 
 #' @export
 niterations.brmcoda <- function(x) {
   niterations(x$Model)
@@ -79,7 +88,9 @@ niterations.brmcoda <- function(x) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms nchains
 #' @method nchains brmcoda
-#' @export nchains
+#' 
+#' @seealso \code{\link[brms:nchains.brmsfit]{nchains.brmsfit}}
+#' 
 #' @export 
 nchains.brmcoda <- function(x) {
   nchains(x$Model)
@@ -88,7 +99,9 @@ nchains.brmcoda <- function(x) {
 #' @rdname draws-index-brmcoda
 #' @importFrom brms ndraws
 #' @method ndraws brmcoda
-#' @export ndraws
+#' 
+#' @seealso \code{\link[brms:ndraws.brmsfit]{ndraws.brmsfit}}
+#' 
 #' @export
 ndraws.brmcoda <- function(x) {
   ndraws(x$Model)
@@ -106,9 +119,9 @@ ndraws.brmcoda <- function(x) {
 #   }
 # }
 
-#' Extract Diagnostic Quantities from \pkg{brmcoda} Models
+#' Extract Diagnostic Quantities from \code{brmsfit} Models in \code{brmcoda}
 #'
-#' @name diagnostic-quantities
+#' @name diagnostic-quantities-brmcoda
 #' @aliases log_posterior nuts_params rhat neff_ratio
 #'
 #' @param x A \code{brmcoda} object.
@@ -118,55 +131,46 @@ ndraws.brmcoda <- function(x) {
 #'
 NULL
 
-#' @rdname diagnostic-quantities
+#' @rdname diagnostic-quantities-brmcoda
 #' @importFrom brms log_posterior
-#' @export log_posterior
+#' @method log_posterior brmcoda
+#' 
+#' @seealso \code{\link[brms:log_posterior.brmsfit]{log_posterior.brmsfit}}
+#' 
 #' @export
 log_posterior.brmcoda <- function(x) {
   log_posterior(x$Model)
 }
 
-#' @rdname diagnostic-quantities
+#' @rdname diagnostic-quantities-brmcoda
 #' @importFrom brms nuts_params
+#' @method nuts_params brmcoda
+#' 
+#' @seealso \code{\link[brms:nuts_params.brmsfit]{nuts_params.brmsfit}}
+#' 
 #' @export
 nuts_params.brmcoda <- function(x) {
   nuts_params(x$Model)
 }
 
-#' @rdname diagnostic-quantities
+#' @rdname diagnostic-quantities-brmcoda
 #' @importFrom brms rhat
-#' @export rhat
+#' @method rhat brmcoda
+#' 
+#' @seealso \code{\link[brms:rhat.brmsfit]{rhat.brmsfit}}
+#' 
 #' @export
 rhat.brmcoda <- function(x) {
   rhat(x$Model)
 }
 
-#' @rdname diagnostic-quantities
+#' @rdname diagnostic-quantities-brmcoda
 #' @importFrom brms neff_ratio
-#' @export neff_ratio
+#' @method neff_ratio brmcoda
+#' 
+#' @seealso \code{\link[brms:neff_ratio.brmsfit]{neff_ratio.brmsfit}}
+#' 
 #' @export
 neff_ratio.brmcoda <- function(x) {
   neff_ratio(x$Model)
-}
-
-#' Interface to \pkg{shinystan}
-#' 
-#' Provide an interface to \pkg{shinystan} for models fitted with \pkg{brms}
-#' 
-#' @aliases launch_shinystan
-#' 
-#' @param object A fitted model object typically of class \code{brmcoda}.
-#' @param ... Optional arguments to pass to 
-#' \code{\link{launch_shinystan.brmsfit}} or \code{\link[shiny:runApp]{runApp}}
-#'
-#' @seealso \code{\link[shinystan:launch_shinystan]{launch_shinystan}}
-#' 
-#' @return An S4 shinystan object
-#' 
-#' @method launch_shinystan brmcoda
-#' @importFrom shinystan launch_shinystan
-#' @export launch_shinystan
-#' @export
-launch_shinystan.brmcoda <- function(object, ...) {
-  launch_shinystan(object$Model, ...)
 }
