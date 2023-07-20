@@ -73,10 +73,16 @@
     <loc>https://florale.github.io/multilevelcoda/reference/is.brmcoda.html</loc>
   </url>
   <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/is.compilr.html</loc>
+  </url>
+  <url>
     <loc>https://florale.github.io/multilevelcoda/reference/launch_shinystan.brmcoda.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/mcompd.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/mean.compilr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/nobs.brmcoda.html</loc>
@@ -104,6 +110,9 @@
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/ranef.brmcoda.html</loc>
+  </url>
+  <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/residuals.brmcoda.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/sbp.html</loc>
