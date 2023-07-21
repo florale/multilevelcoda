@@ -63,7 +63,7 @@ wsubmargins <- function (object,
 
   # y0margins --------------------------------
   y0 <- fitted(
-    object$Model,
+    object,
     newdata = d0,
     re_formula = NULL,
     summary = FALSE

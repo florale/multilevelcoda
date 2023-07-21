@@ -86,7 +86,7 @@ bsub <- function(object,
 
   # y0 --------------------------------
   y0 <- fitted(
-    object$Model,
+    object,
     newdata = d0,
     re_formula = NA,
     summary = FALSE)
