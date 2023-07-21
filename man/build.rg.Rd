@@ -22,7 +22,7 @@ If \code{"proportional"}, weights in proportion to the frequencies of units bein
 (e.g., observations across individuals)
 Default is \code{equal}.}
 
-\item{FALSE}{Logical value only relevant when \code{ref} is an user's specified reference grid
+\item{fill}{Logical value only relevant when \code{ref} is an user's specified reference grid
 in which information about some, but not all covariates is provided
 (e.g., models including age and sex as covariate but only age was provided in the reference grid).
 If \code{TRUE}, the unspecified covariates are filled with the default reference grid.

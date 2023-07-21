@@ -25,7 +25,7 @@ Default to all \code{ref} available in the \code{\link{substitution}} object .}
 \item{level}{A character string or vector (\code{"between"} and/or \code{"within"}).
 Default to all \code{level} available in the \code{\link{substitution}} object.}
 
-\item{digits}{A integer value used for number formatting. Default is \coda{2}.}
+\item{digits}{A integer value used for number formatting. Default is \code{2}.}
 
 \item{...}{generic argument, not in use.}
 }

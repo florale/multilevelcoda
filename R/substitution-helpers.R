@@ -23,7 +23,7 @@ is.substitution <- function(x) {
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals)
 #' Default is \code{equal}.
-#' @param FALSE Logical value only relevant when \code{ref} is an user's specified reference grid
+#' @param fill Logical value only relevant when \code{ref} is an user's specified reference grid
 #' in which information about some, but not all covariates is provided
 #' (e.g., models including age and sex as covariate but only age was provided in the reference grid).
 #' If \code{TRUE}, the unspecified covariates are filled with the default reference grid.
@@ -292,7 +292,7 @@ NULL
         dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NA,
             summary = FALSE
@@ -413,7 +413,7 @@ NULL
         dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NA,
             summary = FALSE
@@ -520,7 +520,7 @@ NULL
         dsub <- cbind(dnew, bilrsub, wilr0)
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
@@ -614,7 +614,7 @@ NULL
         # prediction
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
@@ -698,7 +698,11 @@ NULL
         
         # prediction
         dsub <- cbind(dnew, tilr)
-        ysub <- fitted(object$Model, newdata = dsub, re_formula = NULL, summary = FALSE)
+        ysub <-
+          fitted(object,
+                 newdata = dsub,
+                 re_formula = NULL,
+                 summary = FALSE)
         ysub <- rowMeans(ysub)
         
         # difference in outcomes between substitution and no change
