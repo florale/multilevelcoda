@@ -30,7 +30,7 @@ data(sbp)
 data(psub)
 
 cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
