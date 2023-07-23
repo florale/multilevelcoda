@@ -4,10 +4,12 @@
 \alias{nobs.brmcoda}
 \title{Extract Number of Observations from \pkg{brmcoda} object}
 \usage{
-\method{nobs}{brmcoda}(x)
+\method{nobs}{brmcoda}(object, ...)
 }
 \arguments{
 \item{object}{A \code{brmcoda} object.}
+
+\item{...}{Further arguments to be passed to methods.}
 }
 \description{
 Extract Number of Observations from \pkg{brmcoda} object

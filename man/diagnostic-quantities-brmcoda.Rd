@@ -12,18 +12,19 @@
 \alias{neff_ratio.brmcoda}
 \title{Extract Diagnostic Quantities from \code{brmsfit} Models in \code{brmcoda}}
 \usage{
-\method{log_posterior}{brmcoda}(x)
+\method{log_posterior}{brmcoda}(object, ...)
 
-\method{nuts_params}{brmcoda}(x)
+\method{nuts_params}{brmcoda}(object, ...)
 
-\method{rhat}{brmcoda}(x)
+\method{rhat}{brmcoda}(x, ...)
 
-\method{neff_ratio}{brmcoda}(x)
+\method{neff_ratio}{brmcoda}(object, ...)
 }
 \arguments{
-\item{x}{A \code{brmcoda} object.}
+\item{...}{Arguments passed to individual methods (if applicable).}
 
-\item{...}{Arguments passed to individual methods.}
+\item{x, object}{A \code{brmcoda} object or another \R object for which
+the methods are defined.}
 }
 \value{
 The exact form of the output depends on the method.

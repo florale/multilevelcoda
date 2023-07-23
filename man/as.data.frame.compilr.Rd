@@ -7,6 +7,8 @@
 \usage{
 \method{as.data.frame}{compilr}(
   x,
+  row.names = NULL,
+  optional = TRUE,
   class = c("composition", "logratio"),
   level = c("between", "within", "total"),
   digits = 3,
@@ -24,6 +26,9 @@
 \arguments{
 \item{x}{An object of class \code{compilr}.}
 
+\item{row.names, optional}{Unused and only added for consistency with
+the \code{\link[base:as.data.frame]{as.data.frame}} generic.}
+
 \item{class}{Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 specify the geometry of the composition.}
 
@@ -31,6 +36,8 @@ specify the geometry of the composition.}
 indicating the level of the geometry.}
 
 \item{digits}{A integer value used for number formatting. Default is \code{3}.}
+
+\item{...}{generic argument, not in use.}
 }
 \description{
 Extract amounts and compositions in conventional formats

@@ -80,6 +80,7 @@ plot.substitution <- function(x, to,
   }
   plotsub
 }
+
 #' Trace and Density Plots for MCMC Draws plot
 #'
 #' Make a plot of \code{\link{brmcoda}} model results.
@@ -92,7 +93,7 @@ plot.substitution <- function(x, to,
 #' @method plot brmcoda
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(mcompd)
 #' data(sbp)
 #' cilr <- compilr(data = mcompd, sbp = sbp,
@@ -105,6 +106,6 @@ plot.substitution <- function(x, to,
 #'                chain = 1, iter = 500)
 #' plot(fit)
 #' }
-plot.brmcoda <- function(x) {
-  plot(x$Model)
+plot.brmcoda <- function(x, ...) {
+  plot(x$Model, ...)
 }

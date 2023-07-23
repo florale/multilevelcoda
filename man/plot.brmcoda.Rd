@@ -4,7 +4,7 @@
 \alias{plot.brmcoda}
 \title{Trace and Density Plots for MCMC Draws plot}
 \usage{
-\method{plot}{brmcoda}(x)
+\method{plot}{brmcoda}(x, ...)
 }
 \arguments{
 \item{x}{A \code{\link{brmcoda}} class object.}
@@ -19,7 +19,7 @@ An invisible list of
 Make a plot of \code{\link{brmcoda}} model results.
 }
 \examples{
-\donttest{
+\dontrun{
 data(mcompd)
 data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp,

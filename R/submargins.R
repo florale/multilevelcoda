@@ -1,6 +1,5 @@
-#' @title Average Marginal Substitution
+#' Average Marginal Substitution
 #'
-#' @description
 #' Using a fitted model object, estimates the the average marginal difference 
 #' when compositional parts are substituted for specific unit(s). 
 #' The \code{submargins} output encapsulates 
@@ -33,23 +32,6 @@
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo
 #' @importFrom stats fitted
-#' @export
-#' @examples
-#' \donttest{
-#' data(mcompd)
-#' data(sbp)
-#' data(psub)
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-#' 
-#' # model with compositional predictor
-#' m <- brmcoda(compilr = cilr, 
-#'              formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
-#'              chain = 1, iter = 500,
-#'              backend = "cmdstanr")
-#'              
-#' subm <- submargins(object = m, basesub = psub, delta = 5)
-#' }
 submargins <- function(object,
                        delta,
                        basesub,

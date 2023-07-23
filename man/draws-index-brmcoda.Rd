@@ -2,6 +2,11 @@
 % Please edit documentation in R/brmcoda-methods.R
 \name{draws-index-brmcoda}
 \alias{draws-index-brmcoda}
+\alias{variables}
+\alias{nvariables}
+\alias{niterations}
+\alias{nchains}
+\alias{ndraws}
 \alias{variables.brmcoda}
 \alias{nvariables.brmcoda}
 \alias{niterations.brmcoda}
@@ -21,6 +26,8 @@
 }
 \arguments{
 \item{x}{An object of class \code{brmcoda}.}
+
+\item{...}{Arguments passed to individual methods.}
 }
 \description{
 Index \code{brmcoda} objects

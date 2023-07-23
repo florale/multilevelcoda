@@ -3,7 +3,7 @@
 #' @param object An object of class \code{compilr}.
 #' @param class  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 #' specify the geometry of the composition.
-#' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
+#' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"total"}
 #' indicating the level of the geometry.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -11,6 +11,7 @@
 #' (e.g., observations across individuals).
 #' Default is \code{equal}.
 #' @param digits A integer value used for number formatting. Default is \code{3}.
+#' @param ... generic argument, not in use.
 #' 
 #' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
 #' @method summary compilr
@@ -73,21 +74,21 @@ summary.compilr <- function(object,
     if ("total" %in% level) {
       cat("\n", "———— Raw Composition Statistics ————", "\n")
       for (i in seq_along(output$tcomp)) {
-        cat(paste0("\n", names(output$tcomp)[i], ":\n"))
+        cat(paste0("\n", names(output$tcomp)[i], ":", "\n"))
         print(output$tcomp[[i]], digits = digits)
       }
     }
     if ("between" %in% level) {
       cat("\n", "——— Between-level Composition ———", "\n")
       for (i in seq_along(output$bcomp)) {
-        cat(paste0("\n", names(output$bcomp)[i], ":\n"))
+        cat(paste0("\n", names(output$bcomp)[i], ":", "\n"))
         print(output$bcomp[[i]], digits = digits)
       }
     }
     if ("within" %in% level) {
       cat("\n", "——— Within-level Composition ———", "\n")
       for (i in seq_along(output$wcomp)) {
-        cat(paste0("\n", names(output$wcomp)[i], ":\n"))
+        cat(paste0("\n", names(output$wcomp)[i], ":", "\n"))
         print(output$wcomp[[i]], digits = digits)
       }
     }
@@ -120,19 +121,20 @@ summary.compilr <- function(object,
 #' Print a Summary for a \code{compilr} object
 #' 
 #' @param x An object of class \code{compilr}.
-#' @param ... Other arguments passed to \code{summary.compilr}
+#' @param ... Other arguments passed to \code{summary.compilr}.
 #' 
 #' @seealso \code{\link{summary.compilr}}
 #' 
 #' @export
 print.compilr <- function(x, ...) {
-  summary(object <- x, ...)
+  print(summary(x, ...), ...)
   
 }
+
 #' Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
 #' @param object An object of class \code{brmcoda}.
-#' @param ... Other arguments passed to \code{summary.brmsfit}
+#' @param ... Other arguments passed to \code{summary.brmsfit}.
 #' 
 #' @method summary brmcoda
 #' @export
@@ -145,7 +147,7 @@ summary.brmcoda <- function(object, ...) {
 #' Print a Summary for a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
 #' @param x An object of class \code{brmcoda}.
-#' @inheritParams summary.brmcoda
+#' @param ... Other arguments passed to \code{summary.brmcoda}.
 #' 
 #' @seealso \code{\link{summary.brmcoda}}
 #' 
@@ -255,5 +257,5 @@ summary.substitution <- function(object, delta, to, from,
 #' 
 #' @export
 print.substitution <- function(x, ...) {
-  print(summary(object, ...), ...)
+  print(summary(x, ...), ...)
 }

@@ -16,16 +16,22 @@ is.compilr <- function(x) {
 #' specify the geometry of the composition.
 #' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
 #' indicating the level of the geometry.
+#' @param weight A character value specifying the weight to use in calculation of the reference composition.
+#' If \code{"equal"}, give equal weight to units (e.g., individuals).
+#' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
+#' (e.g., observations across individuals)
+#' Default is \code{equal}.
 #' @param digits A integer value used for number formatting. Default is \code{3}.
+#' @param ... generic argument, not in use.
 #' 
 #' @method mean compilr
 #' @export
-mean.compilr <- function(x, 
+mean.compilr <- function(x, ...,
                          class = c("composition", "logratio"),
                          level = c("between", "within", "total"),
                          weight = c("equal", "proportional"),
-                         digits = 3,
-                         ...) {
+                         digits = 3
+                         ) {
   
   # Assemble
   output <- .get.compilr(x)
@@ -75,9 +81,11 @@ mean.compilr <- function(x,
 #' as data.frames, matrices, or arrays.
 #'
 #' @inheritParams mean.compilr
+#' @param row.names,optional Unused and only added for consistency with
+#' the \code{\link[base:as.data.frame]{as.data.frame}} generic.
 #'
 #' @export
-as.data.frame.compilr <- function(x, 
+as.data.frame.compilr <- function(x, row.names = NULL, optional = TRUE,
                                   class = c("composition", "logratio"),
                                   level = c("between", "within", "total"),
                                   digits = 3,

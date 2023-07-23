@@ -19,7 +19,7 @@
 \item{class}{Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 specify the geometry of the composition.}
 
-\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
+\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"total"}
 indicating the level of the geometry.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
@@ -29,6 +29,8 @@ If \code{"proportional"}, weights in proportion to the frequencies of units bein
 Default is \code{equal}.}
 
 \item{digits}{A integer value used for number formatting. Default is \code{3}.}
+
+\item{...}{generic argument, not in use.}
 }
 \description{
 Create a Summary of a \code{compilr} object

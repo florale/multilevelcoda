@@ -6,14 +6,25 @@
 \alias{as.array.brmcoda}
 \title{Extract Posterior Draws}
 \usage{
-\method{as.data.frame}{brmcoda}(x)
+\method{as.data.frame}{brmcoda}(x, row.names = NULL, optional = TRUE, ...)
 
-\method{as.matrix}{brmcoda}(x)
+\method{as.matrix}{brmcoda}(x, ...)
 
-\method{as.array}{brmcoda}(x)
+\method{as.array}{brmcoda}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{brmcoda}.}
+\item{x}{A \code{brmsfit} object or another \R object for which
+the methods are defined.}
+
+\item{row.names, optional}{Unused and only added for consistency with
+the \code{\link[base:as.data.frame]{as.data.frame}} generic.}
+
+\item{...}{Further arguments to be passed to the corresponding
+\code{\link[brms:draws-brms]{as_draws_*}} methods as well as to
+\code{\link[posterior:subset_draws]{subset_draws}}.}
+}
+\value{
+A data.frame, matrix, or array containing the posterior draws.
 }
 \description{
 Extract posterior draws in conventional formats

@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{An object of class \code{compilr}.}
 
-\item{...}{Other arguments passed to \code{summary.compilr}}
+\item{...}{Other arguments passed to \code{summary.compilr}.}
 }
 \description{
 Print a Summary for a \code{compilr} object

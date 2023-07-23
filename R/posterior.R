@@ -9,6 +9,8 @@
 #' is incorporated in \code{posterior_predict}. However, the estimated means of
 #' both methods averaged across draws should be very similar.
 #' 
+#' @aliases predict
+#' 
 #' @inheritParams brms::predict.brmsfit
 #' @param object An object of class \code{brmcoda}.
 #' @param scale Either \code{"response"} or \code{"linear"} or \code{"comp"}.
@@ -97,6 +99,8 @@ predict.brmcoda <- function(object,
 #' incorporated in the draws computed by \code{fitted} while the
 #' residual error is ignored there. However, the estimated means of both methods
 #' averaged across draws should be very similar.
+#' 
+#' @aliases fitted
 #' 
 #' @inheritParams predict.brmcoda
 #' @param ... Further arguments passed to \code{\link{fitted.brmsfit}}
@@ -257,7 +261,9 @@ coef.brmcoda <- function(object, ...) {
 #' correlations and covariances of the group-level terms
 #' of the \code{brmsfit} object in a \code{brmcoda} object.
 #' 
-#' @inheritParams fixef.brmcoda
+#' @aliases VarCorr
+#' 
+#' @param x An object of class \code{brmcoda}.
 #' @param ... Further arguments passed to \code{\link{VarCorr.brmsfit}}
 #' 
 #' @inherit brms::VarCorr.brmsfit return
@@ -266,10 +272,9 @@ coef.brmcoda <- function(object, ...) {
 #' 
 #' @importFrom brms VarCorr
 #' @method VarCorr brmcoda
-#' @export VarCorr
 #' @export
-VarCorr.brmcoda <- function(object, ...) {
-  VarCorr(object$Model, ...)
+VarCorr.brmcoda <- function(x, ...) {
+  VarCorr(x$Model, ...)
 }
 
 #' Posterior Draws of Residuals/Predictive Errors

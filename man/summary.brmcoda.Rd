@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Other arguments passed to \code{summary.brmsfit}}
+\item{...}{Other arguments passed to \code{summary.brmsfit}.}
 }
 \description{
 Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object

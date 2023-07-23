@@ -2,6 +2,7 @@
 % Please edit documentation in R/posterior.R
 \name{fitted.brmcoda}
 \alias{fitted.brmcoda}
+\alias{fitted}
 \title{Expected Values of the Posterior Predictive Distribution}
 \usage{
 \method{fitted}{brmcoda}(

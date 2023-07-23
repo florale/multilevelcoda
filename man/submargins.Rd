@@ -43,20 +43,3 @@ The \code{submargins} output encapsulates
 the substitution results for all compositional parts
 present in the \code{\link{brmcoda}} object.
 }
-\examples{
-\donttest{
-data(mcompd)
-data(sbp)
-data(psub)
-cilr <- compilr(data = mcompd, sbp = sbp, 
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
-
-# model with compositional predictor
-m <- brmcoda(compilr = cilr, 
-             formula = STRESS ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
-             chain = 1, iter = 500,
-             backend = "cmdstanr")
-             
-subm <- submargins(object = m, basesub = psub, delta = 5)
-}
-}

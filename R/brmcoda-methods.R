@@ -12,12 +12,13 @@ is.brmcoda <- function(x) {
 #' Extract Number of Observations from \pkg{brmcoda} object
 #'
 #' @param object A \code{brmcoda} object.
+#' @param ... Further arguments to be passed to methods.
 #'
 #' @importFrom stats nobs
 #' @method nobs brmcoda
 #' @export
-nobs.brmcoda <- function(x) {
-  nobs(x$Model)
+nobs.brmcoda <- function(object, ...) {
+  nobs(object$Model, ...)
 }
 
 #' Extract Posterior Draws
@@ -25,29 +26,34 @@ nobs.brmcoda <- function(x) {
 #' Extract posterior draws in conventional formats
 #' as data.frames, matrices, or arrays.
 #'
-#' @param x An object of class \code{brmcoda}.
+#' @inheritParams brms::as.data.frame.brmsfit
 #'
+#' @return A data.frame, matrix, or array containing the posterior draws.
+#' 
 #' @export
-as.data.frame.brmcoda <- function(x) {
-  as.data.frame(x$Model)
+as.data.frame.brmcoda <- function(x, row.names = NULL, optional = TRUE, ...) {
+  as.data.frame(x$Model, ...)
 }
 
 #' @rdname as.data.frame.brmcoda
 #' @export
-as.matrix.brmcoda <- function(x) {
-  as.matrix(x$Model)
+as.matrix.brmcoda <- function(x, ...) {
+  as.matrix(x$Model, ...)
 }
 
 #' @rdname as.data.frame.brmcoda
 #' @export
-as.array.brmcoda <- function(x) {
-  as.array(x$Model)
+as.array.brmcoda <- function(x, ...) {
+  as.array(x$Model, ...)
 }
 
 #' Index \code{brmcoda} objects
 #'
+#' @aliases variables nvariables niterations nchains ndraws
+#' 
 #' @param x An object of class \code{brmcoda}.
-#'
+#' @param ... Arguments passed to individual methods.
+#' 
 #' @name draws-index-brmcoda
 #' 
 NULL
@@ -60,7 +66,7 @@ NULL
 #' 
 #' @export
 variables.brmcoda <- function(x, ...) {
-  variables(x$Model)
+  variables(x$Model, ...)
 }
 
 #' @rdname draws-index-brmcoda
@@ -71,7 +77,7 @@ variables.brmcoda <- function(x, ...) {
 #' 
 #' @export
 nvariables.brmcoda <- function(x, ...) {
-  nvariables(x$Model)
+  nvariables(x$Model, ...)
 }
 
 #' @rdname draws-index-brmcoda
@@ -124,8 +130,9 @@ ndraws.brmcoda <- function(x) {
 #' @name diagnostic-quantities-brmcoda
 #' @aliases log_posterior nuts_params rhat neff_ratio
 #'
-#' @param x A \code{brmcoda} object.
-#' @param ... Arguments passed to individual methods.
+#' @param x,object A \code{brmcoda} object or another \R object for which
+#' the methods are defined.
+#' @param ... Arguments passed to individual methods (if applicable).
 #'
 #' @return The exact form of the output depends on the method.
 #'
@@ -138,8 +145,8 @@ NULL
 #' @seealso \code{\link[brms:log_posterior.brmsfit]{log_posterior.brmsfit}}
 #' 
 #' @export
-log_posterior.brmcoda <- function(x) {
-  log_posterior(x$Model)
+log_posterior.brmcoda <- function(object, ...) {
+  log_posterior(object$Model)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -149,8 +156,8 @@ log_posterior.brmcoda <- function(x) {
 #' @seealso \code{\link[brms:nuts_params.brmsfit]{nuts_params.brmsfit}}
 #' 
 #' @export
-nuts_params.brmcoda <- function(x) {
-  nuts_params(x$Model)
+nuts_params.brmcoda <- function(object, ...) {
+  nuts_params(object$Model)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -160,7 +167,7 @@ nuts_params.brmcoda <- function(x) {
 #' @seealso \code{\link[brms:rhat.brmsfit]{rhat.brmsfit}}
 #' 
 #' @export
-rhat.brmcoda <- function(x) {
+rhat.brmcoda <- function(x, ...) {
   rhat(x$Model)
 }
 
@@ -171,6 +178,6 @@ rhat.brmcoda <- function(x) {
 #' @seealso \code{\link[brms:neff_ratio.brmsfit]{neff_ratio.brmsfit}}
 #' 
 #' @export
-neff_ratio.brmcoda <- function(x) {
-  neff_ratio(x$Model)
+neff_ratio.brmcoda <- function(object, ...) {
+  neff_ratio(object$Model)
 }

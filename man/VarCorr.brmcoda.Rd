@@ -2,12 +2,13 @@
 % Please edit documentation in R/posterior.R
 \name{VarCorr.brmcoda}
 \alias{VarCorr.brmcoda}
+\alias{VarCorr}
 \title{Extract Variance and Correlation Components}
 \usage{
-\method{VarCorr}{brmcoda}(object, ...)
+\method{VarCorr}{brmcoda}(x, ...)
 }
 \arguments{
-\item{object}{An object of class \code{brmcoda}.}
+\item{x}{An object of class \code{brmcoda}.}
 
 \item{...}{Further arguments passed to \code{\link{VarCorr.brmsfit}}}
 }

@@ -2,6 +2,7 @@
 % Please edit documentation in R/posterior.R
 \name{predict.brmcoda}
 \alias{predict.brmcoda}
+\alias{predict}
 \title{Draws from the Posterior Predictive Distribution}
 \usage{
 \method{predict}{brmcoda}(
