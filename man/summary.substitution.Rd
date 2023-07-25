@@ -2,16 +2,16 @@
 % Please edit documentation in R/summary.R
 \name{summary.substitution}
 \alias{summary.substitution}
-\title{Create a Summary of a Substitution Model represented by a \code{\link{substitution}} object}
+\title{Create a Summary of a Substitution Model represented by a \code{substitution} object}
 \usage{
 \method{summary}{substitution}(object, delta, to, from, ref, level, digits = 2, ...)
 }
 \arguments{
-\item{object}{A \code{\link{substitution}} class object.}
+\item{object}{A \code{substitution} class object.}
 
 \item{delta}{A integer, numeric value or vector indicating the desired \code{delta}
 at which substitution results should be summarised.
-Default to all \code{delta} available in the \code{\link{substitution}} object.}
+Default to all \code{delta} available in the \code{substitution} object.}
 
 \item{to}{A character value or vector specifying the names of the compositional parts
 that were reallocated to in the model.}
@@ -20,17 +20,17 @@ that were reallocated to in the model.}
 that were reallocated from in the model.}
 
 \item{ref}{Either a character value or vector ((\code{"grandmean"} and/or \code{"clustermean"} or \code{"users"}),
-Default to all \code{ref} available in the \code{\link{substitution}} object .}
+Default to all \code{ref} available in the \code{substitution} object.}
 
 \item{level}{A character string or vector (\code{"between"} and/or \code{"within"}).
-Default to all \code{level} available in the \code{\link{substitution}} object.}
+Default to all \code{level} available in the \code{substitution} object.}
 
 \item{digits}{A integer value used for number formatting. Default is \code{2}.}
 
 \item{...}{generic argument, not in use.}
 }
 \value{
-A summary of \code{\link{substitution}} object.
+A summary of \code{substitution} object.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low} and \code{CI_high}}{ 95\% credible intervals.}
@@ -42,5 +42,5 @@ A summary of \code{\link{substitution}} object.
 }
 }
 \description{
-Create a Summary of a Substitution Model represented by a \code{\link{substitution}} object
+Create a Summary of a Substitution Model represented by a \code{substitution} object
 }
