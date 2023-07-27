@@ -11,7 +11,6 @@
   optional = TRUE,
   class = c("composition", "logratio"),
   level = c("between", "within", "total"),
-  digits = 3,
   ...
 )
 
@@ -19,7 +18,6 @@
   x,
   class = c("composition", "logratio"),
   level = c("between", "within", "total"),
-  digits = 3,
   ...
 )
 }
@@ -34,8 +32,6 @@ specify the geometry of the composition.}
 
 \item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
 indicating the level of the geometry.}
-
-\item{digits}{A integer value used for number formatting. Default is \code{3}.}
 
 \item{...}{generic argument, not in use.}
 }

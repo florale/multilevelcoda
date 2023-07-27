@@ -75,28 +75,28 @@ summary.compilr <- function(object,
   cat(length(unique(object$data[[object$idvar]])), "\n")
   
   # cat("\n", "———— Arithmetic Statistics ————", "\n")
-  # print(JWileymisc::egltable(bcomp[, -1], ...))
+  # print(JWileymisc::egltable(BetweenComp[, -1], ...))
   
   if ("composition" %in% class) {
     if ("total" %in% level) {
       cat("\n", " Raw Composition Statistics: ", "\n")
-      for (i in seq_along(output$tcomp)) {
-        cat(paste0("\n", names(output$tcomp)[i], ":", "\n"))
-        print(output$tcomp[[i]], digits = digits)
+      for (i in seq_along(output$TotalComp)) {
+        cat(paste0("\n", names(output$TotalComp)[i], ":", "\n"))
+        print(output$TotalComp[[i]], digits = digits)
       }
     }
     if ("between" %in% level) {
       cat("\n", " Between-level Composition: ", "\n")
-      for (i in seq_along(output$bcomp)) {
-        cat(paste0("\n", names(output$bcomp)[i], ":", "\n"))
-        print(output$bcomp[[i]], digits = digits)
+      for (i in seq_along(output$BetweenComp)) {
+        cat(paste0("\n", names(output$BetweenComp)[i], ":", "\n"))
+        print(output$BetweenComp[[i]], digits = digits)
       }
     }
     if ("within" %in% level) {
       cat("\n", " Within-level Composition: ", "\n")
-      for (i in seq_along(output$wcomp)) {
-        cat(paste0("\n", names(output$wcomp)[i], ":", "\n"))
-        print(output$wcomp[[i]], digits = digits)
+      for (i in seq_along(output$WithinComp)) {
+        cat(paste0("\n", names(output$WithinComp)[i], ":", "\n"))
+        print(output$WithinComp[[i]], digits = digits)
       }
     }
   }
@@ -104,15 +104,15 @@ summary.compilr <- function(object,
   if ("logratio" %in% class) {
     if ("total" %in% level) {
       cat("\n", " Raw Isometric Log-ratios: ", "\n")
-      print(output$tilr, digits = digits)
+      print(output$TotalILR, digits = digits)
     }
     if ("between" %in% level) {
       cat("\n", " Between-level Isometric Log-ratios: ", "\n")
-      print(output$bilr, digits = digits)
+      print(output$BetweenILR, digits = digits)
     }
     if ("within" %in% level) {
       cat("\n", " Within-level Isometric Log-ratios: ", "\n")
-      print(output$wilr, digits = digits)
+      print(output$WithinILR, digits = digits)
     }
   }
   

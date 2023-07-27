@@ -17,7 +17,7 @@
 #'   along with many other useful information about the model.}
 #'   }
 #' @importFrom brms brm
-#' @export
+#' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
@@ -42,6 +42,7 @@
 #'               chain = 1, iter = 500,
 #'               backend = "cmdstanr")
 #' }} 
+#' @export
 brmcoda <- function (compilr, formula, ...) {
 
   if (isTRUE(missing(compilr))) {

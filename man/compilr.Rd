@@ -46,6 +46,7 @@ Compute sets of compositions and IRLs for multilevel compositional data
 }
 \examples{
 cilr <- compilr(data = mcompd, sbp = sbp, 
-                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                 idvar = "ID", total = 1440)
 str(cilr)
 }

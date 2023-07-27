@@ -14,6 +14,23 @@
 \description{
 Print a Summary for a \code{substitution} object
 }
+\examples{
+\donttest{
+if(requireNamespace("cmdstanr")){
+## fit a model with compositional predictor at between and between-person levels
+m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+                       parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                       idvar = "ID", total = 1440
+                       ), 
+              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+              chain = 1, iter = 500,
+              backend = "cmdstanr")
+             
+subm <- substitution(object = m, delta = 5)
+print(subm)
+}}
+}
 \seealso{
 \code{\link{summary.substitution}}
 }

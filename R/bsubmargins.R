@@ -14,13 +14,10 @@
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo
 #' @importFrom stats fitted
-#' @export
+#' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' data(psub)
-#' data(mcompd)
-#' data(psub)
 #' cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' 
@@ -32,6 +29,7 @@
 #'              
 #' subm <- bsubmargins(object = m, basesub = psub, delta = 5)
 #' }}
+#' @export
 bsubmargins <- function (object,
                          delta,
                          basesub,

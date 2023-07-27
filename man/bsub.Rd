@@ -70,10 +70,6 @@ It is recommended that users run substitution model using the \code{\link{substi
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-data(mcompd)
-data(sbp)
-data(psub)
-
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 

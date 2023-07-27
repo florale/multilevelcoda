@@ -71,9 +71,6 @@ present in the \code{\link{brmcoda}} object.
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-data(mcompd)
-data(sbp)
-data(psub)
 cilr <- compilr(data = mcompd, sbp = sbp, 
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 

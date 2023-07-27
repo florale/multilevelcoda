@@ -14,6 +14,13 @@
 \description{
 Print a Summary for a \code{compilr} object
 }
+\examples{
+
+cilr <- compilr(data = mcompd, sbp = sbp, 
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                idvar = "ID")
+print(cilr)
+}
 \seealso{
 \code{\link{summary.compilr}}
 }

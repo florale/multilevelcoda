@@ -30,7 +30,6 @@
 #' @importFrom brms posterior_summary do_call
 #' @importFrom abind abind
 #' @method predict brmcoda
-#' @export
 #' 
 #' @examples
 #' \donttest{
@@ -59,6 +58,7 @@
 #' predcomp <- predict(m2, scale = "comp")
 #' head(predcomp)
 #' }}
+#' @export
 predict.brmcoda <- function(object,
                             newdata = NULL,
                             re_formula = NULL,
@@ -142,7 +142,6 @@ predict.brmcoda <- function(object,
 #' @importFrom brms posterior_summary do_call
 #' @importFrom abind abind
 #' @method fitted brmcoda
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -173,6 +172,7 @@ predict.brmcoda <- function(object,
 #' fitcomp <- fitted(m2, scale = "comp")
 #' head(fitcomp)
 #' }}
+#' @export
 fitted.brmcoda <- function(object,
                            newdata = NULL,
                            re_formula = NULL,
@@ -245,8 +245,6 @@ fitted.brmcoda <- function(object,
 #' 
 #' @importFrom brms fixef
 #' @method fixef brmcoda
-#' @export fixef
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -265,6 +263,7 @@ fitted.brmcoda <- function(object,
 #' ## extract population-Level coefficients
 #' fixef(m)
 #' }}
+#' @export
 fixef.brmcoda <- function(object, ...) {
   fixef(object$Model, ...)
 }
@@ -283,7 +282,6 @@ fixef.brmcoda <- function(object, ...) {
 #' @seealso \code{\link[brms:vcov.brmsfit]{vcov.brmsfit}}
 #' 
 #' @method vcov brmcoda
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -300,6 +298,7 @@ fixef.brmcoda <- function(object, ...) {
 #'               
 #' vcov(m)
 #' }}
+#' @export
 vcov.brmcoda <- function(object, ...) {
   vcov(object$Model, ...)
 }
@@ -320,8 +319,6 @@ vcov.brmcoda <- function(object, ...) {
 #' 
 #' @importFrom brms ranef
 #' @method ranef brmcoda
-#' @export ranef
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -339,6 +336,7 @@ vcov.brmcoda <- function(object, ...) {
 #' ## extract group-level coefficients
 #' ranef(m)
 #' }}
+#' @export
 ranef.brmcoda <- function(object, ...) {
   ranef(object$Model, ...)
 }
@@ -359,7 +357,6 @@ ranef.brmcoda <- function(object, ...) {
 #' @seealso \code{\link[brms:coef.brmsfit]{coef.brmsfit}}
 #' 
 #' @method coef brmcoda
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -381,6 +378,7 @@ ranef.brmcoda <- function(object, ...) {
 #' ## extract combined coefficients 
 #' coef(m)
 #' }}
+#' @export
 coef.brmcoda <- function(object, ...) {
   coef(object$Model, ...)
 }
@@ -402,7 +400,6 @@ coef.brmcoda <- function(object, ...) {
 #' 
 #' @importFrom brms VarCorr
 #' @method VarCorr brmcoda
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -419,6 +416,7 @@ coef.brmcoda <- function(object, ...) {
 #'               
 #' VarCorr(m)
 #' }}
+#' @export
 VarCorr.brmcoda <- function(x, ...) {
   VarCorr(x$Model, ...)
 }
@@ -433,7 +431,6 @@ VarCorr.brmcoda <- function(x, ...) {
 #'   
 #' @seealso \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}
 #' @method residuals brmcoda
-#' @export
 #' 
 #' @examples
 #' \dontrun{
@@ -452,6 +449,7 @@ VarCorr.brmcoda <- function(x, ...) {
 #' res <- residuals(m)
 #' head(res)
 #' }}
+#' @export
 residuals.brmcoda <- function(object, ...) {
   residuals(object$Model, ...)
 }

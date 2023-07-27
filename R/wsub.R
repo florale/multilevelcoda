@@ -17,13 +17,11 @@
 #' @importFrom insight find_predictors
 #' @importFrom emmeans ref_grid
 #' @importFrom stats fitted
-#' @export
+#' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' data(mcompd)
-#' data(sbp)
-#' data(psub)
+#' 
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' 
@@ -36,6 +34,7 @@
 #'              
 #' subm <- wsub(object = m, basesub = psub, delta = 5)
 #' }}
+#' @export
 wsub <- function(object,
                  basesub,
                  delta,
