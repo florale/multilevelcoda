@@ -86,11 +86,6 @@
         <dd>Extract Variance and Correlation Components</dd>
       </dl><dl><dt>
           
-          <code><a href="as.data.frame.brmcoda.html">as.data.frame(<i>&lt;brmcoda&gt;</i>)</a></code> <code><a href="as.data.frame.brmcoda.html">as.matrix(<i>&lt;brmcoda&gt;</i>)</a></code> <code><a href="as.data.frame.brmcoda.html">as.array(<i>&lt;brmcoda&gt;</i>)</a></code> 
-        </dt>
-        <dd>Extract Posterior Draws</dd>
-      </dl><dl><dt>
-          
           <code><a href="as.data.frame.compilr.html">as.data.frame(<i>&lt;compilr&gt;</i>)</a></code> <code><a href="as.data.frame.compilr.html">as.matrix(<i>&lt;compilr&gt;</i>)</a></code> 
         </dt>
         <dd>Extract Compositional Data from <code>compilr</code> object.</dd>
@@ -139,7 +134,18 @@ via full Bayesian inference</dd>
           
           <code><a href="draws-index-brmcoda.html">variables(<i>&lt;brmcoda&gt;</i>)</a></code> <code><a href="draws-index-brmcoda.html">nvariables(<i>&lt;brmcoda&gt;</i>)</a></code> <code><a href="draws-index-brmcoda.html">niterations(<i>&lt;brmcoda&gt;</i>)</a></code> <code><a href="draws-index-brmcoda.html">nchains(<i>&lt;brmcoda&gt;</i>)</a></code> <code><a href="draws-index-brmcoda.html">ndraws(<i>&lt;brmcoda&gt;</i>)</a></code> 
         </dt>
-        <dd>Index <code>brmcoda</code> objects</dd>
+        <dd>#' Extract Posterior Draws
+#'
+#' Extract posterior draws in conventional formats
+#' as data.frames, matrices, or arrays.
+#'
+#' @inheritParams brms::as.data.frame.brmsfit
+#'
+#' @return A data.frame, matrix, or array containing the posterior draws.
+#'
+#' @export
+as.data.frame.brmcoda &lt;- function(x, row.names = NULL, optional = TRUE, ...) 
+as.data.frame(x$Model, ...)</dd>
       </dl><dl><dt>
           
           <code><a href="fitted.brmcoda.html">fitted(<i>&lt;brmcoda&gt;</i>)</a></code> 
@@ -185,6 +191,11 @@ via full Bayesian inference</dd>
           <code><a href="mean.compilr.html">mean(<i>&lt;compilr&gt;</i>)</a></code> 
         </dt>
         <dd>Mean amounts and mean compositions presented in a <code>compilr</code> object.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="model.frame.brmcoda.html">model.frame(<i>&lt;brmcoda&gt;</i>)</a></code> 
+        </dt>
+        <dd>Extracting the Model Frame from a Formula or Fit from <span class="pkg">brmcoda</span> object</dd>
       </dl><dl><dt>
           
           <code><a href="nobs.brmcoda.html">nobs(<i>&lt;brmcoda&gt;</i>)</a></code> 
