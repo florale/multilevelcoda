@@ -112,8 +112,6 @@ along with many other useful information about the model.</p></li>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"cmdstanr"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mcompd</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sbp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="compilr.html">compilr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
 <span class="r-in"><span>        parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -134,7 +132,6 @@ along with many other useful information about the model.</p></li>
 <span class="r-in"><span>              formula <span class="op">=</span> <span class="fu">mvbind</span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">STRESS</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>              chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
 <span class="r-in"><span>              backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># } </span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required namespace: cmdstanr</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
