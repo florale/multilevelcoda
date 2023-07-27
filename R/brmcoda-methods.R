@@ -21,31 +21,43 @@ nobs.brmcoda <- function(object, ...) {
   nobs(object$Model, ...)
 }
 
-#' Extract Posterior Draws
+#' Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object
 #'
-#' Extract posterior draws in conventional formats
-#' as data.frames, matrices, or arrays.
+#' @param object A \code{brmcoda} object.
+#' @param ... Further arguments to be passed to methods.
 #'
-#' @inheritParams brms::as.data.frame.brmsfit
-#'
-#' @return A data.frame, matrix, or array containing the posterior draws.
+#' @importFrom stats model.frame
+#' @method model.frame brmcoda
+#' @export
+model.frame.brmcoda <- function(object, ...) {
+  model.frame(object$Model, ...)
+}
+
+#' #' Extract Posterior Draws
+#' #'
+#' #' Extract posterior draws in conventional formats
+#' #' as data.frames, matrices, or arrays.
+#' #'
+#' #' @inheritParams brms::as.data.frame.brmsfit
+#' #'
+#' #' @return A data.frame, matrix, or array containing the posterior draws.
+#' #' 
+#' #' @export
+#' as.data.frame.brmcoda <- function(x, row.names = NULL, optional = TRUE, ...) {
+#'   as.data.frame(x$Model, ...)
+#' }
 #' 
-#' @export
-as.data.frame.brmcoda <- function(x, row.names = NULL, optional = TRUE, ...) {
-  as.data.frame(x$Model, ...)
-}
-
-#' @rdname as.data.frame.brmcoda
-#' @export
-as.matrix.brmcoda <- function(x, ...) {
-  as.matrix(x$Model, ...)
-}
-
-#' @rdname as.data.frame.brmcoda
-#' @export
-as.array.brmcoda <- function(x, ...) {
-  as.array(x$Model, ...)
-}
+#' #' @rdname as.data.frame.brmcoda
+#' #' @export
+#' as.matrix.brmcoda <- function(x, ...) {
+#'   as.matrix(x$Model, ...)
+#' }
+#' 
+#' #' @rdname as.data.frame.brmcoda
+#' #' @export
+#' as.array.brmcoda <- function(x, ...) {
+#'   as.array(x$Model, ...)
+#' }
 
 #' Index \code{brmcoda} objects
 #'

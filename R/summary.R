@@ -51,8 +51,9 @@ summary.compilr <- function(object,
     unlist(list(x1, x2, x3), recursive = FALSE)
   })
   output[1:3] <- lapply(output[1:3], "[", c("Compositional Mean", 
-                                            "Variation Matrix",
-                                            "Missingness"))
+                                            "Variation Matrix"
+                                            # , "Missingness"
+                                            ))
   
   ## Summary
   # General info
