@@ -6,8 +6,15 @@
 \usage{
 \method{bayes_factor}{brmcoda}(x1, x2, ...)
 }
+\arguments{
+\item{x1}{A \code{brmcoda} object}
+
+\item{x2}{Another \code{brmcoda} object based on the same responses}
+
+\item{...}{Other arguments passed to \code{\link{bayes_factor.brmsfit}}}
+}
 \description{
-Bayes Factors from Marginal Likelihoods
+Compute Bayes factors from marginal likelihoods
 }
 \seealso{
 \code{\link[brms:bayes_factor.brmsfit]{bayes_factor.brmsfit}}

@@ -130,7 +130,7 @@ as.matrix.compilr <- function(x,
                               class = c("composition", "logratio"),
                               level = c("between", "within", "total"),
                               ...) {
-  as.matrix(as.data.frame(x, class = class, level = level, digits = digits, ...))
+  as.matrix(as.data.frame(x, class = class, level = level, ...))
 }
 
 # ----------------- Extract Compositional Data -----------------

@@ -195,6 +195,12 @@ neff_ratio.brmcoda <- function(object, ...) {
 }
 
 #' Bayes Factors from Marginal Likelihoods
+#' 
+#' Compute Bayes factors from marginal likelihoods
+#' 
+#' @param x1 A \code{brmcoda} object
+#' @param x2 Another \code{brmcoda} object based on the same responses
+#' @param ... Other arguments passed to \code{\link{bayes_factor.brmsfit}}
 #' @importFrom brms bayes_factor
 #' @method bayes_factor brmcoda
 #' 

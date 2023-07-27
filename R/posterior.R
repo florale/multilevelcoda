@@ -264,6 +264,7 @@ fitted.brmcoda <- function(object,
 #'   ## extract population-Level coefficients
 #'   fixef(m)
 #' }}
+#' @export fixef
 #' @export
 fixef.brmcoda <- function(object, ...) {
   fixef(object$Model, ...)
@@ -335,6 +336,7 @@ vcov.brmcoda <- function(object, ...) {
 #'   ## extract group-level coefficients
 #'   ranef(m)
 #' }}
+#' @export ranef
 #' @export
 ranef.brmcoda <- function(object, ...) {
   ranef(object$Model, ...)
