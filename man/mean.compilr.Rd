@@ -35,3 +35,9 @@ Default is \code{equal}.}
 \description{
 Mean amounts and mean compositions presented in a \code{compilr} object.
 }
+\examples{
+cilr <- compilr(data = mcompd, sbp = sbp, 
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                idvar = "ID")
+mean(cilr)
+}

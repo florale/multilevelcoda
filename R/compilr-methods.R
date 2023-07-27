@@ -25,6 +25,12 @@ is.compilr <- function(x) {
 #' @param ... generic argument, not in use.
 #' 
 #' @method mean compilr
+#' 
+#' @examples
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                 idvar = "ID")
+#' mean(cilr)
 #' @export
 mean.compilr <- function(x, ...,
                          class = c("composition", "logratio"),
@@ -34,35 +40,35 @@ mean.compilr <- function(x, ...,
                          ) {
   
   # Assemble
-  output <- .get.compilr(x)
+  output <- .get.compilr(object = x)
   
   ## Out
   if ("composition" %in% class) {
     if ("total" %in% level) {
       cat("\n", "Raw Compositional Mean:", "\n")
-      print(clo(output$TotalComp), digits = digits)
+      print(output$TotalComp$mean, digits = digits)
     }
     if ("between" %in% level) {
       cat("\n", "Between-level Compositional Mean:", "\n")
-      print(clo(output$BetweenComp), digits = digits)
+      print((output$BetweenComp$mean), digits = digits)
     }
     if ("within" %in% level) {
       cat("\n", "Within-level Compositional Mean:", "\n")
-      print(clo(output$WithinComp), digits = digits)
+      print((output$WithinComp$mean), digits = digits)
     }
   }
   if ("logratio" %in% class) {
     if ("total" %in% level) {
       cat("\n", "Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(t(output$TotalILR)), row.names = FALSE, digits = digits)
+      print(as.data.table(output$TotalILR)[4,], row.names = FALSE, digits = digits)
     }
     if ("between" %in% level) {
       cat("\n", "Between-level Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(t(output$BetweenILR)), row.names = FALSE, digits = digits)
+      print(as.data.table(output$BetweenILR)[4,], row.names = FALSE, digits = digits)
     }
     if ("within" %in% level) {
       cat("\n", "Within-level Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(t(output$WithinILR)), row.names = FALSE, digits = digits)
+      print(as.data.table(output$WithinILR)[4,], row.names = FALSE, digits = digits)
     }
   }
   
@@ -88,7 +94,6 @@ mean.compilr <- function(x, ...,
 as.data.frame.compilr <- function(x, row.names = NULL, optional = TRUE,
                                   class = c("composition", "logratio"),
                                   level = c("between", "within", "total"),
-                                  digits = 3,
                                   ...) {
   allout <- lapply(x[1:6], as.data.frame)
   output <- data.frame()
@@ -124,13 +129,12 @@ as.data.frame.compilr <- function(x, row.names = NULL, optional = TRUE,
 as.matrix.compilr <- function(x, 
                               class = c("composition", "logratio"),
                               level = c("between", "within", "total"),
-                              digits = 3,
                               ...) {
   as.matrix(as.data.frame(x, class = class, level = level, digits = digits, ...))
 }
 
 # ----------------- Extract Compositional Data -----------------
-.get.compilr <- function(x, 
+.get.compilr <- function(object, 
                          class = c("composition", "logratio"),
                          level = c("between", "within", "total"),
                          weight = c("equal", "proportional"),
@@ -172,7 +176,7 @@ as.matrix.compilr <- function(x,
     )
   }
   
-  names(output) <- c("bcomp", "wcomp", "tcomp", "bilr", "wilr", "tilr")
+  names(output) <- c("BetweenComp", "WithinComp", "TotalComp", "BetweenILR", "WithinILR", "TotalILR")
   
   output
 }
