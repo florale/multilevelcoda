@@ -19,7 +19,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dev = "CairoPNG", dpi = 150, 
+  fig.path = "mlmcoda-", fig.align = "center"
+)
 
+library(ggsci)
+library(cowplot)
+library(ggplot2)
+```
 
 # Intro
 We often are interested in how an outcome changes when a fixed unit of the predictor 
@@ -34,8 +45,7 @@ doFuture (for parallelisation),
 and data sets `mcompd` (simulated compositional sleep and wake variables),
 `sbp` (sequential binary partition), and `psub` (base possible substitution).
 
-
-```r
+```{r setup}
 library(multilevelcoda)
 library(brms)
 library(doFuture)
@@ -52,10 +62,9 @@ Let's fit our main `brms` model predicting `STRESS` from both between and within
 sleep-wake behaviours (represented by isometric log ratio coordinates), with sex as a covariate, 
 using the `brmcoda()` function. We can compute ILR coordinate predictors using `compilr()` function.
 
-
-```r
+```{r brmcoda, results = "hide", message=FALSE}
 cilr <- compilr(data = mcompd, sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 m <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
@@ -65,54 +74,8 @@ m <- brmcoda(compilr = cilr,
 
 A `summary()` of the model results.
 
-
-```r
-summary(m$Model)
-#>  Family: gaussian 
-#>   Links: mu = identity; sigma = identity 
-#> Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) 
-#>    Data: tmp (Number of observations: 3540) 
-#>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
-#>          total post-warmup draws = 4000
-#> 
-#> Group-Level Effects: 
-#> ~ID (Number of levels: 266) 
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1179
-#>               Tail_ESS
-#> sd(Intercept)     2176
-#> 
-#> Population-Level Effects: 
-#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-#> Intercept     2.64      0.47     1.68     3.57 1.00     1429
-#> bilr1         0.12      0.33    -0.54     0.77 1.00      971
-#> bilr2         0.53      0.35    -0.16     1.21 1.00     1124
-#> bilr3         0.13      0.21    -0.29     0.55 1.00     1052
-#> bilr4        -0.01      0.29    -0.57     0.55 1.00     1021
-#> wilr1        -0.34      0.12    -0.58    -0.10 1.00     2990
-#> wilr2         0.05      0.13    -0.21     0.31 1.00     3396
-#> wilr3        -0.10      0.08    -0.25     0.04 1.00     2900
-#> wilr4         0.23      0.10     0.04     0.43 1.00     2894
-#> Female       -0.39      0.17    -0.74    -0.08 1.00     1405
-#>           Tail_ESS
-#> Intercept     2263
-#> bilr1         1409
-#> bilr2         1679
-#> bilr3         1809
-#> bilr4         1941
-#> wilr1         3206
-#> wilr2         3077
-#> wilr3         3218
-#> wilr4         3220
-#> Female        1697
-#> 
-#> Family Specific Parameters: 
-#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sigma     2.37      0.03     2.31     2.43 1.00     4462     2814
-#> 
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
+```{r summary}
+summary(m)
 ```
 
 We can see that the first and forth within-person ILR coordinates were both associated with stress. 
@@ -156,8 +119,7 @@ and `ref = "grandmean"` to indicate substitution model using the grand compositi
 If your model contains covariates, `substitution()` 
 will average predictions across levels of covariates as the default.
 
-
-```r
+```{r bsub}
 subm1 <- substitution(object = m, delta = 1:10,
                       ref = "grandmean", level = c("between", "within"))
 ```
@@ -165,56 +127,43 @@ subm1 <- substitution(object = m, delta = 1:10,
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
 Here are the results for changes in stress when sleep (TST) is substituted for 10 minutes.
 
-
-```r
+```{r bsubm, results = "asis"}
 knitr::kable(summary(subm1, delta = 10, level = "between", to = "TST"))
 ```
-
-
-
-| Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
-|----:|------:|-------:|-----:|:----|:---|:-------|:---------|
-| 0.06|   0.00|    0.13|    10|WAKE |TST |between |grandmean |
-| 0.00|  -0.03|    0.04|    10|MVPA |TST |between |grandmean |
-| 0.01|  -0.01|    0.04|    10|LPA  |TST |between |grandmean |
-| 0.01|  -0.02|    0.04|    10|SB   |TST |between |grandmean |
-
-
 
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
 in changes in stress at between-person level. 
 These results can be plotted to see the patterns more easily using the `plotsub()` function.
 
-
-```r
-plotsub(data = subm1$BetweenSub$TST, 
-        x = "sleep", y = "stress")
+```{r plotbsub, eval=FALSE}
+plot(subm1, to = "TST", level = "between", ref = "grandmean")
 ```
 
 
-<div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-plotbsubm1-1.png" alt="Example of Between-person Substitution Model"  />
-<p class="caption">Example of Between-person Substitution Model</p>
-</div>
+```{r mlmcoda-plotbsubm1, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Between-person Substitution Model"}
+plot(subm1, to = "TST", level = "between", ref = "grandmean") +
+  scale_color_jco() +
+  scale_fill_jco() +
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
+```
 
 Here are the results for within-person level.
 
-
-```r
+```{r wsubm, results = "asis"}
 knitr::kable(summary(subm1, delta = 10, level = "within", to = "TST"))
 ```
-
-
-
-|  Mean| CI_low| CI_high| Delta|From |To  |Level  |Reference |
-|-----:|------:|-------:|-----:|:----|:---|:------|:---------|
-|  0.04|   0.00|    0.07|    10|WAKE |TST |within |grandmean |
-| -0.01|  -0.02|    0.01|    10|MVPA |TST |within |grandmean |
-| -0.01|  -0.02|    0.00|    10|LPA  |TST |within |grandmean |
-|  0.00|  -0.01|    0.01|    10|SB   |TST |within |grandmean |
-
-
 
 At within-person level, we got some significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
@@ -222,16 +171,28 @@ Increasing 5 minutes in sleep at the expense of time spent awake
 in bed predicted 0.04 higher stress [95% CI 0.01, 0.7], on a given day. 
 Conversely, less sleep and more time awake in bed predicted less stress (b = -0.03 [95% CI -0.06,	-0.01]). Let's also plot theses results.
 
+```{r plotwsub, eval=FALSE}
+plot(subm1, to = "TST", level = "within", ref = "grandmean")
+``` 
 
-```r
-plotsub(data = subm1$WithinSub$TST, x = "sleep", y = "stress")
-```
 
-
-<div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-plotwsubm1-1.png" alt="Example of Within-person Substitution Model"  />
-<p class="caption">Example of Within-person Substitution Model</p>
-</div>
+```{r mlmcoda-plotwsubm1, fig.width = 8, fig.height = 6, echo= FALSE, fig.cap = "Example of Within-person Substitution Model"}
+plot(subm1, to = "TST", level = "within", ref = "grandmean") +
+  scale_color_jco() +
+  scale_fill_jco() +
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
+``` 
 
 ## Average Marginal Substitution Effects
 
@@ -246,8 +207,7 @@ Average substitution models models are generally more computationally expensive 
 In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
 substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
 
-
-```r
+```{r submargin}
 registerDoFuture()
 plan(multisession, workers = 5)
 
@@ -258,41 +218,56 @@ registerDoSEQ()
 
 Below are the results.
 
-
-```r
+```{r submarginsout}
 knitr::kable(summary(subm2, delta = 10, to = "TST"))
 ```
-
-
-
-|  Mean| CI_low| CI_high| Delta|To  |From |Level   |Reference   |
-|-----:|------:|-------:|-----:|:---|:----|:-------|:-----------|
-|  0.09|  -0.05|    0.24|    10|TST |WAKE |between |clustermean |
-|  0.02|  -0.10|    0.15|    10|TST |MVPA |between |clustermean |
-|  0.03|  -0.09|    0.15|    10|TST |LPA  |between |clustermean |
-|  0.03|  -0.09|    0.15|    10|TST |SB   |between |clustermean |
-|  0.05|   0.01|    0.08|    10|TST |WAKE |within  |clustermean |
-| -0.01|  -0.02|    0.01|    10|TST |MVPA |within  |clustermean |
-| -0.01|  -0.02|    0.00|    10|TST |LPA  |within  |clustermean |
-|  0.00|  -0.01|    0.01|    10|TST |SB   |within  |clustermean |
-
-
 
 A comparison between between- and within-person substitution model of sleep on stress, 
 plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
-
-```r
+```{r plotsubmargin, eval=FALSE}
 library(ggpubr)
-p1 <- plotsub(data = subm2$BetweenSubMargins$TST, x = "between-person sleep", y = "stress")
-p2 <- plotsub(data = subm2$WithinSubMargins$TST, x = "within-person sleep", y = "stress")
+p1 <- plot(subm1, to = "TST", level = "between", ref = "clustermean")
+p2 <- plot(subm1, to = "TST", level = "within", ref = "clustermean")
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
 ```
 
 
-<div class="figure" style="text-align: center">
-<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"  />
-<p class="caption">Example of Average Marginal Substitution Model</p>
-</div>
+```{r mlmcoda-submargins, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
+library(ggpubr)
+p1 <- plot(subm1, to = "TST", level = "between", ref = "clustermean") +
+  scale_color_jco() +
+  scale_fill_jco() +
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
+p2 <- plot(subm1, to = "TST", level = "within", ref = "clustermean") +
+  scale_color_jco() +
+  scale_fill_jco() +
+  theme(
+         panel.background = element_rect(fill = 'transparent'),
+         plot.background = element_rect(fill = 'transparent', color = NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill = 'transparent'),
+         legend.box.background = element_rect(fill = 'transparent'),
+         legend.key = element_rect(colour = 'transparent', fill = 'transparent'),
+         axis.ticks = element_blank(),
+         panel.border = element_blank(),
+         strip.background = element_rect(colour = "black", fill = "white")
+       )
+
+ggarrange(p1, p2, 
+          ncol = 1, nrow = 2)
+```

@@ -116,7 +116,7 @@ The `compilr()` function for multilevel data requires four arguments:
 
 ```{r compilr}
 cilr <- compilr(data = mcompd, sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 ```
 
 ## Fitting model
@@ -136,7 +136,7 @@ m <- brmcoda(compilr = cilr,
 Here is a `summary()` of the model results.
 
 ```{r summary}
-summary(m$Model)
+summary(m)
 ```
 
 Results show that the first and forth within-person ILR coordinate was associated with stress.
@@ -196,12 +196,20 @@ m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+rm0 <- brmcoda(compilr = cilr,
+             formula = STRESS ~ 1 + (1 | ID),
+             iter = 0, chains = 0, cores = 0, seed = 123,
+             backend = "rstan", save_pars = save_pars(all = TRUE))
 
 # between-person composition only model
 m1 <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+rm1 <- brmcoda(compilr = cilr,
+             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
+             iter = 0, chains = 0, cores = 0, seed = 123,
+             backend = "rstan", save_pars = save_pars(all = TRUE))
 
 # within-person composition only model
 m2 <- brmcoda(compilr = cilr,
