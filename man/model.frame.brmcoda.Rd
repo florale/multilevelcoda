@@ -4,10 +4,10 @@
 \alias{model.frame.brmcoda}
 \title{Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object}
 \usage{
-\method{model.frame}{brmcoda}(object, ...)
+\method{model.frame}{brmcoda}(formula, ...)
 }
 \arguments{
-\item{object}{A \code{brmcoda} object.}
+\item{formula}{A \code{brmcoda} object.}
 
 \item{...}{Further arguments to be passed to methods.}
 }

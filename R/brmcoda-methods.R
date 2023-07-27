@@ -23,14 +23,14 @@ nobs.brmcoda <- function(object, ...) {
 
 #' Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object
 #'
-#' @param object A \code{brmcoda} object.
+#' @param formula A \code{brmcoda} object.
 #' @param ... Further arguments to be passed to methods.
 #'
 #' @importFrom stats model.frame
 #' @method model.frame brmcoda
 #' @export
-model.frame.brmcoda <- function(object, ...) {
-  model.frame(object$Model, ...)
+model.frame.brmcoda <- function(formula, ...) {
+  model.frame(formula$Model, ...)
 }
 
 #' #' Extract Posterior Draws
