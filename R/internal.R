@@ -1,4 +1,3 @@
-
 ## make Rcmd check happy
 utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "t", "head", 
                          "x", "object", "predict", "residuals", "tail", "vcov", "coef",

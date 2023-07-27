@@ -24,19 +24,18 @@ correlations and covariances of the group-level terms
 of the \code{brmsfit} object in a \code{brmcoda} object.
 }
 \examples{
-\dontrun{
+\donttest{
 ## fit a model
 if(requireNamespace("cmdstanr")){
-m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-                       parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-                       idvar = "ID", total = 1440
-                       ), 
-              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-              chain = 1, iter = 500,
-              backend = "cmdstanr")
-              
-VarCorr(m)
+  m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+                                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+                                 idvar = "ID", total = 1440),
+  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+  chain = 1, iter = 500,
+  backend = "cmdstanr")
+  
+  VarCorr(m)
 }}
 }
 \seealso{

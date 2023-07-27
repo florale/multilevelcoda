@@ -14,17 +14,15 @@
 #' 
 #' @importFrom extraoperators %ain% %snin% %nin%
 #' @method update compilr
-#' @export
+#' 
 #' @examples 
-#' data(mcompd)
-#' data(sbp)
 #' cilr <- compilr(data = mcompd, sbp = sbp, 
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
+#' # update with new data
 #' newdat <- mcompd[ID != 1] # excluding ID 1
-#' cilr_new <- update(object = cilr, newdata = newdat)
-#' 
-#' 
+#' cilr1 <- update(object = cilr, newdata = newdat)
+#' @export
 update.compilr <- function(object, newdata, ...) { 
   
   if (isTRUE(missing(newdata))) {
@@ -74,17 +72,16 @@ update.compilr <- function(object, newdata, ...) {
 #' @seealso \code{\link[brmcoda]{brmcoda}}
 #' 
 #' @method update brmcoda
-#' @export
+#' 
 #' @examples 
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' data(mcompd)
-#' data(sbp)
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
-#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' # model with compositional predictor at between and within-person levels
-#' fit <- brmcoda(compilr = cilr, 
+#' fit <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                                  idvar = "ID"
+#'                                  ), 
 #'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'               chain = 1, iter = 500,
@@ -96,6 +93,7 @@ update.compilr <- function(object, newdata, ...) {
 #' # using only a subset
 #' fit2 <- update(fit, newdata = mcompd[ID != 1])
 #' }}
+#' @export
 update.brmcoda <- function(object,
                            formula. = NULL,
                            newdata = NULL,

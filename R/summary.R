@@ -122,7 +122,6 @@ summary.compilr <- function(object,
     return(X)
   })
   return(invisible(output))
-
 }
 
 #' Print a Summary for a \code{compilr} object
@@ -151,18 +150,18 @@ print.compilr <- function(x, ...) {
 #' @method summary brmcoda
 #' 
 #' @examples
+#' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                        idvar = "ID", total = 1440
-#'                        ), 
-#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'               chain = 1, iter = 500,
-#'               backend = "cmdstanr")
-#' 
-#' summary(m)
-#' }
+#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                  idvar = "ID", total = 1440),
+#'   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   chain = 1, iter = 500,
+#'   backend = "cmdstanr")
+#'   
+#'   summary(m)
+#' }}
 #' @export
 summary.brmcoda <- function(object, ...) {
   if (inherits(object$Model, "brmsfit")) {
@@ -178,18 +177,18 @@ summary.brmcoda <- function(object, ...) {
 #' @seealso \code{\link{summary.brmcoda}}
 #' 
 #' @examples
+#' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                        idvar = "ID", total = 1440
-#'                        ), 
-#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'               chain = 1, iter = 500,
-#'               backend = "cmdstanr")
-#' 
-#' print(m)
-#' }
+#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                  idvar = "ID", total = 1440),
+#'   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   chain = 1, iter = 500,
+#'   backend = "cmdstanr")
+#'   
+#'  print(m)
+#' }}
 #' @export
 print.brmcoda <- function(x, ...) {
   print(summary(x$Model, ...), ...)
@@ -229,18 +228,17 @@ print.brmcoda <- function(x, ...) {
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' ## fit a model with compositional predictor at between and between-person levels
-#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                        idvar = "ID", total = 1440
-#'                        ), 
-#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'               chain = 1, iter = 500,
-#'               backend = "cmdstanr")
-#'              
-#' subm <- substitution(object = m, delta = 5)
-#' summary(subm)
+#'   ## fit a model with compositional predictor at between and between-person levels
+#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                  idvar = "ID", total = 1440),
+#'   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   chain = 1, iter = 500,
+#'   backend = "cmdstanr")
+#'   
+#'   subm <- substitution(object = m, delta = 5)
+#'   summary(subm)
 #' }}
 #' @export
 summary.substitution <- function(object, delta, to, from,
@@ -300,6 +298,7 @@ summary.substitution <- function(object, delta, to, from,
     out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
   }
   
+  
   out
   
 }
@@ -314,18 +313,17 @@ summary.substitution <- function(object, delta, to, from,
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' ## fit a model with compositional predictor at between and between-person levels
-#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                        idvar = "ID", total = 1440
-#'                        ), 
-#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-#'               chain = 1, iter = 500,
-#'               backend = "cmdstanr")
-#'              
-#' subm <- substitution(object = m, delta = 5)
-#' print(subm)
+#'   ## fit a model with compositional predictor at between and between-person levels
+#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                  idvar = "ID", total = 1440),
+#'   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   chain = 1, iter = 500,
+#'   backend = "cmdstanr")
+#'   
+#'   subm <- substitution(object = m, delta = 5)
+#'   print(subm)
 #' }}
 #' @export
 print.substitution <- function(x, ...) {

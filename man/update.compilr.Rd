@@ -39,15 +39,12 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 This method allows for updating an existing \code{\link{compilr}} object.
 }
 \examples{
-data(mcompd)
-data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, 
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
+# update with new data
 newdat <- mcompd[ID != 1] # excluding ID 1
-cilr_new <- update(object = cilr, newdata = newdat)
-
-
+cilr1 <- update(object = cilr, newdata = newdat)
 }
 \seealso{
 \code{\link[compilr]{compilr}}

@@ -73,33 +73,34 @@ residual error is ignored there. However, the estimated means of both methods
 averaged across draws should be very similar.
 }
 \examples{
-\dontrun{
+\donttest{
 ## fit a model
 if(requireNamespace("cmdstanr")){
-## compute composition and ilr coordinates
-cilr <- compilr(data = mcompd, sbp = sbp, 
-        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
-
-## fit a model
-m1 <- brmcoda(compilr = cilr, 
-              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-              chain = 1, iter = 500,
-              backend = "cmdstanr")
-              
-## compute expected predictions
-fit <- fitted(m1)
-head(fit)
-
-## fit a model with compositional outcome
-m2 <- brmcoda(compilr = cilr, 
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
-              chain = 1, iter = 500,
-              backend = "cmdstanr")
-              
-## expected responses on compositional scale
-fitcomp <- fitted(m2, scale = "comp")
-head(fitcomp)
+  ## compute composition and ilr coordinates
+  cilr <- compilr(data = mcompd, sbp = sbp,
+                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+                  idvar = "ID", total = 1440)
+  
+  ## fit a model
+  m1 <- brmcoda(compilr = cilr,
+                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+                chain = 1, iter = 500,
+                backend = "cmdstanr")
+  
+  ## compute expected predictions
+  epred <- fitted(m1)
+  head(epred)
+  
+  ## fit a model with compositional outcome
+  m2 <- brmcoda(compilr = cilr,
+                formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
+                chain = 1, iter = 500,
+                backend = "cmdstanr")
+  
+  ## expected predictions on compositional scale
+  epredcomp <- fitted(m2, scale = "comp")
+  head(epredcomp)
 }}
 }
 \seealso{
