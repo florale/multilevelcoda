@@ -31,8 +31,6 @@ Fit a \code{brm} model with multilevel ILR coordinates
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-data(mcompd)
-data(sbp)
 cilr <- compilr(data = mcompd, sbp = sbp, 
         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
@@ -53,6 +51,5 @@ m2 <- brmcoda(compilr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
               chain = 1, iter = 500,
               backend = "cmdstanr")
-             
 }} 
 }

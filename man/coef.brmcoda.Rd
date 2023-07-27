@@ -28,6 +28,27 @@ Extract model coefficients, which are the sum of population-level
 effects and corresponding group-level effects
 of the \code{brmsfit} object in a \code{brmcoda} object.
 }
+\examples{
+\dontrun{
+## fit a model
+if(requireNamespace("cmdstanr")){
+m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+                       parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                       idvar = "ID", total = 1440
+                       ), 
+              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+              chain = 1, iter = 500,
+              backend = "cmdstanr")
+              
+## extract population and group-level coefficients separately
+fixef(m)
+ranef(m)
+
+## extract combined coefficients 
+coef(m)
+}}
+}
 \seealso{
 \code{\link[brms:coef.brmsfit]{coef.brmsfit}}
 }

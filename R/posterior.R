@@ -31,6 +31,34 @@
 #' @importFrom abind abind
 #' @method predict brmcoda
 #' @export
+#' 
+#' @examples
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
+#' ## fit a model
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+#'
+#' m1 <- brmcoda(compilr = cilr, 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## predicted responses
+#' pred <- predict(m1)
+#' head(pred)
+#' 
+#' ## fit a model with compositional outcome
+#' m2 <- brmcoda(compilr = cilr, 
+#'               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## predicted responses on compositional scale
+#' predcomp <- predict(m2, scale = "comp")
+#' head(predcomp)
+#' }}
 predict.brmcoda <- function(object,
                             newdata = NULL,
                             re_formula = NULL,
@@ -115,6 +143,36 @@ predict.brmcoda <- function(object,
 #' @importFrom abind abind
 #' @method fitted brmcoda
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' ## compute composition and ilr coordinates
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+#' 
+#' ## fit a model
+#' m1 <- brmcoda(compilr = cilr, 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## compute expected predictions
+#' fit <- fitted(m1)
+#' head(fit)
+#' 
+#' ## fit a model with compositional outcome
+#' m2 <- brmcoda(compilr = cilr, 
+#'               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + Female + (1 | ID),
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## expected responses on compositional scale
+#' fitcomp <- fitted(m2, scale = "comp")
+#' head(fitcomp)
+#' }}
 fitted.brmcoda <- function(object,
                            newdata = NULL,
                            re_formula = NULL,
@@ -189,6 +247,24 @@ fitted.brmcoda <- function(object,
 #' @method fixef brmcoda
 #' @export fixef
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' ## fit a model
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## extract population-Level coefficients
+#' fixef(m)
+#' }}
 fixef.brmcoda <- function(object, ...) {
   fixef(object$Model, ...)
 }
@@ -208,6 +284,22 @@ fixef.brmcoda <- function(object, ...) {
 #' 
 #' @method vcov brmcoda
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' vcov(m)
+#' }}
 vcov.brmcoda <- function(object, ...) {
   vcov(object$Model, ...)
 }
@@ -230,6 +322,23 @@ vcov.brmcoda <- function(object, ...) {
 #' @method ranef brmcoda
 #' @export ranef
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## extract group-level coefficients
+#' ranef(m)
+#' }}
 ranef.brmcoda <- function(object, ...) {
   ranef(object$Model, ...)
 }
@@ -251,6 +360,27 @@ ranef.brmcoda <- function(object, ...) {
 #' 
 #' @method coef brmcoda
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' ## extract population and group-level coefficients separately
+#' fixef(m)
+#' ranef(m)
+#' 
+#' ## extract combined coefficients 
+#' coef(m)
+#' }}
 coef.brmcoda <- function(object, ...) {
   coef(object$Model, ...)
 }
@@ -273,6 +403,22 @@ coef.brmcoda <- function(object, ...) {
 #' @importFrom brms VarCorr
 #' @method VarCorr brmcoda
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'               
+#' VarCorr(m)
+#' }}
 VarCorr.brmcoda <- function(x, ...) {
   VarCorr(x$Model, ...)
 }
@@ -288,6 +434,24 @@ VarCorr.brmcoda <- function(x, ...) {
 #' @seealso \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}
 #' @method residuals brmcoda
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#' 
+#' ## extract residuals
+#' res <- residuals(m)
+#' head(res)
+#' }}
 residuals.brmcoda <- function(object, ...) {
   residuals(object$Model, ...)
 }
