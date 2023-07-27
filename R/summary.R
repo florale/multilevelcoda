@@ -15,6 +15,12 @@
 #' 
 #' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
 #' @method summary compilr
+#' 
+#' @examples
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                 idvar = "ID")
+#' summary(cilr)
 #' @export
 summary.compilr <- function(object,
                             class = c("composition", "logratio"),
@@ -126,10 +132,15 @@ summary.compilr <- function(object,
 #' 
 #' @seealso \code{\link{summary.compilr}}
 #' 
+#' @examples
+#' 
+#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                 idvar = "ID")
+#' print(cilr)
 #' @export
 print.compilr <- function(x, ...) {
-  print(summary(x, ...), ...)
-  
+  summary(x, ...)
 }
 
 #' Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
@@ -138,6 +149,20 @@ print.compilr <- function(x, ...) {
 #' @param ... Other arguments passed to \code{\link{summary.brmsfit}}.
 #' 
 #' @method summary brmcoda
+#' 
+#' @examples
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#' 
+#' summary(m)
+#' }
 #' @export
 summary.brmcoda <- function(object, ...) {
   if (inherits(object$Model, "brmsfit")) {
@@ -152,6 +177,19 @@ summary.brmcoda <- function(object, ...) {
 #' 
 #' @seealso \code{\link{summary.brmcoda}}
 #' 
+#' @examples
+#' if(requireNamespace("cmdstanr")){
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#' 
+#' print(m)
+#' }
 #' @export
 print.brmcoda <- function(x, ...) {
   print(summary(x$Model, ...), ...)
@@ -187,6 +225,23 @@ print.brmcoda <- function(x, ...) {
 #' }
 #' 
 #' @method summary substitution
+#' 
+#' @examples
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
+#' ## fit a model with compositional predictor at between and between-person levels
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'              
+#' subm <- substitution(object = m, delta = 5)
+#' summary(subm)
+#' }}
 #' @export
 summary.substitution <- function(object, delta, to, from,
                                  ref, level,
@@ -256,6 +311,22 @@ summary.substitution <- function(object, delta, to, from,
 #' 
 #' @seealso \code{\link{summary.substitution}}
 #' 
+#' @examples
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
+#' ## fit a model with compositional predictor at between and between-person levels
+#' m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
+#'                        parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                        idvar = "ID", total = 1440
+#'                        ), 
+#'               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'               chain = 1, iter = 500,
+#'               backend = "cmdstanr")
+#'              
+#' subm <- substitution(object = m, delta = 5)
+#' print(subm)
+#' }}
 #' @export
 print.substitution <- function(x, ...) {
   print(summary(x, ...), ...)

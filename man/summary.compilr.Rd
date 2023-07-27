@@ -35,3 +35,9 @@ Default is \code{equal}.}
 \description{
 Create a Summary of a \code{compilr} object
 }
+\examples{
+cilr <- compilr(data = mcompd, sbp = sbp, 
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                idvar = "ID")
+summary(cilr)
+}
