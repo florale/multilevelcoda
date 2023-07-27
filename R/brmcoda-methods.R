@@ -193,3 +193,14 @@ rhat.brmcoda <- function(x, ...) {
 neff_ratio.brmcoda <- function(object, ...) {
   neff_ratio(object$Model)
 }
+
+#' Bayes Factors from Marginal Likelihoods
+#' @importFrom brms bayes_factor
+#' @method bayes_factor brmcoda
+#' 
+#' @seealso \code{\link[brms:bayes_factor.brmsfit]{bayes_factor.brmsfit}}
+#' 
+#' @export
+bayes_factor.brmcoda <- function(x1, x2, ...) {
+  bayes_factor(x1$Model, x2$Model, ...)
+}
