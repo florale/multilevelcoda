@@ -230,6 +230,6 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
 #' @seealso \code{\link[brms:prior_summary.brmsfit]{prior_summary.brmsfit}}
 #' 
 #' @export
-prior_summary.brmcoda <- function(x1, x2, ...) {
-  prior_summary(x1$Model, x2$Model, ...)
+prior_summary.brmcoda <- function(object, ...) {
+  prior_summary(object$Model, ...)
 }
