@@ -158,7 +158,7 @@ NULL
 #' 
 #' @export
 log_posterior.brmcoda <- function(object, ...) {
-  log_posterior(object$Model)
+  log_posterior(object$Model, ...)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -169,7 +169,7 @@ log_posterior.brmcoda <- function(object, ...) {
 #' 
 #' @export
 nuts_params.brmcoda <- function(object, ...) {
-  nuts_params(object$Model)
+  nuts_params(object$Model, ...)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -180,7 +180,7 @@ nuts_params.brmcoda <- function(object, ...) {
 #' 
 #' @export
 rhat.brmcoda <- function(x, ...) {
-  rhat(x$Model)
+  rhat(x$Model, ...)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -191,7 +191,7 @@ rhat.brmcoda <- function(x, ...) {
 #' 
 #' @export
 neff_ratio.brmcoda <- function(object, ...) {
-  neff_ratio(object$Model)
+  neff_ratio(object$Model, ...)
 }
 
 #' Bayes Factors from Marginal Likelihoods
@@ -209,7 +209,12 @@ neff_ratio.brmcoda <- function(object, ...) {
 #' 
 #' @export
 bayes_factor.brmcoda <- function(x1, x2, ...) {
-  bayes_factor(x1$Model, x2$Model, ...)
+  out <- invisible(bayes_factor(x1 = x1$Model, x2 = x2$Model, ...))
+  
+  m1 <- deparse(substitute(x1))
+  m2 <- deparse(substitute(x2))
+  
+  cat("Estimated Bayes factor in favor of", m1, "over", m2, ":", out$bf)
 }
 
 #' Extract Priors of a \code{brmsfit} from a \code{brmcoda} object
