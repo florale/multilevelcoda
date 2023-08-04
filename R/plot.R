@@ -106,12 +106,11 @@ plot.substitution <- function(x, to,
 #'                chain = 1, iter = 500)
 #' plot(fit)
 #' }
-plot.brmcoda <- function(x,
-                         ...) {
+plot.brmcoda <- function(x, ...) {
   plot(x$Model, ...)
 }
 
-#' Create a matrix of output plots from a \code{\link{brmcoda}}'s  \code{\link{brmsfot}} object
+#' Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link{brmsfit}} object
 #'
 #' A \code{\link[graphics:pairs]{pairs}}
 #' method that is customized for MCMC output.
@@ -123,6 +122,7 @@ plot.brmcoda <- function(x,
 #' 
 #' @seealso \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}
 #' 
+#' @importFrom brms pairs
 #' @method pairs brmcoda
 #' @export
 #' @examples
@@ -137,7 +137,7 @@ plot.brmcoda <- function(x,
 #'                chain = 1, iter = 500)
 #' pairs(fit)
 #' }
-pairs.brmcoda <- function(x, variable = NULL, regex = FALSE, fixed = FALSE, ...) {
+pairs.brmcoda <- function(x, ...) {
   pairs(x$Model, ...)
 }
 
@@ -169,7 +169,6 @@ pairs.brmcoda <- function(x, variable = NULL, regex = FALSE, fixed = FALSE, ...)
 #'                chain = 1, iter = 500)
 #' mcmc_plot(fit)
 #' }
-mcmc_plot.brmcoda <- function(object,
-                              ...) {
+mcmc_plot.brmcoda <- function(object, ...) {
   mcmc_plot(object$Model, ...)
 }

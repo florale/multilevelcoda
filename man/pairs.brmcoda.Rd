@@ -2,9 +2,9 @@
 % Please edit documentation in R/plot.R
 \name{pairs.brmcoda}
 \alias{pairs.brmcoda}
-\title{Create a matrix of output plots from a \code{\link{brmcoda}}'s  \code{\link{brmsfot}} object}
+\title{Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link{brmsfit}} object}
 \usage{
-\method{pairs}{brmcoda}(x, variable = NULL, regex = FALSE, fixed = FALSE, ...)
+\method{pairs}{brmcoda}(x, ...)
 }
 \arguments{
 \item{x}{A \code{brmcoda} class object.}

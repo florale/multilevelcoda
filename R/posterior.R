@@ -415,6 +415,7 @@ coef.brmcoda <- function(object, ...) {
 #'   
 #'   VarCorr(m)
 #' }}
+#' @export VarCorr
 #' @export
 VarCorr.brmcoda <- function(x, ...) {
   VarCorr(x$Model, ...)
