@@ -83,19 +83,19 @@ plot.substitution <- function(x, to,
 
 #' Trace and Density Plots for MCMC Draws plot
 #'
-#' Make a plot of \code{\link{brmcoda}} model results.
+#' Make a plot of \code{brmcoda} model results.
 #'
 #' @param x A \code{\link{brmcoda}} class object.
 #' @param ... Further arguments passed to \code{\link{plot.brmsfit}}.
 #'
 #' @inherit brms::plot.brmsfit return
 #'
+#' @seealso \code{\link[brms:plot.brmsfit]{plot.brmsfit}}
+#' 
 #' @method plot brmcoda
 #' @export
 #' @examples
 #' \dontrun{
-#' data(mcompd)
-#' data(sbp)
 #' cilr <- compilr(data = mcompd, sbp = sbp,
 #'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #'
@@ -106,6 +106,70 @@ plot.substitution <- function(x, to,
 #'                chain = 1, iter = 500)
 #' plot(fit)
 #' }
-plot.brmcoda <- function(x, ...) {
+plot.brmcoda <- function(x,
+                         ...) {
   plot(x$Model, ...)
+}
+
+#' Create a matrix of output plots from a \code{\link{brmcoda}}'s  \code{\link{brmsfot}} object
+#'
+#' A \code{\link[graphics:pairs]{pairs}}
+#' method that is customized for MCMC output.
+#'
+#' @param x A \code{brmcoda} class object.
+#' @param ... Further arguments passed to \code{\link{pairs.brmsfit}}.
+#'
+#' @inherit brms::pairs.brmsfit return
+#' 
+#' @seealso \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}
+#' 
+#' @method pairs brmcoda
+#' @export
+#' @examples
+#' \dontrun{
+#' cilr <- compilr(data = mcompd, sbp = sbp,
+#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'
+#' # model with compositional predictor at between and within-person levels
+#' fit <- brmcoda(compilr = cilr,
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                chain = 1, iter = 500)
+#' pairs(fit)
+#' }
+pairs.brmcoda <- function(x, variable = NULL, regex = FALSE, fixed = FALSE, ...) {
+  pairs(x$Model, ...)
+}
+
+#' MCMC Plots Implemented in \pkg{bayesplot}
+#'
+#' Call MCMC plotting functions
+#' implemented in the \pkg{bayesplot} package.
+#'
+#' @param object A \code{brmcoda} class object.
+#' @param ... Further arguments passed to \code{\link{mcmc_plot.brmsfit}}.
+#' 
+#' @inherit brms::mcmc_plot.brmsfit return
+#' 
+#' @seealso \code{\link[brms:mcmc_plot.brmsfit]{mcmc_plot.brmsfit}}
+#' 
+#' @importFrom brms mcmc_plot
+#' @method mcmc_plot brmcoda
+#' 
+#' @export
+#' @examples
+#' \dontrun{
+#' cilr <- compilr(data = mcompd, sbp = sbp,
+#'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'
+#' # model with compositional predictor at between and within-person levels
+#' fit <- brmcoda(compilr = cilr,
+#'                formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                chain = 1, iter = 500)
+#' mcmc_plot(fit)
+#' }
+mcmc_plot.brmcoda <- function(object,
+                              ...) {
+  mcmc_plot(object$Model, ...)
 }
