@@ -221,8 +221,8 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
 #' 
 #' Compute Bayes factors from marginal likelihoods
 #' 
-#' @param object An object of class \code{brmcoda}.
-#' @param ... Other arguments passed to \code{\link{prior_summary.brmsfit}}
+#' @param object An object of class \code{brmsfit}.
+#' @inheritParams brms::prior_summary.brmsfit
 #' 
 #' @importFrom brms prior_summary
 #' @method prior_summary brmcoda
@@ -230,6 +230,6 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
 #' @seealso \code{\link[brms:prior_summary.brmsfit]{prior_summary.brmsfit}}
 #' 
 #' @export
-prior_summary.brmcoda <- function(object, ...) {
-  prior_summary(object$Model, ...)
+prior_summary.brmcoda <- function(x1, x2, ...) {
+  prior_summary(x1$Model, x2$Model, ...)
 }
