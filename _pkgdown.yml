@@ -14,10 +14,10 @@ articles:
 - title: Vignettes
   navbar: ~
   contents:
-  - introduction
-  - comp-outcome
-  - comp-predictor
-  - substitution-model
+  - A-introduction
+  - B-composition-MLM
+  - C-composition-MMLM
+  - D-substitution-model
 
 footer:
   structure:
