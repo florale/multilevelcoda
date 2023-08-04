@@ -122,7 +122,7 @@ plot.brmcoda <- function(x, ...) {
 #' 
 #' @seealso \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}
 #' 
-#' @importFrom brms pairs
+#' @importFrom graphics pairs
 #' @method pairs brmcoda
 #' @export
 #' @examples

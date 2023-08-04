@@ -38,7 +38,8 @@ Imports:
     emmeans,
     insight,
     foreach,
-    abind
+    abind,
+    graphics
 Suggests: 
     testthat (>= 3.0.0),
     covr,
