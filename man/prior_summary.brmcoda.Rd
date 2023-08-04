@@ -4,12 +4,12 @@
 \alias{prior_summary.brmcoda}
 \title{Extract Priors of a \code{brmsfit} from a \code{brmcoda} object}
 \usage{
-\method{prior_summary}{brmcoda}(x1, x2, ...)
+\method{prior_summary}{brmcoda}(object, ...)
 }
 \arguments{
-\item{...}{Further arguments passed to or from other methods.}
+\item{object}{An object of class \code{brmcoda}.}
 
-\item{object}{An object of class \code{brmsfit}.}
+\item{...}{Other arguments passed to \code{\link{prior_summary.brmsfit}}}
 }
 \description{
 Compute Bayes factors from marginal likelihoods
