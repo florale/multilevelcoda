@@ -196,20 +196,12 @@ m0 <- brmcoda(compilr = cilr,
              formula = STRESS ~ 1 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
-rm0 <- brmcoda(compilr = cilr,
-             formula = STRESS ~ 1 + (1 | ID),
-             iter = 0, chains = 0, cores = 0, seed = 123,
-             backend = "rstan", save_pars = save_pars(all = TRUE))
 
 # between-person composition only model
 m1 <- brmcoda(compilr = cilr,
              formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
-rm1 <- brmcoda(compilr = cilr,
-             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
-             iter = 0, chains = 0, cores = 0, seed = 123,
-             backend = "rstan", save_pars = save_pars(all = TRUE))
 
 # within-person composition only model
 m2 <- brmcoda(compilr = cilr,
@@ -229,7 +221,7 @@ We can now compare these models with the `bayesfactor_models()` function, using 
 model as reference.
 
 ```{r bf1, results='hide', message=FALSE}
-comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
+comparison <- bayesfactor_models(m0$Model, m1$Model, m2$Model, m$Model, denominator = m0$Model)
 ```
 
 ```{r bf2}

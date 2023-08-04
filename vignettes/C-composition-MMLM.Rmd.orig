@@ -70,7 +70,7 @@ Here is a `summary()` of the model.
 We can see that stress significantly predicted `ilr1` and `ilr2`. 
 
 ```{r summary}
-summary(mv$Model)
+summary(mv)
 ```
 
 # Bayes Factor for compositional multilevel modelling
