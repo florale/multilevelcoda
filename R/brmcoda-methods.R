@@ -201,6 +201,7 @@ neff_ratio.brmcoda <- function(object, ...) {
 #' @param x1 A \code{brmcoda} object
 #' @param x2 Another \code{brmcoda} object based on the same responses
 #' @param ... Other arguments passed to \code{\link{bayes_factor.brmsfit}}
+#' 
 #' @importFrom brms bayes_factor
 #' @method bayes_factor brmcoda
 #' 
@@ -209,4 +210,21 @@ neff_ratio.brmcoda <- function(object, ...) {
 #' @export
 bayes_factor.brmcoda <- function(x1, x2, ...) {
   bayes_factor(x1$Model, x2$Model, ...)
+}
+
+#' Extract Priors of a \code{brmsfit} from a \code{brmcoda} object
+#' 
+#' Compute Bayes factors from marginal likelihoods
+#' 
+#' @param object An object of class \code{brmsfit}.
+#' @inheritParams brms::prior_summary.brmsfit
+#' 
+#' @importFrom brms prior_summary
+#' @method prior_summary brmcoda
+#' 
+#' @seealso \code{\link[brms:prior_summary.brmsfit]{prior_summary.brmsfit}}
+#' 
+#' @export
+prior_summary.brmcoda <- function(x1, x2, ...) {
+  prior_summary(x1$Model, x2$Model, ...)
 }
