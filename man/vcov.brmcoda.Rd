@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{vcov.brmsfit}}}
+\item{...}{Further arguments passed to \code{\link{vcov.brmsfit}}.}
 }
 \value{
 covariance or correlation matrix of population-level parameters

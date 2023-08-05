@@ -239,7 +239,7 @@ fitted.brmcoda <- function(object,
 #' @aliases fixef
 #' 
 #' @param object An object of class \code{brmcoda}.
-#' @param ... Further arguments passed to \code{\link{fixef.brmsfit}}
+#' @param ... Further arguments passed to \code{\link{fixef.brmsfit}}.
 #' 
 #' @inherit brms::fixef.brmsfit return
 #' 
@@ -277,7 +277,7 @@ fixef.brmcoda <- function(object, ...) {
 #' of the \code{brmsfit} object in a \code{brmcoda} object.
 #'
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{vcov.brmsfit}}
+#' @param ... Further arguments passed to \code{\link{vcov.brmsfit}}.
 #' 
 #' @inherit brms::vcov.brmsfit return
 #' 
@@ -312,7 +312,7 @@ vcov.brmcoda <- function(object, ...) {
 #' @aliases ranef
 #' 
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{ranef.brmsfit}}
+#' @param ... Further arguments passed to \code{\link{ranef.brmsfit}}.
 #' 
 #' @inherit brms::ranef.brmsfit return
 #'
@@ -351,7 +351,7 @@ ranef.brmcoda <- function(object, ...) {
 #' @aliases coef
 #' 
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{coef.brmsfit}}
+#' @param ... Further arguments passed to \code{\link{coef.brmsfit}}.
 #' 
 #' @inherit brms::coef.brmsfit return
 #'
@@ -392,7 +392,7 @@ coef.brmcoda <- function(object, ...) {
 #' @aliases VarCorr
 #' 
 #' @param x An object of class \code{brmcoda}.
-#' @param ... Further arguments passed to \code{\link{VarCorr.brmsfit}}
+#' @param ... Further arguments passed to \code{\link{VarCorr.brmsfit}}.
 #' 
 #' @inherit brms::VarCorr.brmsfit return
 #' 
@@ -426,7 +426,7 @@ VarCorr.brmcoda <- function(x, ...) {
 #' Compute posterior draws of residuals/predictive errors
 #' 
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{residuals.brmsfit}}
+#' @param ... Further arguments passed to \code{\link{residuals.brmsfit}}.
 #' @inherit brms::residuals.brmsfit return
 #'   
 #' @seealso \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}

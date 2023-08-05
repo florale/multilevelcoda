@@ -7,7 +7,7 @@
 \method{prior_summary}{brmcoda}(object, ...)
 }
 \arguments{
-\item{object}{An object of class \code{brmsfit}.}
+\item{object}{An object of class \code{brmcoda}.}
 
 \item{...}{Further arguments passed to or from other methods.}
 }
