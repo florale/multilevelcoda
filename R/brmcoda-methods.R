@@ -198,9 +198,9 @@ neff_ratio.brmcoda <- function(object, ...) {
 #' 
 #' Compute Bayes factors from marginal likelihoods
 #' 
-#' @param x1 A \code{brmcoda} object
-#' @param x2 Another \code{brmcoda} object based on the same responses
-#' @param ... Other arguments passed to \code{\link{bayes_factor.brmsfit}}
+#' @param x1 A \code{brmcoda} object.
+#' @param x2 Another \code{brmcoda} object based on the same responses.
+#' @param ... Other arguments passed to \code{\link{bayes_factor.brmsfit}}.
 #' 
 #' @importFrom brms bayes_factor
 #' @method bayes_factor brmcoda
@@ -221,7 +221,7 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
 #' 
 #' Compute Bayes factors from marginal likelihoods
 #' 
-#' @param object An object of class \code{brmsfit}.
+#' @param object An object of class \code{brmcoda}.
 #' @inheritParams brms::prior_summary.brmsfit
 #' 
 #' @importFrom brms prior_summary
@@ -232,4 +232,23 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
 #' @export
 prior_summary.brmcoda <- function(object, ...) {
   prior_summary(object$Model, ...)
+}
+
+#' Posteriors Sampling Diagnostic
+#' 
+#' Extract diagnostic metrics (Effective Sample Size (`ESS`), `Rhat` and Monte
+#' Carlo Standard Error `MCSE`).
+#' 
+#' @param posteriors An object of class \code{brmcoda}.
+#' @inheritParams bayestestR::diagnostic_posterior
+#' @param ... Other arguments passed to \code{\link{diagnostic_posterior}}.
+#' 
+#' @importFrom bayestestR diagnostic_posterior
+#' @method diagnostic_posterior brmcoda
+#' 
+#' @seealso \code{\link[bayestestR:diagnostic_posterior]{diagnostic_posterior}}
+#' 
+#' @export
+diagnostic_posterior.brmcoda <- function(posteriors, diagnostic = c("ESS", "Rhat"), ...) {
+  diagnostic_posterior(posteriors$Model, diagnostic = diagnostic, ...)
 }
