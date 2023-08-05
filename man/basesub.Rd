@@ -17,14 +17,9 @@ Make a data set of all possible pairwise substitution of a composition which can
 the base for substitution models.
 }
 \examples{
-
-data(mcompd)
-
 ps1 <- basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+print(ps1)
+
 ps2 <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
-
 print(ps2)
-
-## cleanup
-rm(mcompd, ps1, ps2)
 }

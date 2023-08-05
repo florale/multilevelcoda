@@ -9,16 +9,11 @@
 #' @importFrom data.table as.data.table 
 #' @export
 #' @examples
-#' 
-#' data(mcompd)
-#' 
 #' ps1 <- basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' print(ps1)
+#' 
 #' ps2 <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
-#' 
 #' print(ps2)
-#' 
-#' ## cleanup
-#' rm(mcompd, ps1, ps2)
 basesub <- function(parts) {
   
   count <- length(parts)
