@@ -12,19 +12,7 @@
 \alias{niterations.brmcoda}
 \alias{nchains.brmcoda}
 \alias{ndraws.brmcoda}
-\title{#' Extract Posterior Draws
-#'
-#' Extract posterior draws in conventional formats
-#' as data.frames, matrices, or arrays.
-#'
-#' @inheritParams brms::as.data.frame.brmsfit
-#'
-#' @return A data.frame, matrix, or array containing the posterior draws.
-#'
-#' @export
-as.data.frame.brmcoda <- function(x, row.names = NULL, optional = TRUE, ...) {
-as.data.frame(x$Model, ...)
-}}
+\title{Index \code{brmcoda} objects}
 \usage{
 \method{variables}{brmcoda}(x, ...)
 
@@ -42,18 +30,6 @@ as.data.frame(x$Model, ...)
 \item{...}{Arguments passed to individual methods.}
 }
 \description{
-#' @rdname as.data.frame.brmcoda
-#' @export
-as.matrix.brmcoda <- function(x, ...) {
-as.matrix(x$Model, ...)
-}
-}
-\details{
-#' @rdname as.data.frame.brmcoda
-#' @export
-as.array.brmcoda <- function(x, ...) {
-as.array(x$Model, ...)
-}
 Index \code{brmcoda} objects
 }
 \seealso{
