@@ -212,7 +212,7 @@ We explored two potential solution to improve MCMC sampling efficiency:
 increasing posterior draws and reparameterisation.
 
 ## Increased posterior draws
-As a first step, we test if increasing iterations and warmups help.
+As a first step, we test if increasing iterations and warmups helps.
 
 
 ```r
@@ -364,7 +364,83 @@ The modified Stan code is
 
 ```r
 m_centered <- cmdstan_model("fit_centered.stan")
+  -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\ 
 print(m_centered)
+  data {
+    int<lower=1> N;  // total number of observations
+    vector[N] Y;  // response variable
+    int<lower=1> K;  // number of population-level effects
+    matrix[N, K] X;  // population-level design matrix
+    // data for group-level effects of ID 1
+    int<lower=1> N_1;  // number of grouping levels
+    int<lower=1> M_1;  // number of coefficients per level
+    int<lower=1> J_1[N];  // grouping indicator per observation
+    // group-level predictor values
+    vector[N] Z_1_1;
+    int prior_only;  // should the likelihood be ignored?
+  }
+  transformed data {
+    int Kc = K - 1;
+    matrix[N, Kc] Xc;  // centered version of X without an intercept
+    vector[Kc] means_X;  // column means of X before centering
+    for (i in 2:K) {
+      means_X[i - 1] = mean(X[, i]);
+      Xc[, i - 1] = X[, i] - means_X[i - 1];
+    }
+  }
+  parameters {
+    vector[Kc] b;  // population-level effects
+    real Intercept;  // temporary intercept for centered predictors
+    real<lower=0> sigma;  // dispersion parameter
+    vector<lower=0>[M_1] sd_1;  // group-level standard deviations
+    vector[N_1] z_1[M_1];  // standardized group-level effects
+    
+    // Manually added
+     vector[N_1] r_1_1;  // actual group-level effects
+  }
+  //transformed parameters {
+  //  vector[N_1] r_1_1;  // actual group-level effects
+  //  real lprior = 0;  // prior contributions to the log posterior
+  //  r_1_1 = (sd_1[1] * (z_1[1]));
+  //  lprior += student_t_lpdf(Intercept | 3, 2, 2.5);
+  //  lprior += student_t_lpdf(sigma | 3, 0, 2.5)
+  //    - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+  //  lprior += student_t_lpdf(sd_1 | 3, 0, 2.5)
+  //    - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+  //}
+  model {
+    // likelihood including constants
+    if (!prior_only) {
+      // initialize linear predictor term
+      vector[N] mu = rep_vector(0.0, N);
+      mu += Intercept;
+      for (n in 1:N) {
+        // add more terms to the linear predictor
+        mu[n] += r_1_1[J_1[n]] * Z_1_1[n];
+        
+      }
+      target += normal_id_glm_lpdf(Y | Xc, mu, b, sigma);
+    }
+    // priors including constants
+    // target += lprior;
+    // target += std_normal_lpdf(z_1[1]);
+  
+    target += student_t_lpdf(Intercept | 3, 2, 2.5);
+    target += student_t_lpdf(sigma | 3, 0, 2.5)
+      - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+    target += student_t_lpdf(sd_1 | 3, 0, 2.5)
+      - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+      
+    // Manually added
+    target += normal_lpdf(r_1_1 | 0, sd_1[1]);
+  
+    // manual soft sum to zero constraint
+    // target += normal_lpdf(sum(r_1_1) | 0, 0.0001 *N_1);
+  }
+  generated quantities {
+    // actual population-level intercept
+    real b_Intercept = Intercept - dot_product(means_X, b);
+  }
 ```
 
 Now we build data for the model and sample with `cmdstanr`
@@ -395,19 +471,19 @@ summary(bm_centered)
   Group-Level Effects: 
   ~ID (Number of levels: 1200) 
                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sd(Intercept)     1.22      0.03     1.17     1.27 1.00     9848     9674
+  sd(Intercept)     1.22      0.03     1.17     1.27 1.00     9931     8766
   
   Population-Level Effects: 
             Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  Intercept     2.36      0.15     2.06     2.66 1.00    10497     5483
-  bilr1         0.19      0.18    -0.17     0.55 1.00    10539     5853
-  bilr2         0.29      0.14     0.01     0.56 1.00    10683     5784
-  wilr1        -0.80      0.03    -0.85    -0.74 1.00    10030     7217
-  wilr2        -0.26      0.02    -0.31    -0.22 1.00     9805     7335
+  Intercept     2.36      0.15     2.08     2.64 1.00    10179     5873
+  bilr1         0.19      0.18    -0.17     0.54 1.00    10484     6106
+  bilr2         0.29      0.14     0.01     0.56 1.00    10177     5829
+  wilr1        -0.80      0.03    -0.85    -0.74 1.00    10095     7128
+  wilr2        -0.26      0.02    -0.31    -0.22 1.00    10313     6910
   
   Family Specific Parameters: 
         Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sigma     0.71      0.00     0.71     0.72 1.00     8197     6616
+  sigma     0.71      0.00     0.71     0.72 1.00     8763     6056
   
   Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
   and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -432,7 +508,7 @@ of number of individuals, number of observations, number of compositional parts,
 magnitude of modeled variance (read more about our simulation study at)
 However,
 in the case of large data and small sample variation, 
-we recommend centered parameterisation or increase in iterations to 
+we recommend centered parameterisation or increasing iterations to 
 achieve efficient MCMC sampling and 
 acceptable ESS.
 

@@ -199,7 +199,7 @@ We explored two potential solution to improve MCMC sampling efficiency:
 increasing posterior draws and reparameterisation.
 
 ## Increased posterior draws
-As a first step, we test if increasing iterations and warmups help.
+As a first step, we test if increasing iterations and warmups helps.
 
 ```{r fit-it, results = "hide", echo = TRUE, message=FALSE}
 fit_it <- brmcoda(cilr, 
@@ -250,7 +250,7 @@ make_stancode(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
 We then can manually edit the generated brms code to center all parameters.
 The modified Stan code is
 
-```{r mod-stancode, results = "hide", warning = FALSE, message=FALSE}
+```{r mod-stancode, warning = FALSE, message=FALSE}
 m_centered <- cmdstan_model("fit_centered.stan")
 print(m_centered)
 ```
@@ -285,7 +285,7 @@ of number of individuals, number of observations, number of compositional parts,
 magnitude of modeled variance (read more about our simulation study at)
 However,
 in the case of large data and small sample variation, 
-we recommend centered parameterisation or increase in iterations to 
+we recommend centered parameterisation or increasing iterations to 
 achieve efficient MCMC sampling and 
 acceptable ESS.
 
