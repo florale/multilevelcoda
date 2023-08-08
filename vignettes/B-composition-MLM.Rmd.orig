@@ -2,7 +2,7 @@
 title: "Multilevel Models with Compositional Predictors"
 output: 
   html_document:
-    theme: sandstone
+    theme: spacelab
     highlight: zenburn
     toc: yes
     toc_float: yes

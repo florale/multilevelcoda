@@ -1,12 +1,19 @@
 ---
 title: "Introduction to Compositional Multilevel Modelling"
-output:
+output: 
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: true
-    toc_depth: 3
+    theme: spacelab
+    highlight: kate
+    toc: yes
+    toc_float: yes
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_width: 14
+    fig_height: 9
+    fig_caption: yes
+    number_sections: true
+---
 vignette: >
   %\VignetteIndexEntry{Introduction to Compositional Multilevel Modelling}
   %\VignetteEngine{knitr::rmarkdown}

@@ -2,8 +2,8 @@
 title: "Compositional Multilevel Substitution Models"
 output: 
   html_document:
-    theme: sandstone
-    highlight: zenburn
+    theme: spacelab
+    highlight: kate
     toc: yes
     toc_float: yes
     collapsed: no
@@ -147,6 +147,7 @@ will average predictions across levels of covariates as the default.
 ```r
 subm1 <- substitution(object = m, delta = 1:10,
                       ref = "grandmean", level = c("between", "within"))
+#> Error in {: task 1 failed - "dim(X) must have a positive length"
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -281,11 +282,6 @@ ggarrange(p1, p2,
 
 
 ```
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
 #> Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Are you sure your arguments are correct?
 #> Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Are you sure your arguments are correct?
 #> Error in eval(expr, envir, enclos): object 'p1' not found

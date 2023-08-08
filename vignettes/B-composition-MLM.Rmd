@@ -2,7 +2,7 @@
 title: "Multilevel Models with Compositional Predictors"
 output: 
   html_document:
-    theme: sandstone
+    theme: spacelab
     highlight: zenburn
     toc: yes
     toc_float: yes
@@ -289,6 +289,7 @@ model as reference.
 
 ```r
 comparison <- bayesfactor_models(m0$Model, m1$Model, m2$Model, m$Model, denominator = m0$Model)
+#> Error in `[.data.frame`(x, i, j, drop): undefined columns selected
 ```
 
 
@@ -297,9 +298,9 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                                                       BF
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.332
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.38
-#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.03
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.337
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.48
+#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.01
 #> 
 #> * Against Denominator: [1] 1 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
@@ -315,9 +316,9 @@ update(comparison, reference = 1)
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                                                       BF
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.332
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.38
-#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.03
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.337
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.48
+#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.01
 #> 
 #> * Against Denominator: [1] 1 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
@@ -354,6 +355,7 @@ The below example examines the changes in stress for different pairwise substitu
 ```r
 bsubm <- substitution(object = m, delta = 5, 
                       level = "between", ref = "grandmean")
+#> Error in {: task 1 failed - "dim(X) must have a positive length"
 ```
 
 The output contains multiple data sets of results for all compositional components. 
@@ -392,6 +394,7 @@ substituted for 5 minutes, at within-person level.
 # Within-person substitution
 wsubm <- substitution(object = m, delta = 5, 
                       level = "within", ref = "grandmean")
+#> Error in {: task 1 failed - "dim(X) must have a positive length"
 ```
 
 Results for 5 minute substitution.

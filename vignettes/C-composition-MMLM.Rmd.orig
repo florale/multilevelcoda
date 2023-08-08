@@ -2,8 +2,8 @@
 title: "Multilevel Model with Compositional Outcomes"
 output: 
   html_document:
-    theme: sandstone
-    highlight: zenburn
+    theme: spacelab
+    highlight: kate
     toc: yes
     toc_float: yes
     collapsed: no

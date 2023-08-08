@@ -2,8 +2,8 @@
 title: "Multilevel Model with Compositional Outcomes"
 output: 
   html_document:
-    theme: sandstone
-    highlight: zenburn
+    theme: spacelab
+    highlight: kate
     toc: yes
     toc_float: yes
     collapsed: no
@@ -56,6 +56,8 @@ head(cilr$TotalILR)
 #> [4,] -0.316 1.37 -0.0332 0.551
 #> [5,]  0.205 1.43 -0.6893 0.733
 #> [6,] -0.446 1.16 -0.0950 0.670
+#> attr(,"class")
+#> [1] "rmult"
 ```
 
 ## Fitting model
@@ -172,6 +174,7 @@ We can now compare these models with the `bayesfactor_models()` function
 
 ```r
 comparison <- bayesfactor_models(mv$Model, denominator = mv0$Model)
+#> Error in `[.data.frame`(x, i, j, drop): undefined columns selected
 ```
 
 
@@ -180,10 +183,12 @@ comparison <- bayesfactor_models(mv$Model, denominator = mv0$Model)
 comparison
 #> Bayes Factors for Model Comparison
 #> 
-#>     Model       BF
-#> [1]       2.81e-06
+#>     Model                                                                       BF
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.337
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.48
+#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.01
 #> 
-#> * Against Denominator: [2]
+#> * Against Denominator: [1] 1 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 

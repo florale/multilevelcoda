@@ -2,8 +2,8 @@
 title: "Compositional Multilevel Substitution Models"
 output: 
   html_document:
-    theme: sandstone
-    highlight: zenburn
+    theme: spacelab
+    highlight: kate
     toc: yes
     toc_float: yes
     collapsed: no
