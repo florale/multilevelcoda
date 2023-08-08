@@ -62,6 +62,7 @@
     <a class="dropdown-item" href="../articles/B-composition-MLM.html">Multilevel Models with Compositional Predictors</a>
     <a class="dropdown-item" href="../articles/C-composition-MMLM.html">Multilevel Model with Compositional Outcomes</a>
     <a class="dropdown-item" href="../articles/D-substitution-model.html">Compositional Multilevel Substitution Models</a>
+    <a class="dropdown-item" href="../articles/E-simmodel-diag.html">Improving MCMC Sampling for Bayesian Compositional Multilevel Models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -139,7 +140,9 @@ and <code>sbp</code> (sequential binary partition).</p>
 <span><span class="co">#&gt; [3,] -0.486 1.33  1.3344 2.659</span></span>
 <span><span class="co">#&gt; [4,] -0.316 1.37 -0.0332 0.551</span></span>
 <span><span class="co">#&gt; [5,]  0.205 1.43 -0.6893 0.733</span></span>
-<span><span class="co">#&gt; [6,] -0.446 1.16 -0.0950 0.670</span></span></code></pre></div>
+<span><span class="co">#&gt; [6,] -0.446 1.16 -0.0950 0.670</span></span>
+<span><span class="co">#&gt; attr(,"class")</span></span>
+<span><span class="co">#&gt; [1] "rmult"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fitting-model">Fitting model<a class="anchor" aria-label="anchor" href="#fitting-model"></a>
@@ -250,15 +253,18 @@ be fitted with an additional non-default argument
 <p>We can now compare these models with the
 <code><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models()</a></code> function</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, denominator <span class="op">=</span> <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `[.data.frame`(x, i, j, drop): undefined columns selected</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span></span>
 <span><span class="co">#&gt; Bayes Factors for Model Comparison</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     Model       BF</span></span>
-<span><span class="co">#&gt; [1]       2.81e-06</span></span>
+<span><span class="co">#&gt;     Model                                                                       BF</span></span>
+<span><span class="co">#&gt; [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.337</span></span>
+<span><span class="co">#&gt; [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.48</span></span>
+<span><span class="co">#&gt; [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.01</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; * Against Denominator: [2]</span></span>
+<span><span class="co">#&gt; * Against Denominator: [1] 1 + (1 | ID)</span></span>
 <span><span class="co">#&gt; *   Bayes Factor Type: marginal likelihoods (bridgesampling)</span></span></code></pre></div>
 <p>With a <span class="math inline">\(BF\)</span> &lt; 1, our data
 favours the intercept only model, showing that there is insufficient

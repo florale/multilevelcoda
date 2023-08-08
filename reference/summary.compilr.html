@@ -40,6 +40,7 @@
     <a class="dropdown-item" href="../articles/B-composition-MLM.html">Multilevel Models with Compositional Predictors</a>
     <a class="dropdown-item" href="../articles/C-composition-MMLM.html">Multilevel Model with Compositional Outcomes</a>
     <a class="dropdown-item" href="../articles/D-substitution-model.html">Compositional Multilevel Substitution Models</a>
+    <a class="dropdown-item" href="../articles/E-simmodel-diag.html">Improving MCMC Sampling for Bayesian Compositional Multilevel Models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -150,7 +151,7 @@ Default is <code>equal</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Compositional Mean:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   BTST  BWAKE  BMVPA   BLPA    BSB </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.3112 0.0421 0.0989 0.3816 0.1661 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.3109 0.0422 0.0986 0.3817 0.1667 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variation Matrix:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         BTST BWAKE BMVPA   BLPA   BSB</span>
@@ -168,11 +169,11 @@ Default is <code>equal</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variation Matrix:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        WTST WWAKE WMVPA  WLPA   WSB</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> WTST  0.000 0.259 0.485 0.139 0.382</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> WWAKE 0.259 0.000 0.675 0.330 0.591</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> WMVPA 0.485 0.675 0.000 0.445 1.060</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> WLPA  0.139 0.330 0.445 0.000 0.473</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> WSB   0.382 0.591 1.060 0.473 0.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WTST  0.000 0.260 0.483 0.134 0.382</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WWAKE 0.260 0.000 0.667 0.321 0.595</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WMVPA 0.483 0.667 0.000 0.448 1.053</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WLPA  0.134 0.321 0.448 0.000 0.464</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WSB   0.382 0.595 1.053 0.464 0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Raw Isometric Log-ratios:  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           ilr1   ilr2   ilr3   ilr4</span>

@@ -6,7 +6,8 @@ articles:
   B-composition-MLM: B-composition-MLM.html
   C-composition-MMLM: C-composition-MMLM.html
   D-substitution-model: D-substitution-model.html
-last_built: 2023-08-05T05:32Z
+  E-simmodel-diag: E-simmodel-diag.html
+last_built: 2023-08-08T11:39Z
 urls:
   reference: https://florale.github.io/multilevelcoda/reference
   article: https://florale.github.io/multilevelcoda/articles
