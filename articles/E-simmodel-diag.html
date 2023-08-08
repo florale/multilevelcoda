@@ -358,7 +358,7 @@ increasing posterior draws and reparameterisation.</p>
 <h3 id="increased-posterior-draws">Increased posterior draws<a class="anchor" aria-label="anchor" href="#increased-posterior-draws"></a>
 </h3>
 <p>As a first step, we test if increasing iterations and warmups
-help.</p>
+helps.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_it</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span><span class="va">cilr</span>, </span>
 <span>                  <span class="va">sleepy</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
@@ -493,9 +493,185 @@ sampling. We first obtain the Stan code for the example model</p>
 <span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 <p>We then can manually edit the generated brms code to center all
 parameters. The modified Stan code is</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_centered</span> <span class="op">&lt;-</span> <span class="fu">cmdstan_model</span><span class="op">(</span><span class="st">"fit_centered.stan"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">m_centered</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>m_centered <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(<span class="st">"fit_centered.stan"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span></span>
+<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a><span class="er">/</span></span>
+<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span></span>
+<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a>\</span>
+<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(m_centered)</span>
+<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a>  data {</span>
+<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a>    int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span><span class="sc">&gt;</span> N;  <span class="sc">/</span><span class="er">/</span> total number of observations</span>
+<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>    vector[N] Y;  <span class="sc">/</span><span class="er">/</span> response variable</span>
+<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a>    int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span><span class="sc">&gt;</span> K;  <span class="sc">/</span><span class="er">/</span> number of population<span class="sc">-</span>level effects</span>
+<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a>    matrix[N, K] X;  <span class="sc">/</span><span class="er">/</span> population<span class="sc">-</span>level design matrix</span>
+<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> data <span class="cf">for</span> group<span class="sc">-</span>level effects of ID <span class="dv">1</span></span>
+<span id="cb10-111"><a href="#cb10-111" aria-hidden="true" tabindex="-1"></a>    int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span><span class="sc">&gt;</span> N_1;  <span class="sc">/</span><span class="er">/</span> number of grouping levels</span>
+<span id="cb10-112"><a href="#cb10-112" aria-hidden="true" tabindex="-1"></a>    int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span><span class="sc">&gt;</span> M_1;  <span class="sc">/</span><span class="er">/</span> number of coefficients per level</span>
+<span id="cb10-113"><a href="#cb10-113" aria-hidden="true" tabindex="-1"></a>    int<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">1</span><span class="sc">&gt;</span> J_1[N];  <span class="sc">/</span><span class="er">/</span> grouping indicator per observation</span>
+<span id="cb10-114"><a href="#cb10-114" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> group<span class="sc">-</span>level predictor values</span>
+<span id="cb10-115"><a href="#cb10-115" aria-hidden="true" tabindex="-1"></a>    vector[N] Z_1_1;</span>
+<span id="cb10-116"><a href="#cb10-116" aria-hidden="true" tabindex="-1"></a>    int prior_only;  <span class="sc">/</span><span class="er">/</span> should the likelihood be ignored?</span>
+<span id="cb10-117"><a href="#cb10-117" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-118"><a href="#cb10-118" aria-hidden="true" tabindex="-1"></a>  transformed data {</span>
+<span id="cb10-119"><a href="#cb10-119" aria-hidden="true" tabindex="-1"></a>    int Kc <span class="ot">=</span> K <span class="sc">-</span> <span class="dv">1</span>;</span>
+<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a>    matrix[N, Kc] Xc;  <span class="sc">/</span><span class="er">/</span> centered version of X without an intercept</span>
+<span id="cb10-121"><a href="#cb10-121" aria-hidden="true" tabindex="-1"></a>    vector[Kc] means_X;  <span class="sc">/</span><span class="er">/</span> column means of X before centering</span>
+<span id="cb10-122"><a href="#cb10-122" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>K) {</span>
+<span id="cb10-123"><a href="#cb10-123" aria-hidden="true" tabindex="-1"></a>      means_X[i <span class="sc">-</span> <span class="dv">1</span>] <span class="ot">=</span> <span class="fu">mean</span>(X[, i]);</span>
+<span id="cb10-124"><a href="#cb10-124" aria-hidden="true" tabindex="-1"></a>      Xc[, i <span class="sc">-</span> <span class="dv">1</span>] <span class="ot">=</span> X[, i] <span class="sc">-</span> means_X[i <span class="sc">-</span> <span class="dv">1</span>];</span>
+<span id="cb10-125"><a href="#cb10-125" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-126"><a href="#cb10-126" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-127"><a href="#cb10-127" aria-hidden="true" tabindex="-1"></a>  parameters {</span>
+<span id="cb10-128"><a href="#cb10-128" aria-hidden="true" tabindex="-1"></a>    vector[Kc] b;  <span class="sc">/</span><span class="er">/</span> population<span class="sc">-</span>level effects</span>
+<span id="cb10-129"><a href="#cb10-129" aria-hidden="true" tabindex="-1"></a>    real Intercept;  <span class="sc">/</span><span class="er">/</span> temporary intercept <span class="cf">for</span> centered predictors</span>
+<span id="cb10-130"><a href="#cb10-130" aria-hidden="true" tabindex="-1"></a>    real<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span> sigma;  <span class="sc">/</span><span class="er">/</span> dispersion parameter</span>
+<span id="cb10-131"><a href="#cb10-131" aria-hidden="true" tabindex="-1"></a>    vector<span class="sc">&lt;</span>lower<span class="ot">=</span><span class="dv">0</span><span class="sc">&gt;</span>[M_1] sd_1;  <span class="sc">/</span><span class="er">/</span> group<span class="sc">-</span>level standard deviations</span>
+<span id="cb10-132"><a href="#cb10-132" aria-hidden="true" tabindex="-1"></a>    vector[N_1] z_1[M_1];  <span class="sc">/</span><span class="er">/</span> standardized group<span class="sc">-</span>level effects</span>
+<span id="cb10-133"><a href="#cb10-133" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-134"><a href="#cb10-134" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> Manually added</span>
+<span id="cb10-135"><a href="#cb10-135" aria-hidden="true" tabindex="-1"></a>     vector[N_1] r_1_1;  <span class="sc">/</span><span class="er">/</span> actual group<span class="sc">-</span>level effects</span>
+<span id="cb10-136"><a href="#cb10-136" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-137"><a href="#cb10-137" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>transformed parameters {</span>
+<span id="cb10-138"><a href="#cb10-138" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>  vector[N_1] r_1_1;  <span class="sc">/</span><span class="er">/</span> actual group<span class="sc">-</span>level effects</span>
+<span id="cb10-139"><a href="#cb10-139" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>  real lprior <span class="ot">=</span> <span class="dv">0</span>;  <span class="sc">/</span><span class="er">/</span> prior contributions to the log posterior</span>
+<span id="cb10-140"><a href="#cb10-140" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>  r_1_1 <span class="ot">=</span> (sd_1[<span class="dv">1</span>] <span class="sc">*</span> (z_1[<span class="dv">1</span>]));</span>
+<span id="cb10-141"><a href="#cb10-141" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>  lprior <span class="sc">+</span><span class="er">=</span> <span class="fu">student_t_lpdf</span>(Intercept <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">2</span>, <span class="fl">2.5</span>);</span>
+<span id="cb10-142"><a href="#cb10-142" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>  lprior <span class="sc">+</span><span class="er">=</span> <span class="fu">student_t_lpdf</span>(sigma <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>)</span>
+<span id="cb10-143"><a href="#cb10-143" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>    <span class="sc">-</span> <span class="dv">1</span> <span class="sc">*</span> <span class="fu">student_t_lccdf</span>(<span class="dv">0</span> <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb10-144"><a href="#cb10-144" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>  lprior <span class="sc">+</span><span class="er">=</span> <span class="fu">student_t_lpdf</span>(sd_1 <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>)</span>
+<span id="cb10-145"><a href="#cb10-145" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>    <span class="sc">-</span> <span class="dv">1</span> <span class="sc">*</span> <span class="fu">student_t_lccdf</span>(<span class="dv">0</span> <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb10-146"><a href="#cb10-146" aria-hidden="true" tabindex="-1"></a>  <span class="sc">/</span><span class="er">/</span>}</span>
+<span id="cb10-147"><a href="#cb10-147" aria-hidden="true" tabindex="-1"></a>  model {</span>
+<span id="cb10-148"><a href="#cb10-148" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> likelihood including constants</span>
+<span id="cb10-149"><a href="#cb10-149" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>prior_only) {</span>
+<span id="cb10-150"><a href="#cb10-150" aria-hidden="true" tabindex="-1"></a>      <span class="sc">/</span><span class="er">/</span> initialize linear predictor term</span>
+<span id="cb10-151"><a href="#cb10-151" aria-hidden="true" tabindex="-1"></a>      vector[N] mu <span class="ot">=</span> <span class="fu">rep_vector</span>(<span class="fl">0.0</span>, N);</span>
+<span id="cb10-152"><a href="#cb10-152" aria-hidden="true" tabindex="-1"></a>      mu <span class="sc">+</span><span class="er">=</span> Intercept;</span>
+<span id="cb10-153"><a href="#cb10-153" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N) {</span>
+<span id="cb10-154"><a href="#cb10-154" aria-hidden="true" tabindex="-1"></a>        <span class="sc">/</span><span class="er">/</span> add more terms to the linear predictor</span>
+<span id="cb10-155"><a href="#cb10-155" aria-hidden="true" tabindex="-1"></a>        mu[n] <span class="sc">+</span><span class="er">=</span> r_1_1[J_1[n]] <span class="sc">*</span> Z_1_1[n];</span>
+<span id="cb10-156"><a href="#cb10-156" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-157"><a href="#cb10-157" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb10-158"><a href="#cb10-158" aria-hidden="true" tabindex="-1"></a>      target <span class="sc">+</span><span class="er">=</span> <span class="fu">normal_id_glm_lpdf</span>(Y <span class="sc">|</span> Xc, mu, b, sigma);</span>
+<span id="cb10-159"><a href="#cb10-159" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> priors including constants</span>
+<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> target <span class="sc">+</span><span class="er">=</span> lprior;</span>
+<span id="cb10-162"><a href="#cb10-162" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> target <span class="sc">+</span><span class="er">=</span> <span class="fu">std_normal_lpdf</span>(z_1[<span class="dv">1</span>]);</span>
+<span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-164"><a href="#cb10-164" aria-hidden="true" tabindex="-1"></a>    target <span class="sc">+</span><span class="er">=</span> <span class="fu">student_t_lpdf</span>(Intercept <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">2</span>, <span class="fl">2.5</span>);</span>
+<span id="cb10-165"><a href="#cb10-165" aria-hidden="true" tabindex="-1"></a>    target <span class="sc">+</span><span class="er">=</span> <span class="fu">student_t_lpdf</span>(sigma <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>)</span>
+<span id="cb10-166"><a href="#cb10-166" aria-hidden="true" tabindex="-1"></a>      <span class="sc">-</span> <span class="dv">1</span> <span class="sc">*</span> <span class="fu">student_t_lccdf</span>(<span class="dv">0</span> <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a>    target <span class="sc">+</span><span class="er">=</span> <span class="fu">student_t_lpdf</span>(sd_1 <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>)</span>
+<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a>      <span class="sc">-</span> <span class="dv">1</span> <span class="sc">*</span> <span class="fu">student_t_lccdf</span>(<span class="dv">0</span> <span class="sc">|</span> <span class="dv">3</span>, <span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> Manually added</span>
+<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a>    target <span class="sc">+</span><span class="er">=</span> <span class="fu">normal_lpdf</span>(r_1_1 <span class="sc">|</span> <span class="dv">0</span>, sd_1[<span class="dv">1</span>]);</span>
+<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> manual soft sum to zero constraint</span>
+<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> target <span class="sc">+</span><span class="er">=</span> <span class="fu">normal_lpdf</span>(<span class="fu">sum</span>(r_1_1) <span class="sc">|</span> <span class="dv">0</span>, <span class="fl">0.0001</span> <span class="sc">*</span>N_1);</span>
+<span id="cb10-175"><a href="#cb10-175" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-176"><a href="#cb10-176" aria-hidden="true" tabindex="-1"></a>  generated quantities {</span>
+<span id="cb10-177"><a href="#cb10-177" aria-hidden="true" tabindex="-1"></a>    <span class="sc">/</span><span class="er">/</span> actual population<span class="sc">-</span>level intercept</span>
+<span id="cb10-178"><a href="#cb10-178" aria-hidden="true" tabindex="-1"></a>    real b_Intercept <span class="ot">=</span> Intercept <span class="sc">-</span> <span class="fu">dot_product</span>(means_X, b);</span>
+<span id="cb10-179"><a href="#cb10-179" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 <p>Now we build data for the model and sample with
 <code>cmdstanr</code></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -518,19 +694,19 @@ parameters. The modified Stan code is</p>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  Group<span class="sc">-</span>Level Effects<span class="sc">:</span> </span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="er">~</span><span class="fu">ID</span> (Number of levels<span class="sc">:</span> <span class="dv">1200</span>) </span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                Estimate Est.Error l<span class="dv">-95</span><span class="sc">% CI u-95%</span> CI Rhat Bulk_ESS Tail_ESS</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sd</span>(Intercept)     <span class="fl">1.22</span>      <span class="fl">0.03</span>     <span class="fl">1.17</span>     <span class="fl">1.27</span> <span class="fl">1.00</span>     <span class="dv">9848</span>     <span class="dv">9674</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sd</span>(Intercept)     <span class="fl">1.22</span>      <span class="fl">0.03</span>     <span class="fl">1.17</span>     <span class="fl">1.27</span> <span class="fl">1.00</span>     <span class="dv">9931</span>     <span class="dv">8766</span></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  Population<span class="sc">-</span>Level Effects<span class="sc">:</span> </span>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>            Estimate Est.Error l<span class="dv">-95</span><span class="sc">% CI u-95%</span> CI Rhat Bulk_ESS Tail_ESS</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  Intercept     <span class="fl">2.36</span>      <span class="fl">0.15</span>     <span class="fl">2.06</span>     <span class="fl">2.66</span> <span class="fl">1.00</span>    <span class="dv">10497</span>     <span class="dv">5483</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  bilr1         <span class="fl">0.19</span>      <span class="fl">0.18</span>    <span class="sc">-</span><span class="fl">0.17</span>     <span class="fl">0.55</span> <span class="fl">1.00</span>    <span class="dv">10539</span>     <span class="dv">5853</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  bilr2         <span class="fl">0.29</span>      <span class="fl">0.14</span>     <span class="fl">0.01</span>     <span class="fl">0.56</span> <span class="fl">1.00</span>    <span class="dv">10683</span>     <span class="dv">5784</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  wilr1        <span class="sc">-</span><span class="fl">0.80</span>      <span class="fl">0.03</span>    <span class="sc">-</span><span class="fl">0.85</span>    <span class="sc">-</span><span class="fl">0.74</span> <span class="fl">1.00</span>    <span class="dv">10030</span>     <span class="dv">7217</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  wilr2        <span class="sc">-</span><span class="fl">0.26</span>      <span class="fl">0.02</span>    <span class="sc">-</span><span class="fl">0.31</span>    <span class="sc">-</span><span class="fl">0.22</span> <span class="fl">1.00</span>     <span class="dv">9805</span>     <span class="dv">7335</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  Intercept     <span class="fl">2.36</span>      <span class="fl">0.15</span>     <span class="fl">2.08</span>     <span class="fl">2.64</span> <span class="fl">1.00</span>    <span class="dv">10179</span>     <span class="dv">5873</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  bilr1         <span class="fl">0.19</span>      <span class="fl">0.18</span>    <span class="sc">-</span><span class="fl">0.17</span>     <span class="fl">0.54</span> <span class="fl">1.00</span>    <span class="dv">10484</span>     <span class="dv">6106</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  bilr2         <span class="fl">0.29</span>      <span class="fl">0.14</span>     <span class="fl">0.01</span>     <span class="fl">0.56</span> <span class="fl">1.00</span>    <span class="dv">10177</span>     <span class="dv">5829</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  wilr1        <span class="sc">-</span><span class="fl">0.80</span>      <span class="fl">0.03</span>    <span class="sc">-</span><span class="fl">0.85</span>    <span class="sc">-</span><span class="fl">0.74</span> <span class="fl">1.00</span>    <span class="dv">10095</span>     <span class="dv">7128</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  wilr2        <span class="sc">-</span><span class="fl">0.26</span>      <span class="fl">0.02</span>    <span class="sc">-</span><span class="fl">0.31</span>    <span class="sc">-</span><span class="fl">0.22</span> <span class="fl">1.00</span>    <span class="dv">10313</span>     <span class="dv">6910</span></span>
 <span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  Family Specific Parameters<span class="sc">:</span> </span>
 <span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        Estimate Est.Error l<span class="dv">-95</span><span class="sc">% CI u-95%</span> CI Rhat Bulk_ESS Tail_ESS</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>  sigma     <span class="fl">0.71</span>      <span class="fl">0.00</span>     <span class="fl">0.71</span>     <span class="fl">0.72</span> <span class="fl">1.00</span>     <span class="dv">8197</span>     <span class="dv">6616</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>  sigma     <span class="fl">0.71</span>      <span class="fl">0.00</span>     <span class="fl">0.71</span>     <span class="fl">0.72</span> <span class="fl">1.00</span>     <span class="dv">8763</span>     <span class="dv">6056</span></span>
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  Draws were sampled using <span class="fu">sample</span>(hmc). For each parameter, Bulk_ESS</span>
 <span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  and Tail_ESS are effective sample size measures, and Rhat is the potential</span>
@@ -554,7 +730,7 @@ across different conditions of number of individuals, number of
 observations, number of compositional parts, and magnitude of modeled
 variance (read more about our simulation study at) However, in the case
 of large data and small sample variation, we recommend centered
-parameterisation or increase in iterations to achieve efficient MCMC
+parameterisation or increasing iterations to achieve efficient MCMC
 sampling and acceptable ESS.</p>
 </div>
 <div class="section level2">
