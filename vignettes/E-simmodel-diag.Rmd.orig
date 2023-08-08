@@ -1,0 +1,292 @@
+---
+title: "Improving MCMC Sampling for Bayesian Compositional Multilevel Models"
+author: "Flora Le"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: spacelab
+    highlight: kate
+    toc: yes
+    toc_float: no
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_width: 14
+    fig_height: 10
+    fig_caption: yes
+    number_sections: true
+bibliography: refs.bib  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = ' ',
+  dev = "CairoPNG", dpi = 150, 
+  fig.path = "mlmcoda-", fig.align = "center"
+)
+options(digits = 3)
+
+library(data.table)
+library(extraoperators)
+library(compositions)
+library(multilevelcoda)
+library(brms)
+library(cmdstanr)
+library(insight)
+library(MASS)
+
+library(doFuture)
+library(foreach)
+library(parallel)
+library(doRNG)
+library(future)
+library(bayesplot)
+
+color_scheme_set("mix-blue-red")
+color_scheme_set("blue")
+
+## input ---------
+input <- readRDS("/Users/florale/Library/CloudStorage/OneDrive-MonashUniversity/GitHub/Projects/multilevelcoda-sim/input.RDS")
+meanscovs <- input$meanscovs
+prefit5 <- input$prefit5
+prefit4 <- input$prefit4
+prefit3 <- input$prefit3
+
+source("/Users/florale/Library/CloudStorage/OneDrive-MonashUniversity/GitHub/Projects/multilevelcoda-sim/simmodel_input.R") # groundtruth, conditions and functions
+
+```
+
+
+# Introduction
+In this vignettes, we present a case study
+we encountered in the simulation study for package `multilevelcoda`. 
+Briefly, we found that 
+multilevel model with compositional predictors with large sample size, 
+large between-person heterogeneity and small within-person heterogeneity
+(large $\sigma^2_{u}$ and small $\sigma^2_{\varepsilon}$)
+produced low bulk effective sample size (ESS).
+Here, we examined the diagnostics of the model of interest and explored different
+methods to improve the within-chain autocorrelation.
+
+# Generating Data from Simulation Study
+We first generated a dataset consisting of a 3-part behaviour composition with
+1200 individuals, 14 observations per individuals, and
+large random intercept variation ($\sigma^2_{u} = 1.5$), coupled with 
+small residual variation ($\sigma^2_{\varepsilon}: 0.5$).
+
+```{r}
+set.seed(1) 
+sampled_cond <- cond[condition == "RElarge_RESsmall" & n_parts == 3 & N == 1200 & K == 14][1]
+i <- 1
+
+# condition
+N             <- sampled_cond[i, N]
+K             <- sampled_cond[i, K]
+rint_sd       <- sampled_cond[i, rint_sd]
+res_sd        <- sampled_cond[i, res_sd]
+run           <- sampled_cond[i, run]
+n_parts       <- sampled_cond[i, n_parts]
+sbp_n         <- sampled_cond[i, sbp]
+prefit_n      <- sampled_cond[i, prefit]
+groundtruth_n <- sampled_cond[i, groundtruth]
+parts         <- sampled_cond[i, parts]
+
+# inputs
+sbp           <- meanscovs[[paste(sbp_n)]]
+prefit        <- get(prefit_n)
+groundtruth   <- get(groundtruth_n)
+parts         <- as.vector(strsplit(parts, " ")[[1]])
+
+simd <- with(meanscovs, rbind(
+  simulateData(
+    bm = BMeans,
+    wm = WMeans,
+    bcov = BCov,
+    wcov = WCov,
+    n = N,
+    k = K,
+    psi = psi)
+))
+
+simd[, Sleep := TST + WAKE]
+simd[, PA := MVPA + LPA]
+# ILR ---------------------------------------------------
+cilr <- compilr(
+  data = simd,
+  sbp = sbp,
+  parts = parts,
+  idvar = "ID")
+
+tmp <- cbind(cilr$data,
+             cilr$BetweenILR,
+             cilr$WithinILR,
+             cilr$TotalILR)
+
+# random effects ----------------------------------------
+redat <- data.table(ID = unique(tmp$ID),
+                    rint = rnorm(
+                      n = length(unique(tmp$ID)),
+                      mean = 0,
+                      sd = rint_sd))
+
+tmp <- merge(tmp, redat, by = "ID")
+
+# outcome -----------------------------------------------
+if (n_parts == 3) {
+  tmp[, sleepy :=  rnorm(
+    n = nrow(simd),
+    mean = groundtruth$b_Intercept  + rint +
+      (groundtruth$b_bilr1 * bilr1) +
+      (groundtruth$b_bilr2 * bilr2) +
+      (groundtruth$b_wilr1 * wilr1) +
+      (groundtruth$b_wilr2 * wilr2),
+    sd = res_sd)]
+}           
+simd$sleepy <- tmp$sleepy
+
+cilr <- compilr(simd, sbp, parts, total = 1440, idvar = "ID")
+dat <- cbind(cilr$data, cilr$BetweenILR, cilr$WithinILR)
+```
+
+Here is the dataset `dat`, along with our variables of interest.
+
+```{r dat}
+knitr::kable(head(dat[, .(ID, sleepy, Sleep, PA, SB,
+                          bilr1, bilr2, wilr1, wilr2)]))
+```
+
+# Example Models
+
+The model of interest is a multilevel model with
+3-part composition (Sleep, Physical Activity, Sedentary Behaviour), expressed
+as a 2 sets of 2-part between and within- $ilr$ coordinates predicting sleepiness.
+
+```{r fit, results = "hide", echo = TRUE, message=FALSE}
+fit <- brmcoda(cilr, 
+               sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID),
+               cores = 4,
+               chains = 4,
+               iter = 3000,
+               warmup = 500,
+               backend = "cmdstanr"
+)
+```
+
+
+A summary of the model indicates that
+the bulk ESS values for the constant and varying intercept as well as the constant coefficients
+of the between $ilr$ coordinates are low.
+
+```{r sum-fit}
+summary(fit)
+```
+
+Further inspection of density and trace lots for these parameters show 
+some areas of the samples being drawn from outside of the parameter space,
+but no strong evidence for non-convergence.
+
+```{r plot-fit, fig.height=8}
+plot(fit, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
+```
+
+# Improving within-chain autocorrelation of MCMC sampling
+The low bulk ESS for random intercept model has been observed previously, for example,
+see  
+[here](https://discourse.mc-stan.org/t/low-ess-and-high-rhat-for-random-intercept-slope-simulation-rstan-and-rstanarm/9985/6)
+and [here](https://discourse.mc-stan.org/t/low-bulk-ess-simple-random-intercept-model/23181/2).
+We explored two potential solution to improve MCMC sampling efficiency:
+increasing posterior draws and reparameterisation.
+
+## Increased posterior draws
+As a first step, we test if increasing iterations and warmups help.
+
+```{r fit-it, results = "hide", echo = TRUE, message=FALSE}
+fit_it <- brmcoda(cilr, 
+                  sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID),
+                  cores = 4,
+                  chains = 4,
+                  iter = 10000,
+                  warmup = 1000,
+                  backend = "cmdstanr"
+)
+```
+
+
+```{r sum-fit-it}
+summary(fit_it)
+```
+
+
+```{r plot-fit-it, warning=FALSE}
+plot(fit_it, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
+```
+
+It is a good sign that increasing interation and warmups increase the ESS, supported by trace plots.
+The ratios of ESS of `b_Intercept`, `b_bilr1`, `b_bilr2` and `sd_ID_intercept` 
+to `b_wilr1`, `b_wilr2`, and `sigma` remain somewhat a concern. 
+
+## Centered Parameterisation
+By default, `brms` uses the non-centered parametrization.
+However, 
+@betancourt2015 explains correlation
+depends on the amount of data, and
+the efficacy of the parameterization depends on the relative strength of the data.
+For small data sets, the computational implementation of the model using non-parameterisation is more efficient. 
+When there is enough data, however,
+this parameterization is unnecessary and it may be more efficient to use the centered parameterisation.
+Reparameterisation is further discussed 
+in [Betancourt's case study](https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html) and
+[Nicenboim, Schad, and Vasishth's chapter on complex models and reparameterisation](https://vasishth.github.io/bayescogsci/book/ch-complexstan.html).
+
+Given that there is a small variation in our large simulated data set,
+we are going to test if centered parameterisation improves the sampling.
+We first obtain the Stan code for the example model
+
+```{r stancode}
+make_stancode(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
+```
+
+We then can manually edit the generated brms code to center all parameters.
+The modified Stan code is
+
+```{r mod-stancode, results = "hide", warning = FALSE, message=FALSE}
+m_centered <- cmdstan_model("fit_centered.stan")
+print(m_centered)
+```
+
+Now we build data for the model and sample with `cmdstanr`
+
+```{r fit-centered, results = "hide", echo = TRUE, message=FALSE}
+sdat <- make_standata(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
+fit_centered <- m_centered$sample(data = sdat,
+                                  parallel_chains = 4,
+                                  iter_sampling = 2500,
+                                  iter_warmup = 500)
+```
+
+
+```{r sum-fit-centered, message=FALSE}
+bm_centered <- brm(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat, empty = TRUE)
+bm_centered$fit <- rstan::read_stan_csv(fit_centered$output_files())
+bm_centered <- rename_pars(bm_centered)
+summary(bm_centered)
+```
+
+Indeed, the centered parameterisation has improved the ESS for all parameters.
+
+```{r pair-fit-centered, warning=FALSE}
+plot(bm_centered, pars = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
+```
+
+# Conclusion
+`multilevelcoda` demonstrates excellent performances across different conditions
+of number of individuals, number of observations, number of compositional parts, and
+magnitude of modeled variance (read more about our simulation study at)
+However,
+in the case of large data and small sample variation, 
+we recommend centered parameterisation or increase in iterations to 
+achieve efficient MCMC sampling and 
+acceptable ESS.
+
+# References

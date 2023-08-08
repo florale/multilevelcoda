@@ -6,11 +6,14 @@
 
 library(knitr)
 knit(
-  "vignettes/D-substitution-model.Rmd.orig",
-  "vignettes/D-substitution-model.Rmd")
+  "vignettes/B-composition-MLM.Rmd.orig",
+  "vignettes/B-composition-MLM.Rmd")
 knit(
   "vignettes/C-composition-MMLM.Rmd.orig",
   "vignettes/C-composition-MMLM.Rmd")
 knit(
-  "vignettes/B-composition-MLM.Rmd.orig",
-  "vignettes/B-composition-MLM.Rmd")
+  "vignettes/D-substitution-model.Rmd.orig",
+  "vignettes/D-substitution-model.Rmd")
+knit(
+  "vignettes/E-simmodel-diag.Rmd.orig",
+  "vignettes/E-simmodel-diag.Rmd")

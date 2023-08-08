@@ -18,6 +18,7 @@ articles:
   - B-composition-MLM
   - C-composition-MMLM
   - D-substitution-model
+  - E-simmodel-diag
 
 footer:
   structure:
