@@ -13,7 +13,6 @@ output:
     fig_height: 9
     fig_caption: yes
     number_sections: true
----
 vignette: >
   %\VignetteIndexEntry{Introduction to Compositional Multilevel Modelling}
   %\VignetteEngine{knitr::rmarkdown}
