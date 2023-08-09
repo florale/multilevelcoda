@@ -11,14 +11,10 @@
 #' 
 #' @aliases predict
 #' 
-#' @inheritParams brms::predict.brmsfit
 #' @param object An object of class \code{brmcoda}.
-#' @param scale Either \code{"response"} or \code{"linear"} or \code{"comp"}.
-#' If either \code{"response"} or \code{"linear"},
-#' results are returned using the corresponding method in \code{predict.brmsfit}.
-#' \code{"comp"} is only relevant to multivariate models of class \code{mvbrmsformula}
-#' (i.e., when response is composition). If \code{"comp"},
-#' results are returned on the compositional scale of the response variable.
+#' @param acomp Should the
+#' results be returned on the compositional scale of the response variable?
+#' Only applicable for models with compositional response
 #' @param ... Further arguments passed to \code{\link{predict.brmsfit}}
 #' that control additional aspects of prediction.
 #' 
@@ -61,30 +57,15 @@
 #' }}
 #' @export
 predict.brmcoda <- function(object,
-                            newdata = NULL,
-                            re_formula = NULL,
-                            scale = c("response", "linear", "comp"),
-                            summary = TRUE,
+                            acomp = FALSE,
                             ...) {
   
-  if (missing(scale)) {
+  if (isFALSE(acomp)) {
     out <- predict(
       object$Model,
-      newdata = newdata,
-      re_formula = re_formula,
-      summary = summary,
       ...
     )
-  } else if (scale %in% c("response", "linear")) {
-    out <- predict(
-      object$Model,
-      newdata = newdata,
-      re_formula = re_formula,
-      scale = scale,
-      summary = summary,
-      ...
-    )
-  } else if (scale == "comp") {
+  } else {
     if (isFALSE(inherits(object$Model$formula, "mvbrmsformula"))) {
       stop(sprintf(
         "This is a %s model, but a model of class mvbrmsformula is required to
@@ -94,9 +75,6 @@ predict.brmcoda <- function(object,
     } else {
       out <- predict(
         object$Model,
-        newdata = newdata,
-        re_formula = re_formula,
-        summary = FALSE,
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
@@ -176,30 +154,15 @@ predict.brmcoda <- function(object,
 #' }}
 #' @export
 fitted.brmcoda <- function(object,
-                           newdata = NULL,
-                           re_formula = NULL,
-                           scale = c("response", "linear", "comp"),
-                           summary = TRUE,
+                           acomp = FALSE,
                            ...) {
   
-  if (missing(scale)) {
+  if (isFALSE(acomp)) {
     out <- fitted(
       object$Model,
-      newdata = newdata,
-      re_formula = re_formula,
-      summary = summary,
       ...
     )
-  } else if (scale %in% c("response", "linear")) {
-    out <- fitted(
-      object$Model,
-      newdata = newdata,
-      re_formula = re_formula,
-      scale = scale,
-      summary = summary,
-      ...
-    )
-  } else if (scale == "comp") {
+  } else {
     if (isFALSE(inherits(object$Model$formula, "mvbrmsformula"))) {
       stop(sprintf(
         "This is a %s model, but a model of class mvbrmsformula is required to
@@ -209,8 +172,6 @@ fitted.brmcoda <- function(object,
     } else {
       out <- fitted(
         object$Model,
-        newdata = newdata,
-        re_formula = re_formula,
         summary = FALSE,
         ...
       )

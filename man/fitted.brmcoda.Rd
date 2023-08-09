@@ -5,37 +5,14 @@
 \alias{fitted}
 \title{Expected Values of the Posterior Predictive Distribution}
 \usage{
-\method{fitted}{brmcoda}(
-  object,
-  newdata = NULL,
-  re_formula = NULL,
-  scale = c("response", "linear", "comp"),
-  summary = TRUE,
-  ...
-)
+\method{fitted}{brmcoda}(object, acomp = FALSE, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{newdata}{An optional data.frame for which to evaluate predictions. If
-\code{NULL} (default), the original data of the model is used.
-\code{NA} values within factors are interpreted as if all dummy
-variables of this factor are zero. This allows, for instance, to make
-predictions of the grand mean when using sum coding.}
-
-\item{re_formula}{formula containing group-level effects to be considered in
-the prediction. If \code{NULL} (default), include all group-level effects;
-if \code{NA}, include no group-level effects.}
-
-\item{scale}{Either \code{"response"} or \code{"linear"} or \code{"comp"}.
-If either \code{"response"} or \code{"linear"},
-results are returned using the corresponding method in \code{predict.brmsfit}.
-\code{"comp"} is only relevant to multivariate models of class \code{mvbrmsformula}
-(i.e., when response is composition). If \code{"comp"},
-results are returned on the compositional scale of the response variable.}
-
-\item{summary}{Should summary statistics be returned
-instead of the raw values? Default is \code{TRUE}.}
+\item{acomp}{Should the
+results be returned on the compositional scale of the response variable?
+Only applicable for models with compositional response}
 
 \item{...}{Further arguments passed to \code{\link{fitted.brmsfit}}
 that control additional aspects of prediction.}

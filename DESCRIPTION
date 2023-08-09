@@ -37,6 +37,7 @@ Imports:
     ggplot2,
     emmeans,
     insight,
+    foreach,
     doFuture,
     abind,
     graphics

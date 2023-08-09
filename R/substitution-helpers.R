@@ -215,7 +215,7 @@ build.rg <- function(object,
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom bayestestR describe_posterior
 #' @importFrom extraoperators %snin% %sin%
-#' @importFrom foreach foreach
+#' @importFrom foreach foreach %dopar%
 #' @importFrom doFuture %dofuture%
 #' @importFrom stats fitted
 #' 
@@ -229,7 +229,7 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
     # dnew - reallocation data
     # possible substitution of 1 compositional variable
@@ -316,7 +316,7 @@ NULL
         dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NA,
             summary = FALSE
@@ -350,7 +350,7 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -437,7 +437,7 @@ NULL
         dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NA,
             summary = FALSE
@@ -470,7 +470,7 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -521,7 +521,7 @@ NULL
         dsub <- cbind(dnew, bilrsub, wilr0)
         ysub <-
           fitted(
-            object,
+            object$Model,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
@@ -562,7 +562,7 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
     
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
@@ -615,7 +615,7 @@ NULL
         # prediction
         ysub <-
           fitted(
-            object,
+            object$Model,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
@@ -700,10 +700,12 @@ NULL
         # prediction
         dsub <- cbind(dnew, tilr)
         ysub <-
-          fitted(object,
-                 newdata = dsub,
-                 re_formula = NULL,
-                 summary = FALSE)
+          fitted(
+            object$Model,
+            newdata = dsub,
+            re_formula = NULL,
+            summary = FALSE
+          )
         ysub <- rowMeans(as.data.frame(ysub))
         
         # difference in outcomes between substitution and no change
