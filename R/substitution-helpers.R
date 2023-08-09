@@ -215,7 +215,8 @@ build.rg <- function(object,
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom bayestestR describe_posterior
 #' @importFrom extraoperators %snin% %sin%
-#' @importFrom foreach foreach %dopar%
+#' @importFrom foreach foreach
+#' @importFrom doFuture %dofuture%
 #' @importFrom stats fitted
 #' 
 #' @name get-substitution
@@ -228,7 +229,7 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # dnew - reallocation data
     # possible substitution of 1 compositional variable
@@ -349,7 +350,7 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -469,7 +470,7 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -525,7 +526,7 @@ NULL
             re_formula = NULL,
             summary = FALSE
           )
-        ysub <- rowMeans(ysub)
+        ysub <- rowMeans(as.data.frame(ysub))
         
         # difference in outcomes between substitution and no change
         delta_y <- ysub - y0
@@ -561,7 +562,7 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
@@ -619,7 +620,7 @@ NULL
             re_formula = NULL,
             summary = FALSE
           )
-        ysub <- rowMeans(ysub) 
+        ysub <- rowMeans(as.data.frame(ysub))
         
         # difference between substitution and no change
         delta_y <- ysub - y0
@@ -656,7 +657,7 @@ NULL
                             level, ref,
                             ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -703,7 +704,7 @@ NULL
                  newdata = dsub,
                  re_formula = NULL,
                  summary = FALSE)
-        ysub <- rowMeans(ysub)
+        ysub <- rowMeans(as.data.frame(ysub))
         
         # difference in outcomes between substitution and no change
         delta_y <- ysub - y0
