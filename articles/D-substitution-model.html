@@ -414,8 +414,8 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="right">Mean</th>
-<th align="left">CI_low</th>
-<th align="left">CI_high</th>
+<th align="right">CI_low</th>
+<th align="right">CI_high</th>
 <th align="right">Delta</th>
 <th align="left">To</th>
 <th align="left">From</th>
@@ -424,9 +424,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">0.08</td>
+<td align="right">0.00</td>
+<td align="right">0.16</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -434,9 +434,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="even">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">0.00</td>
+<td align="right">-0.03</td>
+<td align="right">0.04</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -444,9 +444,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="odd">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">0.01</td>
+<td align="right">-0.01</td>
+<td align="right">0.04</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -454,9 +454,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="even">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">0.02</td>
+<td align="right">-0.01</td>
+<td align="right">0.05</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -464,9 +464,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="odd">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">0.05</td>
+<td align="right">0.01</td>
+<td align="right">0.08</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">WAKE</td>
@@ -474,9 +474,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="even">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">-0.01</td>
+<td align="right">-0.02</td>
+<td align="right">0.01</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">MVPA</td>
@@ -484,9 +484,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="odd">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">-0.01</td>
+<td align="right">-0.02</td>
+<td align="right">0.00</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">LPA</td>
@@ -494,9 +494,9 @@ sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <td align="left">clustermean</td>
 </tr>
 <tr class="even">
-<td align="right">NaN</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
+<td align="right">0.00</td>
+<td align="right">-0.01</td>
+<td align="right">0.01</td>
 <td align="right">10</td>
 <td align="left">TST</td>
 <td align="left">SB</td>
@@ -510,14 +510,16 @@ sleep on stress, plot using <code>plotsub()</code> and
 <code>ggpubr::ggarrange()</code> functions.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/" class="external-link">ggpubr</a></span><span class="op">)</span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">subm1</span>, to <span class="op">=</span> <span class="st">"TST"</span>, level <span class="op">=</span> <span class="st">"between"</span>, ref <span class="op">=</span> <span class="st">"clustermean"</span><span class="op">)</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">subm1</span>, to <span class="op">=</span> <span class="st">"TST"</span>, level <span class="op">=</span> <span class="st">"within"</span>, ref <span class="op">=</span> <span class="st">"clustermean"</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">subm2</span>, to <span class="op">=</span> <span class="st">"TST"</span>, level <span class="op">=</span> <span class="st">"between"</span>, ref <span class="op">=</span> <span class="st">"clustermean"</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">subm2</span>, to <span class="op">=</span> <span class="st">"TST"</span>, level <span class="op">=</span> <span class="st">"within"</span>, ref <span class="op">=</span> <span class="st">"clustermean"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggarrange</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, </span>
 <span>          ncol <span class="op">=</span> <span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt; Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Are you sure your arguments are correct?</span></span>
-<span><span class="co">#&gt; Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Are you sure your arguments are correct?</span></span>
-<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'p1' not found</span></span></code></pre>
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"><p class="caption">
+Example of Average Marginal Substitution Model
+</p>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
