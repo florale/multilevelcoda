@@ -227,8 +227,8 @@ plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
 ```{r plotsubmargin, eval=FALSE}
 library(ggpubr)
-p1 <- plot(subm1, to = "TST", level = "between", ref = "clustermean")
-p2 <- plot(subm1, to = "TST", level = "within", ref = "clustermean")
+p1 <- plot(subm2, to = "TST", level = "between", ref = "clustermean")
+p2 <- plot(subm2, to = "TST", level = "within", ref = "clustermean")
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
@@ -237,7 +237,7 @@ ggarrange(p1, p2,
 
 ```{r mlmcoda-submargins, fig.width = 8, fig.height = 6, echo=FALSE, fig.cap = "Example of Average Marginal Substitution Model"}
 library(ggpubr)
-p1 <- plot(subm1, to = "TST", level = "between", ref = "clustermean") +
+p1 <- plot(subm2, to = "TST", level = "between", ref = "clustermean") +
   scale_color_jco() +
   scale_fill_jco() +
   theme(
@@ -252,7 +252,7 @@ p1 <- plot(subm1, to = "TST", level = "between", ref = "clustermean") +
          panel.border = element_blank(),
          strip.background = element_rect(colour = "black", fill = "white")
        )
-p2 <- plot(subm1, to = "TST", level = "within", ref = "clustermean") +
+p2 <- plot(subm2, to = "TST", level = "within", ref = "clustermean") +
   scale_color_jco() +
   scale_fill_jco() +
   theme(

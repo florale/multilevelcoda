@@ -147,7 +147,6 @@ will average predictions across levels of covariates as the default.
 ```r
 subm1 <- substitution(object = m, delta = 1:10,
                       ref = "grandmean", level = c("between", "within"))
-#> Error in {: task 1 failed - "dim(X) must have a positive length"
 ```
 
 Output from `substitution()` contains multiple data set of results for all available compositional component. 
@@ -240,7 +239,6 @@ plan(multisession, workers = 5)
 
 subm2 <- substitution(object = m, delta = 1:10,
                       ref = "clustermean", level = c("between", "within"))
-#> Error in {: task 1 failed - "'x' must be an array of at least two dimensions"
 registerDoSEQ()
 ```
 
@@ -255,11 +253,11 @@ knitr::kable(summary(subm2, delta = 10, to = "TST"))
 
 |  Mean| CI_low| CI_high| Delta|To  |From |Level   |Reference   |
 |-----:|------:|-------:|-----:|:---|:----|:-------|:-----------|
-|  0.07|  -0.01|    0.15|    10|TST |WAKE |between |clustermean |
+|  0.08|   0.00|    0.16|    10|TST |WAKE |between |clustermean |
 |  0.00|  -0.03|    0.04|    10|TST |MVPA |between |clustermean |
-|  0.01|  -0.01|    0.03|    10|TST |LPA  |between |clustermean |
-|  0.01|  -0.01|    0.04|    10|TST |SB   |between |clustermean |
-|  0.05|   0.01|    0.09|    10|TST |WAKE |within  |clustermean |
+|  0.01|  -0.01|    0.04|    10|TST |LPA  |between |clustermean |
+|  0.02|  -0.01|    0.05|    10|TST |SB   |between |clustermean |
+|  0.05|   0.01|    0.08|    10|TST |WAKE |within  |clustermean |
 | -0.01|  -0.02|    0.01|    10|TST |MVPA |within  |clustermean |
 | -0.01|  -0.02|    0.00|    10|TST |LPA  |within  |clustermean |
 |  0.00|  -0.01|    0.01|    10|TST |SB   |within  |clustermean |
@@ -272,17 +270,15 @@ plot using `plotsub()` and `ggpubr::ggarrange()` functions.
 
 ```r
 library(ggpubr)
-p1 <- plot(subm1, to = "TST", level = "between", ref = "clustermean")
-p2 <- plot(subm1, to = "TST", level = "within", ref = "clustermean")
+p1 <- plot(subm2, to = "TST", level = "between", ref = "clustermean")
+p2 <- plot(subm2, to = "TST", level = "within", ref = "clustermean")
 
 ggarrange(p1, p2, 
           ncol = 1, nrow = 2)
 ```
 
 
-
-```
-#> Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Are you sure your arguments are correct?
-#> Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Are you sure your arguments are correct?
-#> Error in eval(expr, envir, enclos): object 'p1' not found
-```
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"  />
+<p class="caption">Example of Average Marginal Substitution Model</p>
+</div>
