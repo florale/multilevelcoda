@@ -229,7 +229,7 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # dnew - reallocation data
     # possible substitution of 1 compositional variable
@@ -350,7 +350,7 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -470,7 +470,7 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -562,7 +562,7 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dopar% {
+  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
     
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
