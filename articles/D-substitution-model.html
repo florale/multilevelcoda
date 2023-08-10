@@ -137,7 +137,7 @@ substitution).</p>
 <h2 id="fitting-main-model">Fitting main model<a class="anchor" aria-label="anchor" href="#fitting-main-model"></a>
 </h2>
 <p>Let’s fit our main <code>brms</code> model predicting
-<code>STRESS</code> from both between and within-person sleep-wake
+<code>Stress</code> from both between and within-person sleep-wake
 behaviours (represented by isometric log ratio coordinates), with sex as
 a covariate, using the <code><a href="../reference/brmcoda.html">brmcoda()</a></code> function. We can compute
 ILR coordinate predictors using <code><a href="../reference/compilr.html">compilr()</a></code> function.</p>
@@ -146,7 +146,7 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
-<span>             formula <span class="op">=</span> <span class="va">STRESS</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span>
+<span>             formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span>
 <span>                                <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>             cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></code></pre></div>
 <p>A <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model results.</p>
@@ -154,7 +154,7 @@ ILR coordinate predictors using <code><a href="../reference/compilr.html">compil
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = identity </span></span>
-<span><span class="co">#&gt; Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) </span></span>
+<span><span class="co">#&gt; Formula: Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) </span></span>
 <span><span class="co">#&gt;    Data: tmp (Number of observations: 3540) </span></span>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>

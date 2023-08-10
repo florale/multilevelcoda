@@ -153,7 +153,7 @@ of predictors. Our <code>brms</code> model can be then fitted using the
 <code><a href="../reference/brmcoda.html">brmcoda()</a></code> function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
-<span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">STRESS</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
+<span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">Stress</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>              cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'</span></span>
 <span><span class="co">#&gt; via 'set_rescor' instead of using the default.</span></span></code></pre></div>
@@ -166,10 +166,10 @@ significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
 <span><span class="co">#&gt;          mu = identity; sigma = identity</span></span>
 <span><span class="co">#&gt;          mu = identity; sigma = identity</span></span>
 <span><span class="co">#&gt;          mu = identity; sigma = identity </span></span>
-<span><span class="co">#&gt; Formula: ilr1 ~ STRESS + (1 | ID) </span></span>
-<span><span class="co">#&gt;          ilr2 ~ STRESS + (1 | ID) </span></span>
-<span><span class="co">#&gt;          ilr3 ~ STRESS + (1 | ID) </span></span>
-<span><span class="co">#&gt;          ilr4 ~ STRESS + (1 | ID) </span></span>
+<span><span class="co">#&gt; Formula: ilr1 ~ Stress + (1 | ID) </span></span>
+<span><span class="co">#&gt;          ilr2 ~ Stress + (1 | ID) </span></span>
+<span><span class="co">#&gt;          ilr3 ~ Stress + (1 | ID) </span></span>
+<span><span class="co">#&gt;          ilr4 ~ Stress + (1 | ID) </span></span>
 <span><span class="co">#&gt;    Data: tmp (Number of observations: 3540) </span></span>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
@@ -188,10 +188,10 @@ significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
 <span><span class="co">#&gt; ilr2_Intercept     1.47      0.02     1.42     1.51 1.00      877     2029</span></span>
 <span><span class="co">#&gt; ilr3_Intercept    -0.87      0.03    -0.93    -0.82 1.00     1644     2583</span></span>
 <span><span class="co">#&gt; ilr4_Intercept     0.65      0.02     0.60     0.70 1.00     1948     2670</span></span>
-<span><span class="co">#&gt; ilr1_STRESS       -0.01      0.00    -0.02    -0.00 1.00     6441     3679</span></span>
-<span><span class="co">#&gt; ilr2_STRESS        0.01      0.00     0.00     0.01 1.00     5245     3596</span></span>
-<span><span class="co">#&gt; ilr3_STRESS        0.00      0.00    -0.01     0.01 1.00     6436     3519</span></span>
-<span><span class="co">#&gt; ilr4_STRESS        0.01      0.00    -0.00     0.01 1.00     6209     3303</span></span>
+<span><span class="co">#&gt; ilr1_Stress       -0.01      0.00    -0.02    -0.00 1.00     6441     3679</span></span>
+<span><span class="co">#&gt; ilr2_Stress        0.01      0.00     0.00     0.01 1.00     5245     3596</span></span>
+<span><span class="co">#&gt; ilr3_Stress        0.00      0.00    -0.01     0.01 1.00     6436     3519</span></span>
+<span><span class="co">#&gt; ilr4_Stress        0.01      0.00    -0.00     0.01 1.00     6209     3303</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family Specific Parameters: </span></span>
 <span><span class="co">#&gt;            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
@@ -245,7 +245,7 @@ be fitted with an additional non-default argument
 <span><span class="co">#&gt; via 'set_rescor' instead of using the default.</span></span>
 <span><span class="co"># full model</span></span>
 <span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
-<span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">STRESS</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
+<span>              formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">Stress</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>              iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>              backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'</span></span>
@@ -263,9 +263,6 @@ be fitted with an additional non-default argument
 <span><span class="co">#&gt; Iteration: 7</span></span>
 <span><span class="co">#&gt; Iteration: 8</span></span>
 <span><span class="co">#&gt; Iteration: 9</span></span>
-<span><span class="co">#&gt; Iteration: 10</span></span>
-<span><span class="co">#&gt; Iteration: 11</span></span>
-<span><span class="co">#&gt; Iteration: 12</span></span>
 <span><span class="co">#&gt; Iteration: 1</span></span>
 <span><span class="co">#&gt; Iteration: 2</span></span>
 <span><span class="co">#&gt; Iteration: 3</span></span>
