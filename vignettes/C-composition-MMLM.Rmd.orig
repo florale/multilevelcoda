@@ -106,14 +106,11 @@ mv <- brmcoda(compilr = cilr,
 
 We can now compare these models with the `bayesfactor_models()` function
 
-```{r bf1, results='hide', message=FALSE}
-comparison <- bayesfactor_models(mv$Model, denominator = mv0$Model)
+```{r bf, message=FALSE}
+bayes_factor(mv$Model, mv0$Model)
 ```
 
 
-```{r bf2}
-comparison
-```
 
 With a $BF$ < 1, our data favours the intercept only model, showing that there is 
 insufficient evidence for stress predicting the overall sleep-wake composition.

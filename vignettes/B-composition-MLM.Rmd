@@ -288,8 +288,7 @@ model as reference.
 
 
 ```r
-comparison <- bayesfactor_models(m0$Model, m1$Model, m2$Model, m$Model, denominator = m0$Model)
-#> Error in `[.data.frame`(x, i, j, drop): undefined columns selected
+comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
 ```
 
 
@@ -298,15 +297,15 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                                                       BF
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.337
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.48
-#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.01
+#> [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.05
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.340
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.46
 #> 
-#> * Against Denominator: [1] 1 + (1 | ID)
+#> * Against Denominator: [4] 1 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 
-We can see that model with only within-person composition is the best model - with $BF$ = 11.86 compared to the null (intercept only).
+We can see that model with only within-person composition is the best model - with $BF$ = 11.46 compared to the null (intercept only).
 
 Let's compare these models against the full model.
 
@@ -315,16 +314,16 @@ Let's compare these models against the full model.
 update(comparison, reference = 1)
 #> Bayes Factors for Model Comparison
 #> 
-#>     Model                                                                       BF
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.337
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.48
-#> [4] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  4.01
+#>     Model                                       BF
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.084
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  2.83
+#> [4] 1 + (1 | ID)                             0.247
 #> 
-#> * Against Denominator: [1] 1 + (1 | ID)
+#> * Against Denominator: [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
 ```
 
-Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.
+Again, our data favours the within-person composition only model over the full model, giving 2.83 times more support.
 
 # Substitution model
 When examining the relationships between compositional data and an outcome, 
@@ -355,7 +354,6 @@ The below example examines the changes in stress for different pairwise substitu
 ```r
 bsubm <- substitution(object = m, delta = 5, 
                       level = "between", ref = "grandmean")
-#> Error in {: task 1 failed - "dim(X) must have a positive length"
 ```
 
 The output contains multiple data sets of results for all compositional components. 
@@ -363,21 +361,17 @@ Here are the results for changes in stress when sleep (TST) is substituted for 5
 
 
 ```r
-knitr::kable(bsubm$BetweenSub$TST)
+knitr::kable(summary(bsubm, level = "between", to = "TST"))
 ```
 
 
 
-|   Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
-|------:|------:|-------:|-----:|:----|:---|:-------|:---------|
-|  0.021| -0.011|   0.052|     5|WAKE |TST |between |grandmean |
-|  0.003| -0.014|   0.019|     5|MVPA |TST |between |grandmean |
-|  0.005| -0.007|   0.018|     5|LPA  |TST |between |grandmean |
-|  0.006| -0.008|   0.020|     5|SB   |TST |between |grandmean |
-| -0.020| -0.049|   0.010|    -5|WAKE |TST |between |grandmean |
-| -0.003| -0.019|   0.014|    -5|MVPA |TST |between |grandmean |
-| -0.005| -0.018|   0.007|    -5|LPA  |TST |between |grandmean |
-| -0.006| -0.020|   0.008|    -5|SB   |TST |between |grandmean |
+| Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
+|----:|------:|-------:|-----:|:----|:---|:-------|:---------|
+| 0.02|  -0.01|    0.05|     5|WAKE |TST |between |grandmean |
+| 0.00|  -0.01|    0.02|     5|MVPA |TST |between |grandmean |
+| 0.01|  -0.01|    0.02|     5|LPA  |TST |between |grandmean |
+| 0.01|  -0.01|    0.02|     5|SB   |TST |between |grandmean |
 
 
 
@@ -394,36 +388,30 @@ substituted for 5 minutes, at within-person level.
 # Within-person substitution
 wsubm <- substitution(object = m, delta = 5, 
                       level = "within", ref = "grandmean")
-#> Error in {: task 1 failed - "dim(X) must have a positive length"
 ```
 
 Results for 5 minute substitution.
 
 
 ```r
-knitr::kable(wsubm$WithinSub$TST)
+knitr::kable(summary(wsubm, level = "within", to = "TST"))
 ```
 
 
 
-|   Mean| CI_low| CI_high| Delta|From |To  |Level  |Reference |
-|------:|------:|-------:|-----:|:----|:---|:------|:---------|
-|  0.017|  0.003|   0.032|     5|WAKE |TST |within |grandmean |
-| -0.003| -0.009|   0.003|     5|MVPA |TST |within |grandmean |
-| -0.005| -0.009|   0.000|     5|LPA  |TST |within |grandmean |
-| -0.002| -0.007|   0.003|     5|SB   |TST |within |grandmean |
-| -0.016| -0.029|  -0.002|    -5|WAKE |TST |within |grandmean |
-|  0.003| -0.003|   0.009|    -5|MVPA |TST |within |grandmean |
-|  0.005|  0.000|   0.009|    -5|LPA  |TST |within |grandmean |
-|  0.002| -0.003|   0.007|    -5|SB   |TST |within |grandmean |
+| Mean| CI_low| CI_high| Delta|From |To  |Level  |Reference |
+|----:|------:|-------:|-----:|:----|:---|:------|:---------|
+| 0.02|   0.00|    0.03|     5|WAKE |TST |within |grandmean |
+| 0.00|  -0.01|    0.00|     5|MVPA |TST |within |grandmean |
+| 0.00|  -0.01|    0.00|     5|LPA  |TST |within |grandmean |
+| 0.00|  -0.01|    0.00|     5|SB   |TST |within |grandmean |
 
 
 
 At within-person level, there were significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
 Increasing sleep at the expense of time spent awake 
-in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
-more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]).
+in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day.
 
 ## More interesting substitution models
 You can learn more about different types of substitution models at  

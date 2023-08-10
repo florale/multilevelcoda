@@ -221,14 +221,14 @@ We can now compare these models with the `bayesfactor_models()` function, using 
 model as reference.
 
 ```{r bf1, results='hide', message=FALSE}
-comparison <- bayesfactor_models(m0$Model, m1$Model, m2$Model, m$Model, denominator = m0$Model)
+comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
 ```
 
 ```{r bf2}
 comparison
 ```
 
-We can see that model with only within-person composition is the best model - with $BF$ = 11.86 compared to the null (intercept only).
+We can see that model with only within-person composition is the best model - with $BF$ = 11.46 compared to the null (intercept only).
 
 Let's compare these models against the full model.
 
@@ -236,7 +236,7 @@ Let's compare these models against the full model.
 update(comparison, reference = 1)
 ```
 
-Again, our data favours the within-person composition only model over the full model, giving 2.93 times more support.
+Again, our data favours the within-person composition only model over the full model, giving 2.83 times more support.
 
 # Substitution model
 When examining the relationships between compositional data and an outcome, 
@@ -272,7 +272,7 @@ The output contains multiple data sets of results for all compositional componen
 Here are the results for changes in stress when sleep (TST) is substituted for 5 minutes, averaged across levels of covariates. 
 
 ```{r bsubm, results = "asis"}
-knitr::kable(bsubm$BetweenSub$TST)
+knitr::kable(summary(bsubm, level = "between", to = "TST"))
 ```
 
 None of the results are significant, given that the credible intervals did not cross 0, showing that 
@@ -292,14 +292,13 @@ wsubm <- substitution(object = m, delta = 5,
 Results for 5 minute substitution.
 
 ```{r wsubm, results = "asis"}
-knitr::kable(wsubm$WithinSub$TST)
+knitr::kable(summary(wsubm, level = "within", to = "TST"))
 ```
 
 At within-person level, there were significant results for substitution of sleep (TST) and time 
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
 Increasing sleep at the expense of time spent awake 
-in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day. Conversely, less sleep and 
-more time awake in bed predicted less stress (b = -0.02 [95% CI -0.03,	-0.00]).
+in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day.
 
 ## More interesting substitution models
 You can learn more about different types of substitution models at  
