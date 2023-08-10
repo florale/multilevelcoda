@@ -28,7 +28,7 @@ cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
                backend = backend))

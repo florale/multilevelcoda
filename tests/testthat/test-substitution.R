@@ -30,7 +30,7 @@ cilr <- compilr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
 
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
                backend = backend))
@@ -47,7 +47,7 @@ test_that("substitution errors for invalid input", {
   expect_error(x <- substitution(basesub = psub, delta = 2))
   
   ## not brmcoda model
-  m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
+  m1 <- lmer(Stress ~ 1 + (1 | ID), data = mcompd)
   expect_error(x <- substitution(object = m1, basesub = psub, delta = 2))
   
   ## incorrect delta
