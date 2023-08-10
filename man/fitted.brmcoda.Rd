@@ -76,7 +76,7 @@ if(requireNamespace("cmdstanr")){
                 backend = "cmdstanr")
   
   ## expected predictions on compositional scale
-  epredcomp <- fitted(m2, scale = "comp")
+  epredcomp <- fitted(m2, acomp = TRUE)
   head(epredcomp)
 }}
 }

@@ -69,7 +69,7 @@ if(requireNamespace("cmdstanr")){
                 backend = "cmdstanr")
   
   ## predicted responses on compositional scale
-  predcomp <- predict(m2, scale = "comp")
+  predcomp <- predict(m2, acomp = TRUE)
   head(predcomp)
 }}
 }

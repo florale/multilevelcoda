@@ -52,7 +52,7 @@
 #'                 backend = "cmdstanr")
 #'   
 #'   ## predicted responses on compositional scale
-#'   predcomp <- predict(m2, scale = "comp")
+#'   predcomp <- predict(m2, acomp = TRUE)
 #'   head(predcomp)
 #' }}
 #' @export
@@ -75,6 +75,7 @@ predict.brmcoda <- function(object,
     } else {
       out <- predict(
         object$Model,
+        summary = FALSE,
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
@@ -149,7 +150,7 @@ predict.brmcoda <- function(object,
 #'                 backend = "cmdstanr")
 #'   
 #'   ## expected predictions on compositional scale
-#'   epredcomp <- fitted(m2, scale = "comp")
+#'   epredcomp <- fitted(m2, acomp = TRUE)
 #'   head(epredcomp)
 #' }}
 #' @export
