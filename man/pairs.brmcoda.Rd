@@ -22,7 +22,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
 
 # model with compositional predictor at between and within-person levels
 fit <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
                chain = 1, iter = 500)
 pairs(fit)
