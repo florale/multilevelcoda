@@ -62,7 +62,7 @@ Our `brms` model can be then fitted using the `brmcoda()` function.
 
 ```{r brmcoda, results = "hide", message=FALSE}
 mv <- brmcoda(compilr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
@@ -99,7 +99,7 @@ mv0 <- brmcoda(compilr = cilr,
                backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 # full model
 mv <- brmcoda(compilr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 ```

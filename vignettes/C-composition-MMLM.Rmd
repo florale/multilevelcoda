@@ -68,7 +68,7 @@ Our `brms` model can be then fitted using the `brmcoda()` function.
 
 ```r
 mv <- brmcoda(compilr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
 #> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'
 #> via 'set_rescor' instead of using the default.
@@ -85,10 +85,10 @@ summary(mv)
 #>          mu = identity; sigma = identity
 #>          mu = identity; sigma = identity
 #>          mu = identity; sigma = identity 
-#> Formula: ilr1 ~ STRESS + (1 | ID) 
-#>          ilr2 ~ STRESS + (1 | ID) 
-#>          ilr3 ~ STRESS + (1 | ID) 
-#>          ilr4 ~ STRESS + (1 | ID) 
+#> Formula: ilr1 ~ Stress + (1 | ID) 
+#>          ilr2 ~ Stress + (1 | ID) 
+#>          ilr3 ~ Stress + (1 | ID) 
+#>          ilr4 ~ Stress + (1 | ID) 
 #>    Data: tmp (Number of observations: 3540) 
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 4000
@@ -107,10 +107,10 @@ summary(mv)
 #> ilr2_Intercept     1.47      0.02     1.42     1.51 1.00      877     2029
 #> ilr3_Intercept    -0.87      0.03    -0.93    -0.82 1.00     1644     2583
 #> ilr4_Intercept     0.65      0.02     0.60     0.70 1.00     1948     2670
-#> ilr1_STRESS       -0.01      0.00    -0.02    -0.00 1.00     6441     3679
-#> ilr2_STRESS        0.01      0.00     0.00     0.01 1.00     5245     3596
-#> ilr3_STRESS        0.00      0.00    -0.01     0.01 1.00     6436     3519
-#> ilr4_STRESS        0.01      0.00    -0.00     0.01 1.00     6209     3303
+#> ilr1_Stress       -0.01      0.00    -0.02    -0.00 1.00     6441     3679
+#> ilr2_Stress        0.01      0.00     0.00     0.01 1.00     5245     3596
+#> ilr3_Stress        0.00      0.00    -0.01     0.01 1.00     6436     3519
+#> ilr4_Stress        0.01      0.00    -0.00     0.01 1.00     6209     3303
 #> 
 #> Family Specific Parameters: 
 #>            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
@@ -162,7 +162,7 @@ mv0 <- brmcoda(compilr = cilr,
 #> via 'set_rescor' instead of using the default.
 # full model
 mv <- brmcoda(compilr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ STRESS + (1 | ID),
+              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 #> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'
@@ -183,9 +183,6 @@ bayes_factor(mv$Model, mv0$Model)
 #> Iteration: 7
 #> Iteration: 8
 #> Iteration: 9
-#> Iteration: 10
-#> Iteration: 11
-#> Iteration: 12
 #> Iteration: 1
 #> Iteration: 2
 #> Iteration: 3

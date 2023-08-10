@@ -48,7 +48,7 @@ options(digits = 3) # reduce number of digits shown
 ```
 
 # Fitting main model
-Let's fit our main `brms` model predicting `STRESS` from both between and within-person
+Let's fit our main `brms` model predicting `Stress` from both between and within-person
 sleep-wake behaviours (represented by isometric log ratio coordinates), with sex as a covariate, 
 using the `brmcoda()` function. We can compute ILR coordinate predictors using `compilr()` function.
 
@@ -58,7 +58,7 @@ cilr <- compilr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 m <- brmcoda(compilr = cilr,
-             formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+             formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
 ```
@@ -70,7 +70,7 @@ A `summary()` of the model results.
 summary(m)
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
-#> Formula: STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) 
+#> Formula: Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) 
 #>    Data: tmp (Number of observations: 3540) 
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 4000
