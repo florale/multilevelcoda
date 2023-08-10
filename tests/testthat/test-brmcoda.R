@@ -27,12 +27,12 @@ cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 
 test_that("bsub errors for invalid input", {
   # missing compilr
-  expect_error(m <- brmcoda(formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+  expect_error(m <- brmcoda(formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                               wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                             chain = 1, iter = 500, seed = 123,
                             backend = backend))
   expect_error(m <- brmcoda(compilr = psub,
-                            formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                            formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                                wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                             chain = 1, iter = 500, seed = 123,
                             backend = backend))

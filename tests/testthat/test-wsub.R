@@ -30,7 +30,7 @@ cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 
 suppressWarnings(
   m <- brmcoda(compilr = cilr,
-               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
                backend = backend))
@@ -50,7 +50,7 @@ x <- wsub(object = m, basesub = psub, delta = 2)
 #   expect_error(x <- wsub(object = m, delta = 2))
 # 
 #   ## not brmcoda model
-#   m1 <- lmer(STRESS ~ 1 + (1 | ID), data = mcompd)
+#   m1 <- lmer(Stress ~ 1 + (1 | ID), data = mcompd)
 #   expect_error(x <- wsub(object = m1, basesub = psub, delta = 2))
 # 
 #   ## invalid delta
@@ -75,7 +75,7 @@ x <- wsub(object = m, basesub = psub, delta = 2)
 #   ## reference grid is provided for unadjusted model
 #   suppressWarnings(
 #     m2 <- brmcoda(compilr = cilr,
-#                   formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #                   chain = 1, iter = 500, seed = 123,
 #                   backend = backend))
@@ -137,7 +137,7 @@ x <- wsub(object = m, basesub = psub, delta = 2)
 #   
 #   suppressWarnings(
 #     m <- brmcoda(compilr = cilr,
-#                  formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                  formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                    wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -308,7 +308,7 @@ test_that("wsub gives results in expected direction and magnitude", {
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(compilr = cilr,
-#                               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               seed = 123))
 # 
@@ -358,7 +358,7 @@ test_that("wsub gives results in expected direction and magnitude", {
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(compilr = cilr,
-#                               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               seed = 123))
 # 
@@ -406,7 +406,7 @@ test_that("wsub gives results in expected direction and magnitude", {
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(compilr = cilr,
-#                               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               chain = 1, iter = 500, seed = 123))
 # 
@@ -454,7 +454,7 @@ test_that("wsub gives results in expected direction and magnitude", {
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(compilr = cilr,
-#                               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               chain = 1, iter = 500, seed = 123))
 # 
@@ -502,7 +502,7 @@ test_that("wsub gives results in expected direction and magnitude", {
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(compilr = cilr,
-#                               formula = STRESS ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
 #                               seed = 123))
 # 
@@ -551,7 +551,7 @@ test_that("wsub's results matches with brm model for 2-component composition (TS
   psub <- basesub(c("TST", "WAKE"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   a <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -582,7 +582,7 @@ test_that("wsub's results matches with brm model for 2-component composition (TS
   psub <- basesub(c("TST", "MVPA"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   b <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -612,7 +612,7 @@ test_that("wsub's results matches with brm model for 2-component composition (TS
   psub <- basesub(c("TST", "LPA"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   c <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -642,7 +642,7 @@ test_that("wsub's results matches with brm model for 2-component composition (TS
   psub <- basesub(c("TST", "SB"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   d <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -673,7 +673,7 @@ test_that("wsub's results matches with brm model for 2-component composition (WA
   
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   e <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -703,7 +703,7 @@ test_that("wsub's results matches with brm model for 2-component composition (WA
   psub <- basesub(c("WAKE", "LPA"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   f <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -733,7 +733,7 @@ test_that("wsub's results matches with brm model for 2-component composition (WA
   psub <- basesub(c("WAKE", "SB"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   g <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -764,7 +764,7 @@ test_that("wsub's results matches with brm model for 2-component composition (MV
   psub <- basesub(c("MVPA", "LPA"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   h <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -795,7 +795,7 @@ test_that("wsub's results matches with brm model for 2-component composition (MV
   psub <- basesub(c("MVPA", "SB"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   i <- wsub(object = m, basesub = psub, delta = 1:2)
@@ -826,7 +826,7 @@ test_that("wsub's results matches with brm model for 2-component composition (LP
   psub <- basesub(c("LPA", "SB"))
   suppressWarnings(
     m <- brmcoda(compilr = cilr,
-                 formula = STRESS ~ bilr1 + wilr1 + (1 | ID),
+                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   j <- wsub(object = m, basesub = psub, delta = 1:2)
