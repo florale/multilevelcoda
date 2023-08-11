@@ -25,6 +25,7 @@
 #' @importFrom compositions ilrInv
 #' @importFrom brms posterior_summary do_call
 #' @importFrom abind abind
+#' @importFrom stats predict
 #' @method predict brmcoda
 #' 
 #' @examples
@@ -121,6 +122,7 @@ predict.brmcoda <- function(object,
 #' @importFrom compositions ilrInv
 #' @importFrom brms posterior_summary do_call
 #' @importFrom abind abind
+#' @importFrom stats fitted
 #' @method fitted brmcoda
 #' 
 #' @examples
@@ -245,6 +247,7 @@ fixef.brmcoda <- function(object, ...) {
 #' 
 #' @seealso \code{\link[brms:vcov.brmsfit]{vcov.brmsfit}}
 #' 
+#' @importFrom stats vcov
 #' @method vcov brmcoda
 #' 
 #' @examples
@@ -319,6 +322,7 @@ ranef.brmcoda <- function(object, ...) {
 #'
 #' @seealso \code{\link[brms:coef.brmsfit]{coef.brmsfit}}
 #' 
+#' @importFrom stats coef
 #' @method coef brmcoda
 #' 
 #' @examples
@@ -392,6 +396,8 @@ VarCorr.brmcoda <- function(x, ...) {
 #' @inherit brms::residuals.brmsfit return
 #'   
 #' @seealso \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}
+#' 
+#' @importFrom stats residuals
 #' @method residuals brmcoda
 #' 
 #' @examples

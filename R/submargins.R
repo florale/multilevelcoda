@@ -31,7 +31,6 @@
 #'
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo
-#' @importFrom stats fitted
 submargins <- function(object,
                        delta,
                        basesub,

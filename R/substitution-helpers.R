@@ -30,6 +30,13 @@ is.substitution <- function(x) {
 #' If \code{FALSE}, users will be asked to provide a full reference grid.
 #' Default is \code{FALSE}.
 #' 
+#' @importFrom utils head
+#' @importFrom data.table as.data.table copy :=
+#' @importFrom compositions acomp ilr clo mean.acomp
+#' @importFrom insight find_predictors
+#' @importFrom emmeans ref_grid
+#' @importFrom extraoperators %snin% %sin%
+#'
 #' @return A reference grid consisting of a combination of covariates in \code{brmcoda}.
 build.rg <- function(object, 
                      ref,
@@ -209,7 +216,6 @@ build.rg <- function(object,
   as.data.table(d0)
 }
 
-
 #' Helper functions used only internally to estimate substitution model
 #' @importFrom data.table as.data.table data.table copy := setDT rbindlist
 #' @importFrom compositions acomp ilr clo mean.acomp
@@ -217,7 +223,6 @@ build.rg <- function(object,
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doFuture %dofuture%
-#' @importFrom stats fitted
 #' 
 #' @name get-substitution
 NULL

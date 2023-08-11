@@ -45,10 +45,6 @@
 #' 
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
-#' @importFrom extraoperators %snin% %sin%
-#' @importFrom insight find_predictors
-#' @importFrom emmeans ref_grid
-#' @importFrom stats fitted
 #' 
 #' @examples
 #' \donttest{

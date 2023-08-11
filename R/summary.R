@@ -14,6 +14,8 @@
 #' @param ... generic argument, not in use.
 #' 
 #' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
+#' @importFrom utils head tail
+#' 
 #' @method summary compilr
 #' 
 #' @examples
@@ -68,7 +70,8 @@ summary.compilr <- function(object,
   cat("  Composition is closed to    : ")
   cat(object$total, "\n")
   cat("  Geometry                    : ")
-  cat("relative composition ('acomp') and isometric log-ratios ('real multivariate')", "\n")
+  cat("relative composition ('acomp') and", "\n")
+  cat("                                isometric log-ratios ('real multivariate')", "\n")
   cat("  Number of observations      : ")
   cat(nrow(object$data), "\n")
   cat("  Number of levels            : ")
