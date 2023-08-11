@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Compositional Multilevel Modelling"
+title: "Introduction to Bayesian Compositional Multilevel Modelling"
 output: 
   html_document:
     theme: spacelab
@@ -14,7 +14,7 @@ output:
     fig_caption: yes
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Introduction to Compositional Multilevel Modelling}
+  %\VignetteIndexEntry{Introduction to Bayesian Compositional Multilevel Modelling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

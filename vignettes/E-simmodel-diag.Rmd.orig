@@ -16,6 +16,10 @@ output:
     fig_caption: yes
     number_sections: true
 bibliography: refs.bib  
+vignette: >
+  %\VignetteIndexEntry{Improving MCMC Sampling for Bayesian Compositional Multilevel Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -282,7 +286,7 @@ plot(bm_centered, pars = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercep
 # Conclusion
 `multilevelcoda` demonstrates excellent performances across different conditions
 of number of individuals, number of observations, number of compositional parts, and
-magnitude of modeled variance (read more about our simulation study at)
+magnitude of modeled variance (read more about our simulation study at).
 However,
 in the case of large data and small sample variation, 
 we recommend centered parameterisation or increasing iterations to 
