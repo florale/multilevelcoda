@@ -9,8 +9,6 @@ output:
     collapsed: no
     smooth_scroll: no
     toc_depth: 4
-    fig_width: 6
-    fig_height: 4
     fig_caption: yes
     number_sections: true
 vignette: >
@@ -33,12 +31,14 @@ library(ggplot2)
 ```
 
 # Intro
-We often are interested in how an outcome changes when a fixed unit of the predictor 
+When examining the relationship between a composition and an outconme,
+we are often are interested in how an outcome changes when a fixed unit in the composition
 (e.g., minutes of behaviours during a day) is reallocated
-from one compositional component to another. 
+from one component to another. 
 The Compositional Isotemporal Substitution Model can be used to estimate this change. 
 The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
-for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
+for both between- and within-person levels of variability.
+We discuss 4 different substitution models in this vignette.
 
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
@@ -134,7 +134,7 @@ knitr::kable(summary(subm1, delta = 10, level = "between", to = "TST"))
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
 in changes in stress at between-person level. 
-These results can be plotted to see the patterns more easily using the `plotsub()` function.
+These results can be plotted to see the patterns more easily using the `plot()` function.
 
 ```{r plotbsub, eval=FALSE}
 plot(subm1, to = "TST", level = "between", ref = "grandmean")
@@ -223,7 +223,7 @@ knitr::kable(summary(subm2, delta = 10, to = "TST"))
 ```
 
 A comparison between between- and within-person substitution model of sleep on stress, 
-plot using `plotsub()` and `ggpubr::ggarrange()` functions.
+plot using `plot()` and `ggpubr::ggarrange()` functions.
 
 ```{r plotsubmargin, eval=FALSE}
 library(ggpubr)

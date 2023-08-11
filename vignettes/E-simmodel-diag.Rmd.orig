@@ -7,12 +7,10 @@ output:
     theme: spacelab
     highlight: kate
     toc: yes
-    toc_float: no
+    toc_float: yes
     collapsed: no
     smooth_scroll: no
     toc_depth: 4
-    fig_width: 14
-    fig_height: 10
     fig_caption: yes
     number_sections: true
 bibliography: refs.bib  
@@ -25,7 +23,7 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = ' ',
+  comment = "#>",
   dev = "CairoPNG", dpi = 150, 
   fig.path = "mlmcoda-", fig.align = "center"
 )
@@ -57,7 +55,7 @@ prefit5 <- input$prefit5
 prefit4 <- input$prefit4
 prefit3 <- input$prefit3
 
-source("/Users/florale/Library/CloudStorage/OneDrive-MonashUniversity/GitHub/Projects/multilevelcoda-sim/simmodel_input.R") # groundtruth, conditions and functions
+source("/Users/florale/Library/CloudStorage/OneDrive-MonashUniversity/GitHub/Projects/multilevelcoda-sim/1C-simmodel_input.R") # groundtruth, conditions and functions
 
 ```
 
@@ -79,7 +77,7 @@ We first generated a dataset consisting of a 3-part behaviour composition with
 large random intercept variation ($\sigma^2_{u} = 1.5$), coupled with 
 small residual variation ($\sigma^2_{\varepsilon}: 0.5$).
 
-```{r}
+```{r sim}
 set.seed(1) 
 sampled_cond <- cond[condition == "RElarge_RESsmall" & n_parts == 3 & N == 1200 & K == 14][1]
 i <- 1
@@ -173,6 +171,7 @@ fit <- brmcoda(cilr,
                chains = 4,
                iter = 3000,
                warmup = 500,
+               seed = 13,
                backend = "cmdstanr"
 )
 ```
@@ -190,7 +189,7 @@ Further inspection of density and trace lots for these parameters show
 some areas of the samples being drawn from outside of the parameter space,
 but no strong evidence for non-convergence.
 
-```{r plot-fit, fig.height=8}
+```{r plot-fit, fig.width = 8, fig.height = 8, fig.cap = "Density and Trace Plot of Parameters with Low ESS"}
 plot(fit, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
 ```
 
@@ -212,8 +211,10 @@ fit_it <- brmcoda(cilr,
                   chains = 4,
                   iter = 10000,
                   warmup = 1000,
+                  seed = 13,
                   backend = "cmdstanr"
 )
+print(rstan::get_elapsed_time(fit$Model$fit_it))
 ```
 
 
@@ -222,7 +223,7 @@ summary(fit_it)
 ```
 
 
-```{r plot-fit-it, warning=FALSE}
+```{r plot-fit-it, warning=FALSE, fig.width = 8, fig.height = 8, fig.cap = "Density and Trace Plot after increasing iterations and warmups"}
 plot(fit_it, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
 ```
 
@@ -261,7 +262,7 @@ print(m_centered)
 
 Now we build data for the model and sample with `cmdstanr`
 
-```{r fit-centered, results = "hide", echo = TRUE, message=FALSE}
+```{r fit-centered1, results = "hide", echo = TRUE, message=FALSE}
 sdat <- make_standata(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
 fit_centered <- m_centered$sample(data = sdat,
                                   parallel_chains = 4,
@@ -270,27 +271,52 @@ fit_centered <- m_centered$sample(data = sdat,
 ```
 
 
-```{r sum-fit-centered, message=FALSE}
+```{r fit-centered2, message=FALSE}
 bm_centered <- brm(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat, empty = TRUE)
 bm_centered$fit <- rstan::read_stan_csv(fit_centered$output_files())
 bm_centered <- rename_pars(bm_centered)
+```
+
+```{r sum-fit-centered}
 summary(bm_centered)
 ```
 
 Indeed, the centered parameterisation has improved the ESS for all parameters.
 
-```{r pair-fit-centered, warning=FALSE}
+```{r pair-fit-centered, warning=FALSE, fig.width = 8, fig.height = 8, fig.cap = "Density and Trace Plot when using centered parameterisation"}
 plot(bm_centered, pars = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
 ```
+
+# Computational Time
+
+```{r time}
+# example model
+print(rstan::get_elapsed_time(fit$Model$fit))
+
+# increased iter
+print(rstan::get_elapsed_time(fit_it$Model$fit))
+
+# centered parameterisation
+rstan::get_elapsed_time(bm_centered$fit)
+```
+It took ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit)))` to obtain an average-ish of 1000
+across the four parameters with initially low ESS.
+To achieve an ESS of 10 000 across all parameters,
+simplying increasing iterations should take around ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit))) * 10`,
+whereas centered parameterisation takes around `r sum(colSums(rstan::get_elapsed_time(bm_centered$fit)))`.
 
 # Conclusion
 `multilevelcoda` demonstrates excellent performances across different conditions
 of number of individuals, number of observations, number of compositional parts, and
-magnitude of modeled variance (read more about our simulation study at).
+magnitude of modeled variance
+(full results of simulation study will be published at a later date).
 However,
 in the case of large data and small sample variation, 
 we recommend centered parameterisation or increasing iterations to 
-achieve efficient MCMC sampling and 
-acceptable ESS.
+achieve efficient MCMC sampling.
+Based on results of the case study,
+if time is not a constraint, centered parameterisation would give 
+the most reliable results in terms of ESS-to-draw ratios for all parameters.
+However, increasing iteration can also be used to achieve acceptable ESS.
 
 # References
