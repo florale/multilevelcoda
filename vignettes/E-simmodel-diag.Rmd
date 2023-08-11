@@ -1,21 +1,23 @@
 ---
 title: "Improving MCMC Sampling for Bayesian Compositional Multilevel Models"
 author: "Flora Le"
-date: "2023-08-08"
+date: "2023-08-11"
 output: 
   html_document:
     theme: spacelab
     highlight: kate
     toc: yes
-    toc_float: no
+    toc_float: yes
     collapsed: no
     smooth_scroll: no
     toc_depth: 4
-    fig_width: 14
-    fig_height: 10
     fig_caption: yes
     number_sections: true
 bibliography: refs.bib  
+vignette: >
+  %\VignetteIndexEntry{Improving MCMC Sampling for Bayesian Compositional Multilevel Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 
@@ -148,6 +150,7 @@ fit <- brmcoda(cilr,
                chains = 4,
                iter = 3000,
                warmup = 500,
+               seed = 13,
                backend = "cmdstanr"
 )
 ```
@@ -160,33 +163,33 @@ of the between $ilr$ coordinates are low.
 
 ```r
 summary(fit)
-   Family: gaussian 
-    Links: mu = identity; sigma = identity 
-  Formula: sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID) 
-     Data: tmp (Number of observations: 16800) 
-    Draws: 4 chains, each with iter = 3000; warmup = 500; thin = 1;
-           total post-warmup draws = 10000
-  
-  Group-Level Effects: 
-  ~ID (Number of levels: 1200) 
-                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sd(Intercept)     1.22      0.03     1.17     1.27 1.02      572      934
-  
-  Population-Level Effects: 
-            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  Intercept     2.36      0.15     2.06     2.65 1.01      326      617
-  bilr1         0.20      0.19    -0.17     0.57 1.01      224      463
-  bilr2         0.29      0.14     0.01     0.56 1.01      325      607
-  wilr1        -0.80      0.03    -0.85    -0.74 1.00    10829     7772
-  wilr2        -0.26      0.02    -0.31    -0.22 1.00    11257     8102
-  
-  Family Specific Parameters: 
-        Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sigma     0.71      0.00     0.71     0.72 1.00    19111     8010
-  
-  Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-  and Tail_ESS are effective sample size measures, and Rhat is the potential
-  scale reduction factor on split chains (at convergence, Rhat = 1).
+#>  Family: gaussian 
+#>   Links: mu = identity; sigma = identity 
+#> Formula: sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID) 
+#>    Data: tmp (Number of observations: 16800) 
+#>   Draws: 4 chains, each with iter = 3000; warmup = 500; thin = 1;
+#>          total post-warmup draws = 10000
+#> 
+#> Group-Level Effects: 
+#> ~ID (Number of levels: 1200) 
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     1.22      0.03     1.17     1.27 1.01      488      770
+#> 
+#> Population-Level Effects: 
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.35      0.15     2.04     2.65 1.02      286      640
+#> bilr1         0.19      0.18    -0.18     0.52 1.01      312      520
+#> bilr2         0.28      0.14    -0.00     0.56 1.02      280      532
+#> wilr1        -0.80      0.03    -0.85    -0.74 1.00     9447     7579
+#> wilr2        -0.26      0.02    -0.31    -0.22 1.00     9731     7932
+#> 
+#> Family Specific Parameters: 
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     0.71      0.00     0.71     0.72 1.00    17695     7853
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 Further inspection of density and trace lots for these parameters show 
@@ -199,8 +202,8 @@ plot(fit, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"),
 ```
 
 <div class="figure" style="text-align: center">
-<img src="mlmcoda-plot-fit-1.png" alt="plot of chunk plot-fit"  />
-<p class="caption">plot of chunk plot-fit</p>
+<img src="mlmcoda-plot-fit-1.png" alt="Density and Trace Plot of Parameters with Low ESS"  />
+<p class="caption">Density and Trace Plot of Parameters with Low ESS</p>
 </div>
 
 # Improving within-chain autocorrelation of MCMC sampling
@@ -222,41 +225,44 @@ fit_it <- brmcoda(cilr,
                   chains = 4,
                   iter = 10000,
                   warmup = 1000,
+                  seed = 13,
                   backend = "cmdstanr"
 )
+print(rstan::get_elapsed_time(fit$Model$fit_it))
+#> Error in object@mode: no applicable method for `@` applied to an object of class "NULL"
 ```
 
 
 
 ```r
 summary(fit_it)
-   Family: gaussian 
-    Links: mu = identity; sigma = identity 
-  Formula: sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID) 
-     Data: tmp (Number of observations: 16800) 
-    Draws: 4 chains, each with iter = 10000; warmup = 1000; thin = 1;
-           total post-warmup draws = 36000
-  
-  Group-Level Effects: 
-  ~ID (Number of levels: 1200) 
-                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sd(Intercept)     1.22      0.03     1.17     1.27 1.00     1612     3586
-  
-  Population-Level Effects: 
-            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  Intercept     2.36      0.15     2.07     2.65 1.01      750     1969
-  bilr1         0.19      0.18    -0.16     0.54 1.00      853     2073
-  bilr2         0.29      0.14     0.01     0.57 1.01      784     1771
-  wilr1        -0.80      0.03    -0.85    -0.74 1.00    34233    28657
-  wilr2        -0.26      0.02    -0.31    -0.22 1.00    35412    28327
-  
-  Family Specific Parameters: 
-        Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sigma     0.71      0.00     0.71     0.72 1.00    52322    29158
-  
-  Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-  and Tail_ESS are effective sample size measures, and Rhat is the potential
-  scale reduction factor on split chains (at convergence, Rhat = 1).
+#>  Family: gaussian 
+#>   Links: mu = identity; sigma = identity 
+#> Formula: sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID) 
+#>    Data: tmp (Number of observations: 16800) 
+#>   Draws: 4 chains, each with iter = 10000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 36000
+#> 
+#> Group-Level Effects: 
+#> ~ID (Number of levels: 1200) 
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     1.22      0.03     1.17     1.27 1.00     1997     3971
+#> 
+#> Population-Level Effects: 
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.37      0.15     2.08     2.66 1.00     1130     2114
+#> bilr1         0.18      0.18    -0.17     0.54 1.01      938     2477
+#> bilr2         0.29      0.14     0.03     0.56 1.00     1182     2510
+#> wilr1        -0.80      0.03    -0.85    -0.74 1.00    44344    28415
+#> wilr2        -0.26      0.02    -0.31    -0.22 1.00    47155    29351
+#> 
+#> Family Specific Parameters: 
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     0.71      0.00     0.71     0.72 1.00    62444    27585
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 
@@ -266,8 +272,8 @@ plot(fit_it, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept
 ```
 
 <div class="figure" style="text-align: center">
-<img src="mlmcoda-plot-fit-it-1.png" alt="plot of chunk plot-fit-it"  />
-<p class="caption">plot of chunk plot-fit-it</p>
+<img src="mlmcoda-plot-fit-it-1.png" alt="Density and Trace Plot after increasing iterations and warmups"  />
+<p class="caption">Density and Trace Plot after increasing iterations and warmups</p>
 </div>
 
 It is a good sign that increasing interation and warmups increase the ESS, supported by trace plots.
@@ -294,68 +300,68 @@ We first obtain the Stan code for the example model
 
 ```r
 make_stancode(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
-  // generated with brms 2.19.0
-  functions {
-  }
-  data {
-    int<lower=1> N;  // total number of observations
-    vector[N] Y;  // response variable
-    int<lower=1> K;  // number of population-level effects
-    matrix[N, K] X;  // population-level design matrix
-    // data for group-level effects of ID 1
-    int<lower=1> N_1;  // number of grouping levels
-    int<lower=1> M_1;  // number of coefficients per level
-    int<lower=1> J_1[N];  // grouping indicator per observation
-    // group-level predictor values
-    vector[N] Z_1_1;
-    int prior_only;  // should the likelihood be ignored?
-  }
-  transformed data {
-    int Kc = K - 1;
-    matrix[N, Kc] Xc;  // centered version of X without an intercept
-    vector[Kc] means_X;  // column means of X before centering
-    for (i in 2:K) {
-      means_X[i - 1] = mean(X[, i]);
-      Xc[, i - 1] = X[, i] - means_X[i - 1];
-    }
-  }
-  parameters {
-    vector[Kc] b;  // population-level effects
-    real Intercept;  // temporary intercept for centered predictors
-    real<lower=0> sigma;  // dispersion parameter
-    vector<lower=0>[M_1] sd_1;  // group-level standard deviations
-    vector[N_1] z_1[M_1];  // standardized group-level effects
-  }
-  transformed parameters {
-    vector[N_1] r_1_1;  // actual group-level effects
-    real lprior = 0;  // prior contributions to the log posterior
-    r_1_1 = (sd_1[1] * (z_1[1]));
-    lprior += student_t_lpdf(Intercept | 3, 2.1, 2.5);
-    lprior += student_t_lpdf(sigma | 3, 0, 2.5)
-      - 1 * student_t_lccdf(0 | 3, 0, 2.5);
-    lprior += student_t_lpdf(sd_1 | 3, 0, 2.5)
-      - 1 * student_t_lccdf(0 | 3, 0, 2.5);
-  }
-  model {
-    // likelihood including constants
-    if (!prior_only) {
-      // initialize linear predictor term
-      vector[N] mu = rep_vector(0.0, N);
-      mu += Intercept;
-      for (n in 1:N) {
-        // add more terms to the linear predictor
-        mu[n] += r_1_1[J_1[n]] * Z_1_1[n];
-      }
-      target += normal_id_glm_lpdf(Y | Xc, mu, b, sigma);
-    }
-    // priors including constants
-    target += lprior;
-    target += std_normal_lpdf(z_1[1]);
-  }
-  generated quantities {
-    // actual population-level intercept
-    real b_Intercept = Intercept - dot_product(means_X, b);
-  }
+#> // generated with brms 2.19.0
+#> functions {
+#> }
+#> data {
+#>   int<lower=1> N;  // total number of observations
+#>   vector[N] Y;  // response variable
+#>   int<lower=1> K;  // number of population-level effects
+#>   matrix[N, K] X;  // population-level design matrix
+#>   // data for group-level effects of ID 1
+#>   int<lower=1> N_1;  // number of grouping levels
+#>   int<lower=1> M_1;  // number of coefficients per level
+#>   int<lower=1> J_1[N];  // grouping indicator per observation
+#>   // group-level predictor values
+#>   vector[N] Z_1_1;
+#>   int prior_only;  // should the likelihood be ignored?
+#> }
+#> transformed data {
+#>   int Kc = K - 1;
+#>   matrix[N, Kc] Xc;  // centered version of X without an intercept
+#>   vector[Kc] means_X;  // column means of X before centering
+#>   for (i in 2:K) {
+#>     means_X[i - 1] = mean(X[, i]);
+#>     Xc[, i - 1] = X[, i] - means_X[i - 1];
+#>   }
+#> }
+#> parameters {
+#>   vector[Kc] b;  // population-level effects
+#>   real Intercept;  // temporary intercept for centered predictors
+#>   real<lower=0> sigma;  // dispersion parameter
+#>   vector<lower=0>[M_1] sd_1;  // group-level standard deviations
+#>   vector[N_1] z_1[M_1];  // standardized group-level effects
+#> }
+#> transformed parameters {
+#>   vector[N_1] r_1_1;  // actual group-level effects
+#>   real lprior = 0;  // prior contributions to the log posterior
+#>   r_1_1 = (sd_1[1] * (z_1[1]));
+#>   lprior += student_t_lpdf(Intercept | 3, 2.1, 2.5);
+#>   lprior += student_t_lpdf(sigma | 3, 0, 2.5)
+#>     - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+#>   lprior += student_t_lpdf(sd_1 | 3, 0, 2.5)
+#>     - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+#> }
+#> model {
+#>   // likelihood including constants
+#>   if (!prior_only) {
+#>     // initialize linear predictor term
+#>     vector[N] mu = rep_vector(0.0, N);
+#>     mu += Intercept;
+#>     for (n in 1:N) {
+#>       // add more terms to the linear predictor
+#>       mu[n] += r_1_1[J_1[n]] * Z_1_1[n];
+#>     }
+#>     target += normal_id_glm_lpdf(Y | Xc, mu, b, sigma);
+#>   }
+#>   // priors including constants
+#>   target += lprior;
+#>   target += std_normal_lpdf(z_1[1]);
+#> }
+#> generated quantities {
+#>   // actual population-level intercept
+#>   real b_Intercept = Intercept - dot_product(means_X, b);
+#> }
 ```
 
 We then can manually edit the generated brms code to center all parameters.
@@ -364,83 +370,82 @@ The modified Stan code is
 
 ```r
 m_centered <- cmdstan_model("fit_centered.stan")
-  -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\ 
 print(m_centered)
-  data {
-    int<lower=1> N;  // total number of observations
-    vector[N] Y;  // response variable
-    int<lower=1> K;  // number of population-level effects
-    matrix[N, K] X;  // population-level design matrix
-    // data for group-level effects of ID 1
-    int<lower=1> N_1;  // number of grouping levels
-    int<lower=1> M_1;  // number of coefficients per level
-    int<lower=1> J_1[N];  // grouping indicator per observation
-    // group-level predictor values
-    vector[N] Z_1_1;
-    int prior_only;  // should the likelihood be ignored?
-  }
-  transformed data {
-    int Kc = K - 1;
-    matrix[N, Kc] Xc;  // centered version of X without an intercept
-    vector[Kc] means_X;  // column means of X before centering
-    for (i in 2:K) {
-      means_X[i - 1] = mean(X[, i]);
-      Xc[, i - 1] = X[, i] - means_X[i - 1];
-    }
-  }
-  parameters {
-    vector[Kc] b;  // population-level effects
-    real Intercept;  // temporary intercept for centered predictors
-    real<lower=0> sigma;  // dispersion parameter
-    vector<lower=0>[M_1] sd_1;  // group-level standard deviations
-    vector[N_1] z_1[M_1];  // standardized group-level effects
-    
-    // Manually added
-     vector[N_1] r_1_1;  // actual group-level effects
-  }
-  //transformed parameters {
-  //  vector[N_1] r_1_1;  // actual group-level effects
-  //  real lprior = 0;  // prior contributions to the log posterior
-  //  r_1_1 = (sd_1[1] * (z_1[1]));
-  //  lprior += student_t_lpdf(Intercept | 3, 2, 2.5);
-  //  lprior += student_t_lpdf(sigma | 3, 0, 2.5)
-  //    - 1 * student_t_lccdf(0 | 3, 0, 2.5);
-  //  lprior += student_t_lpdf(sd_1 | 3, 0, 2.5)
-  //    - 1 * student_t_lccdf(0 | 3, 0, 2.5);
-  //}
-  model {
-    // likelihood including constants
-    if (!prior_only) {
-      // initialize linear predictor term
-      vector[N] mu = rep_vector(0.0, N);
-      mu += Intercept;
-      for (n in 1:N) {
-        // add more terms to the linear predictor
-        mu[n] += r_1_1[J_1[n]] * Z_1_1[n];
-        
-      }
-      target += normal_id_glm_lpdf(Y | Xc, mu, b, sigma);
-    }
-    // priors including constants
-    // target += lprior;
-    // target += std_normal_lpdf(z_1[1]);
-  
-    target += student_t_lpdf(Intercept | 3, 2, 2.5);
-    target += student_t_lpdf(sigma | 3, 0, 2.5)
-      - 1 * student_t_lccdf(0 | 3, 0, 2.5);
-    target += student_t_lpdf(sd_1 | 3, 0, 2.5)
-      - 1 * student_t_lccdf(0 | 3, 0, 2.5);
-      
-    // Manually added
-    target += normal_lpdf(r_1_1 | 0, sd_1[1]);
-  
-    // manual soft sum to zero constraint
-    // target += normal_lpdf(sum(r_1_1) | 0, 0.0001 *N_1);
-  }
-  generated quantities {
-    // actual population-level intercept
-    real b_Intercept = Intercept - dot_product(means_X, b);
-  }
+#> data {
+#>   int<lower=1> N;  // total number of observations
+#>   vector[N] Y;  // response variable
+#>   int<lower=1> K;  // number of population-level effects
+#>   matrix[N, K] X;  // population-level design matrix
+#>   // data for group-level effects of ID 1
+#>   int<lower=1> N_1;  // number of grouping levels
+#>   int<lower=1> M_1;  // number of coefficients per level
+#>   int<lower=1> J_1[N];  // grouping indicator per observation
+#>   // group-level predictor values
+#>   vector[N] Z_1_1;
+#>   int prior_only;  // should the likelihood be ignored?
+#> }
+#> transformed data {
+#>   int Kc = K - 1;
+#>   matrix[N, Kc] Xc;  // centered version of X without an intercept
+#>   vector[Kc] means_X;  // column means of X before centering
+#>   for (i in 2:K) {
+#>     means_X[i - 1] = mean(X[, i]);
+#>     Xc[, i - 1] = X[, i] - means_X[i - 1];
+#>   }
+#> }
+#> parameters {
+#>   vector[Kc] b;  // population-level effects
+#>   real Intercept;  // temporary intercept for centered predictors
+#>   real<lower=0> sigma;  // dispersion parameter
+#>   vector<lower=0>[M_1] sd_1;  // group-level standard deviations
+#>   vector[N_1] z_1[M_1];  // standardized group-level effects
+#>   
+#>   // Manually added
+#>    vector[N_1] r_1_1;  // actual group-level effects
+#> }
+#> //transformed parameters {
+#> //  vector[N_1] r_1_1;  // actual group-level effects
+#> //  real lprior = 0;  // prior contributions to the log posterior
+#> //  r_1_1 = (sd_1[1] * (z_1[1]));
+#> //  lprior += student_t_lpdf(Intercept | 3, 2, 2.5);
+#> //  lprior += student_t_lpdf(sigma | 3, 0, 2.5)
+#> //    - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+#> //  lprior += student_t_lpdf(sd_1 | 3, 0, 2.5)
+#> //    - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+#> //}
+#> model {
+#>   // likelihood including constants
+#>   if (!prior_only) {
+#>     // initialize linear predictor term
+#>     vector[N] mu = rep_vector(0.0, N);
+#>     mu += Intercept;
+#>     for (n in 1:N) {
+#>       // add more terms to the linear predictor
+#>       mu[n] += r_1_1[J_1[n]] * Z_1_1[n];
+#>       
+#>     }
+#>     target += normal_id_glm_lpdf(Y | Xc, mu, b, sigma);
+#>   }
+#>   // priors including constants
+#>   // target += lprior;
+#>   // target += std_normal_lpdf(z_1[1]);
+#> 
+#>   target += student_t_lpdf(Intercept | 3, 2, 2.5);
+#>   target += student_t_lpdf(sigma | 3, 0, 2.5)
+#>     - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+#>   target += student_t_lpdf(sd_1 | 3, 0, 2.5)
+#>     - 1 * student_t_lccdf(0 | 3, 0, 2.5);
+#>     
+#>   // Manually added
+#>   target += normal_lpdf(r_1_1 | 0, sd_1[1]);
+#> 
+#>   // manual soft sum to zero constraint
+#>   // target += normal_lpdf(sum(r_1_1) | 0, 0.0001 *N_1);
+#> }
+#> generated quantities {
+#>   // actual population-level intercept
+#>   real b_Intercept = Intercept - dot_product(means_X, b);
+#> }
 ```
 
 Now we build data for the model and sample with `cmdstanr`
@@ -460,34 +465,38 @@ fit_centered <- m_centered$sample(data = sdat,
 bm_centered <- brm(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat, empty = TRUE)
 bm_centered$fit <- rstan::read_stan_csv(fit_centered$output_files())
 bm_centered <- rename_pars(bm_centered)
+```
+
+
+```r
 summary(bm_centered)
-   Family: gaussian 
-    Links: mu = identity; sigma = identity 
-  Formula: sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID) 
-     Data: dat (Number of observations: 16800) 
-    Draws: 4 chains, each with iter = 3000; warmup = 500; thin = 1;
-           total post-warmup draws = 10000
-  
-  Group-Level Effects: 
-  ~ID (Number of levels: 1200) 
-                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sd(Intercept)     1.22      0.03     1.17     1.27 1.00     9931     8766
-  
-  Population-Level Effects: 
-            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  Intercept     2.36      0.15     2.08     2.64 1.00    10179     5873
-  bilr1         0.19      0.18    -0.17     0.54 1.00    10484     6106
-  bilr2         0.29      0.14     0.01     0.56 1.00    10177     5829
-  wilr1        -0.80      0.03    -0.85    -0.74 1.00    10095     7128
-  wilr2        -0.26      0.02    -0.31    -0.22 1.00    10313     6910
-  
-  Family Specific Parameters: 
-        Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-  sigma     0.71      0.00     0.71     0.72 1.00     8763     6056
-  
-  Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-  and Tail_ESS are effective sample size measures, and Rhat is the potential
-  scale reduction factor on split chains (at convergence, Rhat = 1).
+#>  Family: gaussian 
+#>   Links: mu = identity; sigma = identity 
+#> Formula: sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID) 
+#>    Data: dat (Number of observations: 16800) 
+#>   Draws: 4 chains, each with iter = 3000; warmup = 500; thin = 1;
+#>          total post-warmup draws = 10000
+#> 
+#> Group-Level Effects: 
+#> ~ID (Number of levels: 1200) 
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     1.22      0.03     1.17     1.27 1.00     9848     9674
+#> 
+#> Population-Level Effects: 
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.36      0.15     2.06     2.66 1.00    10497     5483
+#> bilr1         0.19      0.18    -0.17     0.55 1.00    10539     5853
+#> bilr2         0.29      0.14     0.01     0.56 1.00    10683     5784
+#> wilr1        -0.80      0.03    -0.85    -0.74 1.00    10030     7217
+#> wilr2        -0.26      0.02    -0.31    -0.22 1.00     9805     7335
+#> 
+#> Family Specific Parameters: 
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     0.71      0.00     0.71     0.72 1.00     8197     6616
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 Indeed, the centered parameterisation has improved the ESS for all parameters.
@@ -498,18 +507,56 @@ plot(bm_centered, pars = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercep
 ```
 
 <div class="figure" style="text-align: center">
-<img src="mlmcoda-pair-fit-centered-1.png" alt="plot of chunk pair-fit-centered"  />
-<p class="caption">plot of chunk pair-fit-centered</p>
+<img src="mlmcoda-pair-fit-centered-1.png" alt="Density and Trace Plot when using centered parameterisation"  />
+<p class="caption">Density and Trace Plot when using centered parameterisation</p>
 </div>
+
+# Computational Time
+
+
+```r
+# example model
+print(rstan::get_elapsed_time(fit$Model$fit))
+#>         warmup sample
+#> chain:1   16.3   35.9
+#> chain:2   14.1   35.8
+#> chain:3   18.6   35.8
+#> chain:4   14.9   35.8
+
+# increased iter
+print(rstan::get_elapsed_time(fit_it$Model$fit))
+#>         warmup sample
+#> chain:1   23.5    131
+#> chain:2   21.0    130
+#> chain:3   25.2    130
+#> chain:4   22.0    131
+
+# centered parameterisation
+rstan::get_elapsed_time(bm_centered$fit)
+#>         warmup sample
+#> chain:1    202   1128
+#> chain:2    199   1126
+#> chain:3    202   1125
+#> chain:4    201   1130
+```
+It took ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit)))` to obtain an average-ish of 1000
+across the four parameters with initially low ESS.
+To achieve an ESS of 10 000 across all parameters,
+simplying increasing iterations should take around ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit))) * 10`,
+whereas centered parameterisation takes around 5314.382.
 
 # Conclusion
 `multilevelcoda` demonstrates excellent performances across different conditions
 of number of individuals, number of observations, number of compositional parts, and
-magnitude of modeled variance (read more about our simulation study at)
+magnitude of modeled variance
+(full results of simulation study will be published at a later date).
 However,
 in the case of large data and small sample variation, 
 we recommend centered parameterisation or increasing iterations to 
-achieve efficient MCMC sampling and 
-acceptable ESS.
+achieve efficient MCMC sampling.
+Based on results of the case study,
+if time is not a constraint, centered parameterisation would give 
+the most reliable results in terms of ESS-to-draw ratios for all parameters.
+However, increasing iteration can also be used to achieve acceptable ESS.
 
 # References

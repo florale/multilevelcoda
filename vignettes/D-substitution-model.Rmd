@@ -1,5 +1,5 @@
 ---
-title: "Compositional Multilevel Substitution Models"
+title: "Compositional Substitution Multilevel Models"
 output: 
   html_document:
     theme: spacelab
@@ -9,12 +9,10 @@ output:
     collapsed: no
     smooth_scroll: no
     toc_depth: 4
-    fig_width: 6
-    fig_height: 4
     fig_caption: yes
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Compositional Multilevel Substitution Models}
+  %\VignetteIndexEntry{Compositional Substitution Multilevel Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,12 +20,14 @@ vignette: >
 
 
 # Intro
-We often are interested in how an outcome changes when a fixed unit of the predictor 
+When examining the relationship between a composition and an outconme,
+we are often are interested in how an outcome changes when a fixed unit in the composition
 (e.g., minutes of behaviours during a day) is reallocated
-from one compositional component to another. 
+from one component to another. 
 The Compositional Isotemporal Substitution Model can be used to estimate this change. 
 The `multilevelcoda` package implements this method in a multilevel framework and offers functions 
-for both between- and within-person levels of variability. We discuss 4 different substitution models in this vignette.
+for both between- and within-person levels of variability.
+We discuss 4 different substitution models in this vignette.
 
 We will begin by loading necessary packages, `multilevelcoda`, `brms` (for models fitting),
 doFuture (for parallelisation), 
@@ -38,15 +38,6 @@ and data sets `mcompd` (simulated compositional sleep and wake variables),
 ```r
 library(multilevelcoda)
 library(brms)
-#> Loading required package: Rcpp
-#> Loading 'brms' package (version 2.19.0). Useful instructions
-#> can be found by typing help('brms'). A more detailed introduction
-#> to the package is available through vignette('brms_overview').
-#> 
-#> Attaching package: 'brms'
-#> The following object is masked from 'package:stats':
-#> 
-#>     ar
 library(doFuture)
 
 data("mcompd") 
@@ -180,7 +171,7 @@ knitr::kable(summary(subm1, delta = 10, level = "between", to = "TST"))
 None of them are significant, given that the credible intervals did not cross 0, showing that 
 increasing sleep (TST) at the expense of any other behaviours was not associated 
 in changes in stress at between-person level. 
-These results can be plotted to see the patterns more easily using the `plotsub()` function.
+These results can be plotted to see the patterns more easily using the `plot()` function.
 
 
 ```r
@@ -274,7 +265,7 @@ knitr::kable(summary(subm2, delta = 10, to = "TST"))
 
 
 A comparison between between- and within-person substitution model of sleep on stress, 
-plot using `plotsub()` and `ggpubr::ggarrange()` functions.
+plot using `plot()` and `ggpubr::ggarrange()` functions.
 
 
 ```r
@@ -286,15 +277,6 @@ ggarrange(p1, p2,
           ncol = 1, nrow = 2)
 ```
 
-
-
-```
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
-```
 
 <div class="figure" style="text-align: center">
 <img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"  />
