@@ -229,8 +229,9 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
-    
+  iout <- foreach(i = colnames(basesub), .combine = c, 
+                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                    
     # dnew - reallocation data
     # possible substitution of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -350,8 +351,9 @@ NULL
                       level, ref,
                       ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
-    
+  iout <- foreach(i = colnames(basesub), .combine = c, 
+                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                    
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
@@ -470,7 +472,8 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
+  iout <- foreach(i = colnames(basesub), .combine = c, 
+                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
     
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
@@ -521,7 +524,7 @@ NULL
         dsub <- cbind(dnew, bilrsub, wilr0)
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
@@ -562,8 +565,9 @@ NULL
                              level, ref,
                              ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
-    
+  iout <- foreach(i = colnames(basesub), .combine = c, 
+                  .options.future = list(packages = "multilevelcoda")) %dofuture% {    
+                    
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
     posub <- posub[order(-rank(get(i)))]
@@ -615,7 +619,7 @@ NULL
         # prediction
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
@@ -657,8 +661,9 @@ NULL
                             level, ref,
                             ...) {
   
-  iout <- foreach(i = colnames(basesub), .combine = c) %dofuture% {
-    
+  iout <- foreach(i = colnames(basesub), .combine = c, 
+                  .options.future = list(packages = "multilevelcoda")) %dofuture% {    
+                    
     # possible susbstituion of 1 compositional variable
     posub <- as.data.table(basesub)
     posub <- posub[(get(i) != 0)]
@@ -701,7 +706,7 @@ NULL
         dsub <- cbind(dnew, tilr)
         ysub <-
           fitted(
-            object$Model,
+            object,
             newdata = dsub,
             re_formula = NULL,
             summary = FALSE
