@@ -1,5 +1,5 @@
 ---
-title: "Compositional Multilevel Substitution Models"
+title: "Compositional Substitution Multilevel Models"
 output: 
   html_document:
     theme: spacelab
@@ -14,7 +14,7 @@ output:
     fig_caption: yes
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Compositional Multilevel Substitution Models}
+  %\VignetteIndexEntry{Compositional Substitution Multilevel Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
