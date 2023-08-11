@@ -47,5 +47,5 @@ newdat <- mcompd[ID != 1] # excluding ID 1
 cilr1 <- update(object = cilr, newdata = newdat)
 }
 \seealso{
-\code{\link[compilr]{compilr}}
+\code{\link{compilr}}
 }

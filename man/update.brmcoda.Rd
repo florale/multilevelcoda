@@ -53,5 +53,5 @@ fit2 <- update(fit, newdata = mcompd[ID != 1])
 }}
 }
 \seealso{
-\code{\link[brmcoda]{brmcoda}}
+\code{\link{brmcoda}}
 }

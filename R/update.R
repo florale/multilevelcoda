@@ -10,7 +10,7 @@
 #' 
 #' @inherit compilr return
 #' 
-#' @seealso \code{\link[compilr]{compilr}}
+#' @seealso \code{\link{compilr}}
 #' 
 #' @importFrom extraoperators %ain% %snin% %nin%
 #' @method update compilr
@@ -69,7 +69,7 @@ update.compilr <- function(object, newdata, ...) {
 #' 
 #' @inherit brmcoda return
 #'  
-#' @seealso \code{\link[brmcoda]{brmcoda}}
+#' @seealso \code{\link{brmcoda}}
 #' 
 #' @method update brmcoda
 #' 
