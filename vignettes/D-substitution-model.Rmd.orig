@@ -169,7 +169,7 @@ At within-person level, we got some significant results for substitution of slee
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
 Increasing 5 minutes in sleep at the expense of time spent awake 
 in bed predicted 0.04 higher stress [95% CI 0.01, 0.7], on a given day. 
-Conversely, less sleep and more time awake in bed predicted less stress (b = -0.03 [95% CI -0.06,	-0.01]). Let's also plot theses results.
+Let's also plot theses results.
 
 ```{r plotwsub, eval=FALSE}
 plot(subm1, to = "TST", level = "within", ref = "grandmean")

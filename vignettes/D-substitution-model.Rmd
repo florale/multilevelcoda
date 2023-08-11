@@ -38,6 +38,15 @@ and data sets `mcompd` (simulated compositional sleep and wake variables),
 ```r
 library(multilevelcoda)
 library(brms)
+#> Loading required package: Rcpp
+#> Loading 'brms' package (version 2.19.0). Useful instructions
+#> can be found by typing help('brms'). A more detailed introduction
+#> to the package is available through vignette('brms_overview').
+#> 
+#> Attaching package: 'brms'
+#> The following object is masked from 'package:stats':
+#> 
+#>     ar
 library(doFuture)
 
 data("mcompd") 
@@ -78,24 +87,24 @@ summary(m)
 #> Group-Level Effects: 
 #> ~ID (Number of levels: 266) 
 #>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     0.98      0.06     0.87     1.12 1.00     1466     2608
+#> sd(Intercept)     0.99      0.06     0.87     1.11 1.00     1574     2367
 #> 
 #> Population-Level Effects: 
 #>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept     2.63      0.48     1.66     3.55 1.00     1354     2142
-#> bilr1         0.13      0.31    -0.47     0.76 1.00      981     1997
-#> bilr2         0.52      0.33    -0.13     1.18 1.00     1160     1678
-#> bilr3         0.13      0.22    -0.31     0.56 1.01      892     2038
-#> bilr4         0.01      0.28    -0.51     0.58 1.01     1066     1614
-#> wilr1        -0.34      0.12    -0.59    -0.10 1.00     3229     2334
-#> wilr2         0.05      0.13    -0.21     0.31 1.00     3503     2484
-#> wilr3        -0.11      0.08    -0.26     0.05 1.00     2860     2971
-#> wilr4         0.23      0.10     0.04     0.43 1.00     3404     3272
-#> Female       -0.38      0.17    -0.71    -0.07 1.00     1234     2341
+#> Intercept     2.65      0.48     1.69     3.56 1.00     1494     2202
+#> bilr1         0.11      0.32    -0.53     0.74 1.00      967     1699
+#> bilr2         0.50      0.34    -0.16     1.15 1.00     1081     2071
+#> bilr3         0.11      0.21    -0.31     0.53 1.00     1059     2057
+#> bilr4         0.04      0.28    -0.51     0.60 1.00     1266     2174
+#> wilr1        -0.34      0.12    -0.58    -0.09 1.00     2797     2882
+#> wilr2         0.05      0.13    -0.21     0.32 1.00     3134     2299
+#> wilr3        -0.10      0.08    -0.26     0.06 1.00     2712     2653
+#> wilr4         0.24      0.10     0.04     0.44 1.00     2963     2874
+#> Female       -0.41      0.17    -0.77    -0.07 1.00     1364     1823
 #> 
 #> Family Specific Parameters: 
 #>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sigma     2.37      0.03     2.31     2.43 1.00     4614     2615
+#> sigma     2.38      0.03     2.33     2.44 1.00     4866     2981
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -161,9 +170,9 @@ knitr::kable(summary(subm1, delta = 10, level = "between", to = "TST"))
 
 | Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
 |----:|------:|-------:|-----:|:----|:---|:-------|:---------|
-| 0.06|   0.00|    0.13|    10|WAKE |TST |between |grandmean |
+| 0.06|  -0.01|    0.13|    10|WAKE |TST |between |grandmean |
 | 0.01|  -0.03|    0.04|    10|MVPA |TST |between |grandmean |
-| 0.01|  -0.01|    0.04|    10|LPA  |TST |between |grandmean |
+| 0.01|  -0.01|    0.03|    10|LPA  |TST |between |grandmean |
 | 0.01|  -0.01|    0.04|    10|SB   |TST |between |grandmean |
 
 
@@ -206,7 +215,7 @@ At within-person level, we got some significant results for substitution of slee
 awake in bed (WAKE) for 5 minutes, but not other behaviours. 
 Increasing 5 minutes in sleep at the expense of time spent awake 
 in bed predicted 0.04 higher stress [95% CI 0.01, 0.7], on a given day. 
-Conversely, less sleep and more time awake in bed predicted less stress (b = -0.03 [95% CI -0.06,	-0.01]). Let's also plot theses results.
+Let's also plot theses results.
 
 
 ```r
@@ -253,10 +262,10 @@ knitr::kable(summary(subm2, delta = 10, to = "TST"))
 
 |  Mean| CI_low| CI_high| Delta|To  |From |Level   |Reference   |
 |-----:|------:|-------:|-----:|:---|:----|:-------|:-----------|
-|  0.08|   0.00|    0.16|    10|TST |WAKE |between |clustermean |
-|  0.00|  -0.03|    0.04|    10|TST |MVPA |between |clustermean |
+|  0.07|  -0.01|    0.15|    10|TST |WAKE |between |clustermean |
+|  0.01|  -0.03|    0.04|    10|TST |MVPA |between |clustermean |
 |  0.01|  -0.01|    0.04|    10|TST |LPA  |between |clustermean |
-|  0.02|  -0.01|    0.05|    10|TST |SB   |between |clustermean |
+|  0.01|  -0.02|    0.05|    10|TST |SB   |between |clustermean |
 |  0.05|   0.01|    0.08|    10|TST |WAKE |within  |clustermean |
 | -0.01|  -0.02|    0.01|    10|TST |MVPA |within  |clustermean |
 | -0.01|  -0.02|    0.00|    10|TST |LPA  |within  |clustermean |
@@ -277,6 +286,15 @@ ggarrange(p1, p2,
           ncol = 1, nrow = 2)
 ```
 
+
+
+```
+#> 
+#> Attaching package: 'ggpubr'
+#> The following object is masked from 'package:cowplot':
+#> 
+#>     get_legend
+```
 
 <div class="figure" style="text-align: center">
 <img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Model"  />
