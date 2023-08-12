@@ -17,6 +17,7 @@
 #' Only applicable for models with compositional response
 #' @param ... Further arguments passed to \code{\link{predict.brmsfit}}
 #' that control additional aspects of prediction.
+#' @inheritParams brms::predict.brmsfit
 #' 
 #' @inherit brms::predict.brmsfit return
 #' 
@@ -59,11 +60,13 @@
 #' @export
 predict.brmcoda <- function(object,
                             acomp = FALSE,
+                            summary = TRUE,
                             ...) {
   
   if (isFALSE(acomp)) {
     out <- predict(
       object$Model,
+      summary = summary,
       ...
     )
   } else {
@@ -158,11 +161,13 @@ predict.brmcoda <- function(object,
 #' @export
 fitted.brmcoda <- function(object,
                            acomp = FALSE,
+                           summary = TRUE,
                            ...) {
   
   if (isFALSE(acomp)) {
     out <- fitted(
       object$Model,
+      summary = summary,
       ...
     )
   } else {

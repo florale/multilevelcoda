@@ -5,7 +5,7 @@
 \alias{predict}
 \title{Draws from the Posterior Predictive Distribution}
 \usage{
-\method{predict}{brmcoda}(object, acomp = FALSE, ...)
+\method{predict}{brmcoda}(object, acomp = FALSE, summary = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
@@ -13,6 +13,9 @@
 \item{acomp}{Should the
 results be returned on the compositional scale of the response variable?
 Only applicable for models with compositional response}
+
+\item{summary}{Should summary statistics be returned
+instead of the raw values? Default is \code{TRUE}.}
 
 \item{...}{Further arguments passed to \code{\link{predict.brmsfit}}
 that control additional aspects of prediction.}
