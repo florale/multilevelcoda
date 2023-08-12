@@ -31,4 +31,4 @@
 ### Other Changes
 
 * Fix bugs in vignettes and reformat.
-* Add a new vignette to present a special case usage of `multilevelcoda`.
+* Add a new vignette to present a case study in `multilevelcoda` simulation study.
