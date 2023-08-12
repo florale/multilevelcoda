@@ -2,7 +2,7 @@
 % Please edit documentation in R/compilr-methods.R
 \name{is.compilr}
 \alias{is.compilr}
-\title{Several methods for \code{compilr} objects.}
+\title{Checks if argument is a \code{compilr} object}
 \usage{
 is.compilr(x)
 }

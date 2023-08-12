@@ -1,5 +1,3 @@
-#' Several methods for \code{compilr} objects.
-#' 
 #' Checks if argument is a \code{compilr} object
 #'
 #' @param x An object of class \code{compilr}.

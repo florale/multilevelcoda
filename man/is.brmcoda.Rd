@@ -2,7 +2,7 @@
 % Please edit documentation in R/brmcoda-methods.R
 \name{is.brmcoda}
 \alias{is.brmcoda}
-\title{Several methods for \code{brmcoda} objects.}
+\title{Checks if argument is a \code{brmcoda} object}
 \usage{
 is.brmcoda(x)
 }

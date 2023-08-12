@@ -1,5 +1,3 @@
-#' Several methods for \code{brmcoda} objects.
-#'
 #' Checks if argument is a \code{brmcoda} object
 #'
 #' @param x An object of class \code{brmcoda}.
