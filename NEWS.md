@@ -4,7 +4,7 @@
 
 # multilevelcoda 1.0.0
 
-### CRAN release
+### First CRAN release
 
 # multilevelcoda 1.1.0
 
@@ -21,3 +21,14 @@
 * Deprecate argument `type` of `substitution` and replace with `ref`.
 * Deprecate argument `regrid` of `substitution`
 
+# multilevelcoda 1.2.0
+
+### New Features
+
+* Add various methods for `compilr`, `brmcoda`, and `substitution` objects.
+* Change the default `total` in `compilr` to `1` instead of `1440`.
+
+### Other Changes
+
+* Fix bugs in vignettes and reformat.
+* Add a new vignette to present a special case usage of `multilevelcoda`.
