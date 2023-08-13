@@ -32,3 +32,9 @@
 
 * Fix bugs in vignettes and reformat.
 * Add a new vignette to present a case study in `multilevelcoda` simulation study.
+
+# multilevelcoda 1.2.1
+
+### Other Changes
+
+* Fix a bug in the `summary` argument of `predict()` and `fitted()`.
