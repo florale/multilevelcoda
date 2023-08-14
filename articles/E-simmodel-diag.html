@@ -99,7 +99,7 @@
       <img src="" class="logo" alt=""><h1>Improving MCMC Sampling for Bayesian Compositional Multilevel Models</h1>
                         <h4 data-toc-skip class="author">Flora Le</h4>
             
-            <h4 data-toc-skip class="date">2023-08-11</h4>
+            <h4 data-toc-skip class="date">2023-08-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/florale/multilevelcoda/blob/HEAD/vignettes/E-simmodel-diag.Rmd" class="external-link"><code>vignettes/E-simmodel-diag.Rmd</code></a></small>
       <div class="d-none name"><code>E-simmodel-diag.Rmd</code></div>
@@ -602,19 +602,19 @@ parameters. The modified Stan code is</p>
 <span><span class="co">#&gt; Group-Level Effects: </span></span>
 <span><span class="co">#&gt; ~ID (Number of levels: 1200) </span></span>
 <span><span class="co">#&gt;               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)     1.22      0.03     1.17     1.27 1.00     9848     9674</span></span>
+<span><span class="co">#&gt; sd(Intercept)     1.22      0.03     1.17     1.27 1.00     9931     8766</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Population-Level Effects: </span></span>
 <span><span class="co">#&gt;           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept     2.36      0.15     2.06     2.66 1.00    10497     5483</span></span>
-<span><span class="co">#&gt; bilr1         0.19      0.18    -0.17     0.55 1.00    10539     5853</span></span>
-<span><span class="co">#&gt; bilr2         0.29      0.14     0.01     0.56 1.00    10683     5784</span></span>
-<span><span class="co">#&gt; wilr1        -0.80      0.03    -0.85    -0.74 1.00    10030     7217</span></span>
-<span><span class="co">#&gt; wilr2        -0.26      0.02    -0.31    -0.22 1.00     9805     7335</span></span>
+<span><span class="co">#&gt; Intercept     2.36      0.15     2.08     2.64 1.00    10179     5873</span></span>
+<span><span class="co">#&gt; bilr1         0.19      0.18    -0.17     0.54 1.00    10484     6106</span></span>
+<span><span class="co">#&gt; bilr2         0.29      0.14     0.01     0.56 1.00    10177     5829</span></span>
+<span><span class="co">#&gt; wilr1        -0.80      0.03    -0.85    -0.74 1.00    10095     7128</span></span>
+<span><span class="co">#&gt; wilr2        -0.26      0.02    -0.31    -0.22 1.00    10313     6910</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family Specific Parameters: </span></span>
 <span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sigma     0.71      0.00     0.71     0.72 1.00     8197     6616</span></span>
+<span><span class="co">#&gt; sigma     0.71      0.00     0.71     0.72 1.00     8763     6056</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -637,33 +637,30 @@ Density and Trace Plot when using centered parameterisation
 <code class="sourceCode R"><span><span class="co"># example model</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-class.html" class="external-link">get_elapsed_time</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">Model</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         warmup sample</span></span>
-<span><span class="co">#&gt; chain:1   16.3   35.9</span></span>
-<span><span class="co">#&gt; chain:2   14.1   35.8</span></span>
-<span><span class="co">#&gt; chain:3   18.6   35.8</span></span>
-<span><span class="co">#&gt; chain:4   14.9   35.8</span></span>
+<span><span class="co">#&gt; chain:1   16.0   35.3</span></span>
+<span><span class="co">#&gt; chain:2   14.2   35.6</span></span>
+<span><span class="co">#&gt; chain:3   18.4   35.5</span></span>
+<span><span class="co">#&gt; chain:4   14.9   35.5</span></span>
 <span></span>
 <span><span class="co"># increased iter</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-class.html" class="external-link">get_elapsed_time</a></span><span class="op">(</span><span class="va">fit_it</span><span class="op">$</span><span class="va">Model</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         warmup sample</span></span>
-<span><span class="co">#&gt; chain:1   23.5    131</span></span>
-<span><span class="co">#&gt; chain:2   21.0    130</span></span>
-<span><span class="co">#&gt; chain:3   25.2    130</span></span>
-<span><span class="co">#&gt; chain:4   22.0    131</span></span>
+<span><span class="co">#&gt; chain:1   23.0    128</span></span>
+<span><span class="co">#&gt; chain:2   20.6    128</span></span>
+<span><span class="co">#&gt; chain:3   24.7    128</span></span>
+<span><span class="co">#&gt; chain:4   21.7    128</span></span>
 <span></span>
 <span><span class="co"># centered parameterisation</span></span>
 <span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-class.html" class="external-link">get_elapsed_time</a></span><span class="op">(</span><span class="va">bm_centered</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         warmup sample</span></span>
-<span><span class="co">#&gt; chain:1    202   1128</span></span>
-<span><span class="co">#&gt; chain:2    199   1126</span></span>
-<span><span class="co">#&gt; chain:3    202   1125</span></span>
-<span><span class="co">#&gt; chain:4    201   1130</span></span></code></pre></div>
-<p>It took
-<code>r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit)))</code>
-to obtain an average-ish of 1000 across the four parameters with
-initially low ESS. To achieve an ESS of 10 000 across all parameters,
-simplying increasing iterations should take around
-<code>r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit))) * 10</code>,
-whereas centered parameterisation takes around 5314.382.</p>
+<span><span class="co">#&gt; chain:1    193   1105</span></span>
+<span><span class="co">#&gt; chain:2    198   1105</span></span>
+<span><span class="co">#&gt; chain:3    200   1108</span></span>
+<span><span class="co">#&gt; chain:4    200   1107</span></span></code></pre></div>
+<p>It took 601.661 to obtain an average-ish of 1000 across the four
+parameters with initially low ESS. To achieve an ESS of 10 000 across
+all parameters, simplying increasing iterations should take around
+6016.61, whereas centered parameterisation takes around 5216.669.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
