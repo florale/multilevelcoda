@@ -1,7 +1,7 @@
 ---
 title: "Improving MCMC Sampling for Bayesian Compositional Multilevel Models"
 author: "Flora Le"
-date: "2023-08-11"
+date: "2023-08-14"
 output: 
   html_document:
     theme: spacelab
@@ -518,32 +518,32 @@ plot(bm_centered, pars = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercep
 # example model
 print(rstan::get_elapsed_time(fit$Model$fit))
 #>         warmup sample
-#> chain:1   16.3   35.9
-#> chain:2   14.1   35.8
-#> chain:3   18.6   35.8
-#> chain:4   14.9   35.8
+#> chain:1   16.7   36.6
+#> chain:2   14.6   36.6
+#> chain:3   19.3   36.3
+#> chain:4   15.4   36.7
 
 # increased iter
 print(rstan::get_elapsed_time(fit_it$Model$fit))
 #>         warmup sample
-#> chain:1   23.5    131
-#> chain:2   21.0    130
-#> chain:3   25.2    130
-#> chain:4   22.0    131
+#> chain:1   23.2    128
+#> chain:2   20.9    129
+#> chain:3   25.3    129
+#> chain:4   21.8    129
 
 # centered parameterisation
 rstan::get_elapsed_time(bm_centered$fit)
 #>         warmup sample
-#> chain:1    202   1128
-#> chain:2    199   1126
-#> chain:3    202   1125
-#> chain:4    201   1130
+#> chain:1    200   1125
+#> chain:2    199   1121
+#> chain:3    202   1121
+#> chain:4    200   1124
 ```
-It took ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit)))` to obtain an average-ish of 1000
+It took 607.051 to obtain an average-ish of 1000
 across the four parameters with initially low ESS.
 To achieve an ESS of 10 000 across all parameters,
-simplying increasing iterations should take around ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit))) * 10`,
-whereas centered parameterisation takes around 5314.382.
+simplying increasing iterations should take around 6070.51,
+whereas centered parameterisation takes around 5292.319.
 
 # Conclusion
 `multilevelcoda` demonstrates excellent performances across different conditions
@@ -555,8 +555,7 @@ in the case of large data and small sample variation,
 we recommend centered parameterisation or increasing iterations to 
 achieve efficient MCMC sampling.
 Based on results of the case study,
-if time is not a constraint, centered parameterisation would give 
-the most reliable results in terms of ESS-to-draw ratios for all parameters.
-However, increasing iteration can also be used to achieve acceptable ESS.
+centered parameterisation would give 
+more reliable results in terms of ESS-to-draw ratios for all parameters and computational time.
 
 # References

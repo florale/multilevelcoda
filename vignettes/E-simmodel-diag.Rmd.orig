@@ -299,10 +299,10 @@ print(rstan::get_elapsed_time(fit_it$Model$fit))
 # centered parameterisation
 rstan::get_elapsed_time(bm_centered$fit)
 ```
-It took ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit)))` to obtain an average-ish of 1000
+It took `r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit)))` to obtain an average-ish of 1000
 across the four parameters with initially low ESS.
 To achieve an ESS of 10 000 across all parameters,
-simplying increasing iterations should take around ` r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit))) * 10`,
+simplying increasing iterations should take around `r sum(colSums(rstan::get_elapsed_time(fit_it$Model$fit))) * 10`,
 whereas centered parameterisation takes around `r sum(colSums(rstan::get_elapsed_time(bm_centered$fit)))`.
 
 # Conclusion
@@ -315,8 +315,7 @@ in the case of large data and small sample variation,
 we recommend centered parameterisation or increasing iterations to 
 achieve efficient MCMC sampling.
 Based on results of the case study,
-if time is not a constraint, centered parameterisation would give 
-the most reliable results in terms of ESS-to-draw ratios for all parameters.
-However, increasing iteration can also be used to achieve acceptable ESS.
+centered parameterisation would give 
+more reliable results in terms of ESS-to-draw ratios for all parameters and computational time.
 
 # References
