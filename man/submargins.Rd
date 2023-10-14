@@ -4,7 +4,15 @@
 \alias{submargins}
 \title{Average Marginal Substitution}
 \usage{
-submargins(object, delta, basesub, level = "total", type = "marginal", ...)
+submargins(
+  object,
+  delta,
+  basesub,
+  ref = "clustermean",
+  level = "total",
+  weight = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
@@ -15,31 +23,56 @@ submargins(object, delta, basesub, level = "total", type = "marginal", ...)
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
 
-\item{level}{A character string or vector. Default to \code{total}.}
+\item{ref}{Either a character value or vector or a dataset.
+Can be \code{"grandmean"} and/or \code{"clustermean"}, or
+a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
+of combinations of covariates over which predictions are made.
+User's specified reference grid is only possible for simple substitution.}
 
-\item{type}{A character string or vector.
-Should the estimate be \code{conditional} mean or average \code{marginal} mean?}
+\item{level}{A character string or vector.
+Should the estimate be at the \code{"between"} and/or \code{"within"} level?}
 
-\item{...}{Additional arguments to be passed to \code{\link{describe_posterior}}.}
+\item{weight}{A character value specifying the weight to use in calculation of the reference composition.
+If \code{"equal"}, give equal weight to units (e.g., individuals).
+If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
+(e.g., observations across individuals)
+Default is \code{equal}.}
+
+\item{...}{Additional arguments passed to \code{\link{describe_posterior}}.}
 }
 \value{
-A list containing the result of multilevel compositional substitution model.
-Each element of the list is the estimation for a compositional part
-and include at least six elements.
+A list containing the results of multilevel compositional substitution model.
+The first four lists contain the results of the substitution estimation for a compositional part.
 \itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low} and \code{CI_high}}{ 95\% credible intervals.}
 \item{\code{Delta}}{ Amount substituted across compositional parts.}
 \item{\code{From}}{ Compositional part that is substituted from.}
 \item{\code{To}}{ Compositional parts that is substituted to.}
-\item{\code{Level}}{ Level where changes in composition takes place.}
-\item{\code{EffectType}}{ Either estimated \code{conditional} or average \code{marginal} changes.}
+\item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+\item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 }
 }
 \description{
-Using a fitted model object, estimates the the average marginal difference
-when compositional parts are substituted for specific unit(s).
-The \code{submargins} output encapsulates
-the substitution results for all compositional parts
-present in the \code{\link{brmcoda}} object.
+This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
+when compositional parts are substituted for specific unit(s)
+using cluster mean (e.g., compositional mean at individual level) as reference composition.
+It is recommended that users run substitution model using the \code{\link{substitution}} function.
+}
+\examples{
+\donttest{
+if(requireNamespace("cmdstanr")){
+cilr <- compilr(data = mcompd[ID \%in\% 1:10, .SD[1:3], by = ID], sbp = sbp, 
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+
+m <- brmcoda(compilr = cilr, 
+             formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
+             chains = 1, iter = 500,
+             backend = "cmdstanr")
+             
+subm <- submargins(object = m, basesub = psub, delta = 5)
+}}
+}
+\seealso{
+\code{\link{substitution}}
 }

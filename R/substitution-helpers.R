@@ -661,8 +661,8 @@ NULL
 }
 
 # clustermean Substitution Model.
-.get.submargins <- function(object, basesub, t,
-                            y0, delta,
+.get.submargins <- function(object, delta, basesub,
+                            comp0, y0, d0,
                             level, ref,
                             ...) {
   
@@ -685,8 +685,8 @@ NULL
       sub <- posub * delta[j]
       for (k in seq_len(nrow(sub))) {
         subk <- sub[k, ]
-        subk <- subk[rep(seq_len(nrow(subk)), nrow(t)), ]
-        newcomp <- t + subk
+        subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
+        newcomp <- comp0 + subk
         Delta <- subk[, get(i)]
         names(newcomp) <- object$CompILR$parts
         
@@ -698,7 +698,7 @@ NULL
         dnew$Delta <- as.numeric(dnew$Delta)
         
         # remove impossible reallocation that result in negative values 
-        cols <- colnames(dnew) %sin% c(colnames(t), colnames(basesub))
+        cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
@@ -707,8 +707,10 @@ NULL
         
         colnames(tilr) <- colnames(object$CompILR$TotalILR)
         
-        # prediction
+        # substitution data
         dsub <- cbind(dnew, tilr)
+
+        # prediction
         ysub <-
           fitted(
             object,
@@ -733,10 +735,10 @@ NULL
     jout$To <- iv
     jout[, From := rep(subvar, length.out = nrow(jout))]
     jout$Level <- level
+    jout$Reference <- ref
     
     names(jout) <- c("Mean", "CI_low", "CI_high", 
-                     "Delta", "To", "From", 
-                     "Level")
+                     "Delta", "To", "From", "Level", "Reference")
     
     # store final results for entire composition
     jout <- list(jout)
