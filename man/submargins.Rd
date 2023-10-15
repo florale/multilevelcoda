@@ -57,21 +57,6 @@ The first four lists contain the results of the substitution estimation for a co
 This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
 when compositional parts are substituted for specific unit(s)
 using cluster mean (e.g., compositional mean at individual level) as reference composition.
-It is recommended that users run substitution model using the \code{\link{substitution}} function.
-}
-\examples{
-\donttest{
-if(requireNamespace("cmdstanr")){
-cilr <- compilr(data = mcompd[ID \%in\% 1:10, .SD[1:3], by = ID], sbp = sbp, 
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
-
-m <- brmcoda(compilr = cilr, 
-             formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
-             chains = 1, iter = 500,
-             backend = "cmdstanr")
-             
-subm <- submargins(object = m, basesub = psub, delta = 5)
-}}
 }
 \seealso{
 \code{\link{substitution}}
