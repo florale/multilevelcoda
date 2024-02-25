@@ -44,3 +44,16 @@
 #'   \item{SB}{fifth compositional variable}
 #' }
 "sbp"
+
+#' multilevelcoda Simulation Study results
+#'
+#' A list of 4 components
+#'
+#' @format A list with 5 columns and 4 rows.
+#' \describe{
+#'   \item{brmcoda_tab}{Simulation results for brmcoda() for tables}
+#'   \item{sub_tab}{Simulation results for substitution() for tables}
+#'   \item{brmcoda_plot}{Simulation results for brmcoda() for graphs}
+#'   \item{sub_plot}{Simulation results for substitution() for graphs}
+#' }
+"sbp"

@@ -13,11 +13,23 @@ A matrix with 5 columns and 4 rows.
 \item{LPA}{fourth compositional variable}
 \item{SB}{fifth compositional variable}
 }
+
+A list with 5 columns and 4 rows.
+\describe{
+\item{brmcoda_tab}{Simulation results for brmcoda() for tables}
+\item{sub_tab}{Simulation results for substitution() for tables}
+\item{brmcoda_plot}{Simulation results for brmcoda() for graphs}
+\item{sub_plot}{Simulation results for substitution() for graphs}
+}
 }
 \usage{
+sbp
+
 sbp
 }
 \description{
 A matrix of sequential binary partition.
+
+A list of 4 components
 }
 \keyword{datasets}
