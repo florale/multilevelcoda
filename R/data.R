@@ -56,4 +56,4 @@
 #'   \item{brmcoda_plot}{Simulation results for brmcoda() for graphs}
 #'   \item{sub_plot}{Simulation results for substitution() for graphs}
 #' }
-"sbp"
+"sim"

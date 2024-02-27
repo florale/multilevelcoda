@@ -25,11 +25,42 @@ launch_shinystan.brmcoda <- function(object, ...) {
 #' 
 #' @return An S4 shiny object
 #' 
+#' @importFrom plotly plotlyOutput
+#' @importFrom plotly renderPlotly
+#' @importFrom shiny br
+#' @importFrom shiny column
+#' @importFrom shiny conditionalPanel
+#' @importFrom shiny fluidPage
+#' @importFrom shiny fluidRow
+#' @importFrom shiny h5
+#' @importFrom shiny HTML
+#' @importFrom shiny imageOutput
+#' @importFrom shiny mainPanel
+#' @importFrom shiny navbarPage
+#' @importFrom shiny radioButtons
+#' @importFrom shiny renderImage
+#' @importFrom shiny selectInput
+#' @importFrom shiny shinyApp
+#' @importFrom shiny sidebarLayout
+#' @importFrom shiny sidebarPanel
+#' @importFrom shiny shinyOptions
+#' @importFrom shiny tags
+#' @importFrom bslib bs_add_variables
+#' @importFrom bslib bs_add_variables
+#' @importFrom bslib bs_theme
+#' @importFrom bslib nav_item
+#' @importFrom bslib nav_menu
+#' @importFrom bslib nav_panel
+#' @importFrom bslib nav_spacer
+#' @importFrom DT renderDataTable
+#' @importFrom DT datatable
+#' @importFrom DT dataTableOutput
+#' @importFrom DT DTOutput
 #' @export
 multilevelcoda_sim <- function() {
   
   # shiny input
-  data(sim)
+  load(sim)
   
   brmcoda_tab <- sim[["brmcoda_tab"]]
   sub_tab <- sim[["sub_tab"]]

@@ -42,7 +42,12 @@ Imports:
     foreach,
     doFuture,
     abind,
-    graphics
+    graphics,
+    shiny,
+    plotly,
+    hrbrthemes,
+    bslib,
+    DT
 Suggests: 
     testthat (>= 3.0.0),
     covr,

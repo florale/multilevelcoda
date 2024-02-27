@@ -278,7 +278,7 @@ NULL
     bcompsub  <- acomp(dnew[, object$CompILR$parts, with = FALSE], total = object$CompILR$total)
     
     bilrsub <- ilr(bcompsub, V = object$CompILR$psi)
-    wilr0 <- d0[1, colnames(object$CompILR$WithinILR), with = FALSE]
+    wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
     
     colnames(bilrsub) <- colnames(object$CompILR$BetweenILR)
     colnames(wilr0) <- colnames(object$CompILR$WithinILR)

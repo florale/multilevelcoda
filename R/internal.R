@@ -1,9 +1,13 @@
 ## make Rcmd check happy
-utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "t", "head",  "fitted",
+utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "t", "head",  "fitted", 
                          "x", "object", "predict", "residuals", "tail", "vcov", "coef",
                          "Mean",  "CI_low", "CI_high", "From", "Delta", "pairs",
                          "spread", "value", "variable", "ID", "EffectType", "Level", "Reference",
-                         "update"))
+                         "update",
+                         "sim", "condition",
+                         "est", "lower", "upper", "JI", "N", "K", "D", "Stat", "Estimates", "MCSE",
+                         "sigma", "OnTarget"
+                         ))
 
 
 # expand grid data frame
@@ -13,6 +17,30 @@ expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = 
 is.sequential <- function(x) {
   all(length(x) > 2 & all(abs(diff(x)) == 1))
 }
+
+#' @keywords internal
+#' 
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 coord_flip
+#' @importFrom ggplot2 element_blank
+#' @importFrom ggplot2 element_rect
+#' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 facet_wrap
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_hline
+#' @importFrom ggplot2 geom_linerange
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 geom_segment
+#' @importFrom ggplot2 geom_text
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 scale_colour_manual
+#' @importFrom ggplot2 scale_x_discrete
+#' @importFrom ggplot2 scale_y_continuous
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 theme_void
+#' @importFrom ggplot2 unit
+#' @importFrom hrbrthemes theme_ipsum 
+NULL
 
 # plot for shiny sim
 .par_plot <- function(data, shiny = FALSE, d = 4, font = "Arial Narrow") {
@@ -172,7 +200,7 @@ is.sequential <- function(x) {
       scale_x_discrete(drop = FALSE) +
       # facet_wrap(ggplot2::vars(N, K), labeller = ggplot2::label_both) +
       facet_wrap(ggplot2::vars(JI), labeller = ggplot2::label_context, strip.position = "top") +
-      hrbrthemes::theme_ipsum() +
+      theme_ipsum() +
       coord_flip() +
       theme(
         axis.ticks        = element_blank(),
