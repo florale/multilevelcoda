@@ -211,7 +211,7 @@ prior_summary.brmcoda <- function(object, ...) {
 #' Extract diagnostic metrics (Effective Sample Size (`ESS`), `Rhat` and Monte
 #' Carlo Standard Error `MCSE`).
 #' 
-#' @param posteriors An object of class \code{brmcoda}.
+#' @param posterior An object of class \code{brmcoda}.
 #' @inheritParams bayestestR::diagnostic_posterior
 #' @param ... Other arguments passed to \code{\link{diagnostic_posterior}}.
 #' 
@@ -221,6 +221,6 @@ prior_summary.brmcoda <- function(object, ...) {
 #' @seealso \code{\link[bayestestR:diagnostic_posterior]{diagnostic_posterior}}
 #' 
 #' @export
-diagnostic_posterior.brmcoda <- function(posteriors, diagnostic = c("ESS", "Rhat"), ...) {
-  diagnostic_posterior(posteriors$Model, diagnostic = diagnostic, ...)
+diagnostic_posterior.brmcoda <- function(posterior, diagnostic = c("ESS", "Rhat"), ...) {
+  diagnostic_posterior(posterior = posteriors$Model, diagnostic = diagnostic, ...)
 }

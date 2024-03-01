@@ -44,10 +44,12 @@ Imports:
     abind,
     graphics,
     shiny,
+    shinystan,
     plotly,
     hrbrthemes,
     bslib,
-    DT
+    DT,
+    gtable
 Suggests: 
     testthat (>= 3.0.0),
     covr,
