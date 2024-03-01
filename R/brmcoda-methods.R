@@ -206,6 +206,25 @@ prior_summary.brmcoda <- function(object, ...) {
   prior_summary(object$Model, ...)
 }
 
+#' Posterior Predictive Checks for \code{brmcoda} Objects
+#' 
+#' Perform posterior predictive checks with the help of the \pkg{bayesplot} package.
+#' 
+#' @aliases pp_check
+#' 
+#' @param object An object of class \code{brmcoda}.
+#' @inheritParams brms::pp_check.brmsfit
+#' 
+#' @importFrom bayesplot pp_check
+#' @method pp_check brmcoda
+#' 
+#' @seealso \code{\link[brms:pp_check.brmsfit]{pp_check.brmsfit}}
+#' 
+#' @export
+pp_check.brmcoda <- function(object, ...) {
+  pp_check(object$Model, ...)
+}
+
 #' Posteriors Sampling Diagnostic
 #' 
 #' Extract diagnostic metrics (Effective Sample Size (`ESS`), `Rhat` and Monte

@@ -50,7 +50,8 @@ Imports:
     bslib,
     DT,
     gtable,
-    loo
+    loo,
+    bayesplot
 Suggests: 
     testthat (>= 3.0.0),
     covr,
