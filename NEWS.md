@@ -38,3 +38,10 @@
 ### Other Changes
 
 * Fix a bug in the `summary` argument of `predict()` and `fitted()`.
+
+# multilevelcoda 1.2.2
+
+### New Features
+
+* Add a new function `multilevelcoda_sim()` to bundle simulation study results in a `shiny` app.
+* Add more methods for `brmcoda` (`loo` and `pp_check`).
