@@ -445,7 +445,6 @@ residuals.brmcoda <- function(object, ...) {
 #' 
 #' @examples
 #' \donttest{
-#' ## fit a model
 #' if(requireNamespace("cmdstanr")){
 #'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
 #'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
@@ -455,7 +454,6 @@ residuals.brmcoda <- function(object, ...) {
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
-#'   ## extract residuals
 #'   (loo1 <- loo(m))
 #' }}
 #' @export

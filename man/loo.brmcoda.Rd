@@ -26,7 +26,6 @@ For more details see \code{\link[loo:loo]{loo}}.
 }
 \examples{
 \donttest{
-## fit a model
 if(requireNamespace("cmdstanr")){
   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
@@ -36,7 +35,6 @@ if(requireNamespace("cmdstanr")){
   chain = 1, iter = 500,
   backend = "cmdstanr")
   
-  ## extract residuals
   (loo1 <- loo(m))
 }}
 }
