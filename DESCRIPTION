@@ -1,8 +1,8 @@
 Package: multilevelcoda
 Type: Package
 Title: Estimate Bayesian Multilevel Models for Compositional Data
-Version: 1.2.1
-Date: 2023-8-13
+Version: 1.2.2
+Date: 2024-3-1
 Authors@R: 
     c(person(given = "Flora",
              family = "Le",
@@ -44,12 +44,10 @@ Imports:
     abind,
     graphics,
     shiny,
-    shinystan,
     plotly,
     hrbrthemes,
     bslib,
     DT,
-    gtable,
     loo,
     bayesplot
 Suggests: 

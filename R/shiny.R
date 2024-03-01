@@ -56,6 +56,7 @@ launch_shinystan.brmcoda <- function(object, ...) {
 #' @importFrom DT datatable
 #' @importFrom DT dataTableOutput
 #' @importFrom DT DTOutput
+#' @importFrom utils data
 #' @export
 multilevelcoda_sim <- function() {
   

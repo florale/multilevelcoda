@@ -4,10 +4,10 @@
 \alias{diagnostic_posterior.brmcoda}
 \title{Posteriors Sampling Diagnostic}
 \usage{
-\method{diagnostic_posterior}{brmcoda}(posterior, diagnostic = c("ESS", "Rhat"), ...)
+\method{diagnostic_posterior}{brmcoda}(posteriors, diagnostic = c("ESS", "Rhat"), ...)
 }
 \arguments{
-\item{posterior}{An object of class \code{brmcoda}.}
+\item{posteriors}{An object of class \code{brmcoda}.}
 
 \item{diagnostic}{Diagnostic metrics to compute.  Character (vector) or list
 with one or more of these options: \code{"ESS"}, \code{"Rhat"}, \code{"MCSE"} or \code{"all"}.}
