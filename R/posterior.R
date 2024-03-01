@@ -425,3 +425,40 @@ VarCorr.brmcoda <- function(x, ...) {
 residuals.brmcoda <- function(object, ...) {
   residuals(object$Model, ...)
 }
+
+#' Efficient approximate leave-one-out cross-validation (LOO)
+#' 
+#' Perform approximate leave-one-out cross-validation based
+#' on the posterior likelihood using the \pkg{loo} package.
+#' For more details see \code{\link[loo:loo]{loo}}.
+#' 
+#' @aliases loo
+#' 
+#' @param x A \code{brmcoda} object.
+#' @param ... Further arguments passed to \code{\link{loo.brmsfit}}.
+#' @inherit brms::loo.brmsfit return
+#'   
+#' @seealso \code{\link[brms:loo.brmsfit]{loo.brmsfit}}
+#' 
+#' @importFrom loo loo is.loo
+#' @method loo brmcoda
+#' 
+#' @examples
+#' \donttest{
+#' ## fit a model
+#' if(requireNamespace("cmdstanr")){
+#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                  idvar = "ID", total = 1440),
+#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   chain = 1, iter = 500,
+#'   backend = "cmdstanr")
+#'   
+#'   ## extract residuals
+#'   (loo1 <- loo(m))
+#' }}
+#' @export
+loo.brmcoda <- function(x, ...) {
+  loo(x$Model, ...)
+}
