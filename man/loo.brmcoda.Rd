@@ -24,20 +24,6 @@ Perform approximate leave-one-out cross-validation based
 on the posterior likelihood using the \pkg{loo} package.
 For more details see \code{\link[loo:loo]{loo}}.
 }
-\examples{
-\donttest{
-if(requireNamespace("cmdstanr")){
-  m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
-                                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-                                 idvar = "ID", total = 1440),
-  formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-  chain = 1, iter = 500,
-  backend = "cmdstanr")
-  
-  (loo1 <- loo(m))
-}}
-}
 \seealso{
 \code{\link[brms:loo.brmsfit]{loo.brmsfit}}
 }

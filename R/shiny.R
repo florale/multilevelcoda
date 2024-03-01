@@ -61,7 +61,7 @@ launch_shinystan.brmcoda <- function(object, ...) {
 multilevelcoda_sim <- function() {
   
   # shiny input
-  data(sim)
+  sim <- data(sim, envir = environment())
   
   brmcoda_tab <- sim[["brmcoda_tab"]]
   sub_tab <- sim[["sub_tab"]]
