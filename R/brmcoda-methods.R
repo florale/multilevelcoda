@@ -222,5 +222,5 @@ prior_summary.brmcoda <- function(object, ...) {
 #' 
 #' @export
 diagnostic_posterior.brmcoda <- function(posterior, diagnostic = c("ESS", "Rhat"), ...) {
-  diagnostic_posterior(posterior = posteriors$Model, diagnostic = diagnostic, ...)
+  diagnostic_posterior(posterior = posterior$Model, diagnostic = diagnostic, ...)
 }
