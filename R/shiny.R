@@ -19,9 +19,9 @@ launch_shinystan.brmcoda <- function(object, ...) {
   launch_shinystan(object$Model, ...)
 }
 
-#' Interface to \pkg{shinystan}
+#' multilevelcoda Simulation Study Results
 #' 
-#' Provide an interface to \pkg{shinystan} for 
+#' Provide the full results for a simulation study testing the performance of \pkg{multilevelcoda}
 #' 
 #' @return An S4 shiny object
 #' 
@@ -60,7 +60,7 @@ launch_shinystan.brmcoda <- function(object, ...) {
 multilevelcoda_sim <- function() {
   
   # shiny input
-  load(sim)
+  data(sim)
   
   brmcoda_tab <- sim[["brmcoda_tab"]]
   sub_tab <- sim[["sub_tab"]]

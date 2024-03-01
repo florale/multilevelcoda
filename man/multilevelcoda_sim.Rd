@@ -2,7 +2,7 @@
 % Please edit documentation in R/shiny.R
 \name{multilevelcoda_sim}
 \alias{multilevelcoda_sim}
-\title{Interface to \pkg{shinystan}}
+\title{multilevelcoda Simulation Study Results}
 \usage{
 multilevelcoda_sim()
 }
@@ -10,5 +10,5 @@ multilevelcoda_sim()
 An S4 shiny object
 }
 \description{
-Provide an interface to \pkg{shinystan} for
+Provide the full results for a simulation study testing the performance of \pkg{multilevelcoda}
 }
