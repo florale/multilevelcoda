@@ -3,7 +3,7 @@ utils::globalVariables(c("i",  "..cols", ".", "To", ".SD", "t", "head",  "fitted
                          "x", "object", "predict", "residuals", "tail", "vcov", "coef",
                          "Mean",  "CI_low", "CI_high", "From", "Delta", "pairs",
                          "spread", "value", "variable", "ID", "EffectType", "Level", "Reference",
-                         "update",
+                         "update", "posterior",
                          "sim", "condition",
                          "est", "lower", "upper", "JI", "N", "K", "D", "Stat", "Estimates", "MCSE",
                          "sigma", "OnTarget"
