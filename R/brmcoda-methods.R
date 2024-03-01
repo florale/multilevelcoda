@@ -225,21 +225,21 @@ pp_check.brmcoda <- function(object, ...) {
   pp_check(object$Model, ...)
 }
 
-#' Posteriors Sampling Diagnostic
-#' 
-#' Extract diagnostic metrics (Effective Sample Size (`ESS`), `Rhat` and Monte
-#' Carlo Standard Error `MCSE`).
-#' 
-#' @param posteriors An object of class \code{brmcoda}.
-#' @inheritParams bayestestR::diagnostic_posterior
-#' @param ... Other arguments passed to \code{\link{diagnostic_posterior}}.
-#' 
-#' @importFrom bayestestR diagnostic_posterior
-#' @method diagnostic_posterior brmcoda
-#' 
-#' @seealso \code{\link[bayestestR:diagnostic_posterior]{diagnostic_posterior}}
-#' 
-#' @export
-diagnostic_posterior.brmcoda <- function(posteriors, diagnostic = c("ESS", "Rhat"), ...) {
-  diagnostic_posterior(posterior$Model, diagnostic = diagnostic, ...)
-}
+#' #' Posteriors Sampling Diagnostic
+#' #' 
+#' #' Extract diagnostic metrics (Effective Sample Size (`ESS`), `Rhat` and Monte
+#' #' Carlo Standard Error `MCSE`).
+#' #' 
+#' #' @param posteriors An object of class \code{brmcoda}.
+#' #' @inheritParams bayestestR::diagnostic_posterior
+#' #' @param ... Other arguments passed to \code{\link{diagnostic_posterior}}.
+#' #' 
+#' #' @importFrom bayestestR diagnostic_posterior
+#' #' @method diagnostic_posterior brmcoda
+#' #' 
+#' #' @seealso \code{\link[bayestestR:diagnostic_posterior]{diagnostic_posterior}}
+#' #' 
+#' #' @export
+#' diagnostic_posterior.brmcoda <- function(posteriors, diagnostic = c("ESS", "Rhat"), ...) {
+#'   diagnostic_posterior(posterior$Model, diagnostic = diagnostic, ...)
+#' }
