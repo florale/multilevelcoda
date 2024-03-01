@@ -435,7 +435,7 @@ residuals.brmcoda <- function(object, ...) {
 #' @aliases loo
 #' 
 #' @param x A \code{brmcoda} object.
-#' @param ... Further arguments passed to \code{\link{loo.brmsfit}}.
+#' @inheritParams brms::loo.brmsfit
 #' @inherit brms::loo.brmsfit return
 #'   
 #' @seealso \code{\link[brms:loo.brmsfit]{loo.brmsfit}}

@@ -10,7 +10,10 @@
 \arguments{
 \item{x}{A \code{brmcoda} object.}
 
-\item{...}{Further arguments passed to \code{\link{loo.brmsfit}}.}
+\item{...}{More \code{brmsfit} objects or further arguments
+passed to the underlying post-processing functions.
+In particular, see \code{\link[brms]{prepare_predictions}} for further
+supported arguments.}
 }
 \value{
 If just one object is provided, an object of class \code{loo}.
