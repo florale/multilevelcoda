@@ -7,6 +7,49 @@ is.substitution <- function(x) {
   inherits(x, "substitution")
 }
 
+#' Constructor function for \code{substitution} class.
+#'
+#' @param BetweenSub A list of results from \code{bsub} or \code{NULL}
+#' @param BetweenSubMargins A list of results from \code{bsubmargins} or \code{NULL}
+#' @param WithinSub A list of results from \code{wsub} or \code{NULL}
+#' @param WithinSubMargins A list of results from \code{wsubmargins} or \code{NULL}
+#' @param delta A numeric vector of the amount of substitution
+#' @param ref A character value specifying the reference grid
+#' @param level A character value specifying the level of substitution
+#' @param weight The weight to use in calculation of the reference composition
+#' @param parts The parts of the composition
+#' @param summary A logical value specifying whether to summarize the results
+#' 
+#' @seealso \code{\link{substitution}}
+#' 
+#' @return An object of class \code{substitution}
+#'
+#' @export
+create_substitution <- function(BetweenSub, WithinSub, BetweenSubMargins,
+      WithinSubMargins, delta, ref, level, weight, parts, summary) {
+  stopifnot(is.list(BetweenSub) || is.null(BetweenSub))
+  stopifnot(is.list(WithinSub) || is.null(WithinSub))
+  stopifnot(is.list(BetweenSubMargins) || is.null(BetweenSubMargins))
+  stopifnot(is.list(WithinSubMargins) || is.null(WithinSubMargins))
+
+  out <- list(
+    BetweenSub = BetweenSub,
+    WithinSub = WithinSub,
+    BetweenSubMargins = BetweenSubMargins,
+    WithinSubMargins = WithinSubMargins,
+    delta = delta,
+    ref = ref,
+    level = level,
+    weight = weight,
+    parts = parts,
+    summary = summary
+  )
+
+  class(out) <- "substitution"
+
+  return(out)
+}
+
 #' Reference Grid for \code{substitution} model.
 #' 
 #' Build a dataset for \code{fitted.brmcoda} used in \code{substitution} model

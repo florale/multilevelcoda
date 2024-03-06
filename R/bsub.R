@@ -95,5 +95,6 @@ bsub <- function(object,
     summary = summary,
     level = level,
     ref = ref)
-  
+    
+  return(out)
 }

@@ -147,6 +147,7 @@ substitution <- function(object,
     }
   }
   
+  bmout <- bout <- NULL
   if (isTRUE("between" %in% level)) {
     if (isTRUE("grandmean" %in% ref)) {
       bout <- bsub(
@@ -180,6 +181,7 @@ substitution <- function(object,
     }
   }
   
+  wmout <- wout <- NULL
   if (isTRUE("within" %in% level)) {
     if (isTRUE("grandmean" %in% ref)) {
       wout <- wsub(
@@ -213,17 +215,15 @@ substitution <- function(object,
     }
   }
   
-  structure(
-    list(
-      BetweenSub = if(exists("bout")) (bout) else (NULL),
-      WithinSub = if(exists("wout")) (wout) else (NULL),
-      BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
-      WithinSubMargins = if(exists("wmout")) (wmout) else (NULL),
+create_substitution(
+      BetweenSub = bout,
+      WithinSub = wout,
+      BetweenSubMargins = bmout,
+      WithinSubMargins = wmout,
       delta = delta,
       ref = ref,
       level = level,
       weight = weight,
       parts = object$CompILR$parts,
-      summary = summary),
-    class = "substitution")
+      summary = summary))
 }
