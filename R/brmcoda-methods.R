@@ -186,7 +186,8 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
   m1 <- deparse(substitute(x1))
   m2 <- deparse(substitute(x2))
   
-  cat("Estimated Bayes factor in favor of", m1, "over", m2, ":", out$bf)
+  attr(out, "model_names") <- c(m1, m2)
+  out
 }
 
 #' Extract Priors of a \code{brmsfit} from a \code{brmcoda} object
