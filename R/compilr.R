@@ -14,21 +14,21 @@
 #'
 #' @return A \code{\link{compilr}} object with twelve elements.
 #' \itemize{
-#'   {\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
+#'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-#'   {\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
+#'   \item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-#'   {\code{TotalComp}}{ A vector of class \code{acomp} representing one closed total composition
+#'   \item{\code{TotalComp}}{ A vector of class \code{acomp} representing one closed total composition
 #'   or a matrix of class \code{acomp} representing multiple closed total compositions each in one row.}
-#'   {\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
-#'   {\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-#'   {\code{TotalILR}}{ Isometric log ratio transform of total composition.}
-#'   {\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
-#'   {\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
-#'   {\code{sbp}}{ The user-defined sequential binary partition matrix.}
-#'   {\code{parts}}{ Names of compositional variables.}
-#'   {\code{idvar}}{ Name of the variable containing IDs.}
-#'   {\code{total}}{ Total amount to which the compositions is closed.}
+#'   \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
+#'   \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
+#'   \item{\code{TotalILR}}{ Isometric log ratio transform of total composition.}
+#'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
+#'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
+#'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
+#'   \item{\code{parts}}{ Names of compositional variables.}
+#'   \item{\code{idvar}}{ Name of the variable containing IDs.}
+#'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' }
 #' 
 #' @importFrom compositions ilr acomp gsi.buildilrBase
