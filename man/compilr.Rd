@@ -23,7 +23,6 @@ Default is \code{"ID"}.}
 }
 \value{
 A \code{\link{compilr}} object with twelve elements.
-\itemize{
 \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
 or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
 \item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
@@ -39,7 +38,6 @@ or a matrix of class \code{acomp} representing multiple closed total composition
 \item{\code{parts}}{ Names of compositional variables.}
 \item{\code{idvar}}{ Name of the variable containing IDs.}
 \item{\code{total}}{ Total amount to which the compositions is closed.}
-}
 }
 \description{
 Compute sets of compositions and IRLs for multilevel compositional data

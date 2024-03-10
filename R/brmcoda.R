@@ -11,11 +11,9 @@
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return A \code{\link{brmcoda}} with two elements
-#' \itemize{
 #'   \item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
 #'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
-#'   }
 #' @importFrom brms brm
 #' 
 #' @examples

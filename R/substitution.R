@@ -33,7 +33,6 @@
 #' 
 #' @return A list containing the results of multilevel compositional substitution model.
 #' The first four lists contain the results of the substitution estimation for a compositional part. 
-#' \itemize{
 #'   {\code{Mean}}{ Posterior means.}
 #'   {\code{CI_low} and \code{CI_high}}{ 95% credible intervals.}
 #'   {\code{Delta}}{ Amount substituted across compositional parts.}
@@ -41,7 +40,6 @@
 #'   {\code{To}}{ Compositional parts that is substituted to.}
 #'   {\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
 #'   {\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
-#' }
 #' 
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp

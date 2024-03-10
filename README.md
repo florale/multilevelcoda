@@ -44,7 +44,7 @@ You can learn about the package from these vignettes:
 - [Introduction to Compositional Multilevel Modelling](https://florale.github.io/multilevelcoda/articles/A-introduction.html)
 - [Multilevel Models with Compositional Predictors](https://florale.github.io/multilevelcoda/articles/B-composition-MLM.html)
 - [Multilevel Models with Compositional Outcome](https://florale.github.io/multilevelcoda/articles/C-composition-MMLM.html)
-- [Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/D-substitution-model.html)
+- [Compositional Substitution Multilevel Models](https://florale.github.io/multilevelcoda/articles/D-substitution-model.html)
 
 ## Citing `multilevelcoda` and related software 
 TBA

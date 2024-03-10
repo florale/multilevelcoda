@@ -31,7 +31,6 @@ Default to all \code{level} available in the \code{substitution} object.}
 }
 \value{
 A summary of \code{substitution} object.
-\itemize{
 \item{\code{Mean}}{ Posterior means.}
 \item{\code{CI_low} and \code{CI_high}}{ 95\% credible intervals.}
 \item{\code{Delta}}{ Amount substituted across compositional parts.}
@@ -39,7 +38,6 @@ A summary of \code{substitution} object.
 \item{\code{To}}{ Compositional parts that is substituted to.}
 \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
 \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
-}
 }
 \description{
 Create a Summary of a Substitution Model represented by a \code{substitution} object

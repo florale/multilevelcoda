@@ -22,11 +22,9 @@ ILR coordinates, and other variables used in the updated model.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements
-\itemize{
 \item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
-}
 }
 \description{
 This method allows for updating an existing \code{\link{brmcoda}} object.
