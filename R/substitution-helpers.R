@@ -24,31 +24,38 @@ is.substitution <- function(x) {
 #' 
 #' @return An object of class \code{substitution}
 #'
-#' @export
-create_substitution <- function(BetweenSub, WithinSub, BetweenSubMargins,
-      WithinSubMargins, delta, ref, level, weight, parts, summary) {
-  stopifnot(is.list(BetweenSub) || is.null(BetweenSub))
-  stopifnot(is.list(WithinSub) || is.null(WithinSub))
-  stopifnot(is.list(BetweenSubMargins) || is.null(BetweenSubMargins))
-  stopifnot(is.list(WithinSubMargins) || is.null(WithinSubMargins))
-
-  out <- list(
-    BetweenSub = BetweenSub,
-    WithinSub = WithinSub,
-    BetweenSubMargins = BetweenSubMargins,
-    WithinSubMargins = WithinSubMargins,
-    delta = delta,
-    ref = ref,
-    level = level,
-    weight = weight,
-    parts = parts,
-    summary = summary
-  )
-
-  class(out) <- "substitution"
-
-  return(out)
-}
+create_substitution <-
+  function(BetweenSub, WithinSub,
+           BetweenSubMargins, WithinSubMargins,
+           delta,
+           ref,
+           level,
+           weight,
+           parts,
+           summary) {
+    
+    stopifnot(is.list(BetweenSub) || is.null(BetweenSub))
+    stopifnot(is.list(WithinSub) || is.null(WithinSub))
+    stopifnot(is.list(BetweenSubMargins) || is.null(BetweenSubMargins))
+    stopifnot(is.list(WithinSubMargins) || is.null(WithinSubMargins))
+    
+    out <- list(
+      BetweenSub = BetweenSub,
+      WithinSub = WithinSub,
+      BetweenSubMargins = BetweenSubMargins,
+      WithinSubMargins = WithinSubMargins,
+      delta = delta,
+      ref = ref,
+      level = level,
+      weight = weight,
+      parts = parts,
+      summary = summary
+    )
+    
+    class(out) <- "substitution"
+    
+    return(out)
+  }
 
 #' Reference Grid for \code{substitution} model.
 #' 
