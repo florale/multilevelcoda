@@ -87,7 +87,9 @@ create_substitution <-
 #' @importFrom emmeans ref_grid
 #' @importFrom extraoperators %snin% %sin%
 #'
-#' @return A reference grid consisting of a combination of covariates in \code{brmcoda}.
+#' @return A reference grid consisting of a combination of covariates in \code{brmcoda}
+#' 
+#' @export
 build.rg <- function(object, 
                      ref,
                      weight, 

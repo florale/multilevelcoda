@@ -30,7 +30,7 @@ If \code{FALSE}, users will be asked to provide a full reference grid.
 Default is \code{FALSE}.}
 }
 \value{
-A reference grid consisting of a combination of covariates in \code{brmcoda}.
+A reference grid consisting of a combination of covariates in \code{brmcoda}
 }
 \description{
 Build a dataset for \code{fitted.brmcoda} used in \code{substitution} model
