@@ -44,6 +44,7 @@ Imports:
     abind,
     graphics,
     shiny,
+    shinystan,
     plotly,
     hrbrthemes,
     bslib,
