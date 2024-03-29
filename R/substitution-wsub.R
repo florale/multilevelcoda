@@ -1,7 +1,7 @@
-#' Between-person Simple Substitution
+#' Within-person Simple Substitution
 #' 
 #' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
-#' when compositional parts are substituted for specific unit(s) at \emph{between} level
+#' when compositional parts are substituted for specific unit(s) at \emph{within} level
 #' using a single reference composition (e.g., compositional mean at sample level).
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #' 
@@ -17,29 +17,31 @@
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' 
-#' # model with compositional predictor at between and between-person levels
-#' m <- brmcoda(compilr = cilr, 
+#' cilr <- complr(data = mcompd, sbp = sbp, 
+#'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+#' 
+#' # model with compositional predictor at between and within-person levels
+#' m <- brmcoda(complr = cilr, 
 #'              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + 
-#'                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
+#'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
-#' subm <- bsub(object = m, basesub = psub, delta = 5)
+#'              
+#' subm <- wsub(object = m, basesub = psub, delta = 5)
 #' }}
 #' @export
-bsub <- function(object,
-                 delta,
+wsub <- function(object,
                  basesub,
+                 delta,
                  summary = TRUE,
                  ref = "grandmean",
-                 level = "between",
+                 level = "within",
                  weight = NULL,
                  ...) {
   
   # ref <- "grandmean"
-  level <- "between"
+  level <- "within"
   
   # d0 -------------------------------
   if (isTRUE(ref == "grandmean")) {
@@ -75,7 +77,7 @@ bsub <- function(object,
   round(min(comp0), 2)
     ))
   }
-
+  
   # y0 --------------------------------
   y0 <- fitted(
     object,
@@ -83,17 +85,17 @@ bsub <- function(object,
     re_formula = NA,
     summary = FALSE)
   
-  # yb ---------------------------------
-  out <- .get.bsub(
-    object = object,
-    basesub = basesub,
-    comp0 = comp0,
-    delta = delta,
-    y0 = y0,
-    d0 = d0,
-    summary = summary,
-    level = level,
-    ref = ref)
-    
-  return(out)
+  # yw ---------------------------------
+    # substitution model
+    out <- .get.wsub(
+      object = object,
+      basesub = basesub,
+      comp0 = comp0,
+      delta = delta,
+      y0 = y0,
+      d0 = d0,
+      summary = summary,
+      level = level,
+      ref = ref)
+
 }

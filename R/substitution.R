@@ -47,12 +47,12 @@
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#'   cilr <- compilr(data = mcompd, sbp = sbp,
-#'                   parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                   idvar = "ID", total = 1440)
+#'   cilr <- complr(data = mcompd, sbp = sbp,
+#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                  idvar = "ID", total = 1440)
 #'   
 #'   # model with compositional predictor at between and between-person levels
-#'   m <- brmcoda(compilr = cilr,
+#'   m <- brmcoda(complr = cilr,
 #'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                chain = 1, iter = 500, backend = "cmdstanr")
@@ -85,6 +85,13 @@ substitution <- function(object,
   class(object)))
   }
   
+  if (isFALSE(identical(object$CompLR$transform, "ilr"))) {
+    stop(sprintf(
+      "Can't handle an object of class (%s) in 'substitution', 
+      'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
+      object$CompLR$transform))
+  }
+
   if(isFALSE(missing(delta))) {
     if (isFALSE(is.integer(delta))) {
       if (isFALSE(delta > 0)) {
@@ -213,15 +220,17 @@ substitution <- function(object,
     }
   }
   
-create_substitution(
-      BetweenSub = bout,
-      WithinSub = wout,
-      BetweenSubMargins = bmout,
-      WithinSubMargins = wmout,
+  structure(
+    list(
+      BetweenSub = if(exists("bout")) (bout) else (NULL),
+      WithinSub = if(exists("wout")) (wout) else (NULL),
+      BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
+      WithinSubMargins = if(exists("wmout")) (wmout) else (NULL),
       delta = delta,
       ref = ref,
       level = level,
       weight = weight,
       parts = object$CompILR$parts,
-      summary = summary)
+      summary = summary),
+    class = "substitution")
 }

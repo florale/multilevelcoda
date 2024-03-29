@@ -4,7 +4,7 @@
 \alias{update.brmcoda}
 \title{Update \code{\link{brmcoda}} models}
 \usage{
-\method{update}{brmcoda}(object, formula. = NULL, newdata = NULL, newcilr = NULL, ...)
+\method{update}{brmcoda}(object, formula. = NULL, newdata = NULL, newcomplr = NULL, ...)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object to be updated.}
@@ -13,16 +13,16 @@
 
 \item{newdata}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.
-It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.}
+It must include a composition and the same ID variable as the existing \code{\link{complr}} object.}
 
-\item{newcilr}{A \code{\link{compilr}} object containing data of composition,
+\item{newcomplr}{A \code{\link{complr}} object containing data of composition,
 ILR coordinates, and other variables used in the updated model.}
 
 \item{...}{Further arguments passed to \code{\link{brm}}.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements
-\item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
+\item{\code{CompILR}}{ An object of class \code{complr} used in the \code{brm} model. }
 \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
@@ -34,10 +34,9 @@ This method allows for updating an existing \code{\link{brmcoda}} object.
 if(requireNamespace("cmdstanr")){
 
 # model with compositional predictor at between and within-person levels
-fit <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-                                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-                                 idvar = "ID"
-                                 ), 
+fit <- brmcoda(complr = complr(data = mcompd, sbp = sbp, 
+                               parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+                               idvar = "ID"), 
               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
               chain = 1, iter = 500,

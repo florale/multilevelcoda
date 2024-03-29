@@ -1,6 +1,6 @@
-#' Create a Summary of a \code{compilr} object
+#' Create a Summary of a \code{complr} object
 #' 
-#' @param object An object of class \code{compilr}.
+#' @param object An object of class \code{complr}.
 #' @param class Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 #' specify the geometry of the composition.
 #' @param level Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"total"}
@@ -16,15 +16,15 @@
 #' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
 #' @importFrom utils head tail
 #' 
-#' @method summary compilr
+#' @method summary complr
 #' 
 #' @examples
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                 idvar = "ID")
+#' cilr <- complr(data = mcompd, sbp = sbp, 
+#'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                idvar = "ID")
 #' summary(cilr)
 #' @export
-summary.compilr <- function(object,
+summary.complr <- function(object,
                             class = c("composition", "logratio"),
                             level = c("between", "within", "total"),
                             weight = c("equal", "proportional"),
@@ -32,7 +32,7 @@ summary.compilr <- function(object,
                             ...) {
   
   ## Assemble
-  output <- .get.compilr(object)
+  output <- .get.complr(object)
   
   varn <- c("Compositional Mean", #keep
             "Geometric Mean of the Pairwise Ratios", 
@@ -127,21 +127,21 @@ summary.compilr <- function(object,
   return(invisible(output))
 }
 
-#' Print a Summary for a \code{compilr} object
+#' Print a Summary for a \code{complr} object
 #' 
-#' @param x An object of class \code{compilr}.
-#' @param ... Other arguments passed to \code{\link{summary.compilr}}.
+#' @param x An object of class \code{complr}.
+#' @param ... Other arguments passed to \code{\link{summary.complr}}.
 #' 
-#' @seealso \code{\link{summary.compilr}}
+#' @seealso \code{\link{summary.complr}}
 #' 
 #' @examples
 #' 
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#' cilr <- complr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
 #'                 idvar = "ID")
 #' print(cilr)
 #' @export
-print.compilr <- function(x, ...) {
+print.complr <- function(x, ...) {
   summary(x, ...)
 }
 
@@ -155,7 +155,7 @@ print.compilr <- function(x, ...) {
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+#'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                  idvar = "ID", total = 1440),
 #'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
@@ -182,9 +182,9 @@ summary.brmcoda <- function(object, ...) {
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
-#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                                  idvar = "ID", total = 1440),
+#'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
+#'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                idvar = "ID", total = 1440),
 #'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'   chain = 1, iter = 500,
@@ -230,9 +230,9 @@ print.brmcoda <- function(x, ...) {
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
 #'   ## fit a model with compositional predictor at between and between-person levels
-#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
-#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                                  idvar = "ID", total = 1440),
+#'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
+#'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                idvar = "ID", total = 1440),
 #'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'   chain = 1, iter = 500,
@@ -315,9 +315,9 @@ summary.substitution <- function(object, delta, to, from,
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
 #'   ## fit a model with compositional predictor at between and between-person levels
-#'   m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
-#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                                  idvar = "ID", total = 1440),
+#'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
+#'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                idvar = "ID", total = 1440),
 #'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'   chain = 1, iter = 500,

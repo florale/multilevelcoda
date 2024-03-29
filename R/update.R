@@ -1,32 +1,32 @@
-#' Update \code{\link{compilr}} 
+#' Update \code{\link{complr}} 
 #' 
-#' This method allows for updating an existing \code{\link{compilr}} object.
+#' This method allows for updating an existing \code{\link{complr}} object.
 #' 
-#' @param object A \code{\link{compilr}} class object to be updated.
+#' @param object A \code{\link{complr}} class object to be updated.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
-#' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
+#' It must include a composition and the same ID variable as the existing \code{\link{complr}} object.
 #' @param ... generic argument, not in use.
 #' 
-#' @inherit compilr return
+#' @inherit complr return
 #' 
-#' @seealso \code{\link{compilr}}
+#' @seealso \code{\link{complr}}
 #' 
 #' @importFrom extraoperators %ain% %snin% %nin%
-#' @method update compilr
+#' @method update complr
 #' 
 #' @examples 
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
-#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#' cilr <- complr(data = mcompd, sbp = sbp, 
+#'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #' 
 #' # update with new data
 #' newdat <- mcompd[ID != 1] # excluding ID 1
 #' cilr1 <- update(object = cilr, newdata = newdat)
 #' @export
-update.compilr <- function(object, newdata, ...) { 
+update.complr <- function(object, newdata, ...) { 
   
   if (isTRUE(missing(newdata))) {
-    stop("'newdata' is required when updating a 'compilr' object.")
+    stop("'newdata' is required when updating a 'complr' object.")
     } else {
       if (isFALSE(inherits(newdata, c("data.table", "data.frame", "matrix")))) {
         stop("newdata must be a data table, data frame or matrix.")
@@ -45,13 +45,13 @@ update.compilr <- function(object, newdata, ...) {
       object$idvar))
   }
   
-  # update compilr
+  # update complr
   sbp <- object$sbp
   parts <- object$parts
   total <- object$total
   idvar <- object$idvar
   
-  compilr(newdata, sbp, parts, total, idvar)
+  complr(newdata, sbp, parts, total, idvar)
 }
 
 #' Update \code{\link{brmcoda}} models
@@ -60,11 +60,11 @@ update.compilr <- function(object, newdata, ...) {
 #' 
 #' @param object A fitted \code{\link{brmcoda}} object to be updated.
 #' @param formula. Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.
-#' @param newcilr A \code{\link{compilr}} object containing data of composition, 
+#' @param newcomplr A \code{\link{complr}} object containing data of composition, 
 #' ILR coordinates, and other variables used in the updated model.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
-#' It must include a composition and the same ID variable as the existing \code{\link{compilr}} object.
+#' It must include a composition and the same ID variable as the existing \code{\link{complr}} object.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @inherit brmcoda return
@@ -78,10 +78,9 @@ update.compilr <- function(object, newdata, ...) {
 #' if(requireNamespace("cmdstanr")){
 #' 
 #' # model with compositional predictor at between and within-person levels
-#' fit <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp, 
-#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                                  idvar = "ID"
-#'                                  ), 
+#' fit <- brmcoda(complr = complr(data = mcompd, sbp = sbp, 
+#'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                                idvar = "ID"), 
 #'               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
 #'               chain = 1, iter = 500,
@@ -97,24 +96,24 @@ update.compilr <- function(object, newdata, ...) {
 update.brmcoda <- function(object,
                            formula. = NULL,
                            newdata = NULL,
-                           newcilr = NULL,
+                           newcomplr = NULL,
                            ...) {
   
-  if(!is.null(newcilr) && !is.null(newdata)) {
+  if(!is.null(newcomplr) && !is.null(newdata)) {
     warning(paste(
-      "Either 'newcilr' or 'newdata' is required to update brmcoda,",
+      "Either 'newcomplr' or 'newdata' is required to update brmcoda,",
       "  but both were supplied.",
-      "  'newcilr' will be used to update brmcoda and 'newdata' will be ignored.",
+      "  'newcomplr' will be used to update brmcoda and 'newdata' will be ignored.",
       sep = "\n"))
   }
   
   # check args
-  if (is.null(formula.) && is.null(newcilr) && is.null(newdata)) {
-    stop("either 'formula.', 'newdata', or 'newcilr' is required when updating a 'brmcoda' object.")
+  if (is.null(formula.) && is.null(newcomplr) && is.null(newdata)) {
+    stop("either 'formula.', 'newdata', or 'newcomplr' is required when updating a 'brmcoda' object.")
   }
   
   # updating only formula
-  if (!is.null(formula.) && is.null(newcilr) && is.null(newdata)) {
+  if (!is.null(formula.) && is.null(newcomplr) && is.null(newdata)) {
     fit_new <- update(object$Model, formula. = formula., ...)
     
     structure(
@@ -122,26 +121,26 @@ update.brmcoda <- function(object,
            Model = fit_new),
       class = "brmcoda")
     
-  } else { # updating newdata/newcilr (with and without updating formula)
+  } else { # updating newdata/newcomplr (with and without updating formula)
     
-    if(is.null(newcilr)) {
+    if(is.null(newcomplr)) {
       if(!is.null(newdata)) {
-        newcilr <- update(object$CompILR, newdata = newdata)
+        newcomplr <- update(object$CompILR, newdata = newdata)
       }} else {
-        if(isFALSE(inherits(newcilr, "compilr"))) {
-          stop("'newcilr' must be an object of class 'compilr'.")
+        if(isFALSE(inherits(newcomplr, "complr"))) {
+          stop("'newcomplr' must be an object of class 'complr'.")
         }
       }
     
-    newdata <- cbind(newcilr$data,
-                     newcilr$BetweenILR,
-                     newcilr$WithinILR,
-                     newcilr$TotalILR)
+    newdata <- cbind(newcomplr$data,
+                     newcomplr$BetweenILR,
+                     newcomplr$WithinILR,
+                     newcomplr$TotalILR)
     
     fit_new <- update(object$Model, formula. = formula., newdata = newdata, ...)
     
     structure(
-      list(CompILR = newcilr,
+      list(CompILR = newcomplr,
            Model = fit_new),
       class = "brmcoda")
     

@@ -6,12 +6,12 @@
 #' @param formula A object of class \code{formula}, \code{brmsformula}:
 #' A symbolic description of the model to be fitted. 
 #' Details of the model specification can be found in \code{\link{brmsformula}}.
-#' @param compilr A \code{\link{compilr}} object containing data of composition, 
+#' @param complr A \code{\link{complr}} object containing data of composition, 
 #' ILR coordinates, and other variables used in the model.
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return A \code{\link{brmcoda}} with two elements
-#'   \item{\code{CompILR}}{ An object of class \code{compilr} used in the \code{brm} model. }
+#'   \item{\code{CompILR}}{ An object of class \code{complr} used in the \code{brm} model. }
 #'   \item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
 #' @importFrom brms brm
@@ -19,8 +19,8 @@
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#'   cilr <- compilr(data = mcompd, sbp = sbp,
-#'                   parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'   cilr <- complr(data = mcompd, sbp = sbp,
+#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #'   
 #'   # inspects ILRs before passing to brmcoda
 #'   names(cilr$BetweenILR)
@@ -28,44 +28,44 @@
 #'   names(cilr$TotalILR)
 #'   
 #'   # model with compositional predictor at between and within-person levels
-#'   m1 <- brmcoda(compilr = cilr,
+#'   m1 <- brmcoda(complr = cilr,
 #'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                   wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
 #'   # model with compositional outcome
-#'   m2 <- brmcoda(compilr = cilr,
+#'   m2 <- brmcoda(complr = cilr,
 #'                 formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + Female + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   }}
 #' @export
-brmcoda <- function (compilr, formula, ...) {
+brmcoda <- function (complr, formula, ...) {
 
-  if (isTRUE(missing(compilr))) {
+  if (isTRUE(missing(complr))) {
     stop(paste(
-      "'compilr' is a required argument and cannot be missing;",
-      "  it should be an object of class compilr.", 
-      "  See ?multilevelcoda::compilr for details.",
+      "'complr' is a required argument and cannot be missing;",
+      "  it should be an object of class complr.", 
+      "  See ?multilevelcoda::complr for details.",
       sep = "\n"))
   }
-  if (isFALSE(inherits(compilr, "compilr"))) {
+  if (isFALSE(inherits(complr, "complr"))) {
     stop(paste(
-      "compilr must be an object of class compilr.",
-      "  See ?multilevelcoda::compilr for details.",
+      "complr must be an object of class complr.",
+      "  See ?multilevelcoda::complr for details.",
       sep = "\n"))
   }
   
-  tmp <- cbind(compilr$data, compilr$BetweenILR, 
-               compilr$WithinILR, compilr$TotalILR)
+  tmp <- cbind(complr$data, complr$BetweenILR, 
+               complr$WithinILR, complr$TotalILR)
   
   m <- brm(formula,
            data = tmp,
            ...)
   
   structure(
-    list(CompILR = compilr,
+    list(CompILR = complr,
          Model = m),
     class = "brmcoda")
 }

@@ -1,10 +1,10 @@
-#' Between-person Average Substitution
+#' Within-person Average Substitution
 #'
 #' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
-#' when compositional parts are substituted for specific unit(s) at \emph{between} level
+#' when compositional parts are substituted for specific unit(s) at \emph{within} level
 #' using cluster mean (e.g., compositional mean at individual level) as reference composition. 
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
-#' 
+#'
 #' @inheritParams substitution
 #' 
 #' @seealso \code{\link{substitution}}
@@ -17,28 +17,30 @@
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp, 
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' 
-#' m <- brmcoda(compilr = cilr, 
-#'              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
-#'                                 wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
-#'              chains = 1, iter = 500,
+#' cilr <- complr(data = mcompd, sbp = sbp, 
+#'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+#' 
+#' # model with compositional predictor at between and within-person levels
+#' m <- brmcoda(complr = cilr, 
+#'              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + 
+#'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
-#'              
-#' subm <- bsubmargins(object = m, basesub = psub, delta = 5)
+#'                      
+#' subm <- wsubmargins(object = m, basesub = psub, delta = 5)
 #' }}
 #' @export
-bsubmargins <- function (object,
+wsubmargins <- function (object,
                          delta,
                          basesub,
                          ref = "clustermean",
-                         level = "between",
+                         level = "within",
                          weight = NULL,
                          ...) {
   
   ref <- "clustermean"
-  level <- "between"
+  level <- "within"
   
   d0 <- build.rg(object = object,
                  ref = ref,
@@ -66,9 +68,9 @@ bsubmargins <- function (object,
   )
   y0 <- rowMeans(as.data.frame(y0)) # average across participants when there is no change
   
-  # ybmargins ---------------------------------
+  # ywmargins ---------------------------------
   # substitution model
-  out <- .get.bsubmargins(
+  out <- .get.wsubmargins(
     object = object,
     delta = delta,
     basesub = basesub,

@@ -1,15 +1,15 @@
-#' Checks if argument is a \code{compilr} object
+#' Checks if argument is a \code{complr} object
 #'
-#' @param x An object of class \code{compilr}.
+#' @param x An object of class \code{complr}.
 #'
 #' @export
-is.compilr <- function(x) {
-  inherits(x, "compilr")
+is.complr <- function(x) {
+  inherits(x, "complr")
 }
 
-#' Mean amounts and mean compositions presented in a \code{compilr} object.
+#' Mean amounts and mean compositions presented in a \code{complr} object.
 #' 
-#' @param x An object of class \code{compilr}.
+#' @param x An object of class \code{complr}.
 #' @param class  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 #' specify the geometry of the composition.
 #' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
@@ -22,15 +22,15 @@ is.compilr <- function(x) {
 #' @param digits A integer value used for number formatting. Default is \code{3}.
 #' @param ... generic argument, not in use.
 #' 
-#' @method mean compilr
+#' @method mean complr
 #' 
 #' @examples
-#' cilr <- compilr(data = mcompd, sbp = sbp, 
+#' cilr <- complr(data = mcompd, sbp = sbp, 
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
 #'                 idvar = "ID")
 #' mean(cilr)
 #' @export
-mean.compilr <- function(x, ...,
+mean.complr <- function(x, ...,
                          class = c("composition", "logratio"),
                          level = c("between", "within", "total"),
                          weight = c("equal", "proportional"),
@@ -38,7 +38,7 @@ mean.compilr <- function(x, ...,
                          ) {
   
   # Assemble
-  output <- .get.compilr(object = x)
+  output <- .get.complr(object = x)
   
   ## Out
   if ("composition" %in% class) {
@@ -79,17 +79,17 @@ mean.compilr <- function(x, ...,
   return(invisible(output))
 }
 
-#' Extract Compositional Data from \code{compilr} object.
+#' Extract Compositional Data from \code{complr} object.
 #'
 #' Extract amounts and compositions in conventional formats
 #' as data.frames, matrices, or arrays.
 #'
-#' @inheritParams mean.compilr
+#' @inheritParams mean.complr
 #' @param row.names,optional Unused and only added for consistency with
 #' the \code{\link[base:as.data.frame]{as.data.frame}} generic.
 #'
 #' @export
-as.data.frame.compilr <- function(x, row.names = NULL, optional = TRUE,
+as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
                                   class = c("composition", "logratio"),
                                   level = c("between", "within", "total"),
                                   ...) {
@@ -122,9 +122,9 @@ as.data.frame.compilr <- function(x, row.names = NULL, optional = TRUE,
   output
 }
 
-#' @rdname as.data.frame.compilr
+#' @rdname as.data.frame.complr
 #' @export
-as.matrix.compilr <- function(x, 
+as.matrix.complr <- function(x, 
                               class = c("composition", "logratio"),
                               level = c("between", "within", "total"),
                               ...) {
@@ -132,7 +132,7 @@ as.matrix.compilr <- function(x,
 }
 
 # ----------------- Extract Compositional Data -----------------
-.get.compilr <- function(object, 
+.get.complr <- function(object, 
                          class = c("composition", "logratio"),
                          level = c("between", "within", "total"),
                          weight = c("equal", "proportional"),

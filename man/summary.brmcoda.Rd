@@ -17,7 +17,7 @@ Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-  m <- brmcoda(compilr = compilr(data = mcompd, sbp = sbp,
+  m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                                  idvar = "ID", total = 1440),
   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
