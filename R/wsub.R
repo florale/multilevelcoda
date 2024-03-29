@@ -40,7 +40,7 @@ wsub <- function(object,
                  weight = NULL,
                  ...) {
   
-  ref <- "grandmean"
+  # ref <- "grandmean"
   level <- "within"
   
   # d0 -------------------------------
@@ -54,8 +54,7 @@ wsub <- function(object,
       stop("ref must be 'grandmean' or a data table, data frame or matrix.")
     }
     if(isFALSE(
-      identical(colnames(ref),
-                colnames(as.data.table(ref_grid(object$Model)@grid))))) { # ensure all covs are provided
+      (colnames(as.data.table(ref_grid(object$Model)@grid)) %snin% ".wgt.") %ain% colnames(ref))) { # ensure all covs are provided
       stop(paste(
         "'ref' should contains information about",
         "  the covariates in 'brmcoda' model to estimate the substitution model.",
