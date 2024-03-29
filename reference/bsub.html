@@ -73,7 +73,7 @@ It is recommended that users run substitution model using the substitution funct
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Between-person Simple Substitution</h1>
-      <small class="dont-index">Source: <a href="https://github.com/florale/multilevelcoda/blob/HEAD/R/bsub.R" class="external-link"><code>R/bsub.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/florale/multilevelcoda/blob/HEAD/R/substitution-bsub.R" class="external-link"><code>R/substitution-bsub.R</code></a></small>
       <div class="d-none name"><code>bsub.Rd</code></div>
     </div>
 
@@ -185,11 +185,11 @@ The first four lists contain the results of the substitution estimation for a co
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"cmdstanr"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="compilr.html">compilr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
-<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
+<span class="r-in"><span>               parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># model with compositional predictor at between and between-person levels</span></span></span>
-<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>, </span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>, </span></span>
 <span class="r-in"><span>             formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span> </span></span>
 <span class="r-in"><span>                                <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>             chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>

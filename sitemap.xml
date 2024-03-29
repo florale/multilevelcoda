@@ -37,7 +37,7 @@
     <loc>https://florale.github.io/multilevelcoda/reference/VarCorr.brmcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/as.data.frame.compilr.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/as.data.frame.complr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/basesub.html</loc>
@@ -64,6 +64,9 @@
     <loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc>
   </url>
   <url>
+    <loc>https://florale.github.io/multilevelcoda/reference/complr.html</loc>
+  </url>
+  <url>
     <loc>https://florale.github.io/multilevelcoda/reference/create_substitution.html</loc>
   </url>
   <url>
@@ -88,7 +91,7 @@
     <loc>https://florale.github.io/multilevelcoda/reference/is.brmcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/is.compilr.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/is.complr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/is.substitution.html</loc>
@@ -106,7 +109,7 @@
     <loc>https://florale.github.io/multilevelcoda/reference/mcompd.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/mean.compilr.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/mean.complr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/model.frame.brmcoda.html</loc>
@@ -136,7 +139,7 @@
     <loc>https://florale.github.io/multilevelcoda/reference/print.brmcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/print.compilr.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/print.complr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/print.substitution.html</loc>
@@ -169,7 +172,7 @@
     <loc>https://florale.github.io/multilevelcoda/reference/summary.brmcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/summary.compilr.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/summary.complr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/summary.substitution.html</loc>
@@ -178,7 +181,7 @@
     <loc>https://florale.github.io/multilevelcoda/reference/update.brmcoda.html</loc>
   </url>
   <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/update.compilr.html</loc>
+    <loc>https://florale.github.io/multilevelcoda/reference/update.complr.html</loc>
   </url>
   <url>
     <loc>https://florale.github.io/multilevelcoda/reference/vcov.brmcoda.html</loc>
