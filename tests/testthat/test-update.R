@@ -19,21 +19,21 @@ library(extraoperators)
 library(brms)
 library(lme4)
 
-# Model
+# model
 #---------------------------------------------------------------------------------------------------
 data(mcompd)
 data(sbp)
 data(psub)
 
 cilr <- complr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+               parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 suppressWarnings(
   fit <- brmcoda(complr = cilr,
-               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
-               chain = 1, iter = 500, seed = 123,
-               backend = backend))
+                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                   wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+                 chain = 1, iter = 500, seed = 123,
+                 backend = backend))
 
 parts <- colnames(psub)
 
@@ -59,41 +59,41 @@ test_that("update.complr errors where appropriate", {
 
 test_that("update.complr gives expected output", {
   
-  newcilr <- update(cilr, mcompd[ID != 1:10])
+  newcomplr <- update(cilr, mcompd[ID != 1:10])
   
-  expect_true(inherits(newcilr, "complr"))
+  expect_true(inherits(newcomplr, "complr"))
   
-  expect_true(identical(str(cilr), str(newcilr)))
-  expect_true(identical(newcilr$data, mcompd[ID != 1:10]))
-  expect_true(identical(cilr$parts, newcilr$parts))
+  expect_true(identical(str(cilr), str(newcomplr)))
+  expect_true(identical(newcomplr$data, mcompd[ID != 1:10]))
+  expect_true(identical(cilr$parts, newcomplr$parts))
   
-  expect_true(identical(ncol(newcilr$BetweenComp), ncol(cilr$BetweenComp)))
-  expect_true(identical(ncol(newcilr$WithinComp), ncol(cilr$WithinComp)))
-  expect_true(identical(ncol(newcilr$TotalComp), ncol(cilr$TotalComp)))
-  expect_true(identical(ncol(newcilr$BetweenILR), ncol(cilr$BetweenILR)))
-  expect_true(identical(ncol(newcilr$WithinILR), ncol(cilr$WithinILR)))
-  expect_true(identical(ncol(newcilr$TotalILR), ncol(cilr$TotalILR)))
-
-  expect_true(identical(nrow(newcilr$BetweenComp), nrow(mcompd[ID != 1:10])))
-  expect_true(identical(nrow(newcilr$WithinComp), nrow(mcompd[ID != 1:10])))
-  expect_true(identical(nrow(newcilr$TotalComp), nrow(mcompd[ID != 1:10])))
-  expect_true(identical(nrow(newcilr$BetweenILR), nrow(mcompd[ID != 1:10])))
-  expect_true(identical(nrow(newcilr$WithinILR), nrow(mcompd[ID != 1:10])))
-  expect_true(identical(nrow(newcilr$TotalILR), nrow(mcompd[ID != 1:10])))
+  expect_true(identical(ncol(newcomplr$between_comp), ncol(cilr$between_comp)))
+  expect_true(identical(ncol(newcomplr$within_comp), ncol(cilr$within_comp)))
+  expect_true(identical(ncol(newcomplr$comp), ncol(cilr$comp)))
+  expect_true(identical(ncol(newcomplr$between_logratio), ncol(cilr$between_logratio)))
+  expect_true(identical(ncol(newcomplr$within_logratio), ncol(cilr$within_logratio)))
+  expect_true(identical(ncol(newcomplr$logratio), ncol(cilr$logratio)))
+  
+  expect_true(identical(nrow(newcomplr$between_comp), nrow(mcompd[ID != 1:10])))
+  expect_true(identical(nrow(newcomplr$within_comp), nrow(mcompd[ID != 1:10])))
+  expect_true(identical(nrow(newcomplr$comp), nrow(mcompd[ID != 1:10])))
+  expect_true(identical(nrow(newcomplr$between_logratio), nrow(mcompd[ID != 1:10])))
+  expect_true(identical(nrow(newcomplr$within_logratio), nrow(mcompd[ID != 1:10])))
+  expect_true(identical(nrow(newcomplr$logratio), nrow(mcompd[ID != 1:10])))
   
 })
-  
+
 # Tests update.brmcoda -----------------------------------------------------------------------------
 
 test_that("update.brmcoda gives errors and warnings where appropriate", {
   
-  # warning when newdata and newcilr provided
+  # warning when newdata and newcomplr provided
   expect_warning(fit_new <- update(object = fit, 
                                    newdata = mcompd[ID != 1:10], 
-                                   newcilr = update(cilr, mcompd[ID != 1:10])))
+                                   newcomplr = update(cilr, mcompd[ID != 1:10])))
   
-  ## only newcilr provided, incorrect
-  expect_error(fit_new <- update(object = fit, newcilr = mcompd))
+  ## only newcomplr provided, incorrect
+  expect_error(fit_new <- update(object = fit, newcomplr = mcompd))
   
   ## missing args
   expect_error(fit_new <- update(object = fit))
@@ -105,13 +105,13 @@ test_that("update gives expected output", {
   fit_newformula <- update(fit, formula. = ~ . - wilr1)
   
   expect_true(inherits(fit_newformula, "brmcoda"))
-  expect_true(is.null(as.data.table(fit_newformula$Model$fit)$b_wilr1))
-
+  expect_true(is.null(as.data.table(fit_newformula$model$fit)$b_wilr1))
+  
   # updating only data
   fit_newdat <- update(fit, newdata = mcompd[ID != 1:10])
   
   expect_true(inherits(fit_newdat, "brmcoda"))
-  expect_true(identical(fit_newdat$CompILR$data, mcompd[ID != 1:10]))
+  expect_true(identical(fit_newdat$complr$data, mcompd[ID != 1:10]))
   
   # updating both formula and data
   fit_new <- update(fit, 
@@ -119,7 +119,7 @@ test_that("update gives expected output", {
                     newdata = mcompd[ID != 1:10])
   
   expect_true(inherits(fit_new, "brmcoda"))
-  expect_true(is.null(as.data.table(fit_new$Model$fit)$b_wilr2))
-  expect_true(identical(fit_newdat$CompILR$data, mcompd[ID != 1:10]))
+  expect_true(is.null(as.data.table(fit_new$model$fit)$b_wilr2))
+  expect_true(identical(fit_newdat$complr$data, mcompd[ID != 1:10]))
   
 })

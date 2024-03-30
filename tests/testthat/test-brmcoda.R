@@ -22,18 +22,18 @@ data(mcompd)
 data(sbp)
 data(psub)
 
-cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+               parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 test_that("bsub errors for invalid input", {
-  # missing compilr
+  # missing complr
   expect_error(m <- brmcoda(formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                               wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                             chain = 1, iter = 500, seed = 123,
                             backend = backend))
-  expect_error(m <- brmcoda(compilr = psub,
+  expect_error(m <- brmcoda(complr = psub,
                             formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                               wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+                              wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                             chain = 1, iter = 500, seed = 123,
                             backend = backend))
 })
@@ -61,15 +61,15 @@ test_that("wilr from brmcoda gives expected predictions", {
   daydata <- rbind(day1, day2, day3)
   
   sbp <- as.matrix(data.table(1, -1))
-  cilr <- compilr(data = daydata, sbp = sbp,
-                  parts = c("TST", "Wake"), idvar = "ID")
+  cilr <- complr(data = daydata, sbp = sbp,
+                 parts = c("TST", "Wake"), idvar = "ID")
   psub <- basesub(c("TST", "Wake"))
   suppressWarnings(
-    m <- brmcoda(compilr = cilr,
+    m <- brmcoda(complr = cilr,
                  formula = PA ~ wilr1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
-  daydata2 <- cbind(daydata, fitted(m$Model))
+  daydata2 <- cbind(daydata, fitted(m$model))
   
   expect_true(all.equal(daydata2[, PA[Day == 2] - PA[Day == 1]], 
                         daydata2[, Estimate[Day == 2] - Estimate[Day == 1]], tolerance = 0.2))

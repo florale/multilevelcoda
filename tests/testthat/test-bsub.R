@@ -23,7 +23,7 @@ library(extraoperators)
 library(brms)
 library(lme4)
 
-# Model
+# model
 #---------------------------------------------------------------------------------------------------
 data(mcompd)
 data(sbp)
@@ -196,7 +196,7 @@ test_that("bsub outputs what expected", {
   
   ## types
   expect_type(x, "list")
-  expect_equal(length(x), length(m$CompILR$parts))
+  expect_equal(length(x), length(m$complr$parts))
   expect_s3_class(x$TST, "data.table")
   expect_s3_class(x$WAKE, "data.table")
   expect_s3_class(x$MVPA, "data.table")
@@ -315,7 +315,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   a <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) { 
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) { 
     expect_true(all(a$TST[From == "WAKE" & Delta > 1]$Mean > 0)) 
     expect_true(all(a$WAKE[From == "TST" & Delta > 1]$Mean < 0)) 
   } else {
@@ -325,7 +325,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(a$TST[From == "WAKE" & Delta == 1]$CI_low,
                     a$TST[From == "WAKE" & Delta == 1]$CI_high))))
   
@@ -346,7 +346,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   b <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(b$TST[From == "MVPA" & Delta > 1]$Mean > 0))
     expect_true(all(b$MVPA[From == "TST" & Delta > 1]$Mean < 0))
   } else {
@@ -356,7 +356,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(b$TST[From == "MVPA" & Delta == 1]$CI_low,
                     b$TST[From == "MVPA" & Delta == 1]$CI_high))))
 
@@ -377,7 +377,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   c <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(c$TST[From == "LPA" & Delta > 1]$Mean > 0))
     expect_true(all(c$LPA[From == "TST" & Delta > 1]$Mean < 0))
   } else {
@@ -387,7 +387,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(c$TST[From == "LPA" & Delta == 1]$CI_low,
                     c$TST[From == "LPA" & Delta == 1]$CI_high))))
 
@@ -408,7 +408,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   d <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(d$TST[From == "SB" & Delta > 1]$Mean > 0))
     expect_true(all(d$SB[From == "TST" & Delta > 1]$Mean < 0))
   } else {
@@ -418,7 +418,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(d$TST[From == "SB" & Delta == 1]$CI_low,
                     d$TST[From == "SB" & Delta == 1]$CI_high))))
 
@@ -440,7 +440,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
   e <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(e$WAKE[From == "MVPA" & Delta > 1]$Mean > 0))
     expect_true(all(e$MVPA[From == "WAKE" & Delta > 1]$Mean < 0))
   } else {
@@ -450,7 +450,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(e$WAKE[From == "MVPA" & Delta == 1]$CI_low,
                     e$WAKE[From == "MVPA" & Delta == 1]$CI_high))))
 
@@ -471,7 +471,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
   f <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(f$WAKE[From == "LPA" & Delta > 1]$Mean > 0))
     expect_true(all(f$LPA[From == "WAKE" & Delta > 1]$Mean < 0))
   } else {
@@ -481,7 +481,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(f$WAKE[From == "LPA" & Delta == 1]$CI_low,
                     f$WAKE[From == "LPA" & Delta == 1]$CI_high))))
 
@@ -502,7 +502,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
   g <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(g$WAKE[From == "SB" & Delta > 1]$Mean > 0))
     expect_true(all(g$SB[From == "WAKE" & Delta > 1]$Mean < 0))
   } else {
@@ -512,7 +512,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(g$WAKE[From == "SB" & Delta == 1]$CI_low,
                     g$WAKE[From == "SB" & Delta == 1]$CI_high))))
 
@@ -532,7 +532,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
   h <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(h$MVPA[From == "LPA" & Delta > 1]$Mean > 0))
     expect_true(all(h$LPA[From == "MVPA" & Delta > 1]$Mean < 0))
   } else {
@@ -542,7 +542,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(h$MVPA[From == "LPA" & Delta == 1]$CI_low,
                     h$MVPA[From == "LPA" & Delta == 1]$CI_high))))
 
@@ -563,7 +563,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
   i <- bsub(object = m, basesub = psub, delta = 1:2)
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(i$MVPA[From == "SB" & Delta > 1]$Mean > 0))
     expect_true(all(i$SB[From == "MVPA" & Delta > 1]$Mean < 0))
   } else {
@@ -573,7 +573,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(i$MVPA[From == "SB" & Delta == 1]$CI_low,
                     i$MVPA[From == "SB" & Delta == 1]$CI_high))))
 
@@ -595,7 +595,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
   
   
   ## Estimates
-  if (isTRUE(suppressWarnings(summary(m$Model)$fixed[2, 1] > 0))) {
+  if (isTRUE(suppressWarnings(summary(m$model)$fixed[2, 1] > 0))) {
     expect_true(all(j$LPA[From == "SB" & Delta > 1]$Mean > 0))
     expect_true(all(j$SB[From == "LPA" & Delta > 1]$Mean < 0))
   } else {
@@ -605,7 +605,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
 
   # CIs
   suppressWarnings(expect_true(
-    (0 %gele% c(summary(m$Model)$fixed[2, 3], summary(m$Model)$fixed[2, 4]))
+    (0 %gele% c(summary(m$model)$fixed[2, 3], summary(m$model)$fixed[2, 4]))
     == (0 %agele% c(j$LPA[From == "SB" & Delta == 1]$CI_low,
                     j$LPA[From == "SB" & Delta == 1]$CI_high))))
 
