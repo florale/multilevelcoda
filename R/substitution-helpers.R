@@ -13,6 +13,8 @@ is.substitution <- function(x) {
 #' @param BetweenSubMargins A list of results from \code{bsubmargins} or \code{NULL}
 #' @param WithinSub A list of results from \code{wsub} or \code{NULL}
 #' @param WithinSubMargins A list of results from \code{wsubmargins} or \code{NULL}
+#' @param Sub A list of results from \code{sub} or \code{NULL}
+#' @param Margins A list of results from \code{submargins} or \code{NULL}
 #' @param delta A numeric vector of the amount of substitution
 #' @param ref A character value specifying the reference grid
 #' @param level A character value specifying the level of substitution
