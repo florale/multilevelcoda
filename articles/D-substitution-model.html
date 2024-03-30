@@ -211,7 +211,7 @@ package.</p>
 </h2>
 <p><code>multilevelcoda</code> package provides <code>2</code> different
 methods to compute substitution models, via the
-<code><a href="../reference/substitution.html">substitution()</a></code> function.</p>
+<code><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution()</a></code> function.</p>
 <p>Basic substitution models:</p>
 <ul>
 <li>
@@ -237,12 +237,12 @@ minutes, at between-person level. We specify
 at the between-person level, and <code>ref = "grandmean"</code> to
 indicate substitution model using the grand compositional mean as
 reference composition. If your model contains covariates,
-<code><a href="../reference/substitution.html">substitution()</a></code> will average predictions across levels of
+<code><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution()</a></code> will average predictions across levels of
 covariates as the default.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">subm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
+<code class="sourceCode R"><span><span class="va">subm1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
 <span>                      ref <span class="op">=</span> <span class="st">"grandmean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Output from <code><a href="../reference/substitution.html">substitution()</a></code> contains multiple data set of
+<p>Output from <code><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution()</a></code> contains multiple data set of
 results for all available compositional component. Here are the results
 for changes in stress when sleep (TST) is substituted for 10
 minutes.</p>
@@ -398,13 +398,13 @@ substitution models models are generally more computationally expensive
 than basic subsitution models. All models can be run faster in shorter
 walltime using parallel execution. In this example, we use package
 <code>doFuture</code> to parallel our models.
-<code><a href="../reference/substitution.html">substitution()</a></code> will run 5 substitution models for 5
+<code><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution()</a></code> will run 5 substitution models for 5
 sleep-wake behaviours, so we will parallel them across 5 workers.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://doFuture.futureverse.org/reference/registerDoFuture.html" class="external-link">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">subm2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
+<span><span class="va">subm2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
 <span>                      ref <span class="op">=</span> <span class="st">"clustermean"</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/foreach/man/registerDoSEQ.html" class="external-link">registerDoSEQ</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Below are the results.</p>

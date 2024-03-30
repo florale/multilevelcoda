@@ -746,7 +746,7 @@ can be examined using the compositional isotemporal substitution model.
 In <code>multilevelcoda</code>, we extend this model to multilevel
 approach to test both between-person and within-person changes. All
 substitution models can be computed using the
-<code><a href="../reference/substitution.html">substitution()</a></code> function, with the following arguments:</p>
+<code><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution()</a></code> function, with the following arguments:</p>
 <table class="table">
 <colgroup>
 <col width="10%">
@@ -816,7 +816,7 @@ the reference grid or an average of them should be returned.</td>
 pairwise substitution of sleep-wake behaviours for 5 minutes, at
 between-person level.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">5</span>, </span>
+<code class="sourceCode R"><span><span class="va">bsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">5</span>, </span>
 <span>                      level <span class="op">=</span> <span class="st">"between"</span>, ref <span class="op">=</span> <span class="st">"grandmean"</span><span class="op">)</span></span></code></pre></div>
 <p>The output contains multiple data sets of results for all
 compositional components. Here are the results for changes in stress
@@ -892,7 +892,7 @@ of sleep-wake behaviours are substituted for 5 minutes, at within-person
 level.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Within-person substitution</span></span>
-<span><span class="va">wsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/substitution.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">5</span>, </span>
+<span><span class="va">wsubm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/bsub.html">substitution</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, delta <span class="op">=</span> <span class="fl">5</span>, </span>
 <span>                      level <span class="op">=</span> <span class="st">"within"</span>, ref <span class="op">=</span> <span class="st">"grandmean"</span><span class="op">)</span></span></code></pre></div>
 <p>Results for 5 minute substitution.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
