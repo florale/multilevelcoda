@@ -23,15 +23,15 @@ Default is \code{"ID"}.}
 }
 \value{
 A \code{\link{compilr}} object with twelve elements.
-\item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
+\item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
 or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-\item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
+\item{\code{within_comp}}{ A vector of class \code{acomp} representing one closed within-person composition
 or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-\item{\code{Comp}}{ A vector of class \code{acomp} representing one closed composition
+\item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
 or a matrix of class \code{acomp} representing multiple closed compositions each in one row.}
-\item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
-\item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-\item{\code{ILR}}{ Isometric log ratio transform of composition.}
+\item{\code{between_logratio}}{ Isometric log ratio transform of between-person composition.}
+\item{\code{within_logratio}}{ Isometric log ratio transform of within-person composition.}
+\item{\code{logratio}}{ Isometric log ratio transform of composition.}
 \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
 \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}

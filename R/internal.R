@@ -289,15 +289,15 @@ NULL
 #' Default is \code{1}.
 #'
 #' @return A \code{\link{compilr}} object with twelve elements.
-#'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
+#'   \item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-#'   \item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
+#'   \item{\code{within_comp}}{ A vector of class \code{acomp} representing one closed within-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-#'   \item{\code{Comp}}{ A vector of class \code{acomp} representing one closed composition
+#'   \item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
 #'   or a matrix of class \code{acomp} representing multiple closed compositions each in one row.}
-#'   \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
-#'   \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-#'   \item{\code{ILR}}{ Isometric log ratio transform of composition.}
+#'   \item{\code{between_logratio}}{ Isometric log ratio transform of between-person composition.}
+#'   \item{\code{within_logratio}}{ Isometric log ratio transform of within-person composition.}
+#'   \item{\code{logratio}}{ Isometric log ratio transform of composition.}
 #'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 #'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
 #'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
@@ -374,8 +374,8 @@ NULL
   wilr <- ilr(wcomp, V = psi)
   
   # name them for later use
-  colnames(bcomp) <- paste0("B", parts)
-  colnames(wcomp) <- paste0("W", parts)
+  colnames(bcomp) <- paste0("b", parts)
+  colnames(wcomp) <- paste0("w", parts)
   colnames(tcomp) <- parts
   colnames(bilr)  <- paste0("bilr", seq_len(ncol(bilr)))
   colnames(wilr)  <- paste0("wilr", seq_len(ncol(wilr)))
@@ -392,12 +392,12 @@ NULL
   
   structure(
     list(
-      BetweenComp = bcomp,
-      WithinComp = wcomp,
-      TotalComp = tcomp,
-      BetweenILR = bilr,
-      WithinILR = wilr,
-      TotalILR = tilr,
+      between_comp = bcomp,
+      within_comp = wcomp,
+      comp = tcomp,
+      between_logratio = bilr,
+      within_logratio = wilr,
+      logratio = tilr,
       data = data,
       psi = psi,
       sbp = sbp,

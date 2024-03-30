@@ -31,11 +31,11 @@ is.complr <- function(x) {
 #' mean(cilr)
 #' @export
 mean.complr <- function(x, ...,
-                         class = c("comp", "logratio"),
-                         level = c("between", "within", "combined"),
-                         weight = c("equal", "proportional"),
-                         digits = 3
-                         ) {
+                        class = c("comp", "logratio"),
+                        level = c("between", "within", "combined"),
+                        weight = c("equal", "proportional"),
+                        digits = 3
+) {
   
   # Assemble
   output <- .get.complr(object = x)
@@ -90,9 +90,9 @@ mean.complr <- function(x, ...,
 #'
 #' @export
 as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
-                                  class = c("comp", "logratio"),
-                                  level = c("between", "within", "combined"),
-                                  ...) {
+                                 class = c("comp", "logratio"),
+                                 level = c("between", "within", "combined"),
+                                 ...) {
   allout <- lapply(x[1:6], as.data.frame)
   output <- data.frame()
   
@@ -125,19 +125,19 @@ as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
 #' @rdname as.data.frame.complr
 #' @export
 as.matrix.complr <- function(x, 
-                              class = c("comp", "logratio"),
-                              level = c("between", "within", "combined"),
-                              ...) {
+                             class = c("comp", "logratio"),
+                             level = c("between", "within", "combined"),
+                             ...) {
   as.matrix(as.data.frame(x, class = class, level = level, ...))
 }
 
 # ----------------- Extract compositionositional Data -----------------
 .get.complr <- function(object, 
-                         class = c("comp", "logratio"),
-                         level = c("between", "within", "combined"),
-                         weight = c("equal", "proportional"),
-                         digits = 3,
-                         ...) {
+                        class = c("comp", "logratio"),
+                        level = c("between", "within", "combined"),
+                        weight = c("equal", "proportional"),
+                        digits = 3,
+                        ...) {
   ## Assemble
   if (identical(weight, "proportional")) {
     weight <- "proportional"

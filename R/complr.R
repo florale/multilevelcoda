@@ -294,6 +294,6 @@ complr <- function(data,
 #'
 #' @export
 compilr <- function(x, ...) {
-  warning2("'compilr' is deprecated. Please use 'complr' instead.")
+  warning("'compilr' is deprecated. Please use 'complr' instead.")
   UseMethod("complr")
 }
