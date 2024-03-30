@@ -5,6 +5,8 @@
 #' using cluster mean (e.g., compositional mean at individual level) as reference composition. 
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #' 
+#' @aliases substitution
+#' 
 #' @inheritParams substitution
 #' 
 #' @seealso \code{\link{substitution}}

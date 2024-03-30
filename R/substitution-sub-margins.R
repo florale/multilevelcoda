@@ -4,7 +4,9 @@
 #' when compositional parts are substituted for specific unit(s)
 #' using cluster mean (e.g., compositional mean at individual level) as reference composition. 
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
-#'
+#' 
+#' @aliases substitution
+#' 
 #' @inheritParams substitution
 #' 
 #' @seealso \code{\link{substitution}}
@@ -148,7 +150,7 @@ sub <- function (object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$comp_lr$between_comp), with = FALSE]
+  comp0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(comp0)))) {

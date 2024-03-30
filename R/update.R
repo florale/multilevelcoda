@@ -51,7 +51,7 @@ update.complr <- function(object, newdata, ...) {
   total <- object$total
   idvar <- object$idvar
   
-  complr(newdata, sbp, parts, total, idvar)
+  complr(newdata, transform, parts, sbp, total, idvar, shape)
 }
 
 #' Update \code{\link{brmcoda}} models
@@ -117,15 +117,15 @@ update.brmcoda <- function(object,
     fit_new <- update(object$model, formula. = formula., ...)
     
     structure(
-      list(CompILR = object$comp_lr,
-           Model = fit_new),
+      list(complr = object$complr,
+           model = fit_new),
       class = "brmcoda")
     
   } else { # updating newdata/newcomplr (with and without updating formula)
     
     if(is.null(newcomplr)) {
       if(!is.null(newdata)) {
-        newcomplr <- update(object$comp_lr, newdata = newdata)
+        newcomplr <- update(object$complr, newdata = newdata)
       }} else {
         if(isFALSE(inherits(newcomplr, "complr"))) {
           stop("'newcomplr' must be an object of class 'complr'.")
@@ -140,8 +140,8 @@ update.brmcoda <- function(object,
     fit_new <- update(object$model, formula. = formula., newdata = newdata, ...)
     
     structure(
-      list(CompILR = newcomplr,
-           Model = fit_new),
+      list(complr = newcomplr,
+           model = fit_new),
       class = "brmcoda")
     
   }

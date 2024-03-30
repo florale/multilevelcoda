@@ -2,6 +2,7 @@
 % Please edit documentation in R/substitution-sub-margins.R
 \name{submargins}
 \alias{submargins}
+\alias{substitution}
 \title{Average Substitution}
 \usage{
 submargins(

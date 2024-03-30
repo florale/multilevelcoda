@@ -2,6 +2,7 @@
 % Please edit documentation in R/substitution-wsub.R
 \name{wsub}
 \alias{wsub}
+\alias{substitution}
 \title{Within-person Simple Substitution}
 \usage{
 wsub(

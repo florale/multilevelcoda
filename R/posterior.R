@@ -83,8 +83,8 @@ predict.brmcoda <- function(object,
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
-        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$comp_lr$sbp)))
-        as.data.table(clo(x, total = object$comp_lr$total))
+        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$complr$sbp)))
+        as.data.table(clo(x, total = object$complr$total))
       })
       
       out <- brms::do_call(abind::abind, c(out, along = 3))
@@ -92,7 +92,7 @@ predict.brmcoda <- function(object,
       
       if(isTRUE(summary)) {
         out <- brms::posterior_summary(out)
-        dimnames(out)[[3]] <- object$comp_lr$parts
+        dimnames(out)[[3]] <- object$complr$parts
       }
     }
   }
@@ -184,8 +184,8 @@ fitted.brmcoda <- function(object,
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
-        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$comp_lr$sbp)))
-        as.data.table(clo(x, total = object$comp_lr$total))
+        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$complr$sbp)))
+        as.data.table(clo(x, total = object$complr$total))
       })
       
       out <- brms::do_call(abind::abind, c(out, along = 3))
@@ -193,7 +193,7 @@ fitted.brmcoda <- function(object,
       
       if(isTRUE(summary)) {
         out <- brms::posterior_summary(out)
-        dimnames(out)[[3]] <- object$comp_lr$parts
+        dimnames(out)[[3]] <- object$complr$parts
       }
     }
   }

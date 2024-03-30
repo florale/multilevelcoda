@@ -5,6 +5,8 @@
 #' using a single reference composition (e.g., compositional mean at sample level).
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #' 
+#' @aliases substitution
+#' 
 #' @inheritParams substitution
 #' 
 #' @seealso \code{\link{substitution}}
@@ -68,7 +70,7 @@ wsub <- function(object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$comp_lr$between_comp), with = FALSE]
+  comp0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(comp0)))) {

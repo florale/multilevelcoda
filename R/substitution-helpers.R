@@ -122,8 +122,8 @@ build.rg <- function(object,
   
   # d0 and comp0 for single level model
   if (model_ranef_level == "single") {
-    comp0 <- object$comp_lr$comp
-    d0 <- object$comp_lr$data
+    comp0 <- object$complr$comp
+    d0 <- object$complr$data
   }
   
   # d0 and comp0 for multilevel level model
@@ -131,120 +131,120 @@ build.rg <- function(object,
     
     # for combined
     if (level == "combined") {
-      comp0 <- object$comp_lr$comp
-      d0 <- cbind(object$comp_lr$comp, object$comp_lr$data)
-      d0 <- d0[, head(.SD, 1), by = eval(object$comp_lr$idvar)]
-      comp0 <- acomp(d0[, colnames(object$comp_lr$comp), with = FALSE], total = object$comp_lr$total)
+      comp0 <- object$complr$comp
+      d0 <- cbind(object$complr$comp, object$complr$data)
+      d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
+      comp0 <- acomp(d0[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
     }
     
     # for between and/or within
     if (level %in% c("between", "within")) {
       if (isTRUE(ref == "clustermean")) {
         if (isTRUE(weight == "equal")) {
-          comp0 <- object$comp_lr$between_comp
-          d0 <- cbind(object$comp_lr$between_comp, object$comp_lr$data)
-          d0 <- d0[, head(.SD, 1), by = eval(object$comp_lr$idvar)]
-          comp0 <- acomp(d0[, colnames(object$comp_lr$between_comp), with = FALSE], total = object$comp_lr$total)
+          comp0 <- object$complr$between_comp
+          d0 <- cbind(object$complr$between_comp, object$complr$data)
+          d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
+          comp0 <- acomp(d0[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
         }
         if (isTRUE(is.null(weight))) {
-          comp0 <- object$comp_lr$between_comp
-          d0 <- object$comp_lr$data
+          comp0 <- object$complr$between_comp
+          d0 <- object$complr$data
         }
         if (weight == "proportional") {
-          comp0 <- object$comp_lr$between_comp
-          d0 <- object$comp_lr$data
+          comp0 <- object$complr$between_comp
+          d0 <- object$complr$data
         }
         
         # d0 
         bcomp0 <- comp0
-        bilr0 <- ilr(bcomp0, V = object$comp_lr$psi)
+        bilr0 <- ilr(bcomp0, V = object$complr$psi)
         bilr0 <- as.data.table(bilr0)
         
         wcomp0 <- as.data.table(matrix(1, nrow = nrow(bcomp0), ncol = ncol(bcomp0)))
         wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
         
-        colnames(bilr0) <- colnames(object$comp_lr$between_logratio)
-        colnames(wilr0) <- colnames(object$comp_lr$within_logratio)
-        colnames(bcomp0) <- colnames(object$comp_lr$between_comp)
-        colnames(wcomp0) <- colnames(object$comp_lr$within_comp)
+        colnames(bilr0) <- colnames(object$complr$between_logratio)
+        colnames(wilr0) <- colnames(object$complr$within_logratio)
+        colnames(bcomp0) <- colnames(object$complr$between_comp)
+        colnames(wcomp0) <- colnames(object$complr$within_comp)
         
         d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0,
-                    d0[, colnames(d0) %in% colnames(object$comp_lr$data), with = FALSE])
+                    d0[, colnames(d0) %in% colnames(object$complr$data), with = FALSE])
       }
       
       if (isTRUE(ref == "grandmean")) {
         if (isTRUE(is.null(weight) || weight == "equal")) {
-          comp0 <- cbind(object$comp_lr$between_comp, 
-                         object$comp_lr$data[, object$comp_lr$idvar, with = FALSE])
-          comp0 <- comp0[, head(.SD, 1), by = eval(object$comp_lr$idvar)]
-          comp0 <- acomp(comp0[, -object$comp_lr$idvar, with = FALSE], total = object$comp_lr$total)
+          comp0 <- cbind(object$complr$between_comp, 
+                         object$complr$data[, object$complr$idvar, with = FALSE])
+          comp0 <- comp0[, head(.SD, 1), by = eval(object$complr$idvar)]
+          comp0 <- acomp(comp0[, -object$complr$idvar, with = FALSE], total = object$complr$total)
           comp0 <- mean.acomp(comp0, robust = TRUE)
-          comp0 <- acomp(comp0, total = object$comp_lr$total)
+          comp0 <- acomp(comp0, total = object$complr$total)
           comp0 <- as.data.table(t(comp0))
           mcomp <- comp0
         }
         if (isTRUE(weight == "proportional")) {
-          comp0 <- mean.acomp(object$comp_lr$between_comp, robust = TRUE)
-          comp0 <- acomp(comp0, total = object$comp_lr$total)
+          comp0 <- mean.acomp(object$complr$between_comp, robust = TRUE)
+          comp0 <- acomp(comp0, total = object$complr$total)
           comp0 <- as.data.table(t(comp0))
           mcomp <- comp0
         }
         
         if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
           # get compositional mean
-          mcomp <- cbind(object$comp_lr$between_comp, 
-                         object$comp_lr$data[, object$comp_lr$idvar, with = FALSE])
-          mcomp <- mcomp[, head(.SD, 1), by = eval(object$comp_lr$idvar)]
-          mcomp <- acomp(mcomp[, -object$comp_lr$idvar, with = FALSE], total = object$comp_lr$total)
+          mcomp <- cbind(object$complr$between_comp, 
+                         object$complr$data[, object$complr$idvar, with = FALSE])
+          mcomp <- mcomp[, head(.SD, 1), by = eval(object$complr$idvar)]
+          mcomp <- acomp(mcomp[, -object$complr$idvar, with = FALSE], total = object$complr$total)
           mcomp <- mean.acomp(mcomp, robust = TRUE)
-          mcomp <- acomp(mcomp, total = object$comp_lr$total)
+          mcomp <- acomp(mcomp, total = object$complr$total)
           mcomp <- as.data.table(t(mcomp))
           
-          if (isTRUE(identical(length(object$comp_lr$parts), ncol(ref)))) {
+          if (isTRUE(identical(length(object$complr$parts), ncol(ref)))) {
             comp0 <- ref
             
           } else {
-            if (object$comp_lr$parts %nin% colnames(ref)) {
+            if (object$complr$parts %nin% colnames(ref)) {
               stop(
                 sprintf(
                   "The reference grid should include all compositional components but (%s) are missing.",
-                  paste0(object$comp_lr$parts %nin% colnames(ref), collapse = ", ")
+                  paste0(object$complr$parts %nin% colnames(ref), collapse = ", ")
                 ))
             }
-            comp0 <- ref[, object$comp_lr$parts, with = FALSE]
-            cov.grid <- ref[, -object$comp_lr$parts, with = FALSE]
+            comp0 <- ref[, object$complr$parts, with = FALSE]
+            cov.grid <- ref[, -object$complr$parts, with = FALSE]
           }
           
-          if(isFALSE(sum(comp0) == object$comp_lr$total)) {
+          if(isFALSE(sum(comp0) == object$complr$total)) {
             stop(sprintf(
               "The total amount of the reference composition (%s) should be the same as the composition (%s).",
               sum(comp0),
-              object$comp_lr$total
+              object$complr$total
             ))
           }
-          if (isTRUE((any(comp0 > lapply(object$comp_lr$data[, object$comp_lr$parts, with = FALSE], max)) |
-                      any(comp0 < lapply(object$comp_lr$data[, object$comp_lr$parts, with = FALSE], min))))) {
+          if (isTRUE((any(comp0 > lapply(object$complr$data[, object$complr$parts, with = FALSE], max)) |
+                      any(comp0 < lapply(object$complr$data[, object$complr$parts, with = FALSE], min))))) {
             stop(paste(
               sprintf(
                 "comp0 should be numeric or interger values that are between (%s) and (%s)",
-                paste0(round(apply(object$comp_lr$data[, object$comp_lr$parts, with = FALSE], 2, min)), collapse = ", "),
-                paste0(round(apply(object$comp_lr$data[, object$comp_lr$parts, with = FALSE], 2, max)), collapse = ", ")),
+                paste0(round(apply(object$complr$data[, object$complr$parts, with = FALSE], 2, min)), collapse = ", "),
+                paste0(round(apply(object$complr$data[, object$complr$parts, with = FALSE], 2, max)), collapse = ", ")),
               "\n", 
               " for",
-              paste0(object$comp_lr$parts, collapse = ", "),
+              paste0(object$complr$parts, collapse = ", "),
               "respectively"
             ))
           }
-          comp0  <- acomp(comp0, total = object$comp_lr$total)
+          comp0  <- acomp(comp0, total = object$complr$total)
           comp0  <- as.data.table(t(comp0))
-          colnames(comp0) <- colnames(object$comp_lr$between_comp)
+          colnames(comp0) <- colnames(object$complr$between_comp)
         }
         
         # reference grid 
         # get possible ilr names
-        ilrnames <- c(colnames(object$comp_lr$between_logratio), 
-                      colnames(object$comp_lr$within_logratio),
-                      colnames(object$comp_lr$ILR))
+        ilrnames <- c(colnames(object$complr$between_logratio), 
+                      colnames(object$complr$within_logratio),
+                      colnames(object$complr$ILR))
         
         # get all varnames in model
         varnames <- do.call(rbind, find_predictors(object$model))
@@ -262,7 +262,7 @@ build.rg <- function(object,
           if (isTRUE(is.null(cov.grid))) {
             refgrid <- rg[, covnames, with = FALSE]
           } else {
-            gridnames <- colnames(cov.grid) %nin% object$comp_lr$parts
+            gridnames <- colnames(cov.grid) %nin% object$complr$parts
             
             if (isFALSE(fill)) {
               if (isFALSE(identical(colnames(cov.grid), covnames))) {
@@ -287,22 +287,22 @@ build.rg <- function(object,
         # d0 
         # bilr0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
         bcomp0 <- comp0
-        bilr0 <- ilr(bcomp0, V = object$comp_lr$psi)
+        bilr0 <- ilr(bcomp0, V = object$complr$psi)
         bilr0 <- as.data.table(t(bilr0))
         
         # wcomp0 and wilr0 are the difference between the actual compositional mean of the dataset and bilr
         # is 0 if ref comp is compositional mean
         # but is different if not
         wcomp0 <- bcomp0 - mcomp
-        wilr0 <- as.data.table(t(ilr(wcomp0, V = object$comp_lr$psi)))
+        wilr0 <- as.data.table(t(ilr(wcomp0, V = object$complr$psi)))
         
         id <- data.table::data.table(1) # to make fitted() happy
         
-        colnames(bilr0)  <- colnames(object$comp_lr$between_logratio)
-        colnames(wilr0)  <- colnames(object$comp_lr$within_logratio)
-        colnames(bcomp0) <- colnames(object$comp_lr$between_comp)
-        colnames(wcomp0) <- colnames(object$comp_lr$within_comp)
-        colnames(id)     <- object$comp_lr$idvar
+        colnames(bilr0)  <- colnames(object$complr$between_logratio)
+        colnames(wilr0)  <- colnames(object$complr$within_logratio)
+        colnames(bcomp0) <- colnames(object$complr$between_comp)
+        colnames(wcomp0) <- colnames(object$complr$within_comp)
+        colnames(id)     <- object$complr$idvar
         
         if (is.null(dim(refgrid))) {
           d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0, id)
@@ -352,7 +352,7 @@ NULL
                       sub <- posub * delta[j]
                       for (k in seq_len(nrow(sub))) {
                         newcomp <- comp0 + sub[k,]
-                        names(newcomp) <- object$comp_lr$parts
+                        names(newcomp) <- object$complr$parts
                         Delta <- sub[k, get(i)]
                         kout[[k]] <- cbind(comp0, newcomp, Delta)
                       }
@@ -372,21 +372,21 @@ NULL
                     dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
                     
                     # compositions and ilrs for predictions
-                    bcomp0 <- acomp(dnew[, colnames(object$comp_lr$between_comp), with = FALSE], total = object$comp_lr$total)
-                    bcompsub  <- acomp(dnew[, object$comp_lr$parts, with = FALSE], total = object$comp_lr$total)
+                    bcomp0 <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
+                    bcompsub  <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
                     
-                    bilrsub <- ilr(bcompsub, V = object$comp_lr$psi)
+                    bilrsub <- ilr(bcompsub, V = object$complr$psi)
                     wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
                     
-                    colnames(bilrsub) <- colnames(object$comp_lr$between_logratio)
-                    colnames(wilr0) <- colnames(object$comp_lr$within_logratio)
+                    colnames(bilrsub) <- colnames(object$complr$between_logratio)
+                    colnames(wilr0) <- colnames(object$complr$within_logratio)
                     
                     # reference grid 
                     ## get covariate + idvar names
-                    covnames <- colnames(d0) %snin% c(colnames(object$comp_lr$between_logratio),
-                                                      colnames(object$comp_lr$within_logratio),
-                                                      colnames(object$comp_lr$between_comp),
-                                                      colnames(object$comp_lr$within_comp)
+                    covnames <- colnames(d0) %snin% c(colnames(object$complr$between_logratio),
+                                                      colnames(object$complr$within_logratio),
+                                                      colnames(object$complr$between_comp),
+                                                      colnames(object$complr$within_comp)
                     )
                     refgrid <- d0[, covnames, with = FALSE]
                     
@@ -433,7 +433,7 @@ NULL
                         PD_delta_y <- rbindlist(PD_delta_y)
                         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
                                             dsub[, .(Delta, From, To, Level, Reference)],
-                                            dsub[, colnames(refgrid) %snin% object$comp_lr$idvar, with = FALSE])
+                                            dsub[, colnames(refgrid) %snin% object$complr$idvar, with = FALSE])
                         
                         hout[[h]] <- PD_delta_y
                       }
@@ -473,7 +473,7 @@ NULL
                       sub <- posub * delta[j]
                       for (k in seq_len(nrow(sub))) {
                         newcomp <- comp0 + sub[k, ]
-                        names(newcomp) <- object$comp_lr$parts
+                        names(newcomp) <- object$complr$parts
                         Delta <- sub[k, get(i)]
                         kout[[k]] <- cbind(comp0, newcomp, Delta)
                       }
@@ -493,22 +493,22 @@ NULL
                     dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
                     
                     # compositions and ilrs for predictions
-                    bcomp0   <- acomp(dnew[, colnames(object$comp_lr$between_comp), with = FALSE], total = object$comp_lr$total)
-                    bcompsub <- acomp(dnew[, object$comp_lr$parts, with = FALSE], total = object$comp_lr$total)
+                    bcomp0   <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
+                    bcompsub <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
                     
-                    bilr0   <- ilr(bcomp0, V = object$comp_lr$psi)
-                    bilrsub <- ilr(bcompsub, V = object$comp_lr$psi)
+                    bilr0   <- ilr(bcomp0, V = object$complr$psi)
+                    bilrsub <- ilr(bcompsub, V = object$complr$psi)
                     wilrsub <- bilrsub - bilr0
                     
-                    colnames(bilr0) <- colnames(object$comp_lr$between_logratio)
-                    colnames(wilrsub) <- colnames(object$comp_lr$within_logratio)
+                    colnames(bilr0) <- colnames(object$complr$between_logratio)
+                    colnames(wilrsub) <- colnames(object$complr$within_logratio)
                     
                     # reference grid 
                     ## get covariate + idvar names
-                    covnames <- colnames(d0) %snin% c(colnames(object$comp_lr$between_logratio),
-                                                      colnames(object$comp_lr$within_logratio),
-                                                      colnames(object$comp_lr$between_comp),
-                                                      colnames(object$comp_lr$within_comp)
+                    covnames <- colnames(d0) %snin% c(colnames(object$complr$between_logratio),
+                                                      colnames(object$complr$within_logratio),
+                                                      colnames(object$complr$between_comp),
+                                                      colnames(object$complr$within_comp)
                     )
                     refgrid <- d0[, covnames, with = FALSE]
                     
@@ -555,7 +555,7 @@ NULL
                         PD_delta_y <- rbindlist(PD_delta_y)
                         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
                                             dsub[, .(Delta, From, To, Level, Reference)],
-                                            dsub[, colnames(refgrid) %snin% object$comp_lr$idvar, with = FALSE])
+                                            dsub[, colnames(refgrid) %snin% object$complr$idvar, with = FALSE])
                         
                         hout[[h]] <- PD_delta_y
                       }
@@ -596,7 +596,7 @@ NULL
                       sub <- posub * delta[j]
                       for (k in seq_len(nrow(sub))) {
                         newcomp <- comp0 + sub[k,]
-                        names(newcomp) <- object$comp_lr$parts
+                        names(newcomp) <- object$complr$parts
                         Delta <- sub[k, get(i)]
                         kout[[k]] <- cbind(comp0, newcomp, Delta)
                       }
@@ -616,16 +616,16 @@ NULL
                     dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
                     
                     # compositions and ilrs for predictions
-                    comp0 <- acomp(dnew[, colnames(object$comp_lr$comp), with = FALSE], total = object$comp_lr$total)
-                    compsub  <- acomp(dnew[, object$comp_lr$parts, with = FALSE], total = object$comp_lr$total)
+                    comp0 <- acomp(dnew[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
+                    compsub  <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
                     
-                    ilrsub <- ilr(bcompsub, V = object$comp_lr$psi)
-                    colnames(ilrsub) <- colnames(object$comp_lr$ILR)
+                    ilrsub <- ilr(compsub, V = object$complr$psi)
+                    colnames(ilrsub) <- colnames(object$complr$ILR)
                     
                     # reference grid 
                     ## get covariate + idvar names
-                    covnames <- colnames(d0) %snin% c(colnames(object$comp_lr$ILR),
-                                                      colnames(object$comp_lr$comp)
+                    covnames <- colnames(d0) %snin% c(colnames(object$complr$ILR),
+                                                      colnames(object$complr$comp)
                     )
                     refgrid <- d0[, covnames, with = FALSE]
                     
@@ -672,7 +672,7 @@ NULL
                         PD_delta_y <- rbindlist(PD_delta_y)
                         PD_delta_y <- cbind(PD_delta_y[, .(Mean, CI_low, CI_high)], 
                                             dsub[, .(Delta, From, To, Level, Reference)],
-                                            dsub[, colnames(refgrid) %snin% object$comp_lr$idvar, with = FALSE])
+                                            dsub[, colnames(refgrid) %snin% object$complr$idvar, with = FALSE])
                         
                         hout[[h]] <- PD_delta_y
                       }
@@ -714,10 +714,10 @@ NULL
                         subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
                         newcomp <- comp0 + subk
                         Delta <- subk[, get(i)]
-                        names(newcomp) <- object$comp_lr$parts
+                        names(newcomp) <- object$complr$parts
                         
                         dnew <- cbind(comp0, newcomp, 
-                                      d0[, colnames(d0) %in% colnames(object$comp_lr$data[, -object$comp_lr$part, with = FALSE]), with = FALSE], 
+                                      d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE], 
                                       Delta)
                         # useful information for the final results
                         dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
@@ -729,16 +729,16 @@ NULL
                         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
                         
                         # compositions and ilrs for predictions
-                        bcomp0    <- acomp(dnew[, colnames(object$comp_lr$between_comp), with = FALSE], total = object$comp_lr$total)
-                        bcompsub  <- acomp(dnew[, object$comp_lr$parts, with = FALSE], total = object$comp_lr$total)
+                        bcomp0    <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
+                        bcompsub  <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
                         
-                        bilr0    <- ilr(bcomp0, V = object$comp_lr$psi)
-                        bilrsub  <- ilr(bcompsub, V = object$comp_lr$psi)
+                        bilr0    <- ilr(bcomp0, V = object$complr$psi)
+                        bilrsub  <- ilr(bcompsub, V = object$complr$psi)
                         
                         wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
                         
-                        colnames(bilrsub) <- colnames(object$comp_lr$between_logratio)
-                        colnames(wilr0)   <- colnames(object$comp_lr$within_logratio)
+                        colnames(bilrsub) <- colnames(object$complr$between_logratio)
+                        colnames(wilr0)   <- colnames(object$complr$within_logratio)
                         
                         # prediction
                         dsub <- cbind(dnew, bilrsub, wilr0)
@@ -806,10 +806,10 @@ NULL
                         subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
                         newcomp <- comp0 + subk
                         Delta <- subk[, get(i)]
-                        names(newcomp) <- object$comp_lr$parts
+                        names(newcomp) <- object$complr$parts
                         
                         dnew <- cbind(comp0, newcomp, 
-                                      d0[, colnames(d0) %in% colnames(object$comp_lr$data[, -object$comp_lr$part, with = FALSE]), with = FALSE], 
+                                      d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE], 
                                       Delta)
                         
                         # useful information for the final output
@@ -822,16 +822,16 @@ NULL
                         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
                         
                         # compositions and ilr for predictions
-                        bcomp0   <- acomp(dnew[, colnames(object$comp_lr$between_comp), with = FALSE], total = object$comp_lr$total)
-                        bcompsub <- acomp(dnew[, object$comp_lr$parts, with = FALSE], total = object$comp_lr$total)
+                        bcomp0   <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
+                        bcompsub <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
                         
-                        bilr0   <- ilr(bcomp0, V = object$comp_lr$psi)
-                        bilrsub <- ilr(bcompsub, V = object$comp_lr$psi)
+                        bilr0   <- ilr(bcomp0, V = object$complr$psi)
+                        bilrsub <- ilr(bcompsub, V = object$complr$psi)
                         
                         wilrsub <- bilrsub - bilr0 
                         
-                        colnames(bilr0)   <- colnames(object$comp_lr$between_logratio)
-                        colnames(wilrsub) <- colnames(object$comp_lr$within_logratio)
+                        colnames(bilr0)   <- colnames(object$complr$between_logratio)
+                        colnames(wilrsub) <- colnames(object$complr$within_logratio)
                         
                         # substitution data
                         dsub <- cbind(dnew, bilr0, wilrsub)
@@ -903,9 +903,9 @@ NULL
                         subk <- subk[rep(seq_len(nrow(subk)), nrow(comp0)), ]
                         newcomp <- comp0 + subk
                         Delta <- subk[, get(i)]
-                        names(newcomp) <- object$comp_lr$parts
+                        names(newcomp) <- object$complr$parts
                         
-                        dnew <- cbind(newcomp, object$comp_lr$data, Delta)
+                        dnew <- cbind(newcomp, object$complr$data, Delta)
                         
                         # useful information for the final results
                         dnew[, From := rep(subvar, length.out = nrow(dnew))[k]]
@@ -917,10 +917,10 @@ NULL
                         dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
                         
                         # compositions and ilrs for predictions
-                        tcomp <- acomp(dnew[, object$comp_lr$parts, with = FALSE], total = object$comp_lr$total)
-                        tilr <- ilr(tcomp, V = object$comp_lr$psi)
+                        tcomp <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
+                        tilr <- ilr(tcomp, V = object$complr$psi)
                         
-                        colnames(tilr) <- colnames(object$comp_lr$ILR)
+                        colnames(tilr) <- colnames(object$complr$ILR)
                         
                         # substitution data
                         dsub <- cbind(dnew, tilr)

@@ -11,7 +11,7 @@
 #' @param ... Further arguments passed to \code{\link{brm}}.
 #' 
 #' @return A \code{\link{brmcoda}} with two elements
-#'   \item{\code{comp_lr}}{ An object of class \code{complr} used in the \code{brm} model. }
+#'   \item{\code{complr}}{ An object of class \code{complr} used in the \code{brm} model. }
 #'   \item{\code{model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
 #'   along with many other useful information about the model.}
 #' @importFrom brms brm
@@ -67,7 +67,7 @@ brmcoda <- function (complr, formula, ...) {
            ...)
   
   structure(
-    list(comp_lr = complr,
+    list(complr = complr,
          model = m),
     class = "brmcoda")
 }

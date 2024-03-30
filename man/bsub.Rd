@@ -2,6 +2,7 @@
 % Please edit documentation in R/substitution-bsub.R
 \name{bsub}
 \alias{bsub}
+\alias{substitution}
 \title{Between-person Simple Substitution}
 \usage{
 bsub(

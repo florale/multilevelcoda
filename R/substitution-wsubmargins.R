@@ -4,7 +4,9 @@
 #' when compositional parts are substituted for specific unit(s) at \emph{within} level
 #' using cluster mean (e.g., compositional mean at individual level) as reference composition. 
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
-#'
+#' 
+#' @aliases substitution
+#' 
 #' @inheritParams substitution
 #' 
 #' @seealso \code{\link{substitution}}
@@ -49,7 +51,7 @@ wsubmargins <- function (object,
                  fill = FALSE)
   
   # error if delta out of range
-  comp0 <- d0[, colnames(object$comp_lr$between_comp), with = FALSE]
+  comp0 <- d0[, colnames(object$complr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(comp0, min)))) {

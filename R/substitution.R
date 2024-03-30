@@ -94,11 +94,11 @@ substitution <- function(object,
   class(object)))
   }
   
-  if (isFALSE(identical(object$comp_lr$transform, "ilr"))) {
+  if (isFALSE(identical(object$complr$transform, "ilr"))) {
     stop(sprintf(
       "Can't handle an object of class (%s) in 'substitution', 
       'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
-      object$comp_lr$transform)
+      object$complr$transform)
     )
   }
   
@@ -122,7 +122,7 @@ substitution <- function(object,
   }
   
   if (isTRUE(missing(basesub))) {
-    count <- length(object$comp_lr$parts)
+    count <- length(object$complr$parts)
     n <- count - 2
     
     subvars1 <- c(1, -1)
@@ -132,7 +132,7 @@ substitution <- function(object,
     nc <- length(subvars)
     nr <- (nc - 1) * count
     
-    basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$comp_lr$parts))
+    basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$complr$parts))
     k <- 0
     
     for (i in 1:nc)
@@ -143,23 +143,23 @@ substitution <- function(object,
         }
     
     basesub <- as.data.table(basesub)
-    names(basesub) <- object$comp_lr$parts
+    names(basesub) <- object$complr$parts
     
   } else if(isFALSE(missing(basesub))) {
-    if (isFALSE(identical(ncol(basesub), length(object$comp_lr$parts)))) {
+    if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
       stop(sprintf(
         "The number of columns in 'basesub' (%d) must be the same
         as the compositional parts in 'parts' (%d).",
         ncol(basesub),
-        length(object$comp_lr$parts)
+        length(object$complr$parts)
       ))
     }
-    if (isFALSE(identical(colnames(basesub), object$comp_lr$parts))) {
+    if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
       stop(sprintf(
         "The names of compositional parts must be the
         same in 'basesub' (%s) and 'parts' (%s).",
         colnames(basesub),
-        object$comp_lr$parts
+        object$complr$parts
       ))
     }
   }
@@ -355,7 +355,7 @@ substitution <- function(object,
       ref = ref,
       level = level,
       weight = weight,
-      parts = object$comp_lr$parts,
+      parts = object$complr$parts,
       summary = summary),
     class = "substitution")
 }

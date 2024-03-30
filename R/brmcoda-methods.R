@@ -16,10 +16,10 @@ is.brmcoda <- function(x) {
 #' @method nobs brmcoda
 #' @export
 nobs.brmcoda <- function(object, ...) {
-  nobs(object$Model, ...)
+  nobs(object$model, ...)
 }
 
-#' Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object
+#' Extracting the model Frame from a Formula or Fit from \pkg{brmcoda} object
 #'
 #' @param formula A \code{brmcoda} object.
 #' @param ... Further arguments to be passed to methods.
@@ -28,7 +28,7 @@ nobs.brmcoda <- function(object, ...) {
 #' @method model.frame brmcoda
 #' @export
 model.frame.brmcoda <- function(formula, ...) {
-  model.frame(formula$Model, ...)
+  model.frame(formula$model, ...)
 }
 
 #' Index \code{brmcoda} objects
@@ -50,7 +50,7 @@ NULL
 #' 
 #' @export
 variables.brmcoda <- function(x, ...) {
-  variables(x$Model, ...)
+  variables(x$model, ...)
 }
 
 #' @rdname draws-index-brmcoda
@@ -61,7 +61,7 @@ variables.brmcoda <- function(x, ...) {
 #' 
 #' @export
 nvariables.brmcoda <- function(x, ...) {
-  nvariables(x$Model, ...)
+  nvariables(x$model, ...)
 }
 
 #' @rdname draws-index-brmcoda
@@ -72,7 +72,7 @@ nvariables.brmcoda <- function(x, ...) {
 #' 
 #' @export
 niterations.brmcoda <- function(x) {
-  niterations(x$Model)
+  niterations(x$model)
 }
 
 #' @rdname draws-index-brmcoda
@@ -83,7 +83,7 @@ niterations.brmcoda <- function(x) {
 #' 
 #' @export 
 nchains.brmcoda <- function(x) {
-  nchains(x$Model)
+  nchains(x$model)
 }
 
 #' @rdname draws-index-brmcoda
@@ -94,18 +94,18 @@ nchains.brmcoda <- function(x) {
 #' 
 #' @export
 ndraws.brmcoda <- function(x) {
-  ndraws(x$Model)
+  ndraws(x$model)
 }
 
 # nwarmup.brmcoda <- function(x) {
-#   if (inherits(x$Model, "brmcoda")) {
-#     nwarmup(x$Model)
+#   if (inherits(x$model, "brmcoda")) {
+#     nwarmup(x$model)
 #   }
 # }
 #
 # nthin.brmcoda <- function(x) {
-#   if (inherits(x$Model, "brmcoda")) {
-#     nthin(x$Model)
+#   if (inherits(x$model, "brmcoda")) {
+#     nthin(x$model)
 #   }
 # }
 
@@ -130,7 +130,7 @@ NULL
 #' 
 #' @export
 log_posterior.brmcoda <- function(object, ...) {
-  log_posterior(object$Model, ...)
+  log_posterior(object$model, ...)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -141,7 +141,7 @@ log_posterior.brmcoda <- function(object, ...) {
 #' 
 #' @export
 nuts_params.brmcoda <- function(object, ...) {
-  nuts_params(object$Model, ...)
+  nuts_params(object$model, ...)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -152,7 +152,7 @@ nuts_params.brmcoda <- function(object, ...) {
 #' 
 #' @export
 rhat.brmcoda <- function(x, ...) {
-  rhat(x$Model, ...)
+  rhat(x$model, ...)
 }
 
 #' @rdname diagnostic-quantities-brmcoda
@@ -163,7 +163,7 @@ rhat.brmcoda <- function(x, ...) {
 #' 
 #' @export
 neff_ratio.brmcoda <- function(object, ...) {
-  neff_ratio(object$Model, ...)
+  neff_ratio(object$model, ...)
 }
 
 #' Bayes Factors from Marginal Likelihoods
@@ -181,7 +181,7 @@ neff_ratio.brmcoda <- function(object, ...) {
 #' 
 #' @export
 bayes_factor.brmcoda <- function(x1, x2, ...) {
-  out <- invisible(bayes_factor(x1 = x1$Model, x2 = x2$Model, ...))
+  out <- invisible(bayes_factor(x1 = x1$model, x2 = x2$model, ...))
   
   m1 <- deparse(substitute(x1))
   m2 <- deparse(substitute(x2))
@@ -204,7 +204,7 @@ bayes_factor.brmcoda <- function(x1, x2, ...) {
 #' 
 #' @export
 prior_summary.brmcoda <- function(object, ...) {
-  prior_summary(object$Model, ...)
+  prior_summary(object$model, ...)
 }
 
 #' Posterior Predictive Checks for \code{brmcoda} Objects
@@ -223,7 +223,7 @@ prior_summary.brmcoda <- function(object, ...) {
 #' 
 #' @export
 pp_check.brmcoda <- function(object, ...) {
-  pp_check(object$Model, ...)
+  pp_check(object$model, ...)
 }
 
 #' #' Posteriors Sampling Diagnostic
@@ -242,5 +242,5 @@ pp_check.brmcoda <- function(object, ...) {
 #' #' 
 #' #' @export
 #' diagnostic_posterior.brmcoda <- function(posteriors, diagnostic = c("ESS", "Rhat"), ...) {
-#'   diagnostic_posterior(posterior$Model, diagnostic = diagnostic, ...)
+#'   diagnostic_posterior(posterior$model, diagnostic = diagnostic, ...)
 #' }
