@@ -82,7 +82,7 @@
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"composition"</span>, <span class="st">"logratio"</span><span class="op">)</span>,</span>
-<span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span>, <span class="st">"total"</span><span class="op">)</span>,</span>
+<span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span>, <span class="st">"combined"</span><span class="op">)</span>,</span>
 <span>  weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -104,7 +104,7 @@ specify the geometry of the composition.</p></dd>
 
 
 <dt>level</dt>
-<dd><p>Optional. Can be <code>"between"</code>, <code>"within"</code>, and/or <code>total</code>
+<dd><p>Optional. Can be <code>"between"</code>, <code>"within"</code>, and/or <code>"combined"</code>
 indicating the level of the geometry.</p></dd>
 
 
@@ -127,7 +127,39 @@ Default is <code>equal</code>.</p></dd>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in gsi.plain(oneOrDataset(X))[, parts, drop = FALSE]:</span> subscript out of bounds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Raw Compositional Mean: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      TST     WAKE     MVPA      LPA       SB </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "0.3257" "0.0394" "0.0836" "0.3785" "0.1727" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acomp"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Between-level Compositional Mean: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     BTST    BWAKE    BMVPA     BLPA      BSB </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "0.3109" "0.0422" "0.0986" "0.3816" "0.1667" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acomp"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Within-level Compositional Mean: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    WTST   WWAKE   WMVPA    WLPA     WSB </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "0.215" "0.196" "0.176" "0.207" "0.207" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acomp"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Isometric Log-ratio (Real) Mean: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ilr1  ilr2   ilr3  ilr4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;num&gt; &lt;num&gt;  &lt;num&gt; &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.458  1.48 -0.911 0.605</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Between-level Isometric Log-ratio (Real) Mean: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   bilr1 bilr2 bilr3 bilr4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.521  1.42 -0.78  0.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Within-level Isometric Log-ratio (Real) Mean: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   wilr1  wilr2 wilr3  wilr4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;num&gt;  &lt;num&gt; &lt;num&gt;  &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0636 0.0666 -0.13 0.0254</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
