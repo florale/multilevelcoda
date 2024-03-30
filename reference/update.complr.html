@@ -101,36 +101,33 @@ It must include a composition and the same ID variable as the existing <code>com
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code>complr</code> object with twelve elements.</p>
-<dl><dt><code>BetweenComp</code></dt>
-<dd><p>A vector of class <code>acomp</code> representing one closed between-person composition
-or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></dd>
-
-<dt><code>WithinComp</code></dt>
-<dd><p>A vector of class <code>acomp</code> representing one closed within-person composition
-or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></dd>
-
-<dt><code>Comp</code></dt>
+<p>A <code>complr</code> object with at least 11 elements.</p>
+<dl><dt><code>comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed composition
 or a matrix of class <code>acomp</code> representing multiple closed  compositions each in one row.</p></dd>
 
-<dt><code>BetweenILR</code></dt>
+<dt><code>between_comp</code></dt>
+<dd><p>A vector of class <code>acomp</code> representing one closed between-person composition
+or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></dd>
+
+<dt><code>within_comp</code></dt>
+<dd><p>A vector of class <code>acomp</code> representing one closed within-person composition
+or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></dd>
+
+<dt><code>logratio</code></dt>
+<dd><p>Log ratio transform of composition.</p></dd>
+
+<dt><code>between_logratio</code></dt>
 <dd><p>Isometric log ratio transform of between-person composition.</p></dd>
 
-<dt><code>WithinILR</code></dt>
+<dt><code>within_logratio</code></dt>
 <dd><p>Isometric log ratio transform of within-person composition.</p></dd>
-
-<dt><code>ILR</code></dt>
-<dd><p>Isometric log ratio transform of composition.</p></dd>
 
 <dt><code>data</code></dt>
 <dd><p>The user's dataset or imputed dataset if the input data contains zeros.</p></dd>
 
-<dt><code>psi</code></dt>
-<dd><p>A ILR matrix associated with user-defined partition structure.</p></dd>
-
-<dt><code>sbp</code></dt>
-<dd><p>The user-defined sequential binary partition matrix.</p></dd>
+<dt><code>transform</code></dt>
+<dd><p>Type of transform applied on compositional data.</p></dd>
 
 <dt><code>parts</code></dt>
 <dd><p>Names of compositional variables.</p></dd>
@@ -155,7 +152,7 @@ or a matrix of class <code>acomp</code> representing multiple closed  compositio
 <span class="r-in"><span><span class="co"># update with new data</span></span></span>
 <span class="r-in"><span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="va">mcompd</span><span class="op">[</span><span class="va">ID</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">]</span> <span class="co"># excluding ID 1</span></span></span>
 <span class="r-in"><span><span class="va">cilr1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">cilr</span>, newdata <span class="op">=</span> <span class="va">newdat</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> j mixes positives and negatives</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in complr(newdata, sbp, parts, total, idvar):</span> only one type of transforms can be done at a time.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

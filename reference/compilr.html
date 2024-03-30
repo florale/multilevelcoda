@@ -84,36 +84,33 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code>complr</code> object with twelve elements.</p>
-<dl><dt><code>BetweenComp</code></dt>
-<dd><p>A vector of class <code>acomp</code> representing one closed between-person composition
-or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></dd>
-
-<dt><code>WithinComp</code></dt>
-<dd><p>A vector of class <code>acomp</code> representing one closed within-person composition
-or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></dd>
-
-<dt><code>Comp</code></dt>
+<p>A <code>complr</code> object with at least 11 elements.</p>
+<dl><dt><code>comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed composition
 or a matrix of class <code>acomp</code> representing multiple closed  compositions each in one row.</p></dd>
 
-<dt><code>BetweenILR</code></dt>
+<dt><code>between_comp</code></dt>
+<dd><p>A vector of class <code>acomp</code> representing one closed between-person composition
+or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></dd>
+
+<dt><code>within_comp</code></dt>
+<dd><p>A vector of class <code>acomp</code> representing one closed within-person composition
+or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></dd>
+
+<dt><code>logratio</code></dt>
+<dd><p>Log ratio transform of composition.</p></dd>
+
+<dt><code>between_logratio</code></dt>
 <dd><p>Isometric log ratio transform of between-person composition.</p></dd>
 
-<dt><code>WithinILR</code></dt>
+<dt><code>within_logratio</code></dt>
 <dd><p>Isometric log ratio transform of within-person composition.</p></dd>
-
-<dt><code>ILR</code></dt>
-<dd><p>Isometric log ratio transform of composition.</p></dd>
 
 <dt><code>data</code></dt>
 <dd><p>The user's dataset or imputed dataset if the input data contains zeros.</p></dd>
 
-<dt><code>psi</code></dt>
-<dd><p>A ILR matrix associated with user-defined partition structure.</p></dd>
-
-<dt><code>sbp</code></dt>
-<dd><p>The user-defined sequential binary partition matrix.</p></dd>
+<dt><code>transform</code></dt>
+<dd><p>Type of transform applied on compositional data.</p></dd>
 
 <dt><code>parts</code></dt>
 <dd><p>Names of compositional variables.</p></dd>
