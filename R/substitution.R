@@ -35,13 +35,13 @@
 #' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the results of multilevel compositional substitution model.
-#' The first four lists contain the results of the substitution estimation for a compositional part. 
+#' The first six lists contain the results of the substitution estimation for a compositional part. 
 #'   \item{\code{Mean}}{ Posterior means.}
 #'   \item{\code{CI_low} and \code{CI_high}}{ 95% credible intervals.}
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{ Level where changes in composition takes place. Either \code{between} or \code{within}.}
+#'   \item{\code{Level}}{ Level where changes in composition takes place.
 #'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 #' 
 #' @importFrom data.table as.data.table copy :=
@@ -94,11 +94,11 @@ substitution <- function(object,
   class(object)))
   }
   
-  if (isFALSE(identical(object$CompLR$transform, "ilr"))) {
+  if (isFALSE(identical(object$comp_lr$transform, "ilr"))) {
     stop(sprintf(
       "Can't handle an object of class (%s) in 'substitution', 
       'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
-      object$CompLR$transform)
+      object$comp_lr$transform)
     )
   }
   
@@ -122,7 +122,7 @@ substitution <- function(object,
   }
   
   if (isTRUE(missing(basesub))) {
-    count <- length(object$CompILR$parts)
+    count <- length(object$comp_lr$parts)
     n <- count - 2
     
     subvars1 <- c(1, -1)
@@ -132,7 +132,7 @@ substitution <- function(object,
     nc <- length(subvars)
     nr <- (nc - 1) * count
     
-    basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$CompILR$parts))
+    basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$comp_lr$parts))
     k <- 0
     
     for (i in 1:nc)
@@ -143,23 +143,23 @@ substitution <- function(object,
         }
     
     basesub <- as.data.table(basesub)
-    names(basesub) <- object$CompILR$parts
+    names(basesub) <- object$comp_lr$parts
     
   } else if(isFALSE(missing(basesub))) {
-    if (isFALSE(identical(ncol(basesub), length(object$CompILR$parts)))) {
+    if (isFALSE(identical(ncol(basesub), length(object$comp_lr$parts)))) {
       stop(sprintf(
         "The number of columns in 'basesub' (%d) must be the same
         as the compositional parts in 'parts' (%d).",
         ncol(basesub),
-        length(object$CompILR$parts)
+        length(object$comp_lr$parts)
       ))
     }
-    if (isFALSE(identical(colnames(basesub), object$CompILR$parts))) {
+    if (isFALSE(identical(colnames(basesub), object$comp_lr$parts))) {
       stop(sprintf(
         "The names of compositional parts must be the
         same in 'basesub' (%s) and 'parts' (%s).",
         colnames(basesub),
-        object$CompILR$parts
+        object$comp_lr$parts
       ))
     }
   }
@@ -345,17 +345,17 @@ substitution <- function(object,
   
   structure(
     list(
-      BetweenSub = if(exists("bout")) (bout) else (NULL),
-      WithinSub = if(exists("wout")) (wout) else (NULL),
-      Sub = if(exists("tout")) (tout) else (NULL),
-      BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
-      WithinSubMargins = if(exists("wmout")) (wmout) else (NULL),
-      SubMargins = if(exists("tmout")) (tmout) else (NULL),
+      between_simple_sub = if(exists("bout")) (bout) else (NULL),
+      within_simple_sub = if(exists("wout")) (wout) else (NULL),
+      simple_sub = if(exists("tout")) (tout) else (NULL),
+      between_avg_sub = if(exists("bmout")) (bmout) else (NULL),
+      within_avg_sub = if(exists("wmout")) (wmout) else (NULL),
+      avg_sub = if(exists("tmout")) (tmout) else (NULL),
       delta = delta,
       ref = ref,
       level = level,
       weight = weight,
-      parts = object$CompILR$parts,
+      parts = object$comp_lr$parts,
       summary = summary),
     class = "substitution")
 }

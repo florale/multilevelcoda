@@ -170,5 +170,5 @@ pairs.brmcoda <- function(x, ...) {
 #' mcmc_plot(fit)
 #' }
 mcmc_plot.brmcoda <- function(object, ...) {
-  mcmc_plot(object$Model, ...)
+  mcmc_plot(object$model, ...)
 }

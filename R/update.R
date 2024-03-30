@@ -114,10 +114,10 @@ update.brmcoda <- function(object,
   
   # updating only formula
   if (!is.null(formula.) && is.null(newcomplr) && is.null(newdata)) {
-    fit_new <- update(object$Model, formula. = formula., ...)
+    fit_new <- update(object$model, formula. = formula., ...)
     
     structure(
-      list(CompILR = object$CompILR,
+      list(CompILR = object$comp_lr,
            Model = fit_new),
       class = "brmcoda")
     
@@ -125,7 +125,7 @@ update.brmcoda <- function(object,
     
     if(is.null(newcomplr)) {
       if(!is.null(newdata)) {
-        newcomplr <- update(object$CompILR, newdata = newdata)
+        newcomplr <- update(object$comp_lr, newdata = newdata)
       }} else {
         if(isFALSE(inherits(newcomplr, "complr"))) {
           stop("'newcomplr' must be an object of class 'complr'.")
@@ -137,7 +137,7 @@ update.brmcoda <- function(object,
                      newcomplr$WithinILR,
                      newcomplr$TotalILR)
     
-    fit_new <- update(object$Model, formula. = formula., newdata = newdata, ...)
+    fit_new <- update(object$model, formula. = formula., newdata = newdata, ...)
     
     structure(
       list(CompILR = newcomplr,

@@ -16,7 +16,7 @@
 #' @importFrom shinystan launch_shinystan
 #' @export
 launch_shinystan.brmcoda <- function(object, ...) {
-  launch_shinystan(object$Model, ...)
+  launch_shinystan(object$model, ...)
 }
 
 #' multilevelcoda Simulation Study Results

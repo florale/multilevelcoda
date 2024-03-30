@@ -65,26 +65,26 @@ predict.brmcoda <- function(object,
   
   if (isFALSE(acomp)) {
     out <- predict(
-      object$Model,
+      object$model,
       summary = summary,
       ...
     )
   } else {
-    if (isFALSE(inherits(object$Model$formula, "mvbrmsformula"))) {
+    if (isFALSE(inherits(object$model$formula, "mvbrmsformula"))) {
       stop(sprintf(
         "This is a %s model, but a model of class mvbrmsformula is required to
   return results on compsitional scale.",
-  class(object$Model$formula)[1]))
+  class(object$model$formula)[1]))
       
     } else {
       out <- predict(
-        object$Model,
+        object$model,
         summary = FALSE,
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
-        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$CompILR$sbp)))
-        as.data.table(clo(x, total = object$CompILR$total))
+        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$comp_lr$sbp)))
+        as.data.table(clo(x, total = object$comp_lr$total))
       })
       
       out <- brms::do_call(abind::abind, c(out, along = 3))
@@ -92,7 +92,7 @@ predict.brmcoda <- function(object,
       
       if(isTRUE(summary)) {
         out <- brms::posterior_summary(out)
-        dimnames(out)[[3]] <- object$CompILR$parts
+        dimnames(out)[[3]] <- object$comp_lr$parts
       }
     }
   }
@@ -166,26 +166,26 @@ fitted.brmcoda <- function(object,
   
   if (isFALSE(acomp)) {
     out <- fitted(
-      object$Model,
+      object$model,
       summary = summary,
       ...
     )
   } else {
-    if (isFALSE(inherits(object$Model$formula, "mvbrmsformula"))) {
+    if (isFALSE(inherits(object$model$formula, "mvbrmsformula"))) {
       stop(sprintf(
         "This is a %s model, but a model of class mvbrmsformula is required to
   return results on compsitional scale.",
-  class(object$Model$formula)[1]))
+  class(object$model$formula)[1]))
       
     } else {
       out <- fitted(
-        object$Model,
+        object$model,
         summary = FALSE,
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
-        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$CompILR$sbp)))
-        as.data.table(clo(x, total = object$CompILR$total))
+        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$comp_lr$sbp)))
+        as.data.table(clo(x, total = object$comp_lr$total))
       })
       
       out <- brms::do_call(abind::abind, c(out, along = 3))
@@ -193,7 +193,7 @@ fitted.brmcoda <- function(object,
       
       if(isTRUE(summary)) {
         out <- brms::posterior_summary(out)
-        dimnames(out)[[3]] <- object$CompILR$parts
+        dimnames(out)[[3]] <- object$comp_lr$parts
       }
     }
   }
@@ -236,7 +236,7 @@ fitted.brmcoda <- function(object,
 #' @export fixef
 #' @export
 fixef.brmcoda <- function(object, ...) {
-  fixef(object$Model, ...)
+  fixef(object$model, ...)
 }
 
 #' Covariance and Correlation Matrix of Population-Level Effects
@@ -271,7 +271,7 @@ fixef.brmcoda <- function(object, ...) {
 #' }}
 #' @export
 vcov.brmcoda <- function(object, ...) {
-  vcov(object$Model, ...)
+  vcov(object$model, ...)
 }
 
 #' Group-Level Estimates
@@ -309,7 +309,7 @@ vcov.brmcoda <- function(object, ...) {
 #' @export ranef
 #' @export
 ranef.brmcoda <- function(object, ...) {
-  ranef(object$Model, ...)
+  ranef(object$model, ...)
 }
 
 #' Model Coefficients
@@ -351,7 +351,7 @@ ranef.brmcoda <- function(object, ...) {
 #' }}
 #' @export
 coef.brmcoda <- function(object, ...) {
-  coef(object$Model, ...)
+  coef(object$model, ...)
 }
 
 #' Extract Variance and Correlation Components
@@ -423,7 +423,7 @@ VarCorr.brmcoda <- function(x, ...) {
 #' }}
 #' @export
 residuals.brmcoda <- function(object, ...) {
-  residuals(object$Model, ...)
+  residuals(object$model, ...)
 }
 
 #' Efficient approximate leave-one-out cross-validation (LOO)

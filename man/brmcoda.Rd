@@ -19,8 +19,8 @@ Details of the model specification can be found in \code{\link{brmsformula}}.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements
-\item{\code{CompILR}}{ An object of class \code{complr} used in the \code{brm} model. }
-\item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
+\item{\code{comp_lr}}{ An object of class \code{complr} used in the \code{brm} model. }
+\item{\code{model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
 \description{
@@ -33,9 +33,9 @@ if(requireNamespace("cmdstanr")){
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
   
   # inspects ILRs before passing to brmcoda
-  names(cilr$BetweenILR)
-  names(cilr$WithinILR)
-  names(cilr$TotalILR)
+  names(cilr$between_logratio)
+  names(cilr$within_logratio)
+  names(cilr$logratio)
   
   # model with compositional predictor at between and within-person levels
   m1 <- brmcoda(complr = cilr,

@@ -16,19 +16,18 @@ It must include a composition and the same ID variable as the existing \code{\li
 \item{...}{generic argument, not in use.}
 }
 \value{
-A \code{\link{complr}} object with twelve elements.
-\item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
-or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-\item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
-or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-\item{\code{Comp}}{ A vector of class \code{acomp} representing one closed composition
+A \code{\link{complr}} object with at least 11 elements.
+\item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
 or a matrix of class \code{acomp} representing multiple closed  compositions each in one row.}
-\item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
-\item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-\item{\code{ILR}}{ Isometric log ratio transform of composition.}
+\item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
+or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
+\item{\code{within_comp}}{ A vector of class \code{acomp} representing one closed within-person composition
+or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
+\item{\code{logratio}}{ Log ratio transform of composition.}
+\item{\code{between_logratio}}{ Isometric log ratio transform of between-person composition.}
+\item{\code{within_logratio}}{ Isometric log ratio transform of within-person composition.}
 \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
-\item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
-\item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
+\item{\code{transform}}{ Type of transform applied on compositional data.}
 \item{\code{parts}}{ Names of compositional variables.}
 \item{\code{idvar}}{ Name of the variable containing IDs.}
 \item{\code{total}}{ Total amount to which the compositions is closed.}

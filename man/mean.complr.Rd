@@ -7,7 +7,7 @@
 \method{mean}{complr}(
   x,
   ...,
-  class = c("composition", "logratio"),
+  class = c("comp", "logratio"),
   level = c("between", "within", "combined"),
   weight = c("equal", "proportional"),
   digits = 3

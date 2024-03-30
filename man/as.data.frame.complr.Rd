@@ -3,20 +3,20 @@
 \name{as.data.frame.complr}
 \alias{as.data.frame.complr}
 \alias{as.matrix.complr}
-\title{Extract Compositional Data from \code{complr} object.}
+\title{Extract compositionositional Data from \code{complr} object.}
 \usage{
 \method{as.data.frame}{complr}(
   x,
   row.names = NULL,
   optional = TRUE,
-  class = c("composition", "logratio"),
+  class = c("comp", "logratio"),
   level = c("between", "within", "combined"),
   ...
 )
 
 \method{as.matrix}{complr}(
   x,
-  class = c("composition", "logratio"),
+  class = c("comp", "logratio"),
   level = c("between", "within", "combined"),
   ...
 )

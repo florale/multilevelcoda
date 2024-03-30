@@ -135,7 +135,7 @@ sub <- function (object,
       stop("ref must be 'grandmean' or a data table, data frame or matrix.")
     }
     if(isFALSE(
-      (colnames(as.data.table(ref_grid(object$Model)@grid)) %snin% ".wgt.") %ain% colnames(ref))) { # ensure all covs are provided
+      (colnames(as.data.table(ref_grid(object$model)@grid)) %snin% ".wgt.") %ain% colnames(ref))) { # ensure all covs are provided
       stop(paste(
         "'ref' should contains information about",
         "  the covariates in 'brmcoda' model to estimate the substitution model.",
@@ -148,7 +148,7 @@ sub <- function (object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$CompILR$BetweenComp), with = FALSE]
+  comp0 <- d0[1, colnames(object$comp_lr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(comp0)))) {

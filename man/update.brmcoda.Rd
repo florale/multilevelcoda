@@ -22,8 +22,8 @@ ILR coordinates, and other variables used in the updated model.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements
-\item{\code{CompILR}}{ An object of class \code{complr} used in the \code{brm} model. }
-\item{\code{Model}}{ An object of class \code{brmsfit}, which contains the posterior draws
+\item{\code{comp_lr}}{ An object of class \code{complr} used in the \code{brm} model. }
+\item{\code{model}}{ An object of class \code{brmsfit}, which contains the posterior draws
 along with many other useful information about the model.}
 }
 \description{

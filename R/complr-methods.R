@@ -31,7 +31,7 @@ is.complr <- function(x) {
 #' mean(cilr)
 #' @export
 mean.complr <- function(x, ...,
-                         class = c("composition", "logratio"),
+                         class = c("comp", "logratio"),
                          level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
                          digits = 3
@@ -41,32 +41,32 @@ mean.complr <- function(x, ...,
   output <- .get.complr(object = x)
   
   ## Out
-  if ("composition" %in% class) {
+  if ("comp" %in% class) {
     if ("combined" %in% level) {
-      cat("\n", "Raw Compositional Mean:", "\n")
-      print(output$Comp$mean, digits = digits)
+      cat("\n", "Raw compositionositional Mean:", "\n")
+      print(output$comp$mean, digits = digits)
     }
     if ("between" %in% level) {
-      cat("\n", "Between-level Compositional Mean:", "\n")
-      print((output$BetweenComp$mean), digits = digits)
+      cat("\n", "Between-level compositionositional Mean:", "\n")
+      print((output$between_comp$mean), digits = digits)
     }
     if ("within" %in% level) {
-      cat("\n", "Within-level Compositional Mean:", "\n")
-      print((output$WithinComp$mean), digits = digits)
+      cat("\n", "Within-level compositionositional Mean:", "\n")
+      print((output$Withincomp$mean), digits = digits)
     }
   }
   if ("logratio" %in% class) {
     if ("combined" %in% level) {
       cat("\n", "Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(output$ILR)[4,], row.names = FALSE, digits = digits)
+      print(as.data.table(output$logratio)[4,], row.names = FALSE, digits = digits)
     }
     if ("between" %in% level) {
       cat("\n", "Between-level Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(output$BetweenILR)[4,], row.names = FALSE, digits = digits)
+      print(as.data.table(output$between_logratio)[4,], row.names = FALSE, digits = digits)
     }
     if ("within" %in% level) {
       cat("\n", "Within-level Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(output$WithinILR)[4,], row.names = FALSE, digits = digits)
+      print(as.data.table(output$within_logratio)[4,], row.names = FALSE, digits = digits)
     }
   }
   
@@ -79,7 +79,7 @@ mean.complr <- function(x, ...,
   return(invisible(output))
 }
 
-#' Extract Compositional Data from \code{complr} object.
+#' Extract compositionositional Data from \code{complr} object.
 #'
 #' Extract amounts and compositions in conventional formats
 #' as data.frames, matrices, or arrays.
@@ -90,14 +90,14 @@ mean.complr <- function(x, ...,
 #'
 #' @export
 as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
-                                  class = c("composition", "logratio"),
+                                  class = c("comp", "logratio"),
                                   level = c("between", "within", "combined"),
                                   ...) {
   allout <- lapply(x[1:6], as.data.frame)
   output <- data.frame()
   
   ## Out
-  if ("composition" %in% class) {
+  if ("comp" %in% class) {
     if ("combined" %in% level) {
       output <- allout[[1]]
     }
@@ -125,15 +125,15 @@ as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
 #' @rdname as.data.frame.complr
 #' @export
 as.matrix.complr <- function(x, 
-                              class = c("composition", "logratio"),
+                              class = c("comp", "logratio"),
                               level = c("between", "within", "combined"),
                               ...) {
   as.matrix(as.data.frame(x, class = class, level = level, ...))
 }
 
-# ----------------- Extract Compositional Data -----------------
+# ----------------- Extract compositionositional Data -----------------
 .get.complr <- function(object, 
-                         class = c("composition", "logratio"),
+                         class = c("comp", "logratio"),
                          level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
                          digits = 3,
@@ -146,13 +146,13 @@ as.matrix.complr <- function(x,
   }
   
   if (weight == "equal") {
-    bcomp <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenComp)[!duplicated(get(object$idvar))]
-    wcomp <- cbind(object$data[, object$idvar, with = FALSE], object$WithinComp)[!duplicated(get(object$idvar))]
-    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$Comp)[!duplicated(get(object$idvar))]
+    bcomp <- cbind(object$data[, object$idvar, with = FALSE], object$between_comp)[!duplicated(get(object$idvar))]
+    wcomp <- cbind(object$data[, object$idvar, with = FALSE], object$within_comp)[!duplicated(get(object$idvar))]
+    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$comp)[!duplicated(get(object$idvar))]
     
-    bilr <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenILR)[!duplicated(get(object$idvar))]
-    wilr <- cbind(object$data[, object$idvar, with = FALSE], object$WithinILR)[!duplicated(get(object$idvar))]
-    tilr <- cbind(object$data[, object$idvar, with = FALSE], object$ILR)[!duplicated(get(object$idvar))]
+    bilr <- cbind(object$data[, object$idvar, with = FALSE], object$between_logratio)[!duplicated(get(object$idvar))]
+    wilr <- cbind(object$data[, object$idvar, with = FALSE], object$within_logratio)[!duplicated(get(object$idvar))]
+    tilr <- cbind(object$data[, object$idvar, with = FALSE], object$logratio)[!duplicated(get(object$idvar))]
     
     output <- list(
       summary(acomp(bcomp[, -1]), robust = TRUE),
@@ -165,16 +165,16 @@ as.matrix.complr <- function(x,
     
   } else if (weight == "proportional") {
     output <- list(
-      summary(object$BetweenComp, robust = TRUE),
-      summary(object$WithinComp, robust = TRUE),
-      summary(object$Comp, robust = TRUE),
-      data.frame(summary(object$BetweenILR)),
-      data.frame(summary(object$WithinILR)),
-      data.frame(summary(object$ILR))
+      summary(object$between_comp, robust = TRUE),
+      summary(object$within_comp, robust = TRUE),
+      summary(object$comp, robust = TRUE),
+      data.frame(summary(object$between_logratio)),
+      data.frame(summary(object$within_logratio)),
+      data.frame(summary(object$logratio))
     )
   }
   
-  names(output) <- c("BetweenComp", "WithinComp", "Comp", "BetweenILR", "WithinILR", "ILR")
+  names(output) <- c("between_comp", "within_comp", "comp", "between_logratio", "within_logratio", "logratio")
   
   output
 }
