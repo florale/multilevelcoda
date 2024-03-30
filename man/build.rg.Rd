@@ -4,7 +4,7 @@
 \alias{build.rg}
 \title{Reference Grid for \code{substitution} model.}
 \usage{
-build.rg(object, ref, weight, fill = FALSE)
+build.rg(object, ref, level = NULL, weight, fill = FALSE)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
@@ -13,8 +13,13 @@ build.rg(object, ref, weight, fill = FALSE)
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
-User's specified reference grid only applicable to substitution model
-using a single reference composition value.}
+User's specified reference grid is only possible for simple substitution.
+#' Single-level models are default to \code{"grandmean"}.}
+
+\item{level}{A character string or vector.
+Should the estimate focus on the \code{"between"} and/or \code{"within"} or \code{"combined"}
+variance for multilevel models?
+Single-level models are default to \code{"combined"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -27,7 +32,7 @@ in which information about some, but not all covariates is provided
 (e.g., models including age and sex as covariate but only age was provided in the reference grid).
 If \code{TRUE}, the unspecified covariates are filled with the default reference grid.
 If \code{FALSE}, users will be asked to provide a full reference grid.
-Default is \code{FALSE}.}
+Currently only support the default to \code{FALSE}.}
 }
 \value{
 A reference grid consisting of a combination of covariates in \code{brmcoda}

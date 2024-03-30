@@ -10,7 +10,7 @@ substitution(
   basesub = NULL,
   summary = TRUE,
   ref = c("grandmean", "clustermean"),
-  level = c("between", "within"),
+  level = c("between", "within", "combined"),
   weight = c("equal", "proportional"),
   ...
 )
@@ -35,10 +35,13 @@ the isometric log-ratio coordinates (i.e., adjusted model).}
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
-User's specified reference grid is only possible for simple substitution.}
+User's specified reference grid is only possible for simple substitution.
+#' Single-level models are default to \code{"grandmean"}.}
 
 \item{level}{A character string or vector.
-Should the estimate be at the \code{"between"} and/or \code{"within"} level?}
+Should the estimate focus on the \code{"between"} and/or \code{"within"} or \code{"combined"}
+variance for multilevel models?
+Single-level models are default to \code{"combined"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -73,12 +76,18 @@ if(requireNamespace("cmdstanr")){
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                  idvar = "ID", total = 1440)
   
-  # model with compositional predictor at between and between-person levels
-  m <- brmcoda(complr = cilr,
-               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-               chain = 1, iter = 500, backend = "cmdstanr")
+  # model with compositional predictor at between and between-person levels of variance
+  fit1 <- brmcoda(complr = cilr,
+                  formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
+                                     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+                  chain = 1, iter = 500, backend = "cmdstanr")
+  sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
   
-  subm <- substitution(object = m, delta = 5)
+  # model with compositional predictor at combined level of variance
+  fit2 <- brmcoda(complr = cilr,
+                  formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
+                  chain = 1, iter = 500, backend = "cmdstanr")
+  sub2 <- substitution(object = fit2, delta = 5, level = c("combined"))
+  
 }}
 }

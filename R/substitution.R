@@ -15,7 +15,8 @@
 #' Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
-#' User's specified reference grid is only possible for simple substitution. 
+#' User's specified reference grid is only possible for simple substitution.
+#' #' Single-level models are default to \code{"grandmean"}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -23,7 +24,9 @@
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate be at the \code{"between"} and/or \code{"within"} level?
+#' Should the estimate focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} 
+#' variance for multilevel models?
+#' Single-level models are default to \code{"combined"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
@@ -51,13 +54,19 @@
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                  idvar = "ID", total = 1440)
 #'   
-#'   # model with compositional predictor at between and between-person levels
-#'   m <- brmcoda(complr = cilr,
-#'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-#'                chain = 1, iter = 500, backend = "cmdstanr")
+#'   # model with compositional predictor at between and between-person levels of variance
+#'   fit1 <- brmcoda(complr = cilr,
+#'                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                      wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                   chain = 1, iter = 500, backend = "cmdstanr")
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
 #'   
-#'   subm <- substitution(object = m, delta = 5)
+#'   # model with compositional predictor at combined level of variance
+#'   fit2 <- brmcoda(complr = cilr,
+#'                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
+#'                   chain = 1, iter = 500, backend = "cmdstanr")
+#'   sub2 <- substitution(object = fit2, delta = 5, level = c("combined"))
+#'   
 #' }}
 #' @export
 substitution <- function(object,
@@ -65,7 +74,7 @@ substitution <- function(object,
                          basesub = NULL,
                          summary = TRUE,
                          ref = c("grandmean", "clustermean"),
-                         level = c("between", "within"),
+                         level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
                          ...) {
   
@@ -89,9 +98,10 @@ substitution <- function(object,
     stop(sprintf(
       "Can't handle an object of class (%s) in 'substitution', 
       'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
-      object$CompLR$transform))
+      object$CompLR$transform)
+    )
   }
-
+  
   if(isFALSE(missing(delta))) {
     if (isFALSE(is.integer(delta))) {
       if (isFALSE(delta > 0)) {
@@ -141,17 +151,96 @@ substitution <- function(object,
         "The number of columns in 'basesub' (%d) must be the same
         as the compositional parts in 'parts' (%d).",
         ncol(basesub),
-        length(object$CompILR$parts)))
+        length(object$CompILR$parts)
+      ))
     }
     if (isFALSE(identical(colnames(basesub), object$CompILR$parts))) {
       stop(sprintf(
         "The names of compositional parts must be the
         same in 'basesub' (%s) and 'parts' (%s).",
         colnames(basesub),
-        object$CompILR$parts))
+        object$CompILR$parts
+      ))
     }
   }
   
+  # get what type of model is being estimated
+  model_fixef <- rownames(fixef(object))
+  model_ranef <- names(ranef(object))
+  
+  if (isFALSE(length(grep("^[bilr]", model_fixef, value = T)) == 1)) {
+    model_fixef_level <- "between"
+    model_fixef_coef <- grep("^[bilr]", model_fixef, value = T)
+  }
+  if (isFALSE(length(grep("^[wilr]", model_fixef, value = T)) == 1)) {
+    model_fixef_level <- "within"
+    model_fixef_coef <- grep("^[wilr]", model_fixef, value = T)
+  }
+  if (isFALSE(length(grep("^[ilr]", model_fixef, value = T)) == 1)) {
+    model_fixef_level <- "combined"
+    model_fixef_coef <- grep("^[ilr]", model_fixef, value = T)
+  }
+  
+  # single level or multilevel
+  if (length(model_ranef) > 0) {
+    model_ranef_level <- "multilevel"
+    model_ranef_coef <- model_ranef
+  } else {
+    model_ranef_level <- "single"
+    model_ranef_coef <- NULL
+  }
+  
+  # ensure sub args make sense
+  ## only grandmean for single level model
+  if (model_fixef_level == "combined") {
+    if (model_ranef_level == "single") {
+      if (ref == "clustermean") {
+        warning("can only use grandmean for single level model")
+      }
+      level <- "combined"
+      ref <- "grandmean"
+      weight <- "equal"
+    } else if (model_ranef == "multilevel") {
+      level <- "combined"
+      ref <- ref
+    }
+  }
+  
+  ## no between or within for single level model
+  if (model_fixef_level %in% c("between", "within")) {
+    if (model_ranef_level == "single") {
+      stop(" 'between' and 'within' cannot be computed on a single level model")
+    } else if (model_ranef_level == "multilevel") {
+      level <- level
+      ref <- ref
+    }
+  }
+  
+  ## level args match with coefs in object
+  if (level %in% c("between", "within")) {
+    if (isFALSE(model_fixef_level %in% c("between", "within"))) {
+      stop(sprintf(
+        "'between' and 'within' substitution analysis cannot be computed
+  on a model estimated using the (%s) variance of ilrs.
+  Please specify the level argument as '(%s)' instead or refit 'brmcoda' model.",
+  model_fixef_level,
+  model_fixef_level
+      ))
+    }
+  }
+  if (level == "combined") {
+    if (isFALSE(model_fixef_level == "combined")) {
+      stop(sprintf(
+        "'combined' substitution analysis cannot be computed
+  on a model estimated using the (%s) variance of ilrs.
+  Please specify the level argument as '(%s)' instead or refit 'brmcoda' model.",
+  model_fixef_level,
+  model_fixef_level
+      ))
+    }
+  }
+  
+  # deploy to substitution analysis
   bmout <- bout <- NULL
   if (isTRUE("between" %in% level)) {
     if (isTRUE("grandmean" %in% ref)) {
@@ -220,12 +309,48 @@ substitution <- function(object,
     }
   }
   
+  tmout <- tout <- NULL
+  if (isTRUE("combined" %in% level)) {
+    if (isTRUE("grandmean" %in% ref)) {
+      tout <- sub(
+        object = object,
+        delta = delta,
+        basesub = basesub,
+        summary = summary,
+        ref = "grandmean",
+        level = "combined",
+        weight = weight)
+    } 
+    else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+      tout <- sub(
+        object = object,
+        delta = delta,
+        basesub = basesub,
+        summary = summary,
+        ref = ref,
+        level = "between",
+        weight = weight)
+    }
+    if (isTRUE("clustermean" %in% ref)) {
+      tmout <-
+        submargins(
+          object = object,
+          delta = delta,
+          basesub = basesub,
+          ref = "clustermean",
+          level = "combined",
+          weight = weight)
+    }
+  }
+  
   structure(
     list(
       BetweenSub = if(exists("bout")) (bout) else (NULL),
       WithinSub = if(exists("wout")) (wout) else (NULL),
+      Sub = if(exists("tout")) (tout) else (NULL),
       BetweenSubMargins = if(exists("bmout")) (bmout) else (NULL),
       WithinSubMargins = if(exists("wmout")) (wmout) else (NULL),
+      SubMargins = if(exists("tmout")) (tmout) else (NULL),
       delta = delta,
       ref = ref,
       level = level,

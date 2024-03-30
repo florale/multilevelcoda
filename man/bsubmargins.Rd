@@ -27,10 +27,13 @@ If \code{NULL}, all possible pairwise substitution of compositional parts are us
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
-User's specified reference grid is only possible for simple substitution.}
+User's specified reference grid is only possible for simple substitution.
+#' Single-level models are default to \code{"grandmean"}.}
 
 \item{level}{A character string or vector.
-Should the estimate be at the \code{"between"} and/or \code{"within"} level?}
+Should the estimate focus on the \code{"between"} and/or \code{"within"} or \code{"combined"}
+variance for multilevel models?
+Single-level models are default to \code{"combined"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
