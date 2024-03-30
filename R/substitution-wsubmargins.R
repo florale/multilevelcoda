@@ -44,6 +44,7 @@ wsubmargins <- function (object,
   
   d0 <- build.rg(object = object,
                  ref = ref,
+                 level = level,
                  weight = weight,
                  fill = FALSE)
   
@@ -72,8 +73,8 @@ wsubmargins <- function (object,
   # substitution model
   out <- .get.wsubmargins(
     object = object,
-    delta = delta,
     basesub = basesub,
+    delta = delta,
     comp0 = comp0,
     d0 = d0,
     y0 = y0,

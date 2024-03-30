@@ -47,6 +47,7 @@ wsub <- function(object,
   if (isTRUE(ref == "grandmean")) {
     d0 <- build.rg(object = object,
                    ref = ref,
+                   level = level,
                    weight = weight,
                    fill = FALSE)
   } else {
@@ -90,12 +91,13 @@ wsub <- function(object,
     out <- .get.wsub(
       object = object,
       basesub = basesub,
-      comp0 = comp0,
       delta = delta,
-      y0 = y0,
+      comp0 = comp0,
       d0 = d0,
-      summary = summary,
+      y0 = y0,
       level = level,
-      ref = ref)
+      ref = ref,
+      summary = summary
+    )
 
 }

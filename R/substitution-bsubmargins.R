@@ -42,6 +42,7 @@ bsubmargins <- function (object,
   
   d0 <- build.rg(object = object,
                  ref = ref,
+                 level = level,
                  weight = weight,
                  fill = FALSE)
   
@@ -70,8 +71,8 @@ bsubmargins <- function (object,
   # substitution model
   out <- .get.bsubmargins(
     object = object,
-    delta = delta,
     basesub = basesub,
+    delta = delta,
     comp0 = comp0,
     d0 = d0,
     y0 = y0,
