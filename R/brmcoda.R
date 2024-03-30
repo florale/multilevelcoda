@@ -58,7 +58,7 @@ brmcoda <- function (complr, formula, ...) {
   }
   
   tmp <- cbind(complr$data, complr$BetweenILR, 
-               complr$WithinILR, complr$TotalILR)
+               complr$WithinILR, complr$ILR)
   
   m <- brm(formula,
            data = tmp,
