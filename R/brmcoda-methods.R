@@ -19,7 +19,7 @@ nobs.brmcoda <- function(object, ...) {
   nobs(object$model, ...)
 }
 
-#' Extracting the model Frame from a Formula or Fit from \pkg{brmcoda} object
+#' Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object
 #'
 #' @param formula A \code{brmcoda} object.
 #' @param ... Further arguments to be passed to methods.
