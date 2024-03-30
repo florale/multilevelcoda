@@ -5,14 +5,15 @@
 #' @param data A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and a ID variable. Required.
-#' @param sbp A signary matrix indicating sequential binary partition. Required.
-#' @param parts A character vector specifying the names of compositional variables to be used.
 #' @param transform A character value naming a log ratio transformation to be applied on compositional data.
 #' Can be either \code{"ilr"} (isometric logratio), \code{"alr"} (additive logratio), or \code{"clr"} (centered logratio).
 #' Default is \code{"ilr"}.
-#' @param idvar A character string specifying the name of the variable containing IDs. 
-#' Default is \code{"ID"}.
+#' @param parts A character vector specifying the names of compositional variables to be used.
+#' @param sbp A signary matrix indicating sequential binary partition.
 #' @param total A numeric value of the total amount to which the compositions should be closed.
+#' @param idvar A character string specifying the name of the variable containing IDs. 
+#' @param shape A character string, either \code{"wide"} format, or \code{"long"} format. Default to \code{"long"}.
+#' Default is \code{"ID"}.
 #' Default is \code{1}.
 #' 
 #' @details 
@@ -32,21 +33,21 @@
 #' \emph{clr} transformation is not injetive, 
 #' resulting in singular covariance matrices. 
 #'
-#' @return A \code{\link{complr}} object with twelve elements.
-#'   \item{\code{BetweenComp}}{ A vector of class \code{acomp} representing one closed between-person composition
-#'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-#'   \item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
-#'   or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-#'   \item{\code{Comp}}{ A vector of class \code{acomp} representing one closed composition
+#' @return A \code{\link{complr}} object with at least 12 elements.
+#'   \item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
 #'   or a matrix of class \code{acomp} representing multiple closed  compositions each in one row.}
-#'   \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
-#'   \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-#'   \item{\code{ILR}}{ Isometric log ratio transform of composition.}
+#'   \item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
+#'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
+#'   \item{\code{within_comp}}{ A vector of class \code{acomp} representing one closed within-person composition
+#'   or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
+#'   \item{\code{logratio}}{ Log ratio transform of composition.}
+#'   \item{\code{between_logratio}}{ Log ratio transform of between-person composition.}
+#'   \item{\code{within_logratio}}{ Log ratio transform of within-person composition.}
 #'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
-#'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
-#'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
+#'   \item{\code{transform}}{ Type of transform applied on compositional data.}
 #'   \item{\code{parts}}{ Names of compositional variables.}
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
+#'   \item{\code{shape}}{ The shape of the input dataset.}
 #'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' 
 #' @importFrom compositions ilr alr clr acomp gsi.buildilrBase
@@ -57,12 +58,30 @@
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID", total = 1440)
 #' str(cilr)
+#' 
+#' calr <- complr(data = mcompd, sbp = sbp,
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), transform = "alr",
+#'                 idvar = "ID")
+#' str(calr)
+#' 
+#' cclr <- complr(data = mcompd, sbp = sbp,
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), transform = "clr",
+#'                 idvar = "ID")
+#' str(cclr)
+#' 
+#' cilr_wide <- complr(data = mcompd, sbp = sbp,
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                 shape = "wide")
+#' str(cilr_wide)
 #' @export
-complr <- function(data, parts, 
+complr <- function(data,
                    transform = "ilr",
+                   parts,
                    sbp = NULL, 
                    total = 1, 
-                   idvar = "ID") {
+                   idvar = "ID",
+                   shape = "long"
+) {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
@@ -100,24 +119,7 @@ complr <- function(data, parts,
     stop(" 'transform' should be one of the following: 'ilr', 'alr', 'clr'")
   }
   
-  ## Make Composition ---------------
-  # combined
-  tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
-  # between-person
-  for (v in parts) {
-    tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
-  }
-  bcomp <- acomp(tmp[, parts, with = FALSE], total = total)
-  
-  # within-person 
-  wcomp <- tcomp - bcomp
-  
-  # name them for later use
-  colnames(bcomp) <- paste0("B", parts)
-  colnames(wcomp) <- paste0("W", parts)
-  colnames(tcomp) <- parts
-  
-  # ILR ---------------
+  # specific for ilr
   if (identical(transform, "ilr")) {
     if (isTRUE(missing(sbp))) {
       stop(" 'sbp', i.e., sequential binary partition, is required for ilr transform.")
@@ -137,134 +139,146 @@ complr <- function(data, parts,
   ncol(sbp)))
     }
     psi <- gsi.buildilrBase(t(sbp))
-    
-    # combined
-    tilr <- ilr(tcomp, V = psi)
-    
-    # between-person
-    bilr <- ilr(bcomp, V = psi)
-    
-    # within-person 
-    wilr <- ilr(wcomp, V = psi)
-    
-    # name them for later use
-    colnames(bilr)  <- paste0("bilr", seq_len(ncol(bilr)))
-    colnames(wilr)  <- paste0("wilr", seq_len(ncol(wilr)))
-    colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
-    
-    if (any(c(colnames(bilr), colnames(wilr), colnames(tilr)) %in% colnames(tmp))) {
-      stop(
-        paste(
-          "'data' should not have any column names starting with 'bilr', 'wilr', or 'ilr';",
-          "  these variables will be used in subsequent models.",
-          "  Please rename them before running 'complr'.",
-          sep = "\n"))
-    }
-    
-    out <- structure(
-      list(
-        Comp = tcomp,
-        BetweenComp = bcomp,
-        WithinComp = wcomp,
-        BetweenILR = bilr,
-        WithinILR = wilr,
-        ILR = tilr,
-        data = data,
-        transform = "ilr",
-        psi = psi,
-        sbp = sbp,
-        parts = parts,
-        idvar = idvar,
-        total = total),
-      class = "complr"
-    )
+  } else {
+    psi <- sbp <- NULL
   }
   
-  # ALR ---------------
-  if (identical(transform, "alr")) {
-    
-    # combined
-    talr <- alr(tcomp)
-    
-    # between-person
-    balr <- alr(bcomp)
-    
-    # within-person 
-    walr <- alr(wcomp)
-    
-    # name them for later use
-    colnames(balr)  <- paste0("balr", seq_len(ncol(balr)))
-    colnames(walr)  <- paste0("walr", seq_len(ncol(walr)))
-    colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
-    
-    if (any(c(colnames(balr), colnames(walr), colnames(talr)) %in% colnames(tmp))) {
-      stop(
-        paste(
-          "'data' should not have any column names starting with 'balr', 'walr', or 'alr';",
-          "  these variables will be used in subsequent models.",
-          "  Please rename them before running 'complr'.",
-          sep = "\n"))
-    }
-    
-    out <- structure(
-      list(
-        Comp = tcomp,
-        BetweenComp = bcomp,
-        WithinComp = wcomp,
-        ALR = talr,
-        BetweenALR = balr,
-        WithinALR = walr,
-        data = data,
-        transform = "alr",
-        parts = parts,
-        idvar = idvar,
-        total = total),
-      class = "complr"
-    )
+  # check var names
+  if (isTRUE(any(grep("ilr|alr|clr", colnames(tmp))))) {
+    stop(
+      paste(
+        "'data' should not have any column names with patterns of 'ilr', 'alr', or 'clr';",
+        "  these variables will be computed by 'complr' used in subsequent models.",
+        "  Please remove or rename them before running 'complr'.",
+        sep = "\n"))
   }
   
-  # CLR ---------------
-  if (identical(transform, "clr")) {
+  # check shape
+  if (shape == "wide") {
+    # make composition
+    tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
+    bcomp <- wcomp <- NULL
+    colnames(tcomp) <- parts
     
+    # ILR
+    if (identical(transform, "ilr")) {
+      tilr <- ilr(tcomp, V = psi)
+      bilr <- wilr <- NULL
+      colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
+      
+    } else if (identical(transform, "alr")) {
+      talr <- alr(tcomp)
+      balr <- walr <- NULL
+      colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
+      
+    } else if (identical(transform, "clr")) {
+      tclr <- clr(tcomp)
+      bclr <- wclr <- NULL
+      colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))
+    }
+  }
+  
+  if (shape == "long") {
+    # make composition
     # combined
-    tclr <- clr(tcomp)
-    
+    tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
     # between-person
-    bclr <- clr(bcomp)
+    for (v in parts) {
+      tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
+    }
+    bcomp <- acomp(tmp[, parts, with = FALSE], total = total)
     
     # within-person 
-    wclr <- clr(wcomp)
+    wcomp <- tcomp - bcomp
     
     # name them for later use
-    colnames(bclr)  <- paste0("bclr", seq_len(ncol(bclr)))
-    colnames(wclr)  <- paste0("wclr", seq_len(ncol(wclr)))
-    colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))
+    colnames(bcomp) <- paste0("b", parts)
+    colnames(wcomp) <- paste0("w", parts)
+    colnames(tcomp) <- parts
     
-    if (any(c(colnames(bclr), colnames(wclr), colnames(tclr)) %in% colnames(tmp))) {
-      stop(
-        paste(
-          "'data' should not have any column names starting with 'bclr', 'wclr', or 'clr';",
-          "  these variables will be used in subsequent models.",
-          "  Please rename them before running 'complr'.",
-          sep = "\n"))
+    # ILR ---------------
+    if (identical(transform, "ilr")) {
+      
+      # combined
+      tilr <- ilr(tcomp, V = psi)
+      
+      # between-person
+      bilr <- ilr(bcomp, V = psi)
+      
+      # within-person 
+      wilr <- ilr(wcomp, V = psi)
+      
+      # name
+      colnames(bilr)  <- paste0("bilr", seq_len(ncol(bilr)))
+      colnames(wilr)  <- paste0("wilr", seq_len(ncol(wilr)))
+      colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
     }
     
-    out <- structure(
-      list(
-        Comp = tcomp,
-        BetweenComp = bcomp,
-        WithinComp = wcomp,
-        CLR = tclr,
-        BetweenCLR = bclr,
-        WithinCLR = wclr,
-        data = data,
-        transform = "clr",
-        parts = parts,
-        idvar = idvar,
-        total = total),
-      class = "complr"
-    )
+    # ALR 
+    if (identical(transform, "alr")) {
+      
+      # combined
+      talr <- alr(tcomp)
+      
+      # between-person
+      balr <- alr(bcomp)
+      
+      # within-person 
+      walr <- alr(wcomp)
+      
+      # name
+      colnames(balr)  <- paste0("balr", seq_len(ncol(balr)))
+      colnames(walr)  <- paste0("walr", seq_len(ncol(walr)))
+      colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
+    }
+    
+    # CLR 
+    if (identical(transform, "clr")) {
+      
+      # combined
+      tclr <- clr(tcomp)
+      
+      # between-person
+      bclr <- clr(bcomp)
+      
+      # within-person 
+      wclr <- clr(wcomp)
+      
+      # name 
+      colnames(bclr)  <- paste0("bclr", seq_len(ncol(bclr)))
+      colnames(wclr)  <- paste0("wclr", seq_len(ncol(wclr)))
+      colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))
+    }
   }
+  
+  out <- structure(
+    list(
+      comp = tcomp,
+      between_comp = bcomp,
+      within_comp = wcomp,
+      logratio = if (exists("tilr")) (tilr)
+            else if (exists("talr")) (talr)
+            else if (exists("tclr")) (tclr)
+            else (NULL),
+      between_logratio = if (exists("bilr")) (bilr)
+                    else if (exists("balr")) (balr)
+                    else if (exists("bclr")) (bclr)
+                    else (NULL),
+      within_logratio = if (exists("wilr")) (wilr)
+                   else if (exists("walr")) (walr)
+                   else if (exists("wclr")) (wclr) 
+                   else (NULL),
+      data = data,
+      transform = transform,
+      psi = if(exists("psi")) (psi) else (NULL),
+      sbp = if(exists("sbp")) (sbp) else (NULL),
+      parts = parts,
+      idvar = idvar,
+      shape = shape,
+      total = total
+    ),
+    class = "complr"
+  )
   out
 }
 
