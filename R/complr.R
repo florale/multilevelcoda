@@ -267,3 +267,19 @@ complr <- function(data, parts,
   }
   out
 }
+
+#' Indices from a (dataset of) Multilevel Composition(s)
+#'
+#' Compute sets of compositions and log ratio transformation for multilevel compositional data
+#'
+#' @aliases complr
+#'
+#' @inheritParams complr
+#'
+#' @inherit complr return
+#'
+#' @export
+compilr <- function(x, ...) {
+  warning2("'compilr' is deprecated. Please use 'complr' instead.")
+  UseMethod("complr")
+}

@@ -314,7 +314,7 @@ NULL
 #'                 idvar = "ID", total = 1440)
 #' str(cilr)
 #' @export
-compilr <- function(data, sbp, parts, total = 1, idvar = "ID") {
+.get.compilr <- function(data, sbp, parts, total = 1, idvar = "ID") {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
