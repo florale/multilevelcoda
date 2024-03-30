@@ -111,25 +111,25 @@ Default is <code>"ID"</code>.</p></dd>
     
 
 <p>A <code><a href="compilr.html">compilr</a></code> object with twelve elements.</p>
-<dl><dt><code>BetweenComp</code></dt>
+<dl><dt><code>between_comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed between-person composition
 or a matrix of class <code>acomp</code> representing multiple closed between-person compositions each in one row.</p></dd>
 
-<dt><code>WithinComp</code></dt>
+<dt><code>within_comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed within-person composition
 or a matrix of class <code>acomp</code> representing multiple closed within-person compositions each in one row.</p></dd>
 
-<dt><code>Comp</code></dt>
+<dt><code>comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed composition
 or a matrix of class <code>acomp</code> representing multiple closed compositions each in one row.</p></dd>
 
-<dt><code>BetweenILR</code></dt>
+<dt><code>between_logratio</code></dt>
 <dd><p>Isometric log ratio transform of between-person composition.</p></dd>
 
-<dt><code>WithinILR</code></dt>
+<dt><code>within_logratio</code></dt>
 <dd><p>Isometric log ratio transform of within-person composition.</p></dd>
 
-<dt><code>ILR</code></dt>
+<dt><code>logratio</code></dt>
 <dd><p>Isometric log ratio transform of composition.</p></dd>
 
 <dt><code>data</code></dt>
@@ -157,7 +157,8 @@ or a matrix of class <code>acomp</code> representing multiple closed composition
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="compilr.html">compilr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in warning2("'compilr' is deprecated. Please use 'complr' instead."):</span> could not find function "warning2"</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'compilr' is deprecated. Please use 'complr' instead.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in UseMethod("complr"):</span> no applicable method for 'complr' applied to an object of class "c('data.table', 'data.frame')"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'cilr' not found</span>
 </code></pre></div>
