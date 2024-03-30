@@ -10,14 +10,14 @@
   row.names = NULL,
   optional = TRUE,
   class = c("composition", "logratio"),
-  level = c("between", "within", "total"),
+  level = c("between", "within", "combined"),
   ...
 )
 
 \method{as.matrix}{complr}(
   x,
   class = c("composition", "logratio"),
-  level = c("between", "within", "total"),
+  level = c("between", "within", "combined"),
   ...
 )
 }
@@ -30,7 +30,7 @@ the \code{\link[base:as.data.frame]{as.data.frame}} generic.}
 \item{class}{Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 specify the geometry of the composition.}
 
-\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
+\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"combined"}
 indicating the level of the geometry.}
 
 \item{...}{generic argument, not in use.}

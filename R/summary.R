@@ -3,7 +3,7 @@
 #' @param object An object of class \code{complr}.
 #' @param class Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 #' specify the geometry of the composition.
-#' @param level Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"total"}
+#' @param level Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"combined"}
 #' indicating the level of the geometry.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -26,7 +26,7 @@
 #' @export
 summary.complr <- function(object,
                             class = c("composition", "logratio"),
-                            level = c("between", "within", "total"),
+                            level = c("between", "within", "combined"),
                             weight = c("equal", "proportional"),
                             digits = 3,
                             ...) {
@@ -68,7 +68,7 @@ summary.complr <- function(object,
   cat("  Compositional components are: ")
   cat(paste(object$parts, collapse = ", "), "\n")
   cat("  Composition is closed to    : ")
-  cat(object$total, "\n")
+  cat(object$combined, "\n")
   cat("  Geometry                    : ")
   cat("relative composition ('acomp') and", "\n")
   cat("                                isometric log-ratios ('real multivariate')", "\n")
@@ -81,7 +81,7 @@ summary.complr <- function(object,
   # print(JWileymisc::egltable(BetweenComp[, -1], ...))
   
   if ("composition" %in% class) {
-    if ("total" %in% level) {
+    if ("combined" %in% level) {
       cat("\n", " Raw Composition Statistics: ", "\n")
       for (i in seq_along(output$TotalComp)) {
         cat(paste0("\n", names(output$TotalComp)[i], ":", "\n"))
@@ -105,7 +105,7 @@ summary.complr <- function(object,
   }
   
   if ("logratio" %in% class) {
-    if ("total" %in% level) {
+    if ("combined" %in% level) {
       cat("\n", " Raw Isometric Log-ratios: ", "\n")
       print(output$TotalILR, digits = digits)
     }

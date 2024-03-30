@@ -12,7 +12,7 @@ is.complr <- function(x) {
 #' @param x An object of class \code{complr}.
 #' @param class  Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 #' specify the geometry of the composition.
-#' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{total}
+#' @param level  Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"combined"}
 #' indicating the level of the geometry.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -32,7 +32,7 @@ is.complr <- function(x) {
 #' @export
 mean.complr <- function(x, ...,
                          class = c("composition", "logratio"),
-                         level = c("between", "within", "total"),
+                         level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
                          digits = 3
                          ) {
@@ -42,9 +42,9 @@ mean.complr <- function(x, ...,
   
   ## Out
   if ("composition" %in% class) {
-    if ("total" %in% level) {
+    if ("combined" %in% level) {
       cat("\n", "Raw Compositional Mean:", "\n")
-      print(output$TotalComp$mean, digits = digits)
+      print(output$Comp$mean, digits = digits)
     }
     if ("between" %in% level) {
       cat("\n", "Between-level Compositional Mean:", "\n")
@@ -56,9 +56,9 @@ mean.complr <- function(x, ...,
     }
   }
   if ("logratio" %in% class) {
-    if ("total" %in% level) {
+    if ("combined" %in% level) {
       cat("\n", "Isometric Log-ratio (Real) Mean:", "\n")
-      print(as.data.table(output$TotalILR)[4,], row.names = FALSE, digits = digits)
+      print(as.data.table(output$ILR)[4,], row.names = FALSE, digits = digits)
     }
     if ("between" %in% level) {
       cat("\n", "Between-level Isometric Log-ratio (Real) Mean:", "\n")
@@ -91,14 +91,14 @@ mean.complr <- function(x, ...,
 #' @export
 as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
                                   class = c("composition", "logratio"),
-                                  level = c("between", "within", "total"),
+                                  level = c("between", "within", "combined"),
                                   ...) {
   allout <- lapply(x[1:6], as.data.frame)
   output <- data.frame()
   
   ## Out
   if ("composition" %in% class) {
-    if ("total" %in% level) {
+    if ("combined" %in% level) {
       output <- allout[[1]]
     }
     if ("between" %in% level) {
@@ -109,7 +109,7 @@ as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
     }
   }
   if ("logratio" %in% class) {
-    if ("total" %in% level) {
+    if ("combined" %in% level) {
       output <- cbind(output, allout[[4]])
     }
     if ("between" %in% level) {
@@ -126,7 +126,7 @@ as.data.frame.complr <- function(x, row.names = NULL, optional = TRUE,
 #' @export
 as.matrix.complr <- function(x, 
                               class = c("composition", "logratio"),
-                              level = c("between", "within", "total"),
+                              level = c("between", "within", "combined"),
                               ...) {
   as.matrix(as.data.frame(x, class = class, level = level, ...))
 }
@@ -134,7 +134,7 @@ as.matrix.complr <- function(x,
 # ----------------- Extract Compositional Data -----------------
 .get.complr <- function(object, 
                          class = c("composition", "logratio"),
-                         level = c("between", "within", "total"),
+                         level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
                          digits = 3,
                          ...) {
@@ -148,11 +148,11 @@ as.matrix.complr <- function(x,
   if (weight == "equal") {
     bcomp <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenComp)[!duplicated(get(object$idvar))]
     wcomp <- cbind(object$data[, object$idvar, with = FALSE], object$WithinComp)[!duplicated(get(object$idvar))]
-    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$TotalComp)[!duplicated(get(object$idvar))]
+    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$Comp)[!duplicated(get(object$idvar))]
     
     bilr <- cbind(object$data[, object$idvar, with = FALSE], object$BetweenILR)[!duplicated(get(object$idvar))]
     wilr <- cbind(object$data[, object$idvar, with = FALSE], object$WithinILR)[!duplicated(get(object$idvar))]
-    tilr <- cbind(object$data[, object$idvar, with = FALSE], object$TotalILR)[!duplicated(get(object$idvar))]
+    tilr <- cbind(object$data[, object$idvar, with = FALSE], object$ILR)[!duplicated(get(object$idvar))]
     
     output <- list(
       summary(acomp(bcomp[, -1]), robust = TRUE),
@@ -167,14 +167,14 @@ as.matrix.complr <- function(x,
     output <- list(
       summary(object$BetweenComp, robust = TRUE),
       summary(object$WithinComp, robust = TRUE),
-      summary(object$TotalComp, robust = TRUE),
+      summary(object$Comp, robust = TRUE),
       data.frame(summary(object$BetweenILR)),
       data.frame(summary(object$WithinILR)),
-      data.frame(summary(object$TotalILR))
+      data.frame(summary(object$ILR))
     )
   }
   
-  names(output) <- c("BetweenComp", "WithinComp", "TotalComp", "BetweenILR", "WithinILR", "TotalILR")
+  names(output) <- c("BetweenComp", "WithinComp", "Comp", "BetweenILR", "WithinILR", "ILR")
   
   output
 }

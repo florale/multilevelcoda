@@ -293,11 +293,11 @@ NULL
 #'   or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
 #'   \item{\code{WithinComp}}{ A vector of class \code{acomp} representing one closed within-person composition
 #'   or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-#'   \item{\code{TotalComp}}{ A vector of class \code{acomp} representing one closed total composition
-#'   or a matrix of class \code{acomp} representing multiple closed total compositions each in one row.}
+#'   \item{\code{Comp}}{ A vector of class \code{acomp} representing one closed composition
+#'   or a matrix of class \code{acomp} representing multiple closed compositions each in one row.}
 #'   \item{\code{BetweenILR}}{ Isometric log ratio transform of between-person composition.}
 #'   \item{\code{WithinILR}}{ Isometric log ratio transform of within-person composition.}
-#'   \item{\code{TotalILR}}{ Isometric log ratio transform of total composition.}
+#'   \item{\code{ILR}}{ Isometric log ratio transform of composition.}
 #'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
 #'   \item{\code{psi}}{ A ILR matrix associated with user-defined partition structure.}
 #'   \item{\code{sbp}}{ The user-defined sequential binary partition matrix.}
@@ -358,7 +358,7 @@ compilr <- function(data, sbp, parts, total = 1, idvar = "ID") {
   }
   
   ## Composition and ILRs
-  # total
+  # combined
   tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
   tilr <- ilr(tcomp, V = psi)
   

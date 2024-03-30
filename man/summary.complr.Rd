@@ -7,7 +7,7 @@
 \method{summary}{complr}(
   object,
   class = c("composition", "logratio"),
-  level = c("between", "within", "total"),
+  level = c("between", "within", "combined"),
   weight = c("equal", "proportional"),
   digits = 3,
   ...
@@ -19,7 +19,7 @@
 \item{class}{Optional. Can be \code{"composition"} and/or \code{"logratio"} to
 specify the geometry of the composition.}
 
-\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"total"}
+\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"combined"}
 indicating the level of the geometry.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
