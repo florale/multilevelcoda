@@ -24,6 +24,8 @@ create_substitution(
 
 \item{WithinSub}{A list of results from \code{wsub} or \code{NULL}}
 
+\item{Sub}{A list of results from \code{sub} or \code{NULL}}
+
 \item{BetweenSubMargins}{A list of results from \code{bsubmargins} or \code{NULL}}
 
 \item{WithinSubMargins}{A list of results from \code{wsubmargins} or \code{NULL}}
@@ -39,6 +41,8 @@ create_substitution(
 \item{parts}{The parts of the composition}
 
 \item{summary}{A logical value specifying whether to summarize the results}
+
+\item{Margins}{A list of results from \code{submargins} or \code{NULL}}
 }
 \value{
 An object of class \code{substitution}

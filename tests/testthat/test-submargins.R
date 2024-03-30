@@ -25,11 +25,11 @@
 # data(sbp)
 # data(psub)
 # 
-# cilr <- compilr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
+# cilr <- complr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(
-#   m <- brmcoda(compilr = cilr,
+#   m <- brmcoda(complr = cilr,
 #                formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
 #                chain = 1, iter = 500, seed = 123,
 #                backend = backend))
@@ -163,11 +163,11 @@
 # test_that("submargins's results matches with brm for 2-component composition (TST vs WAKE)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "WAKE"), idvar = "ID")
 #   psub <- basesub(c("TST", "WAKE"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -194,11 +194,11 @@
 # test_that("submargins's results matches with brm for 2-component composition (TST vs MVPA)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "MVPA"), idvar = "ID")
 #   psub <- basesub(c("TST", "MVPA"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -225,11 +225,11 @@
 # test_that("submargins's results matches with brm model for 2-component composition (TST vs LPA)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "LPA"), idvar = "ID")
 #   psub <- basesub(c("TST", "LPA"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -256,11 +256,11 @@
 # test_that("submargins's results matches with brm model for 2-component composition (TST vs SB)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "SB"), idvar = "ID")
 #   psub <- basesub(c("TST", "SB"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -287,12 +287,12 @@
 # test_that("submargins's results matches with brm for 2-component composition (WAKE vs MVPA)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("WAKE", "MVPA"), idvar = "ID")
 #   psub <- basesub(c("WAKE", "MVPA"))
 #   
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -319,11 +319,11 @@
 # test_that("submargins's results matches with brm for 2-component composition (WAKE vs LPA)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("WAKE", "LPA"), idvar = "ID")
 #   psub <- basesub(c("WAKE", "LPA"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -350,11 +350,11 @@
 # test_that("submargins's results matches with brm model for 2-component composition (WAKE vs SB)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("WAKE", "SB"), idvar = "ID")
 #   psub <- basesub(c("WAKE", "SB"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -381,11 +381,11 @@
 # test_that("submargins's results matches with brm for 2-component composition (MVPA vs LPA)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("MVPA", "LPA"), idvar = "ID")
 #   psub <- basesub(c("MVPA", "LPA"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -412,11 +412,11 @@
 # test_that("submargins's results matches with brm model for 2-component composition (MVPA vs SB)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("MVPA", "SB"), idvar = "ID")
 #   psub <- basesub(c("MVPA", "SB"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))
@@ -443,11 +443,11 @@
 # test_that("submargins's results matches with brm model for 2-component composition (LPA vs SB)", {
 #   
 #   sbp <- as.matrix(data.table(1, -1))
-#   cilr <- compilr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
+#   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("LPA", "SB"), idvar = "ID")
 #   psub <- basesub(c("LPA", "SB"))
 #   suppressWarnings(
-#     m <- brmcoda(compilr = cilr,
+#     m <- brmcoda(complr = cilr,
 #                  formula = Stress ~ ilr1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = backend))

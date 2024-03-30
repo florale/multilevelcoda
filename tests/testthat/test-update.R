@@ -25,11 +25,11 @@ data(mcompd)
 data(sbp)
 data(psub)
 
-cilr <- compilr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
+cilr <- complr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 suppressWarnings(
-  fit <- brmcoda(compilr = cilr,
+  fit <- brmcoda(complr = cilr,
                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
@@ -37,9 +37,9 @@ suppressWarnings(
 
 parts <- colnames(psub)
 
-# Tests update.compilr -----------------------------------------------------------------------------
+# Tests update.complr -----------------------------------------------------------------------------
 
-test_that("update.compilr errors where appropriate", {
+test_that("update.complr errors where appropriate", {
   
   # missing newdata
   expect_error(cilr_new <- update(object = cilr))
@@ -57,11 +57,11 @@ test_that("update.compilr errors where appropriate", {
   expect_error(cilr_new <- update(object = cilr, newdata = list("a" = 1, "b" = 2)))
 })
 
-test_that("update.compilr gives expected output", {
+test_that("update.complr gives expected output", {
   
   newcilr <- update(cilr, mcompd[ID != 1:10])
   
-  expect_true(inherits(newcilr, "compilr"))
+  expect_true(inherits(newcilr, "complr"))
   
   expect_true(identical(str(cilr), str(newcilr)))
   expect_true(identical(newcilr$data, mcompd[ID != 1:10]))
