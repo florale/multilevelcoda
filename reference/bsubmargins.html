@@ -118,12 +118,15 @@ If <code>NULL</code>, all possible pairwise substitution of compositional parts 
 Can be <code>"grandmean"</code> and/or <code>"clustermean"</code>, or
 a <code>data.frame</code> or <code>data.table</code> of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
-User's specified reference grid is only possible for simple substitution.</p></dd>
+User's specified reference grid is only possible for simple substitution.
+#' Single-level models are default to <code>"grandmean"</code>.</p></dd>
 
 
 <dt>level</dt>
 <dd><p>A character string or vector.
-Should the estimate be at the <code>"between"</code> and/or <code>"within"</code> level?</p></dd>
+Should the estimate focus on the <code>"between"</code> and/or <code>"within"</code> or <code>"combined"</code>
+variance for multilevel models?
+Single-level models are default to <code>"combined"</code>.</p></dd>
 
 
 <dt>weight</dt>

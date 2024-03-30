@@ -77,7 +77,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build.rg</span><span class="op">(</span><span class="va">object</span>, <span class="va">ref</span>, <span class="va">weight</span>, fill <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build.rg</span><span class="op">(</span><span class="va">object</span>, <span class="va">ref</span>, level <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">weight</span>, fill <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -91,8 +91,15 @@
 Can be <code>"grandmean"</code> and/or <code>"clustermean"</code>, or
 a <code>data.frame</code> or <code>data.table</code> of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
-User's specified reference grid only applicable to substitution model
-using a single reference composition value.</p></dd>
+User's specified reference grid is only possible for simple substitution.
+#' Single-level models are default to <code>"grandmean"</code>.</p></dd>
+
+
+<dt>level</dt>
+<dd><p>A character string or vector.
+Should the estimate focus on the <code>"between"</code> and/or <code>"within"</code> or <code>"combined"</code>
+variance for multilevel models?
+Single-level models are default to <code>"combined"</code>.</p></dd>
 
 
 <dt>weight</dt>
@@ -109,7 +116,7 @@ in which information about some, but not all covariates is provided
 (e.g., models including age and sex as covariate but only age was provided in the reference grid).
 If <code>TRUE</code>, the unspecified covariates are filled with the default reference grid.
 If <code>FALSE</code>, users will be asked to provide a full reference grid.
-Default is <code>FALSE</code>.</p></dd>
+Currently only support the default to <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
