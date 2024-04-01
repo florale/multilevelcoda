@@ -216,6 +216,11 @@ substitution <- function(object,
     }
   }
   
+  ## set default to be only between and within if level is not specified
+  if (level == c("between", "within", 'combined')) {
+    level <- c("between", "within")
+  }
+  
   ## level args match with coefs in object
   if (level %in% c("between", "within")) {
     if (isFALSE(model_fixef_level %in% c("between", "within"))) {
