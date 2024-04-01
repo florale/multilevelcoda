@@ -391,51 +391,10 @@ resulting in singular covariance matrices.</p>
 <span class="r-in"><span><span class="va">cilr_wide</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                shape <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in complr(data = mcompd, sbp = sbp, parts = c("TST", "WAKE", "MVPA",     "LPA", "SB"), shape = "wide"):</span> 'data' might have duplicated ids. </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>   Please check the duplicates or specify shape = "long" if the data are repeated measures.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr_wide</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_comp    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_comp     : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ logratio        : 'rmult' num [1:3540, 1:4] 0.291 -0.4759 -0.4983 -0.3126 0.2044 1.2022 1.5804 1.3354 1.3666 1.4313 0.6298 -0.8348 1.3223 -0.0314 -0.6875 1.7| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "ilr1" "ilr2" "ilr3" "ilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_logratio: NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_logratio : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data            :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform       : chr "ilr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ psi             : num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : num [1:4, 1:5] 1 1 0 0 1 -1 0 0 -1 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ shape           : chr "wide"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'cilr_wide' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
