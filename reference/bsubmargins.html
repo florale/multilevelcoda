@@ -82,7 +82,7 @@
 <span>  <span class="va">basesub</span>,</span>
 <span>  ref <span class="op">=</span> <span class="st">"clustermean"</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"between"</span>,</span>
-<span>  weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weight <span class="op">=</span> <span class="st">"proportional"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -109,13 +109,13 @@ Can be <code>"grandmean"</code> and/or <code>"clustermean"</code>, or
 a <code>data.frame</code> or <code>data.table</code> of user's specified reference grid consisting
 of combinations of covariates over which predictions are made.
 User's specified reference grid is only possible for simple substitution.
-#' Single-level models are default to <code>"grandmean"</code>.</p></dd>
+Single level models are default to <code>"grandmean"</code>.</p></dd>
 
 
 <dt>level</dt>
 <dd><p>A character string or vector.
-Should the estimate focus on the <code>"between"</code> and/or <code>"within"</code> or <code>"combined"</code>
-variance for multilevel models?
+Should the estimate of multilevel models focus on the <code>"between"</code> and/or <code>"within"</code> or <code>"combined"</code>
+variance?
 Single-level models are default to <code>"combined"</code>.</p></dd>
 
 
@@ -123,8 +123,8 @@ Single-level models are default to <code>"combined"</code>.</p></dd>
 <dd><p>A character value specifying the weight to use in calculation of the reference composition.
 If <code>"equal"</code>, give equal weight to units (e.g., individuals).
 If <code>"proportional"</code>, weights in proportion to the frequencies of units being averaged
-(e.g., observations across individuals)
-Default is <code>equal</code>.</p></dd>
+(e.g., observations across individuals).
+Default to <code>"equal"</code> for <code>ref = "grandmean"</code> and <code>"proportional"</code> for <code>ref = "clustermean"</code>.</p></dd>
 
 
 <dt>...</dt>
@@ -156,16 +156,16 @@ The first six lists contain the results of the substitution estimation for a com
 <dd><p>Level where changes in composition takes place.
 <code>Reference</code> Either <code>grandmean</code>, <code>clustermean</code>, or <code>users</code>.</p></dd>
 
-</dl><p>This function is an alias of <code>substitution</code> to estimates the the difference in an outcome
+</dl><p>This function is an alias of <code><a href="substitution.html">substitution</a></code> to estimates the the difference in an outcome
 when compositional parts are substituted for specific unit(s) at <em>between</em> level
 using cluster mean (e.g., compositional mean at individual level) as reference composition.
-It is recommended that users run substitution model using the <code>substitution</code> function.</p>
+It is recommended that users run substitution model using the <code><a href="substitution.html">substitution</a></code> function.</p>
 
 
 <p></p>
 
 
-<p><code>substitution</code></p>
+<p><code><a href="substitution.html">substitution</a></code></p>
 
 
     </div>
