@@ -38,7 +38,6 @@ Imports:
     extraoperators,
     ggplot2,
     emmeans,
-    insight,
     foreach,
     doFuture,
     abind,
