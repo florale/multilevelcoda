@@ -16,7 +16,7 @@
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid is only possible for simple substitution.
-#' #' Single-level models are default to \code{"grandmean"}.
+#' Single level models are default to \code{"grandmean"}.
 #' @param summary A logical value. 
 #' Should the estimate at each level of the reference grid (\code{FALSE}) 
 #' or their average (\code{TRUE}) be returned? 
@@ -24,14 +24,14 @@
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} 
-#' variance for multilevel models?
+#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} 
+#' variance?
 #' Single-level models are default to \code{"combined"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
-#' (e.g., observations across individuals)
-#' Default is \code{equal}.
+#' (e.g., observations across individuals).
+#' Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.
 #' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the results of multilevel compositional substitution model.
@@ -105,7 +105,7 @@ substitution <- function(object,
   if(isFALSE(missing(delta))) {
     if (isFALSE(is.integer(delta))) {
       if (isFALSE(delta > 0)) {
-        stop(" 'delta' must be an positive integer value.")
+        stop(" 'delta' should be an positive integer value.")
       }
     }
   } else if (isTRUE(missing(delta))){
@@ -115,6 +115,8 @@ substitution <- function(object,
       "  to specify the change in units across compositional parts", 
       sep = "\n"))
   }
+  
+  # set default weight to be equal
   if (identical(weight, "proportional")) {
     weight <- "proportional"
   } else {
@@ -148,37 +150,38 @@ substitution <- function(object,
   } else if(isFALSE(missing(basesub))) {
     if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
       stop(sprintf(
-        "The number of columns in 'basesub' (%d) must be the same
-        as the compositional parts in 'parts' (%d).",
+        "The number of columns in 'basesub' (%d) should be the same as the compositional parts in 'parts' (%d).",
         ncol(basesub),
         length(object$complr$parts)
       ))
     }
     if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
       stop(sprintf(
-        "The names of compositional parts must be the
-        same in 'basesub' (%s) and 'parts' (%s).",
+        "The names of compositional parts should be the same in 'basesub' (%s) and 'parts' (%s).",
         colnames(basesub),
         object$complr$parts
       ))
     }
   }
   
-  # get what type of model is being estimated
+  # what type of model is being estimated
   model_fixef <- rownames(fixef(object))
   model_ranef <- names(ranef(object))
   
-  if (isFALSE(length(grep("^[bilr]", model_fixef, value = T)) == 1)) {
-    model_fixef_level <- "between"
-    model_fixef_coef <- grep("^[bilr]", model_fixef, value = T)
+  model_fixef_level <- NULL
+  model_fixef_coef <- NULL
+  
+  if (isTRUE(length(grep("^[bilr]", model_fixef, value = T)) > 0)) {
+    model_fixef_level <- append(model_fixef_level, "between")
+    model_fixef_coef  <- append(model_fixef_coef, grep("^[bilr]", model_fixef, value = T))
   }
-  if (isFALSE(length(grep("^[wilr]", model_fixef, value = T)) == 1)) {
-    model_fixef_level <- "within"
-    model_fixef_coef <- grep("^[wilr]", model_fixef, value = T)
+  if (length(grep("^[wilr]", model_fixef, value = T)) > 0) {
+    model_fixef_level <- append(model_fixef_level, "within")
+    model_fixef_coef  <- append(model_fixef_coef, grep("^[wilr]", model_fixef, value = T))
   }
-  if (isFALSE(length(grep("^[ilr]", model_fixef, value = T)) == 1)) {
-    model_fixef_level <- "combined"
-    model_fixef_coef <- grep("^[ilr]", model_fixef, value = T)
+  if (length(grep("^[ilr]", model_fixef, value = T)) > 0) {
+    model_fixef_level <- append(model_fixef_level, "combined")
+    model_fixef_coef  <- append(model_fixef_coef, grep("^[ilr]", model_fixef, value = T))
   }
   
   # single level or multilevel
@@ -192,24 +195,24 @@ substitution <- function(object,
   
   # ensure sub args make sense
   ## only grandmean for single level model
-  if (model_fixef_level == "combined") {
+  if (isTRUE("combined" %in% model_fixef_level)) {
     if (model_ranef_level == "single") {
-      if (ref == "clustermean") {
-        warning("can only use grandmean for single level model")
+      if ("clustermean" %in% ref) {
+        warning("Can only use grandmean for single level model.")
       }
       level <- "combined"
       ref <- "grandmean"
       weight <- "equal"
-    } else if (model_ranef == "multilevel") {
+    } else {
       level <- "combined"
       ref <- ref
     }
   }
   
   ## no between or within for single level model
-  if (model_fixef_level %in% c("between", "within")) {
+  if (isTRUE(any(c("between", "within") %in% model_fixef_level))) {
     if (model_ranef_level == "single") {
-      stop(" 'between' and 'within' cannot be computed on a single level model")
+      stop(" 'between' and 'within' substitution analysis cannot be computed on a single level model")
     } else if (model_ranef_level == "multilevel") {
       level <- level
       ref <- ref
@@ -217,28 +220,28 @@ substitution <- function(object,
   }
   
   ## set default to be only between and within if level is not specified
-  if (level == c("between", "within", 'combined')) {
+  if (isTRUE(all(c("between", "within", "combined") %in% level))) {
     level <- c("between", "within")
   }
   
   ## level args match with coefs in object
-  if (level %in% c("between", "within")) {
-    if (isFALSE(model_fixef_level %in% c("between", "within"))) {
+  if (isTRUE(any(level %in% c("between", "within")))) {
+    if (isFALSE(any(model_fixef_level %in% c("between", "within")))) {
       stop(sprintf(
         "'between' and 'within' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
-  Please specify the level argument as '(%s)' instead or refit 'brmcoda' model.",
+  Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
   model_fixef_level,
   model_fixef_level
       ))
     }
   }
-  if (level == "combined") {
-    if (isFALSE(model_fixef_level == "combined")) {
+  if (isTRUE("combined" %in% level)) {
+    if (isFALSE("combined" %in% model_fixef_level)) {
       stop(sprintf(
         "'combined' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
-  Please specify the level argument as '(%s)' instead or refit 'brmcoda' model.",
+  Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
   model_fixef_level,
   model_fixef_level
       ))
