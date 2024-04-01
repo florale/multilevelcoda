@@ -35,7 +35,7 @@ update.complr <- function(object, newdata, ...) {
   
   if (isFALSE(object$parts %ain% colnames(newdata))) { # check compositional variables
     stop(sprintf(
-      "The folllowing compositional parts could not be found in 'newdata'  (%s).",
+      "The folllowing compositional parts could not be found in 'newdata': %s.",
       paste(object$parts %snin% colnames(newdata), collapse = ", ")))
   }
   

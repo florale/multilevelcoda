@@ -5,11 +5,9 @@
 #' using a single reference composition (e.g., compositional mean at sample level).
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #' 
-#' @aliases substitution
+#' @seealso \code{\link{substitution}}
 #' 
 #' @inheritParams substitution
-#' 
-#' @seealso \code{\link{substitution}}
 #' 
 #' @inherit substitution return
 #' 
@@ -37,7 +35,7 @@ bsub <- function(object,
                  summary = TRUE,
                  ref = "grandmean",
                  level = "between",
-                 weight = NULL,
+                 weight = "equal",
                  ...) {
   
   # ref <- "grandmean"
@@ -52,7 +50,7 @@ bsub <- function(object,
                    fill = FALSE)
   } else {
     if (isFALSE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
-      stop("ref must be 'grandmean' or a data table, data frame or matrix.")
+      stop("ref must be \"grandmean\" or a data table, data frame or matrix.")
     }
     if(isFALSE(
       (colnames(as.data.table(ref_grid(object$model)@grid)) %snin% ".wgt.") %ain% colnames(ref))) { # ensure all covs are provided
@@ -73,8 +71,7 @@ bsub <- function(object,
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(comp0)))) {
     stop(sprintf(
-      "delta value should be less than or equal to %s, which is
-  the amount of composition part available for pairwise substitution.",
+      "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
   round(min(comp0), 2)
     ))
   }

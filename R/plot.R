@@ -22,13 +22,13 @@ plot.substitution <- function(x, to,
   
   if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref)) ||
       isTRUE(length(ref) > 1)) {
-    stop("'ref' should be either grandmean or clustermean or users.")
+    stop("'ref' should be either one of the following: \"grandmean\", \"clustermean\", or \"users\".")
   }
   ref <- as.character(ref)
   
   if (isFALSE(any(c("between", "within") %in% level)) ||
       isTRUE(length(level) > 1)) {
-    stop("'level' should be either between or within.")
+    stop("'level' should be either one of the following: \"between\", \"within\", \"combined\".")
   }
   level <- as.character(level)
   

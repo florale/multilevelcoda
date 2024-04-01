@@ -5,11 +5,9 @@
 #' using cluster mean (e.g., compositional mean at individual level) as reference composition. 
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #' 
-#' @aliases substitution
+#' @seealso \code{\link{substitution}}
 #' 
 #' @inheritParams substitution
-#' 
-#' @seealso \code{\link{substitution}}
 #' 
 #' @inherit substitution return
 #'
@@ -36,10 +34,10 @@ bsubmargins <- function (object,
                          basesub,
                          ref = "clustermean",
                          level = "between",
-                         weight = NULL,
+                         weight = "proportional",
                          ...) {
   
-  ref <- "clustermean"
+  ref   <- "clustermean"
   level <- "between"
   
   d0 <- build.rg(object = object,
@@ -54,8 +52,7 @@ bsubmargins <- function (object,
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
     stop(sprintf(
-      "delta value should be less than or equal to %s, which is
-  the amount of composition part available for pairwise substitution.",
+      "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
   paste0(round(min(lapply(comp0, min))), collapse = ", ")
     ))
   }

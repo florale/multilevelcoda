@@ -167,7 +167,7 @@ complr <- function(data,
         sep = "\n"))
   }
   
-  # check shape
+  # composition and lr
   if (shape == "wide") {
     # make composition
     tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
@@ -213,16 +213,10 @@ complr <- function(data,
     # ILR ---------------
     if (identical(transform, "ilr")) {
       
-      # combined
       tilr <- ilr(tcomp, V = psi)
-      
-      # between-person
       bilr <- ilr(bcomp, V = psi)
-      
-      # within-person 
       wilr <- ilr(wcomp, V = psi)
       
-      # name
       colnames(bilr)  <- paste0("bilr", seq_len(ncol(bilr)))
       colnames(wilr)  <- paste0("wilr", seq_len(ncol(wilr)))
       colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
@@ -231,16 +225,10 @@ complr <- function(data,
     # ALR 
     if (identical(transform, "alr")) {
       
-      # combined
       talr <- alr(tcomp)
-      
-      # between-person
       balr <- alr(bcomp)
-      
-      # within-person 
       walr <- alr(wcomp)
       
-      # name
       colnames(balr)  <- paste0("balr", seq_len(ncol(balr)))
       colnames(walr)  <- paste0("walr", seq_len(ncol(walr)))
       colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
@@ -249,16 +237,10 @@ complr <- function(data,
     # CLR 
     if (identical(transform, "clr")) {
       
-      # combined
       tclr <- clr(tcomp)
-      
-      # between-person
       bclr <- clr(bcomp)
-      
-      # within-person 
       wclr <- clr(wcomp)
       
-      # name 
       colnames(bclr)  <- paste0("bclr", seq_len(ncol(bclr)))
       colnames(wclr)  <- paste0("wclr", seq_len(ncol(wclr)))
       colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))

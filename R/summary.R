@@ -264,7 +264,7 @@ summary.substitution <- function(object, delta, to, from,
     level <- object$level
   } else {
     if (isFALSE(any(c("between", "within") %in% level))) {
-      stop("'level' should be between and/or within.")
+      stop("'level' should be between, within, or combined.")
     }
     level <- as.character(level)
   }
@@ -291,7 +291,7 @@ summary.substitution <- function(object, delta, to, from,
   out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   
   if(isTRUE(dim(out)[1] == 0)) {
-    stop("An empty data.table returned. Are you sure your arguments are correct?")
+    stop("An empty data.table returned. Please check that the arguments match with your substitution object.")
   }
   
   if(isFALSE(digits == "asis")) {

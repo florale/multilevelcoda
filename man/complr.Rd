@@ -89,7 +89,7 @@ cclr <- complr(data = mcompd, sbp = sbp,
                 idvar = "ID")
 str(cclr)
 
-cilr_wide <- complr(data = mcompd, sbp = sbp,
+cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 shape = "wide")
 str(cilr_wide)
