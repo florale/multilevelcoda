@@ -293,15 +293,13 @@ summary.substitution <- function(object, delta, to, from,
   if(isTRUE(dim(out)[1] == 0)) {
     stop("An empty data.table returned. Are you sure your arguments are correct?")
   }
-    
+  
   if(isFALSE(digits == "asis")) {
     # out[, 1:3] <- round(out[, 1:3], digits)
     out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
   }
   
-  
   out
-  
 }
 
 #' Print a Summary for a \code{substitution} object

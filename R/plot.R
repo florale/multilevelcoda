@@ -107,7 +107,7 @@ plot.substitution <- function(x, to,
 #' plot(fit)
 #' }
 plot.brmcoda <- function(x, ...) {
-  plot(x$Model, ...)
+  plot(x$model, ...)
 }
 
 #' Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link{brmsfit}} object
@@ -138,7 +138,7 @@ plot.brmcoda <- function(x, ...) {
 #' pairs(fit)
 #' }
 pairs.brmcoda <- function(x, ...) {
-  pairs(x$Model, ...)
+  pairs(x$model, ...)
 }
 
 #' MCMC Plots Implemented in \pkg{bayesplot}

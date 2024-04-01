@@ -5,7 +5,10 @@
 \alias{complr}
 \title{Indices from a (dataset of) Multilevel Composition(s)}
 \usage{
-compilr(x, ...)
+compilr(...)
+}
+\arguments{
+\item{...}{arguments passed to \code{\link{complr}}.}
 }
 \value{
 A \code{\link{complr}} object with at least 12 elements.

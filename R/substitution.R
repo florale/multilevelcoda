@@ -1,4 +1,4 @@
-#' Multilevel Compositional Substitution Model
+#' Multilevel Compositional Substitution Analysis
 #' 
 #' Estimate the difference in an outcome
 #' when compositional parts are substituted for specific unit(s). 

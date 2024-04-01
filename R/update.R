@@ -46,10 +46,12 @@ update.complr <- function(object, newdata, ...) {
   }
   
   # update complr
-  sbp <- object$sbp
+  transform <- object$transform
   parts <- object$parts
+  sbp <- object$sbp
   total <- object$total
   idvar <- object$idvar
+  shape <- object$shape
   
   complr(newdata, transform, parts, sbp, total, idvar, shape)
 }
@@ -133,9 +135,9 @@ update.brmcoda <- function(object,
       }
     
     newdata <- cbind(newcomplr$data,
-                     newcomplr$BetweenILR,
-                     newcomplr$WithinILR,
-                     newcomplr$TotalILR)
+                     newcomplr$between_logratio,
+                     newcomplr$within_logratio,
+                     newcomplr$logratio)
     
     fit_new <- update(object$model, formula. = formula., newdata = newdata, ...)
     

@@ -389,7 +389,7 @@ coef.brmcoda <- function(object, ...) {
 #' @export VarCorr
 #' @export
 VarCorr.brmcoda <- function(x, ...) {
-  VarCorr(x$Model, ...)
+  VarCorr(x$model, ...)
 }
 
 #' Posterior Draws of Residuals/Predictive Errors
@@ -444,5 +444,5 @@ residuals.brmcoda <- function(object, ...) {
 #' @method loo brmcoda
 #' @export
 loo.brmcoda <- function(x, ...) {
-  loo(x$Model, ...)
+  loo(x$model, ...)
 }

@@ -286,14 +286,14 @@ complr <- function(data,
 #'
 #' Compute sets of compositions and log ratio transformation for multilevel compositional data
 #'
+#' @param ... arguments passed to \code{\link{complr}}.
 #' @aliases complr
 #'
-#' @inheritParams complr
 #'
 #' @inherit complr return
 #'
 #' @export
-compilr <- function(x, ...) {
+compilr <- function(...) {
   warning("'compilr' is deprecated. Please use 'complr' instead.")
   UseMethod("complr")
 }

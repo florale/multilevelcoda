@@ -50,7 +50,7 @@ submargins <- function (object,
                  fill = FALSE)
   
   # error if delta out of range
-  comp0 <- d0[, colnames(object$CompILR$Comp), with = FALSE]
+  comp0 <- d0[, colnames(object$complr$comp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
@@ -150,7 +150,7 @@ sub <- function (object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
+  comp0 <- d0[1, colnames(object$complr$comp), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(comp0)))) {
