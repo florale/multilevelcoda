@@ -69,7 +69,7 @@
 #'                 idvar = "ID")
 #' str(cclr)
 #' 
-#' cilr_wide <- complr(data = mcompd, sbp = sbp,
+#' cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 shape = "wide")
 #' str(cilr_wide)
@@ -109,6 +109,20 @@ complr <- function(data,
       sep = "\n"))
   }
   
+  # check shape of dataset
+  if (shape == "long") {
+    if (all(!duplicated(tmp[[idvar]]))) {
+      shape <- "wide"
+      warning("It seems that 'data' is a wide data set (e.g., averaged data), so single-level complr was performed.
+  Please specify shape = \"wide\" for single-level data in the future.")
+    }
+  }
+  if (shape == "wide") {
+    if (any(duplicated(tmp[[idvar]]))) {
+      stop("'data' might have duplicated ids. 
+  Please check the duplicates or specify shape = \"long\" if the data are repeated measures.")
+    }
+  }
   # allow one transform at a time
   if (isFALSE(length(transform) == 1)) {
     stop("only one type of transforms can be done at a time.")
@@ -116,7 +130,7 @@ complr <- function(data,
   
   # check transform
   if (isFALSE(transform %in% c("ilr", "alr", "clr"))) {
-    stop(" 'transform' should be one of the following: 'ilr', 'alr', 'clr'")
+    stop(" 'transform' should be one of the following: \"ilr\", \"alr\", \"clr\".")
   }
   
   # specific for ilr
@@ -147,7 +161,7 @@ complr <- function(data,
   if (isTRUE(any(grep("ilr|alr|clr", colnames(tmp))))) {
     stop(
       paste(
-        "'data' should not have any column names with patterns of 'ilr', 'alr', or 'clr';",
+        "'data' should not have any column names with patterns of \"ilr\", \"alr\", or \"clr\";",
         "  these variables will be computed by 'complr' used in subsequent models.",
         "  Please remove or rename them before running 'complr'.",
         sep = "\n"))
