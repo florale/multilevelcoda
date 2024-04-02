@@ -18,6 +18,45 @@ is.sequential <- function(x) {
   all(length(x) > 2 & all(abs(diff(x)) == 1))
 }
 
+# get composition and lr from a complr object
+.get.complr <- function(object, 
+                        weight = c("equal", "proportional"),
+                        ...) {
+  
+  if (identical(weight, "proportional")) {
+    out <- list(
+      summary(object$comp, robust = TRUE),
+      summary(object$between_comp, robust = TRUE),
+      summary(object$within_comp, robust = TRUE),
+      data.frame(summary(object$logratio)),
+      data.frame(summary(object$between_logratio)),
+      data.frame(summary(object$within_logratio))
+    )
+  } else {
+    tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$comp)[!duplicated(get(object$idvar))]
+    bcomp <- cbind(object$data[, object$idvar, with = FALSE], object$between_comp)[!duplicated(get(object$idvar))]
+    wcomp <- cbind(object$data[, object$idvar, with = FALSE], object$within_comp)[!duplicated(get(object$idvar))]
+    
+    tlr <- cbind(object$data[, object$idvar, with = FALSE], object$logratio)[!duplicated(get(object$idvar))]
+    blr <- cbind(object$data[, object$idvar, with = FALSE], object$between_logratio)[!duplicated(get(object$idvar))]
+    wlr <- cbind(object$data[, object$idvar, with = FALSE], object$within_logratio)[!duplicated(get(object$idvar))]
+    
+    out <- list(
+      summary(acomp(tcomp[, colnames(object$comp), with = FALSE]), robust = TRUE),
+      summary(acomp(bcomp[, colnames(object$between_comp), with = FALSE]), robust = TRUE),
+      summary(acomp(wcomp[, colnames(object$within_comp), with = FALSE]), robust = TRUE),
+      
+      summary(rmult(tlr[, colnames(object$logratio), with = FALSE])),
+      summary(rmult(blr[, colnames(object$between_logratio), with = FALSE])),
+      summary(rmult(wlr[, colnames(object$within_logratio), with = FALSE]))
+    )
+  }
+  
+  names(out) <- c("comp", "between_comp", "within_comp",
+                  "logratio", "between_logratio", "within_logratio")
+  out
+}
+
 #' @keywords internal
 #' 
 #' @importFrom ggplot2 aes

@@ -3,35 +3,17 @@
 \name{as.data.frame.complr}
 \alias{as.data.frame.complr}
 \alias{as.matrix.complr}
-\title{Extract compositionositional Data from \code{complr} object.}
+\title{Extract Compositional Data from \code{complr} object.}
 \usage{
-\method{as.data.frame}{complr}(
-  x,
-  row.names = NULL,
-  optional = TRUE,
-  class = c("comp", "logratio"),
-  level = c("between", "within", "combined"),
-  ...
-)
+\method{as.data.frame}{complr}(x, row.names = NULL, optional = TRUE, ...)
 
-\method{as.matrix}{complr}(
-  x,
-  class = c("comp", "logratio"),
-  level = c("between", "within", "combined"),
-  ...
-)
+\method{as.matrix}{complr}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{complr}.}
 
 \item{row.names, optional}{Unused and only added for consistency with
 the \code{\link[base:as.data.frame]{as.data.frame}} generic.}
-
-\item{class}{Optional. Can be \code{"composition"} and/or \code{"logratio"} to
-specify the geometry of the composition.}
-
-\item{level}{Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"combined"}
-indicating the level of the geometry.}
 
 \item{...}{generic argument, not in use.}
 }

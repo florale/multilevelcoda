@@ -1,20 +1,14 @@
 #' Create a Summary of a \code{complr} object
 #' 
 #' @param object An object of class \code{complr}.
-#' @param class Optional. Can be \code{"composition"} and/or \code{"logratio"} to
-#' specify the geometry of the composition.
-#' @param level Optional. Can be \code{"between"}, \code{"within"}, and/or \code{"combined"}
-#' indicating the level of the geometry.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals).
 #' Default is \code{equal}.
-#' @param digits A integer value used for number formatting. Default is \code{3}.
 #' @param ... generic argument, not in use.
 #' 
 #' @importFrom compositions summary.acomp summary.rmult clo acomp rmult
-#' @importFrom utils head tail
 #' 
 #' @method summary complr
 #' 
@@ -25,106 +19,37 @@
 #' summary(cilr)
 #' @export
 summary.complr <- function(object,
-                            class = c("composition", "logratio"),
-                            level = c("between", "within", "combined"),
-                            weight = c("equal", "proportional"),
-                            digits = 3,
-                            ...) {
+                           weight = c("equal", "proportional"),
+                           ...) {
   
-  ## Assemble
-  output <- .get.complr(object)
+  out <- list()
   
-  varn <- c("Compositional Mean", #keep
-            "Geometric Mean of the Pairwise Ratios", 
-            "Variation Matrix", #keep
-            "One-sigma Factor of Pairwise Ratios",
-            "Inverse of One-sigma Factor of Pairwise Ratios",
-            "Min of Pairwise Ratios",
-            "Q1 of Pairwise Ratios",
-            "Median of Pairwise Ratios",
-            "Q3 of Pairwise Ratios",
-            "Max of Pairwise Ratios",
-            "Missingness" #keep
+  out$mean_comp <- mean.complr(object, weight = weight)$mean_comp
+  out$mean_lr   <- mean.complr(object, weight = weight)$mean_lr
+  out$variation_comp <- var.complr(object, weight = weight)
+  
+  out$transform_method <- list(
+    transform_type = object$transform,
+    psi = object$psi,
+    total = object$total,
+    sequential_binary_partition = object$sbp
+  )
+  out$data <- list(composition_parts = object$parts,
+                   logratios = paste0(object$transform, seq_len(length(object$parts) - 1)),
+                   shape = object$shape,
+                   idvar = object$idvar,
+                   nobs = nrow(object$data),
+                   ngrps = length(unique(object$data[[object$idvar]]))
   )
   
-  output[1:3] <- lapply(output[1:3], function(X) {
-    x1 <- list(clo(X[[1]]))
-    x2 <- X[-c(1, length(X))]
-    x3 <- tail(X, 1)
-    
-    names(x1) <- head(varn, 1)
-    names(x2) <- varn[-c(1, length(varn))]
-    names(x3) <- tail(varn, 1)
-    
-    unlist(list(x1, x2, x3), recursive = FALSE)
-  })
-  output[1:3] <- lapply(output[1:3], "[", c("Compositional Mean", 
-                                            "Variation Matrix"
-                                            # , "Missingness"
-                                            ))
+  out$geometry <- list(composition_geometry = class(object$comp),
+                       logratio_class = class(object$logratio))
   
-  ## Summary
-  # General info
-  cat("  Compositional components are: ")
-  cat(paste(object$parts, collapse = ", "), "\n")
-  cat("  Composition is closed to    : ")
-  cat(object$combined, "\n")
-  cat("  Geometry                    : ")
-  cat("relative composition ('acomp') and", "\n")
-  cat("                                isometric log-ratios ('real multivariate')", "\n")
-  cat("  Number of observations      : ")
-  cat(nrow(object$data), "\n")
-  cat("  Number of levels            : ")
-  cat(length(unique(object$data[[object$idvar]])), "\n")
+  sum_out <- as.data.frame(as.array(append(append(out$data, out$transform_method[c("transform_type", "total")]), out$geometry)))
+  names(sum_out) <- NULL
+  print(sum_out)
   
-  # cat("\n", "———— Arithmetic Statistics ————", "\n")
-  # print(JWileymisc::egltable(BetweenComp[, -1], ...))
-  
-  if ("composition" %in% class) {
-    if ("combined" %in% level) {
-      cat("\n", " Raw Composition Statistics: ", "\n")
-      for (i in seq_along(output$TotalComp)) {
-        cat(paste0("\n", names(output$TotalComp)[i], ":", "\n"))
-        print(output$TotalComp[[i]], digits = digits)
-      }
-    }
-    if ("between" %in% level) {
-      cat("\n", " Between-level Composition: ", "\n")
-      for (i in seq_along(output$BetweenComp)) {
-        cat(paste0("\n", names(output$BetweenComp)[i], ":", "\n"))
-        print(output$BetweenComp[[i]], digits = digits)
-      }
-    }
-    if ("within" %in% level) {
-      cat("\n", " Within-level Composition: ", "\n")
-      for (i in seq_along(output$WithinComp)) {
-        cat(paste0("\n", names(output$WithinComp)[i], ":", "\n"))
-        print(output$WithinComp[[i]], digits = digits)
-      }
-    }
-  }
-  
-  if ("logratio" %in% class) {
-    if ("combined" %in% level) {
-      cat("\n", " Raw Isometric Log-ratios: ", "\n")
-      print(output$TotalILR, digits = digits)
-    }
-    if ("between" %in% level) {
-      cat("\n", " Between-level Isometric Log-ratios: ", "\n")
-      print(output$BetweenILR, digits = digits)
-    }
-    if ("within" %in% level) {
-      cat("\n", " Within-level Isometric Log-ratios: ", "\n")
-      print(output$WithinILR, digits = digits)
-    }
-  }
-  
-  ### Return output invisibly
-  output <- lapply(output, function(X) {
-    row.names(X) <- NULL
-    return(X)
-  })
-  return(invisible(output))
+  return(invisible(out))
 }
 
 #' Print a Summary for a \code{complr} object
