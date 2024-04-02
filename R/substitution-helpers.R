@@ -104,7 +104,7 @@ build.rg <- function(object,
   model_fixef_level <- NULL
   model_fixef_coef <- NULL
   
-  if (isTRUE(length(grep("^[bilr]", model_fixef, value = T)) > 0)) {
+  if (length(grep("^[bilr]", model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef, grep("^[bilr]", model_fixef, value = T))
   }
@@ -130,7 +130,7 @@ build.rg <- function(object,
   if (model_ranef_level == "multilevel") {
     
     # for clustermean
-    if (isTRUE(ref == "clustermean")) { 
+    if ("clustermean" %in% ref) { 
       weight <- NULL # ignore weight
       
       # combined
@@ -194,11 +194,11 @@ build.rg <- function(object,
       colnames(id) <- object$complr$idvar
       
       # grandmean
-      if (isTRUE(ref == "grandmean")) {
+      if ("grandmean" %in% ref) {
         
         # combined
         if (level == "combined") {
-          if (isTRUE(weight == "proportional")) {
+          if (weight == "proportional") {
             comp0 <- mean.acomp(object$complr$comp, robust = TRUE)
             
           } else {
@@ -223,7 +223,7 @@ build.rg <- function(object,
         
         # between and/or within
         if (level %in% c("between", "within")) {
-          if (isTRUE(weight == "proportional")) {
+          if (weight == "proportional") {
             comp0 <- mean.acomp(object$complr$between_comp, robust = TRUE)
             
           } else {
@@ -253,7 +253,7 @@ build.rg <- function(object,
         }
       }
       
-      if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+      if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
         weight <- NULL
         
         if (isFALSE(object$complr$parts %in% colnames(ref))) {  # get user's composition
@@ -266,7 +266,6 @@ build.rg <- function(object,
           comp_user <- ref[, object$complr$parts, with = FALSE]
           comp_user <- acomp(comp_user, total = object$complr$total)
           comp_user <- as.data.table(t(comp_user))
-          comp_user <- comp_user
         }
         
         # sanity checks
@@ -321,15 +320,7 @@ build.rg <- function(object,
         }
         
         if (level == "combined") {
-          # compositional mean of the input dataset
-          comp0 <- cbind(object$complr$comp, 
-                         object$complr$data[, object$complr$idvar, with = FALSE])
-          comp0 <- comp0[, head(.SD, 1), by = eval(object$complr$idvar)]
-          comp0 <- acomp(comp0[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
-          comp0 <- mean.acomp(comp0, robust = TRUE)
-          
-          comp0 <- acomp(comp0, total = object$complr$total)
-          comp0 <- as.data.table(t(comp0))
+          comp0 <- comp_user
           
           ilr0 <- ilr(comp0, V = object$complr$psi)
           ilr0 <- as.data.table(t(ilr0))
@@ -349,14 +340,14 @@ build.rg <- function(object,
           
           # assemble d0 
           # bilr0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
-          bcomp0 <- comp0
+          bcomp0 <- comp_user
           bilr0 <- ilr(bcomp0, V = object$complr$psi)
           bilr0 <- as.data.table(t(bilr0))
           
           # wcomp0 and wilr0 are the difference between the actual compositional mean of the dataset and bilr
           # is 0 if ref comp is compositional mean
           # but is different if not
-          wcomp0 <- bcomp0 - comp_user
+          wcomp0 <- bcomp0 - comp0
           wilr0 <- as.data.table(t(ilr(wcomp0, V = object$complr$psi)))
           
           id <- data.table::data.table(1) # to make fitted() happy
@@ -488,7 +479,7 @@ NULL
                     
                     # predictions
                     hout <- vector("list", length = nrow(refgrid))
-                    if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
+                    if(summary) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(refgrid))) {
                         dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
                         ysub <-
@@ -610,7 +601,7 @@ NULL
                     
                     # predictions
                     hout <- vector("list", length = nrow(refgrid))
-                    if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
+                    if (summary) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(refgrid))) {
                         dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
                         ysub <-
@@ -727,7 +718,7 @@ NULL
                     
                     # predictions
                     hout <- vector("list", length = nrow(refgrid))
-                    if(isTRUE(summary)) { # unadj OR adj averaging over reference grid
+                    if (summary) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(refgrid))) {
                         dsub <- cbind(dnew, ilrsub, refgrid[h, ])
                         ysub <-
