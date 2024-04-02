@@ -429,7 +429,7 @@ NULL
                       ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", future.globals.maxSize = 1.0 * 1e9)) %dofuture% {
                     
                     # dnew - reallocation data
                     # possible substitution of 1 compositional variable
@@ -551,7 +551,7 @@ NULL
                       ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", future.globals.maxSize = 1.0 * 1e9)) %dofuture% {
                     
                     # possible susbstituion of 1 compositional variable
                     posub <- as.data.table(basesub)
@@ -673,7 +673,7 @@ NULL
                      ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", future.globals.maxSize = 1.0 * 1e9)) %dofuture% {
                     
                     # dnew - reallocation data
                     # possible substitution of 1 compositional variable
@@ -789,7 +789,7 @@ NULL
                              ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", future.globals.maxSize = 1.0 * 1e9)) %dofuture% {
                     
                     # possible susbstituion of 1 compositional variable
                     posub <- as.data.table(basesub)
@@ -882,7 +882,7 @@ NULL
                              ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {    
+                  .options.future = list(packages = "multilevelcoda", future.globals.maxSize = 1.0 * 1e9)) %dofuture% {
                     
                     posub <- as.data.table(basesub)
                     posub <- posub[(get(i) != 0)]
@@ -978,7 +978,7 @@ NULL
                             ...) {
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {    
+                  .options.future = list(packages = "multilevelcoda", future.globals.maxSize = 1.0 * 1e9)) %dofuture% {
                     
                     # possible susbstituion of 1 compositional variable
                     posub <- as.data.table(basesub)
