@@ -167,8 +167,8 @@ print.complr <- function(x, ...) {
 #' }}
 #' @export
 summary.brmcoda <- function(object, ...) {
-  if (inherits(object$Model, "brmsfit")) {
-    summary(object$Model, ...)
+  if (inherits(object$model, "brmsfit")) {
+    summary(object$model, ...)
   }
 }
 
@@ -194,7 +194,7 @@ summary.brmcoda <- function(object, ...) {
 #' }}
 #' @export
 print.brmcoda <- function(x, ...) {
-  print(summary(x$Model, ...), ...)
+  print(summary(x$model, ...), ...)
   
 }
 
@@ -286,7 +286,9 @@ summary.substitution <- function(object, delta, to, from,
     from <- as.character(from)
   }
   
-  out <- lapply(object[1:4], rbindlist)
+  out <- lapply(object[c("between_simple_sub", "within_simple_sub", "simple_sub",
+                         "between_avg_sub", "within_avg_sub", "avg_sub")],
+                rbindlist)
   out <- rbindlist(out, use.names = TRUE)
   out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   
