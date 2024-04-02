@@ -78,7 +78,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for complr</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">weight</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -106,7 +106,18 @@ Default is <code>equal</code>.</p></dd>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in mean.complr(cilr):</span> argument "weight" is missing, with no default</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mean_comp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    TST       WAKE       MVPA       LPA        SB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> comp         0.3256777 0.03941706 0.08364547 0.3785304 0.1727294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> between_comp 0.3109103 0.04219850 0.09859328 0.3816460 0.1666520</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> within_comp  0.2145624 0.19638789 0.17412177 0.2065891 0.2083389</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mean_lr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    TST       WAKE       MVPA       LPA        SB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> comp         0.3256777 0.03941706 0.08364547 0.3785304 0.1727294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> between_comp 0.3109103 0.04219850 0.09859328 0.3816460 0.1666520</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> within_comp  0.2145624 0.19638789 0.17412177 0.2065891 0.2083389</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
