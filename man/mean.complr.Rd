@@ -4,7 +4,7 @@
 \alias{mean.complr}
 \title{Mean amounts and mean compositions presented in a \code{complr} object.}
 \usage{
-\method{mean}{complr}(x, weight, ...)
+\method{mean}{complr}(x, weight = c("equal", "proportional"), ...)
 }
 \arguments{
 \item{x}{An object of class \code{complr}.}

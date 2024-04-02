@@ -26,7 +26,7 @@ is.complr <- function(x) {
 #' mean(cilr)
 #' @export
 mean.complr <- function(x,
-                        weight,
+                        weight = c("equal", "proportional"),
                         ...) {
   
   stats <- .get.complr(object = x,
@@ -51,7 +51,7 @@ mean.complr <- function(x,
 #' var.complr(cilr)
 #' @export
 var.complr <- function(x,
-                       weight,
+                       weight = c("equal", "proportional"),
                        ...) {
   
   stats <- .get.complr(object = x,

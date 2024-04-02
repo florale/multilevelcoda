@@ -4,7 +4,7 @@
 \alias{var.complr}
 \title{Variance of compositions presented in a \code{complr} object.}
 \usage{
-var.complr(x, weight, ...)
+var.complr(x, weight = c("equal", "proportional"), ...)
 }
 \arguments{
 \item{x}{An object of class \code{complr}.}
