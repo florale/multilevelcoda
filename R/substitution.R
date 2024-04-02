@@ -78,7 +78,7 @@ substitution <- function(object,
                          weight = c("equal", "proportional"),
                          ...) {
   
-  if (isTRUE(missing(object))) {
+  if (missing(object)) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
       "  it should be an object of class 'brmcoda'.", 
@@ -108,7 +108,7 @@ substitution <- function(object,
         stop(" 'delta' should be an positive integer value.")
       }
     }
-  } else if (isTRUE(missing(delta))){
+  } else if (missing(delta)){
     stop(paste(
       "'delta' is a required argument and cannot be missing;",
       "  it should be interger, numeric positive value or vector", 
@@ -123,7 +123,7 @@ substitution <- function(object,
     weight <- "equal"
   }
   
-  if (isTRUE(missing(basesub))) {
+  if (missing(basesub)) {
     count <- length(object$complr$parts)
     n <- count - 2
     
@@ -171,7 +171,7 @@ substitution <- function(object,
   model_fixef_level <- NULL
   model_fixef_coef <- NULL
   
-  if (isTRUE(length(grep("^[bilr]", model_fixef, value = T)) > 0)) {
+  if (length(grep("^[bilr]", model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef, grep("^[bilr]", model_fixef, value = T))
   }
@@ -195,7 +195,7 @@ substitution <- function(object,
   
   # ensure sub args make sense
   ## only grandmean for single level model
-  if (isTRUE("combined" %in% model_fixef_level)) {
+  if ("combined" %in% model_fixef_level) {
     if (model_ranef_level == "single") {
       if ("clustermean" %in% ref) {
         warning("Can only use grandmean for single level model.")
@@ -210,7 +210,7 @@ substitution <- function(object,
   }
   
   ## no between or within for single level model
-  if (isTRUE(any(c("between", "within") %in% model_fixef_level))) {
+  if (any(c("between", "within") %in% model_fixef_level)) {
     if (model_ranef_level == "single") {
       stop(" 'between' and 'within' substitution analysis cannot be computed on a single level model")
     } else if (model_ranef_level == "multilevel") {
@@ -220,12 +220,12 @@ substitution <- function(object,
   }
   
   ## set default to be only between and within if level is not specified
-  if (isTRUE(all(c("between", "within", "combined") %in% level))) {
+  if (all(c("between", "within", "combined") %in% level)) {
     level <- c("between", "within")
   }
   
   ## level args match with coefs in object
-  if (isTRUE(any(level %in% c("between", "within")))) {
+  if (any(level %in% c("between", "within"))) {
     if (isFALSE(any(model_fixef_level %in% c("between", "within")))) {
       stop(sprintf(
         "'between' and 'within' substitution analysis cannot be computed
@@ -236,7 +236,7 @@ substitution <- function(object,
       ))
     }
   }
-  if (isTRUE("combined" %in% level)) {
+  if ("combined" %in% level) {
     if (isFALSE("combined" %in% model_fixef_level)) {
       stop(sprintf(
         "'combined' substitution analysis cannot be computed
@@ -250,8 +250,8 @@ substitution <- function(object,
   
   # deploy to substitution analysis
   bmout <- bout <- NULL
-  if (isTRUE("between" %in% level)) {
-    if (isTRUE("grandmean" %in% ref)) {
+  if ("between" %in% level) {
+    if ("grandmean" %in% ref) {
       bout <- bsub(
         object = object,
         delta = delta,
@@ -261,7 +261,7 @@ substitution <- function(object,
         level = "between",
         weight = weight)
     } 
-    else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+    else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       bout <- bsub(
         object = object,
         delta = delta,
@@ -271,7 +271,7 @@ substitution <- function(object,
         level = "between",
         weight = weight)
     }
-    if (isTRUE("clustermean" %in% ref)) {
+    if ("clustermean" %in% ref) {
       bmout <-
         bsubmargins(
           object = object,
@@ -284,8 +284,8 @@ substitution <- function(object,
   }
   
   wmout <- wout <- NULL
-  if (isTRUE("within" %in% level)) {
-    if (isTRUE("grandmean" %in% ref)) {
+  if ("within" %in% level) {
+    if ("grandmean" %in% ref) {
       wout <- wsub(
         object = object,
         delta = delta,
@@ -295,7 +295,7 @@ substitution <- function(object,
         level = "within",
         weight = weight)
     } 
-    else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+    else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       wout <- wsub(
         object = object,
         delta = delta,
@@ -305,7 +305,7 @@ substitution <- function(object,
         level = "within",
         weight = weight)
     }
-    if (isTRUE("clustermean" %in% ref)) {
+    if ("clustermean" %in% ref) {
       wmout <-
         wsubmargins(
           object = object,
@@ -318,8 +318,8 @@ substitution <- function(object,
   }
   
   tmout <- tout <- NULL
-  if (isTRUE("combined" %in% level)) {
-    if (isTRUE("grandmean" %in% ref)) {
+  if ("combined" %in% level) {
+    if ("grandmean" %in% ref) {
       tout <- sub(
         object = object,
         delta = delta,
@@ -329,7 +329,7 @@ substitution <- function(object,
         level = "combined",
         weight = weight)
     } 
-    else if (isTRUE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
+    else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       tout <- sub(
         object = object,
         delta = delta,
@@ -339,7 +339,7 @@ substitution <- function(object,
         level = "between",
         weight = weight)
     }
-    if (isTRUE("clustermean" %in% ref)) {
+    if ("clustermean" %in% ref) {
       tmout <-
         submargins(
           object = object,
