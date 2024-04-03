@@ -75,7 +75,7 @@ sub <- function (object,
   y0 <- fitted(
     object,
     newdata = d0,
-    re_formula = NULL,
+    re_formula = NA,
     summary = FALSE
   )
   y0 <- rowMeans(as.data.frame(y0)) # average across participants when there is no change
