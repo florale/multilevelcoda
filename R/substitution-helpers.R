@@ -99,22 +99,22 @@ build.rg <- function(object,
   
   # get what type of model is being estimated
   model_fixef <- rownames(fixef(object))
-  model_ranef <- names(ranef(object))
+  model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   model_fixef_level <- NULL
   model_fixef_coef <- NULL
   
-  if (length(grep("^[bilr]", model_fixef, value = T)) > 0) {
+  if (isFALSE(is.null(object$complr$between_logratio)) && length(grep(paste0(names(object$complr$between_logratio), collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
-    model_fixef_coef  <- append(model_fixef_coef, grep("^[bilr]", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$between_logratio), collapse = "|"), model_fixef, value = T))
   }
-  if (length(grep("^[wilr]", model_fixef, value = T)) > 0) {
+  if (isFALSE(is.null(object$complr$within_logratio)) && length(grep(paste0(names(object$complr$within_logratio), collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "within")
-    model_fixef_coef  <- append(model_fixef_coef, grep("^[wilr]", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$within_logratio), collapse = "|"), model_fixef, value = T))
   }
-  if (length(grep("^[ilr]", model_fixef, value = T)) > 0) {
+  if (length(grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "combined")
-    model_fixef_coef  <- append(model_fixef_coef, grep("^[ilr]", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
   }
   
   # single level or multilevel
