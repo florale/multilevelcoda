@@ -17,8 +17,7 @@ User's specified reference grid is only possible for simple substitution.
 Single level models are default to \code{"grandmean"}.}
 
 \item{level}{A character string or vector.
-Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"}
-variance?
+Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} variance?
 Single-level models are default to \code{"combined"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.

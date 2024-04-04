@@ -24,8 +24,7 @@
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} 
-#' variance?
+#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} variance?
 #' Single-level models are default to \code{"combined"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -45,7 +44,7 @@
 #'   \item{\code{Delta}}{ Amount substituted across compositional parts.}
 #'   \item{\code{From}}{ Compositional part that is substituted from.}
 #'   \item{\code{To}}{ Compositional parts that is substituted to.}
-#'   \item{\code{Level}}{ Level where changes in composition takes place.
+#'   \item{\code{Level}}{ Level where changes in composition takes place.}
 #'   \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 #' 
 #' @importFrom data.table as.data.table copy :=
