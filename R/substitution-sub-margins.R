@@ -29,6 +29,7 @@
 sub <- function (object,
                  delta,
                  basesub,
+                 summary = TRUE,
                  ref = "grandmean",
                  level = "combined",
                  weight = "equal",
@@ -78,7 +79,6 @@ sub <- function (object,
     re_formula = NA,
     summary = FALSE
   )
-  y0 <- rowMeans(as.data.frame(y0)) # average across participants when there is no change
   
   # y ---------------------------------
   out <- .get.sub(

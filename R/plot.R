@@ -6,7 +6,7 @@
 #' @param to A character value or vector specifying the names of the compositional parts
 #' that were reallocated to in the model.
 #' @param ref A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),
-#' @param level A character value of (\code{"between"} or \code{"within"}).
+#' @param level A character value of (\code{"between"}, \code{"within"}), or \code{"combined"}).
 #' @param ... Further arguments passed to \code{\link{ggplot}}.
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
@@ -26,7 +26,7 @@ plot.substitution <- function(x, to,
   }
   ref <- as.character(ref)
   
-  if (isFALSE(any(c("between", "within") %in% level)) ||
+  if (isFALSE(any(c("between", "within", "combined") %in% level)) ||
       isTRUE(length(level) > 1)) {
     stop("'level' should be either one of the following: \"between\", \"within\", \"combined\".")
   }
