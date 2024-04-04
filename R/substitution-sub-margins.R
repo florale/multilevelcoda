@@ -33,6 +33,7 @@ sub <- function (object,
                  ref = "grandmean",
                  level = "combined",
                  weight = "equal",
+                 cores,
                  ...) {
   
   level <- "combined"
@@ -90,7 +91,8 @@ sub <- function (object,
     y0 = y0,
     level = level,
     ref = ref,
-    summary = TRUE
+    summary = summary,
+    cores = cores
   )
 }
 
@@ -129,6 +131,7 @@ submargins <- function (object,
                         ref = "clustermean",
                         level = "combined",
                         weight = "proportional",
+                        cores = getOption("mc.cores", 1),
                         ...) {
   
   ref <- "clustermean"
@@ -171,6 +174,7 @@ submargins <- function (object,
     d0 = d0,
     y0 = y0,
     level = level,
-    ref = ref
+    ref = ref,
+    cores = cores
   )
 }

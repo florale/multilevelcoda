@@ -12,6 +12,7 @@ bsub(
   ref = "grandmean",
   level = "between",
   weight = "equal",
+  cores = getOption("mc.cores", 1),
   ...
 )
 }
@@ -48,6 +49,11 @@ If \code{"equal"}, give equal weight to units (e.g., individuals).
 If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals).
 Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
+
+\item{cores}{Number of cores to use when executing the chains in parallel,
+which defaults to 1 but we recommend setting the \code{mc.cores} option
+to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
+For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.}
 
 \item{...}{Additional arguments passed to \code{\link{describe_posterior}}.}
 }

@@ -14,7 +14,7 @@ that were reallocated to in the model.}
 
 \item{ref}{A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),}
 
-\item{level}{A character value of (\code{"between"} or \code{"within"}).}
+\item{level}{A character value of (\code{"between"}, \code{"within"}), or \code{"combined"}).}
 
 \item{...}{Further arguments passed to \code{\link{ggplot}}.}
 }

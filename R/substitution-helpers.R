@@ -419,8 +419,15 @@ NULL
 .get.bsub <- function(object, delta, basesub,
                       comp0, y0, d0,
                       summary,
-                      level, ref,
+                      level, ref, cores,
                       ...) {
+  
+  if (cores > 1) {
+    oplan <- plan(multisession, workers = cores)
+    on.exit(plan(oplan))
+  }
+  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
@@ -538,8 +545,15 @@ NULL
 .get.wsub <- function(object, delta, basesub,
                       comp0, y0, d0,
                       summary,
-                      level, ref,
+                      level, ref, cores,
                       ...) {
+  
+  if (cores > 1) {
+    oplan <- plan(multisession, workers = cores)
+    on.exit(plan(oplan))
+  }
+  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
@@ -657,8 +671,15 @@ NULL
 .get.sub <- function(object, delta, basesub,
                      comp0, y0, d0,
                      summary,
-                     level, ref,
+                     level, ref, cores,
                      ...) {
+  
+  if (cores > 1) {
+    oplan <- plan(multisession, workers = cores)
+    on.exit(plan(oplan))
+  }
+  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
@@ -769,8 +790,15 @@ NULL
 # Clustermean Between-person Substitution model
 .get.bsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
-                             level, ref,
+                             level, ref, cores,
                              ...) {
+  
+  if (cores > 1) {
+    oplan <- plan(multisession, workers = cores)
+    on.exit(plan(oplan))
+  }
+  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
@@ -863,8 +891,15 @@ NULL
 # Clustermean Within-person Substitution model
 .get.wsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
-                             level, ref,
+                             level, ref, cores,
                              ...) {
+  
+  if (cores > 1) {
+    oplan <- plan(multisession, workers = cores)
+    on.exit(plan(oplan))
+  }
+  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
@@ -960,8 +995,15 @@ NULL
 # Clustermean Average Substitution
 .get.submargins <- function(object, delta, basesub,
                             comp0, y0, d0,
-                            level, ref,
+                            level, ref, cores,
                             ...) {
+  
+  if (cores > 1) {
+    oplan <- plan(multisession, workers = cores)
+    on.exit(plan(oplan))
+  }
+  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {

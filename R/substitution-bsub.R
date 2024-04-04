@@ -36,6 +36,7 @@ bsub <- function(object,
                  ref = "grandmean",
                  level = "between",
                  weight = "equal",
+                 cores = getOption("mc.cores", 1),
                  ...) {
   
   # ref <- "grandmean"
@@ -93,7 +94,8 @@ bsub <- function(object,
     y0 = y0,
     level = level,
     ref = ref,
-    summary = summary
+    summary = summary,
+    cores = cores
   )
   
   return(out)

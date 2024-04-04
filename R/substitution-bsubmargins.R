@@ -35,6 +35,7 @@ bsubmargins <- function (object,
                          ref = "clustermean",
                          level = "between",
                          weight = "proportional",
+                         cores = getOption("mc.cores", 1),
                          ...) {
   
   ref   <- "clustermean"
@@ -76,6 +77,7 @@ bsubmargins <- function (object,
     d0 = d0,
     y0 = y0,
     level = level,
-    ref = ref
+    ref = ref,
+    cores = cores
   )
 }

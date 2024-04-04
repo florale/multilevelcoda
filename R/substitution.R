@@ -32,6 +32,10 @@
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
 #' (e.g., observations across individuals).
 #' Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.
+#' @param cores Number of cores to use when executing the chains in parallel, 
+#' which defaults to 1 but we recommend setting the \code{mc.cores} option 
+#' to be as many processors as the hardware and RAM allow (up to the number of compositional parts). 
+#' For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 #' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
 #' 
 #' @return A list containing the results of multilevel compositional substitution model.
@@ -76,6 +80,7 @@ substitution <- function(object,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
+                         cores = getOption("mc.cores", 1),
                          ...) {
   
   if (missing(object)) {
@@ -259,7 +264,8 @@ substitution <- function(object,
         summary = summary,
         ref = "grandmean",
         level = "between",
-        weight = weight)
+        weight = weight,
+        cores = cores)
     } 
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       bout <- bsub(
@@ -269,7 +275,8 @@ substitution <- function(object,
         summary = summary,
         ref = ref,
         level = "between",
-        weight = weight)
+        weight = weight,
+        cores = cores)
     }
     if ("clustermean" %in% ref) {
       bmout <-
@@ -279,7 +286,8 @@ substitution <- function(object,
           basesub = basesub,
           ref = "clustermean",
           level = "between",
-          weight = weight)
+          weight = weight,
+          cores = cores)
     }
   }
   
@@ -293,7 +301,8 @@ substitution <- function(object,
         summary = summary,
         ref = "grandmean",
         level = "within",
-        weight = weight)
+        weight = weight,
+        cores = cores)
     } 
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       wout <- wsub(
@@ -303,7 +312,8 @@ substitution <- function(object,
         summary = summary,
         ref = ref,
         level = "within",
-        weight = weight)
+        weight = weight,
+        cores = cores)
     }
     if ("clustermean" %in% ref) {
       wmout <-
@@ -313,7 +323,8 @@ substitution <- function(object,
           basesub = basesub,
           ref = "clustermean",
           level = "within",
-          weight = weight)
+          weight = weight,
+          cores = cores)
     }
   }
   
@@ -327,7 +338,8 @@ substitution <- function(object,
         summary = summary,
         ref = "grandmean",
         level = "combined",
-        weight = weight)
+        weight = weight,
+        cores = cores)
     } 
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       tout <- sub(
@@ -337,7 +349,8 @@ substitution <- function(object,
         summary = summary,
         ref = ref,
         level = "between",
-        weight = weight)
+        weight = weight,
+        cores = cores)
     }
     if ("clustermean" %in% ref) {
       tmout <-
@@ -347,7 +360,8 @@ substitution <- function(object,
           basesub = basesub,
           ref = "clustermean",
           level = "combined",
-          weight = weight)
+          weight = weight,
+          cores = cores)
     }
   }
   
