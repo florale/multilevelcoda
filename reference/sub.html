@@ -84,6 +84,7 @@
 <span>  ref <span class="op">=</span> <span class="st">"grandmean"</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"combined"</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">"equal"</span>,</span>
+<span>  <span class="va">cores</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -135,6 +136,13 @@ If <code>"equal"</code>, give equal weight to units (e.g., individuals).
 If <code>"proportional"</code>, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals).
 Default to <code>"equal"</code> for <code>ref = "grandmean"</code> and <code>"proportional"</code> for <code>ref = "clustermean"</code>.</p></dd>
+
+
+<dt>cores</dt>
+<dd><p>Number of cores to use when executing the chains in parallel,
+which defaults to 1 but we recommend setting the <code>mc.cores</code> option
+to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
+For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.</p></dd>
 
 
 <dt>...</dt>
