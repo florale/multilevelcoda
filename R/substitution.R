@@ -171,15 +171,15 @@ substitution <- function(object,
   model_fixef_level <- NULL
   model_fixef_coef <- NULL
   
-  if (isFALSE(is.null(object$complr$between_logratio)) && length(grep(paste0(names(object$complr$between_logratio), collapse = "|"), model_fixef, value = T)) > 0) {
+  if (length(grep("bilr", model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
-    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$between_logratio), collapse = "|"), model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, grep(".*bilr", model_fixef, value = T))
   }
-  if (isFALSE(is.null(object$complr$within_logratio)) && length(grep(paste0(names(object$complr$within_logratio), collapse = "|"), model_fixef, value = T)) > 0) {
+  if (length(grep("wilr", model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "within")
-    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$within_logratio), collapse = "|"), model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, grep(".*wilr", model_fixef, value = T))
   }
-  if (length(grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T)) > 0) {
+  if ((length(grep("ilr", model_fixef, value = T)) > 0) && (length(grep("[b|w]ilr", model_fixef, value = T)) == 0)) {
     model_fixef_level <- append(model_fixef_level, "combined")
     model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
   }

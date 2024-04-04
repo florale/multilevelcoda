@@ -181,15 +181,15 @@ summary.substitution <- function(object, delta, to, from,
     ref <- object$ref
   } else {
     if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
-      stop("'ref' should be grandmean and/or clustermean or users.")
+      stop("'ref' should be either one of the following: \"grandmean\", \"clustermean\", or \"users\".")
     }
     ref <- as.character(ref)
   }
   if (isTRUE(missing(level))) {
     level <- object$level
   } else {
-    if (isFALSE(any(c("between", "within") %in% level))) {
-      stop("'level' should be between, within, or combined.")
+    if (isFALSE(any(c("between", "within", "combined") %in% level))) {
+      stop("'level' should be either one of the following: \"between\", \"within\", \"combined\".")
     }
     level <- as.character(level)
   }

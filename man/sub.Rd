@@ -8,6 +8,7 @@ sub(
   object,
   delta,
   basesub,
+  summary = TRUE,
   ref = "grandmean",
   level = "combined",
   weight = "equal",
@@ -22,6 +23,13 @@ sub(
 \item{basesub}{A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
 This data set can be computed using function \code{\link{basesub}}.
 If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
+
+\item{summary}{A logical value.
+Should the estimate at each level of the reference grid (\code{FALSE})
+or their average (\code{TRUE}) be returned?
+Default is \code{TRUE}.
+Only applicable for model with covariates in addition to
+the isometric log-ratio coordinates (i.e., adjusted model).}
 
 \item{ref}{Either a character value or vector or a dataset.
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
