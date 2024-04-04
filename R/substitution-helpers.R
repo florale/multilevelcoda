@@ -397,7 +397,7 @@ build.rg <- function(object,
     drg <- as.data.table(ref_grid(object$model)@grid)
     
     # reference grid with only covariates
-    refgrid <- drg[, covs, with = FALSE]
+    refgrid <- drg[, colnames(drg) %in% covs, with = FALSE]
     
     d0 <- if (all(dim(refgrid) == 0)) (cbind(ilr0, comp0)) else (expand.grid.df(ilr0, comp0, refgrid))
   }
