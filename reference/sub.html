@@ -80,6 +80,7 @@
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  <span class="va">basesub</span>,</span>
+<span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ref <span class="op">=</span> <span class="st">"grandmean"</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"combined"</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">"equal"</span>,</span>
@@ -101,6 +102,15 @@
 <dd><p>A <code>data.frame</code> or <code>data.table</code> of the base possible substitution of compositional parts.
 This data set can be computed using function <code><a href="basesub.html">basesub</a></code>.
 If <code>NULL</code>, all possible pairwise substitution of compositional parts are used.</p></dd>
+
+
+<dt>summary</dt>
+<dd><p>A logical value.
+Should the estimate at each level of the reference grid (<code>FALSE</code>)
+or their average (<code>TRUE</code>) be returned?
+Default is <code>TRUE</code>.
+Only applicable for model with covariates in addition to
+the isometric log-ratio coordinates (i.e., adjusted model).</p></dd>
 
 
 <dt>ref</dt>
