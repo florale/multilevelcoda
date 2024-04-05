@@ -411,6 +411,7 @@ build.rg <- function(object,
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doFuture %dofuture%
+#' @importFrom future plan
 #' 
 #' @name get-substitution
 NULL
@@ -425,8 +426,10 @@ NULL
   if (cores > 1) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
+  } else {
+    plan(sequential)
   }
-  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
@@ -551,8 +554,10 @@ NULL
   if (cores > 1) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
+  } else {
+    plan(sequential)
   }
-  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
@@ -677,8 +682,10 @@ NULL
   if (cores > 1) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
+  } else {
+    plan(sequential)
   }
-  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
@@ -796,8 +803,10 @@ NULL
   if (cores > 1) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
+  } else {
+    plan(sequential)
   }
-  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
@@ -897,8 +906,10 @@ NULL
   if (cores > 1) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
+  } else {
+    plan(sequential)
   }
-  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
@@ -1001,8 +1012,10 @@ NULL
   if (cores > 1) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
+  } else {
+    plan(sequential)
   }
-  oopts <- options(future.globals.maxSize = 1.0 * 1e9)
+  oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c, 
