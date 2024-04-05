@@ -50,31 +50,31 @@ plot.substitution <- function(x, to,
   if (isTRUE(is.sequential(delta.pos))) {
     plotsub <- ggplot(tmp, 
                       aes(x = Delta, y = Mean)) +
+      geom_hline(yintercept = 0,
+                 linewidth = 0.2,
+                 linetype = 2) +
+      geom_vline(xintercept = 0,
+                 linewidth = 0.2,
+                 linetype = 2) +
       geom_line(aes(colour = From), linewidth = 1) +
       geom_ribbon(
         aes(ymin = CI_low,
             ymax = CI_high, fill = From),
         alpha = 1 / 10,
         linewidth = 1 / 10) +
-      geom_hline(yintercept = 0,
-                 linewidth = 0.2,
-                 linetype = 2) +
-      geom_vline(xintercept = 0,
-                 linewidth = 0.2,
-                 linetype = 2) +
       facet_grid( ~ From)
     
   } else {
     plotsub <- ggplot(tmp,
                       aes(x = Delta, y = Mean)) +
-      geom_line(aes(colour = From)) +
-      geom_pointrange(aes(ymin = CI_low, ymax = CI_high, colour = From)) +
       geom_hline(yintercept = 0,
                  linewidth = 0.2,
                  linetype = 2) +
       geom_vline(xintercept = 0,
                  linewidth = 0.2,
                  linetype = 2) +
+      geom_line(aes(colour = From)) +
+      geom_pointrange(aes(ymin = CI_low, ymax = CI_high, colour = From)) +
       facet_grid( ~ From)
     
   }
