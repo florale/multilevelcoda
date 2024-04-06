@@ -134,7 +134,7 @@ build.rg <- function(object,
       weight <- NULL # ignore weight
       
       # combined
-      if (level == "combined") {
+      if ("combined" %in% level) {
         d0 <- cbind(object$complr$comp, object$complr$data[, -colnames(object$complr$comp), with = FALSE])
         d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
         comp0 <- acomp(d0[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
@@ -150,7 +150,7 @@ build.rg <- function(object,
       }
       
       # between and within
-      if (level %in% c("between", "within")) {
+      if (any(c("between", "within") %in% level)) {
         d0 <- cbind(object$complr$between_comp, object$complr$data)
         d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
         comp0 <- acomp(d0[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
@@ -197,7 +197,7 @@ build.rg <- function(object,
       if ("grandmean" %in% ref) {
         
         # combined
-        if (level == "combined") {
+        if ("combined" %in% level) {
           if (weight == "proportional") {
             comp0 <- mean.acomp(object$complr$comp, robust = TRUE)
             
@@ -222,7 +222,7 @@ build.rg <- function(object,
         }
         
         # between and/or within
-        if (level %in% c("between", "within")) {
+        if (any(c("between", "within") %in% level)) {
           if (weight == "proportional") {
             comp0 <- mean.acomp(object$complr$between_comp, robust = TRUE)
             
@@ -405,13 +405,13 @@ build.rg <- function(object,
 }
 
 #' Helper functions used only internally to estimate substitution model
-#' @importFrom data.table as.data.table data.table copy := setDT rbindlist
+#' @importFrom data.table as.data.table data.table copy := setDT rbindlist .SD
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom bayestestR describe_posterior
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doFuture %dofuture%
-#' @importFrom future plan
+#' @importFrom future plan multisession sequential
 #' 
 #' @name get-substitution
 NULL
