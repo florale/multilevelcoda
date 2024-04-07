@@ -56,12 +56,12 @@ plot.substitution <- function(x, to,
       geom_vline(xintercept = 0,
                  linewidth = 0.2,
                  linetype = 2) +
-      geom_line(aes(colour = From), linewidth = 1) +
       geom_ribbon(
         aes(ymin = CI_low,
             ymax = CI_high, fill = From),
-        alpha = 1 / 10,
+        alpha = 2 / 10,
         linewidth = 1 / 10) +
+      geom_line(aes(colour = From), linewidth = 1) +
       facet_grid( ~ From)
     
   } else {

@@ -110,6 +110,10 @@ complr <- function(data,
   }
   
   # check shape of dataset
+  
+  if (lengh(shape) > 1 ) {
+    stop("shape of the dataset should be either wide or long.")
+  }
   if (shape == "long") {
     if (all(!duplicated(tmp[[idvar]]))) {
       shape <- "wide"
@@ -124,18 +128,18 @@ complr <- function(data,
     }
   }
   # allow one transform at a time
-  if (isFALSE(length(transform) == 1)) {
+  if (length(transform) > 1) {
     stop("only one type of transforms can be done at a time.")
   }
   
   # check transform
-  if (isFALSE(transform %in% c("ilr", "alr", "clr"))) {
+  if (isFALSE(any(transform %in% c("ilr", "alr", "clr")))) {
     stop(" 'transform' should be one of the following: \"ilr\", \"alr\", \"clr\".")
   }
   
   # specific for ilr
   if (identical(transform, "ilr")) {
-    if (isTRUE(missing(sbp))) {
+    if (missing(sbp)) {
       stop(" 'sbp', i.e., sequential binary partition, is required for ilr transform.")
     }
     if (isFALSE(inherits(sbp, "matrix"))) {
