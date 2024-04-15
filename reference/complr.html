@@ -77,15 +77,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">complr</span><span class="op">(</span></span>
-<span>  <span class="va">data</span>,</span>
-<span>  transform <span class="op">=</span> <span class="st">"ilr"</span>,</span>
-<span>  <span class="va">parts</span>,</span>
-<span>  sbp <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  total <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  idvar <span class="op">=</span> <span class="st">"ID"</span>,</span>
-<span>  shape <span class="op">=</span> <span class="st">"long"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">complr</span><span class="op">(</span><span class="va">data</span>, <span class="va">parts</span>, sbp <span class="op">=</span> <span class="cn">NULL</span>, total <span class="op">=</span> <span class="fl">1</span>, idvar <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="st">"ilr"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -94,12 +86,6 @@
 <dd><p>A <code>data.frame</code> or <code>data.table</code>
 containing data of all variables used in the analysis.
 It must include a composition and a ID variable. Required.</p></dd>
-
-
-<dt>transform</dt>
-<dd><p>A character value naming a log ratio transformation to be applied on compositional data.
-Can be either <code>"ilr"</code> (isometric logratio), <code>"alr"</code> (additive logratio), or <code>"clr"</code> (centered logratio).
-Default is <code>"ilr"</code>.</p></dd>
 
 
 <dt>parts</dt>
@@ -111,17 +97,18 @@ Default is <code>"ilr"</code>.</p></dd>
 
 
 <dt>total</dt>
-<dd><p>A numeric value of the total amount to which the compositions should be closed.</p></dd>
+<dd><p>A numeric value of the total amount to which the compositions should be closed.
+Default is <code>1</code>.</p></dd>
 
 
 <dt>idvar</dt>
-<dd><p>A character string specifying the name of the variable containing IDs.</p></dd>
+<dd><p>Only for multilevel data, a character string specifying the name of the variable containing IDs.</p></dd>
 
 
-<dt>shape</dt>
-<dd><p>A character string, either <code>"wide"</code> format, or <code>"long"</code> format. Default to <code>"long"</code>.
-Default is <code>"ID"</code>.
-Default is <code>1</code>.</p></dd>
+<dt>transform</dt>
+<dd><p>A character value naming a log ratio transformation to be applied on compositional data.
+Can be either <code>"ilr"</code> (isometric logratio), <code>"alr"</code> (additive logratio), or <code>"clr"</code> (centered logratio).
+Default is <code>"ilr"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -395,8 +382,7 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cilr_wide</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">]</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
-<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                shape <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr_wide</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:266, 1:5] 0.3767 0.3569 0.2771 0.4357 0.3678 0.0688 0.0437 0.0826 0.0368 0.05 0.2064 0.0785 0.0229 0.0716 0.0749 0.3197 0.3| __truncated__ ...</span>
@@ -438,7 +424,7 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ shape           : chr "wide"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
@@ -453,7 +439,7 @@ resulting in singular covariance matrices.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
   <p class="preferably">Using <a href="https://preferably.amirmasoudabdol.name/?source=footer" class="external-link">preferably</a> template.</p>
 </div>
 
