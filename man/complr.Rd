@@ -4,36 +4,25 @@
 \alias{complr}
 \title{Indices from a (dataset of) Multilevel Composition(s)}
 \usage{
-complr(
-  data,
-  transform = "ilr",
-  parts,
-  sbp = NULL,
-  total = 1,
-  idvar = "ID",
-  shape = "long"
-)
+complr(data, parts, sbp = NULL, total = 1, idvar = NULL, transform = "ilr")
 }
 \arguments{
 \item{data}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.
 It must include a composition and a ID variable. Required.}
 
-\item{transform}{A character value naming a log ratio transformation to be applied on compositional data.
-Can be either \code{"ilr"} (isometric logratio), \code{"alr"} (additive logratio), or \code{"clr"} (centered logratio).
-Default is \code{"ilr"}.}
-
 \item{parts}{A character vector specifying the names of compositional variables to be used.}
 
 \item{sbp}{A signary matrix indicating sequential binary partition.}
 
-\item{total}{A numeric value of the total amount to which the compositions should be closed.}
-
-\item{idvar}{A character string specifying the name of the variable containing IDs.}
-
-\item{shape}{A character string, either \code{"wide"} format, or \code{"long"} format. Default to \code{"long"}.
-Default is \code{"ID"}.
+\item{total}{A numeric value of the total amount to which the compositions should be closed.
 Default is \code{1}.}
+
+\item{idvar}{Only for multilevel data, a character string specifying the name of the variable containing IDs.}
+
+\item{transform}{A character value naming a log ratio transformation to be applied on compositional data.
+Can be either \code{"ilr"} (isometric logratio), \code{"alr"} (additive logratio), or \code{"clr"} (centered logratio).
+Default is \code{"ilr"}.}
 }
 \value{
 A \code{\link{complr}} object with at least 12 elements.
@@ -90,7 +79,6 @@ cclr <- complr(data = mcompd, sbp = sbp,
 str(cclr)
 
 cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-                shape = "wide")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 str(cilr_wide)
 }

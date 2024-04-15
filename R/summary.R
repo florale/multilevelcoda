@@ -45,11 +45,33 @@ summary.complr <- function(object,
   out$geometry <- list(composition_geometry = class(object$comp),
                        logratio_class = class(object$logratio))
   
-  sum_out <- as.data.frame(as.array(append(append(out$data, out$transform_method[c("transform_type", "total")]), out$geometry)))
-  names(sum_out) <- NULL
-  print(sum_out)
+  class(out) <- "summary.complr"
   
-  return(invisible(out))
+  return(out)
+}
+
+#' Summary for a \code{complr} object
+#' 
+#' @param x An object of class \code{summary.complr}.
+#' @param ... Other arguments passed to \code{\link{summary.complr}}.
+#' 
+#' @seealso \code{\link{summary.complr}}
+#' 
+#' @method print summary.complr
+#' 
+#' @examples
+#' 
+#' cilr <- complr(data = mcompd, sbp = sbp, 
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+#'                 idvar = "ID")
+#' print(cilr)
+#' @export
+print.summary.complr <- function(x, ...) {
+  
+  out <- as.data.frame(as.array(append(append(x$data, x$transform_method[c("transform_type", "total")]), x$geometry)))
+  names(out) <- NULL
+  
+  print(out, ...)
 }
 
 #' Print a Summary for a \code{complr} object

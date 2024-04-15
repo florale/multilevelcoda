@@ -11,10 +11,8 @@
 #' @param parts A character vector specifying the names of compositional variables to be used.
 #' @param sbp A signary matrix indicating sequential binary partition.
 #' @param total A numeric value of the total amount to which the compositions should be closed.
-#' @param idvar A character string specifying the name of the variable containing IDs. 
-#' @param shape A character string, either \code{"wide"} format, or \code{"long"} format. Default to \code{"long"}.
-#' Default is \code{"ID"}.
 #' Default is \code{1}.
+#' @param idvar Only for multilevel data, a character string specifying the name of the variable containing IDs.
 #' 
 #' @details 
 #' The \emph{ilr}-transform maps the D-part compositional data from the simplex into non-overlapping 
@@ -60,27 +58,27 @@
 #' str(cilr)
 #' 
 #' calr <- complr(data = mcompd, sbp = sbp,
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), transform = "alr",
-#'                 idvar = "ID")
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                 idvar = "ID",
+#'                 transform = "alr")
 #' str(calr)
 #' 
 #' cclr <- complr(data = mcompd, sbp = sbp,
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), transform = "clr",
-#'                 idvar = "ID")
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                 idvar = "ID",
+#'                  transform = "clr")
 #' str(cclr)
 #' 
 #' cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                 shape = "wide")
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' str(cilr_wide)
 #' @export
 complr <- function(data,
-                   transform = "ilr",
                    parts,
                    sbp = NULL, 
                    total = 1, 
-                   idvar = "ID",
-                   shape = "long"
+                   idvar = NULL,
+                   transform = "ilr"
 ) {
   
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
@@ -109,24 +107,13 @@ complr <- function(data,
       sep = "\n"))
   }
   
-  # check shape of dataset
-  
-  if (lengh(shape) > 1 ) {
-    stop("shape of the dataset should be either wide or long.")
+  # check single level or multilevel
+  if (is.null(idvar)) {
+    shape <- "wide"
+  } else {
+    shape <- "long"
   }
-  if (shape == "long") {
-    if (all(!duplicated(tmp[[idvar]]))) {
-      shape <- "wide"
-      warning("It seems that 'data' is a wide data set (e.g., averaged data), so single-level complr was performed.
-  Please specify shape = \"wide\" for single-level data in the future.")
-    }
-  }
-  if (shape == "wide") {
-    if (any(duplicated(tmp[[idvar]]))) {
-      stop("'data' might have duplicated ids. 
-  Please check the duplicates or specify shape = \"long\" if the data are repeated measures.")
-    }
-  }
+
   # allow one transform at a time
   if (length(transform) > 1) {
     stop("only one type of transforms can be done at a time.")
@@ -250,24 +237,28 @@ complr <- function(data,
       colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))
     }
   }
+  logratio <-  if (exists("tilr")) (tilr)
+  else if (exists("talr")) (talr)
+  else if (exists("tclr")) (tclr)
+  
+  between_logratio <- if (exists("bilr")) (bilr)
+  else if (exists("balr")) (balr)
+  else if (exists("bclr")) (bclr)
+  else (NULL)
+  
+  within_logratio <- if (exists("wilr")) (wilr)
+  else if (exists("walr")) (walr)
+  else if (exists("wclr")) (wclr) 
+  else (NULL)
   
   out <- structure(
     list(
       comp = tcomp,
       between_comp = bcomp,
       within_comp = wcomp,
-      logratio = if (exists("tilr")) (tilr)
-            else if (exists("talr")) (talr)
-            else if (exists("tclr")) (tclr)
-            else (NULL),
-      between_logratio = if (exists("bilr")) (bilr)
-                    else if (exists("balr")) (balr)
-                    else if (exists("bclr")) (bclr)
-                    else (NULL),
-      within_logratio = if (exists("wilr")) (wilr)
-                   else if (exists("walr")) (walr)
-                   else if (exists("wclr")) (wclr) 
-                   else (NULL),
+      logratio = logratio,
+      between_logratio = between_logratio,
+      within_logratio = within_logratio,
       data = data,
       transform = transform,
       psi = if(exists("psi")) (psi) else (NULL),
