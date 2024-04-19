@@ -97,7 +97,7 @@ present in the <code><a href="brmcoda.html">brmcoda</a></code> object.</p>
 <span>  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grandmean"</span>, <span class="st">"clustermean"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span>, <span class="st">"combined"</span><span class="op">)</span>,</span>
 <span>  weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"mc.cores"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -152,7 +152,7 @@ Default to <code>"equal"</code> for <code>ref = "grandmean"</code> and <code>"pr
 
 <dt>cores</dt>
 <dd><p>Number of cores to use when executing the chains in parallel,
-which defaults to 1 but we recommend setting the <code>mc.cores</code> option
+we recommend setting the <code>mc.cores</code> option
 to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
 For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.</p></dd>
 
