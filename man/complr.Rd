@@ -69,13 +69,15 @@ cilr <- complr(data = mcompd, sbp = sbp,
 str(cilr)
 
 calr <- complr(data = mcompd, sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), transform = "alr",
-                idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+                idvar = "ID",
+                transform = "alr")
 str(calr)
 
 cclr <- complr(data = mcompd, sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), transform = "clr",
-                idvar = "ID")
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+                idvar = "ID",
+                 transform = "clr")
 str(cclr)
 
 cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,

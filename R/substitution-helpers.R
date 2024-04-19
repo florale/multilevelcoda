@@ -50,6 +50,7 @@ create_substitution <-
       between_avg_sub = between_avg_sub,
       within_avg_sub = within_avg_sub,
       avg_sub = avg_sub,
+      brmsformula = object$model$formula,
       delta = delta,
       ref = ref,
       level = level,
@@ -423,7 +424,7 @@ NULL
                       level, ref, cores,
                       ...) {
   
-  if (cores > 1) {
+  if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
@@ -551,7 +552,7 @@ NULL
                       level, ref, cores,
                       ...) {
   
-  if (cores > 1) {
+  if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
@@ -679,7 +680,7 @@ NULL
                      level, ref, cores,
                      ...) {
   
-  if (cores > 1) {
+  if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
@@ -800,7 +801,7 @@ NULL
                              level, ref, cores,
                              ...) {
   
-  if (cores > 1) {
+  if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
@@ -903,7 +904,7 @@ NULL
                              level, ref, cores,
                              ...) {
   
-  if (cores > 1) {
+  if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
@@ -1009,7 +1010,7 @@ NULL
                             level, ref, cores,
                             ...) {
   
-  if (cores > 1) {
+  if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {

@@ -32,7 +32,7 @@
 #' (e.g., observations across individuals).
 #' Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.
 #' @param cores Number of cores to use when executing the chains in parallel, 
-#' which defaults to 1 but we recommend setting the \code{mc.cores} option 
+#' we recommend setting the \code{mc.cores} option 
 #' to be as many processors as the hardware and RAM allow (up to the number of compositional parts). 
 #' For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 #' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
@@ -49,6 +49,7 @@
 #' 
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
+#' @importFrom future sequential
 #' 
 #' @examples
 #' \donttest{
@@ -79,7 +80,7 @@ substitution <- function(object,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "combined"),
                          weight = c("equal", "proportional"),
-                         cores = getOption("mc.cores", 1),
+                         cores = NULL,
                          ...) {
   
   if (missing(object)) {
@@ -229,8 +230,8 @@ substitution <- function(object,
   }
   
   ## level args match with coefs in object
-  if (any(level %in% c("between", "within"))) {
-    if (isFALSE(any(model_fixef_level %in% c("between", "within")))) {
+  if (any(c("between", "within") %in% level)) {
+    if (isFALSE(any(c("between", "within") %in% model_fixef_level))) {
       stop(sprintf(
         "'between' and 'within' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
@@ -364,6 +365,7 @@ substitution <- function(object,
     }
   }
   
+  # out
   structure(
     list(
       between_simple_sub = if(exists("bout")) (bout) else (NULL),
@@ -372,6 +374,7 @@ substitution <- function(object,
       between_avg_sub = if(exists("bmout")) (bmout) else (NULL),
       within_avg_sub = if(exists("wmout")) (wmout) else (NULL),
       avg_sub = if(exists("tmout")) (tmout) else (NULL),
+      brmsformula = object$model$formula,
       delta = delta,
       ref = ref,
       level = level,
@@ -379,4 +382,5 @@ substitution <- function(object,
       parts = object$complr$parts,
       summary = summary),
     class = "substitution")
+  
 }

@@ -6,7 +6,8 @@ utils::globalVariables(c("i",  "..cols", ".", "To", "t", "head",  "fitted",
                          "update", "posterior",
                          "sim", "condition",
                          "est", "lower", "upper", "JI", "N", "K", "D", "Stat", "Estimates", "MCSE",
-                         "sigma", "OnTarget"
+                         "sigma", "OnTarget",
+                         "multisession", "sequential"
 ))
 
 
