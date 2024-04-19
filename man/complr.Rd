@@ -25,7 +25,7 @@ Can be either \code{"ilr"} (isometric logratio), \code{"alr"} (additive logratio
 Default is \code{"ilr"}.}
 }
 \value{
-A \code{\link{complr}} object with at least 12 elements.
+A \code{\link{complr}} object with at least the following elements.
 \item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
 or a matrix of class \code{acomp} representing multiple closed  compositions each in one row.}
 \item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
@@ -39,7 +39,6 @@ or a matrix of class \code{acomp} representing multiple closed within-person com
 \item{\code{transform}}{ Type of transform applied on compositional data.}
 \item{\code{parts}}{ Names of compositional variables.}
 \item{\code{idvar}}{ Name of the variable containing IDs.}
-\item{\code{shape}}{ The shape of the input dataset.}
 \item{\code{total}}{ Total amount to which the compositions is closed.}
 }
 \description{

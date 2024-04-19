@@ -51,9 +51,8 @@ update.complr <- function(object, newdata, ...) {
   sbp <- object$sbp
   total <- object$total
   idvar <- object$idvar
-  shape <- object$shape
-  
-  complr(newdata, transform, parts, sbp, total, idvar, shape)
+
+  complr(newdata, transform, parts, sbp, total, idvar)
 }
 
 #' Update \code{\link{brmcoda}} models

@@ -31,7 +31,7 @@
 #' \emph{clr} transformation is not injetive, 
 #' resulting in singular covariance matrices. 
 #'
-#' @return A \code{\link{complr}} object with at least 12 elements.
+#' @return A \code{\link{complr}} object with at least the following elements.
 #'   \item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
 #'   or a matrix of class \code{acomp} representing multiple closed  compositions each in one row.}
 #'   \item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
@@ -45,7 +45,6 @@
 #'   \item{\code{transform}}{ Type of transform applied on compositional data.}
 #'   \item{\code{parts}}{ Names of compositional variables.}
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
-#'   \item{\code{shape}}{ The shape of the input dataset.}
 #'   \item{\code{total}}{ Total amount to which the compositions is closed.}
 #' 
 #' @importFrom compositions ilr alr clr acomp gsi.buildilrBase
@@ -265,7 +264,6 @@ complr <- function(data,
       sbp = if(exists("sbp")) (sbp) else (NULL),
       parts = parts,
       idvar = idvar,
-      shape = shape,
       total = total
     ),
     class = "complr"
