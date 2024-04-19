@@ -115,7 +115,7 @@ Default is <code>"ilr"</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code>complr</code> object with at least 12 elements.</p>
+<p>A <code>complr</code> object with at least the following elements.</p>
 <dl><dt><code>comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed composition
 or a matrix of class <code>acomp</code> representing multiple closed  compositions each in one row.</p></dd>
@@ -149,9 +149,6 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 <dt><code>idvar</code></dt>
 <dd><p>Name of the variable containing IDs.</p></dd>
 
-<dt><code>shape</code></dt>
-<dd><p>The shape of the input dataset.</p></dd>
-
 <dt><code>total</code></dt>
 <dd><p>Total amount to which the compositions is closed.</p></dd>
 
@@ -181,7 +178,7 @@ resulting in singular covariance matrices.</p>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 542.4 458.3 270.8 525 651 99.1 49 41 76 86 297.2 117.1 488.7 259 112 460.3 653.5 624.6 398 436 41 162.1 15 182 155 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
@@ -246,7 +243,6 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ shape           : chr "long"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1440</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
@@ -255,7 +251,7 @@ resulting in singular covariance matrices.</p>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span>,</span></span>
 <span class="r-in"><span>                transform <span class="op">=</span> <span class="st">"alr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">calr</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
@@ -314,7 +310,6 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ shape           : chr "long"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
@@ -323,7 +318,7 @@ resulting in singular covariance matrices.</p>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span>,</span></span>
 <span class="r-in"><span>                 transform <span class="op">=</span> <span class="st">"clr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cclr</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
@@ -379,14 +374,13 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ shape           : chr "long"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cilr_wide</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">]</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr_wide</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:266, 1:5] 0.3767 0.3569 0.2771 0.4357 0.3678 0.0688 0.0437 0.0826 0.0368 0.05 0.2064 0.0785 0.0229 0.0716 0.0749 0.3197 0.3| __truncated__ ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
@@ -427,7 +421,6 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ shape           : chr "wide"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 </code></pre></div>

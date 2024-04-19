@@ -101,7 +101,7 @@ It must include a composition and the same ID variable as the existing <code>com
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code>complr</code> object with at least 12 elements.</p>
+<p>A <code>complr</code> object with at least the following elements.</p>
 <dl><dt><code>comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed composition
 or a matrix of class <code>acomp</code> representing multiple closed  compositions each in one row.</p></dd>
@@ -135,9 +135,6 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 <dt><code>idvar</code></dt>
 <dd><p>Name of the variable containing IDs.</p></dd>
 
-<dt><code>shape</code></dt>
-<dd><p>The shape of the input dataset.</p></dd>
-
 <dt><code>total</code></dt>
 <dd><p>Total amount to which the compositions is closed.</p></dd>
 
@@ -155,7 +152,7 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 <span class="r-in"><span><span class="co"># update with new data</span></span></span>
 <span class="r-in"><span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="va">mcompd</span><span class="op">[</span><span class="va">ID</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">]</span> <span class="co"># excluding ID 1</span></span></span>
 <span class="r-in"><span><span class="va">cilr1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">cilr</span>, newdata <span class="op">=</span> <span class="va">newdat</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in complr(newdata, transform, parts, sbp, total, idvar, shape):</span> unused argument (shape)</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> column(s) not found: [ilr]</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
