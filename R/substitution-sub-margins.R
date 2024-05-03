@@ -2,7 +2,8 @@
 #' 
 #' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
 #' when compositional parts are substituted for specific unit(s) 
-#' using a combined reference composition (e.g., compositional mean at sample level).
+#' using a aggregate reference composition 
+#' (e.g., compositional mean at sample level, not seperated by between- and within effects).
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
 #' 
 #' @seealso \code{\link{substitution}}
@@ -31,12 +32,12 @@ sub <- function (object,
                  basesub,
                  summary = TRUE,
                  ref = "grandmean",
-                 level = "combined",
+                 level = "aggregate",
                  weight = "equal",
                  cores,
                  ...) {
   
-  level <- "combined"
+  level <- "aggregate"
   
   # d0 -------------------------------
   if (isTRUE(ref == "grandmean")) {
@@ -129,13 +130,13 @@ submargins <- function (object,
                         delta,
                         basesub,
                         ref = "clustermean",
-                        level = "combined",
+                        level = "aggregate",
                         weight = "proportional",
                         cores = getOption("mc.cores", 1),
                         ...) {
   
   ref <- "clustermean"
-  level <- "combined"
+  level <- "aggregate"
   
   d0 <- build.rg(object = object,
                  ref = ref,

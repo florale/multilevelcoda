@@ -5,14 +5,17 @@
 \alias{predict}
 \title{Draws from the Posterior Predictive Distribution}
 \usage{
-\method{predict}{brmcoda}(object, acomp = FALSE, summary = TRUE, ...)
+\method{predict}{brmcoda}(object, scale = c("linear", "response"), summary = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{acomp}{Should the
-results be returned on the compositional scale of the response variable?
-Only applicable for models with compositional response}
+\item{scale}{Specifically for models with compositional responses,
+either \code{"response"} or \code{"linear"}.
+If \code{"linear"},
+results are returned on the log-ratio scale.
+If \code{"response"}, results are returned on the compositional scale
+of the response variable.}
 
 \item{summary}{Should summary statistics be returned
 instead of the raw values? Default is \code{TRUE}.}
@@ -72,7 +75,7 @@ if(requireNamespace("cmdstanr")){
                 backend = "cmdstanr")
   
   ## predicted responses on compositional scale
-  predcomp <- predict(m2, acomp = TRUE)
+  predcomp <- predict(m2, scale = "linear")
   head(predcomp)
 }}
 }

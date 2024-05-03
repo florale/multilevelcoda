@@ -24,8 +24,8 @@
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param level A character string or vector. 
-#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} variance?
-#' Single-level models are default to \code{"combined"}.
+#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
+#' Single-level models are default to \code{"aggregate"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged 
@@ -65,11 +65,11 @@
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
 #'   
-#'   # model with compositional predictor at combined level of variance
+#'   # model with compositional predictor at aggregate level of variance
 #'   fit2 <- brmcoda(complr = cilr,
 #'                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
-#'   sub2 <- substitution(object = fit2, delta = 5, level = c("combined"))
+#'   sub2 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
 #'   
 #' }}
 #' @export
@@ -78,7 +78,7 @@ substitution <- function(object,
                          basesub = NULL,
                          summary = TRUE,
                          ref = c("grandmean", "clustermean"),
-                         level = c("between", "within", "combined"),
+                         level = c("between", "within", "aggregate"),
                          weight = c("equal", "proportional"),
                          cores = NULL,
                          ...) {
@@ -185,7 +185,7 @@ substitution <- function(object,
     model_fixef_coef  <- append(model_fixef_coef, grep(".*wilr", model_fixef, value = T))
   }
   if ((length(grep("ilr", model_fixef, value = T)) > 0) && (length(grep("[b|w]ilr", model_fixef, value = T)) == 0)) {
-    model_fixef_level <- append(model_fixef_level, "combined")
+    model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
   }
   
@@ -200,16 +200,16 @@ substitution <- function(object,
   
   # ensure sub args make sense
   ## only grandmean for single level model
-  if ("combined" %in% model_fixef_level) {
+  if ("aggregate" %in% model_fixef_level) {
     if (model_ranef_level == "single") {
       if ("clustermean" %in% ref) {
         warning("Can only use grandmean for single level model.")
       }
-      level <- "combined"
+      level <- "aggregate"
       ref <- "grandmean"
       weight <- "equal"
     } else {
-      level <- "combined"
+      level <- "aggregate"
       ref <- ref
     }
   }
@@ -225,7 +225,7 @@ substitution <- function(object,
   }
   
   ## set default to be only between and within if level is not specified
-  if (all(c("between", "within", "combined") %in% level)) {
+  if (all(c("between", "within", "aggregate") %in% level)) {
     level <- c("between", "within")
   }
   
@@ -241,10 +241,10 @@ substitution <- function(object,
       ))
     }
   }
-  if ("combined" %in% level) {
-    if (isFALSE("combined" %in% model_fixef_level)) {
+  if ("aggregate" %in% level) {
+    if (isFALSE("aggregate" %in% model_fixef_level)) {
       stop(sprintf(
-        "'combined' substitution analysis cannot be computed
+        "'aggregate' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
   model_fixef_level,
@@ -329,7 +329,7 @@ substitution <- function(object,
   }
   
   tmout <- tout <- NULL
-  if ("combined" %in% level) {
+  if ("aggregate" %in% level) {
     if ("grandmean" %in% ref) {
       tout <- sub(
         object = object,
@@ -337,7 +337,7 @@ substitution <- function(object,
         basesub = basesub,
         summary = summary,
         ref = "grandmean",
-        level = "combined",
+        level = "aggregate",
         weight = weight,
         cores = cores)
     } 
@@ -359,7 +359,7 @@ substitution <- function(object,
           delta = delta,
           basesub = basesub,
           ref = "clustermean",
-          level = "combined",
+          level = "aggregate",
           weight = weight,
           cores = cores)
     }

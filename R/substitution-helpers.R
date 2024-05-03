@@ -114,7 +114,7 @@ build.rg <- function(object,
     model_fixef_coef  <- append(model_fixef_coef, grep(".*wilr", model_fixef, value = T))
   }
   if ((length(grep("ilr", model_fixef, value = T)) > 0) && (length(grep("[b|w]ilr", model_fixef, value = T)) == 0)) {
-    model_fixef_level <- append(model_fixef_level, "combined")
+    model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
   }
   
@@ -134,8 +134,8 @@ build.rg <- function(object,
     if ("clustermean" %in% ref) { 
       weight <- NULL # ignore weight
       
-      # combined
-      if ("combined" %in% level) {
+      # aggregate
+      if ("aggregate" %in% level) {
         d0 <- cbind(object$complr$comp, object$complr$data[, -colnames(object$complr$comp), with = FALSE])
         d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
         comp0 <- acomp(d0[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
@@ -197,8 +197,8 @@ build.rg <- function(object,
       # grandmean
       if ("grandmean" %in% ref) {
         
-        # combined
-        if ("combined" %in% level) {
+        # aggregate
+        if ("aggregate" %in% level) {
           if (weight == "proportional") {
             comp0 <- mean.acomp(object$complr$comp, robust = TRUE)
             
@@ -320,7 +320,7 @@ build.rg <- function(object,
           refgrid <- drg[, covs, with = FALSE]
         }
         
-        if (level == "combined") {
+        if (level == "aggregate") {
           comp0 <- comp_user
           
           ilr0 <- ilr(comp0, V = object$complr$psi)

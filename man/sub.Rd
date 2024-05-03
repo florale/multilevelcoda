@@ -10,7 +10,7 @@ sub(
   basesub,
   summary = TRUE,
   ref = "grandmean",
-  level = "combined",
+  level = "aggregate",
   weight = "equal",
   cores,
   ...
@@ -40,8 +40,8 @@ User's specified reference grid is only possible for simple substitution.
 Single level models are default to \code{"grandmean"}.}
 
 \item{level}{A character string or vector.
-Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} variance?
-Single-level models are default to \code{"combined"}.}
+Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
+Single-level models are default to \code{"aggregate"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -70,7 +70,8 @@ The first six lists contain the results of the substitution estimation for a com
 \description{
 This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
 when compositional parts are substituted for specific unit(s)
-using a combined reference composition (e.g., compositional mean at sample level).
+using a aggregate reference composition
+(e.g., compositional mean at sample level, not seperated by between- and within effects).
 It is recommended that users run substitution model using the \code{\link{substitution}} function.
 }
 \examples{

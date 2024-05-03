@@ -10,7 +10,7 @@ substitution(
   basesub = NULL,
   summary = TRUE,
   ref = c("grandmean", "clustermean"),
-  level = c("between", "within", "combined"),
+  level = c("between", "within", "aggregate"),
   weight = c("equal", "proportional"),
   cores = NULL,
   ...
@@ -40,8 +40,8 @@ User's specified reference grid is only possible for simple substitution.
 Single level models are default to \code{"grandmean"}.}
 
 \item{level}{A character string or vector.
-Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"combined"} variance?
-Single-level models are default to \code{"combined"}.}
+Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
+Single-level models are default to \code{"aggregate"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -88,11 +88,11 @@ if(requireNamespace("cmdstanr")){
                   chain = 1, iter = 500, backend = "cmdstanr")
   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
   
-  # model with compositional predictor at combined level of variance
+  # model with compositional predictor at aggregate level of variance
   fit2 <- brmcoda(complr = cilr,
                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
-  sub2 <- substitution(object = fit2, delta = 5, level = c("combined"))
+  sub2 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
   
 }}
 }
