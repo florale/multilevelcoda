@@ -125,8 +125,8 @@ Single level models are default to <code>"grandmean"</code>.</p></dd>
 
 <dt>level</dt>
 <dd><p>A character string or vector.
-Should the estimate of multilevel models focus on the <code>"between"</code> and/or <code>"within"</code> or <code>"combined"</code> variance?
-Single-level models are default to <code>"combined"</code>.</p></dd>
+Should the estimate of multilevel models focus on the <code>"between"</code> and/or <code>"within"</code> or <code>"aggregate"</code> variance?
+Single-level models are default to <code>"aggregate"</code>.</p></dd>
 
 
 <dt>weight</dt>
@@ -196,128 +196,6 @@ The first six lists contain the results of the substitution estimation for a com
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">subm</span> <span class="op">&lt;-</span> <span class="fu">bsubmargins</span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, basesub <span class="op">=</span> <span class="va">psub</span>, delta <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Called from: complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     total = 1440)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (isTRUE(any(grep("ilr|alr|clr", colnames(tmp))))) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     stop(paste("'data' should not have any column names with patterns of \"ilr\", \"alr\", or \"clr\";", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         "  these variables will be computed by 'complr' used in subsequent models.", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         "  Please remove or rename them before running 'complr'.", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         sep = "\n"))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (shape == "wide") {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tcomp &lt;- acomp(tmp[, parts, with = FALSE], total = total)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     bcomp &lt;- wcomp &lt;- NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(tcomp) &lt;- parts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     if (identical(transform, "ilr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         tilr &lt;- ilr(tcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         bilr &lt;- wilr &lt;- NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(tilr) &lt;- paste0("ilr", seq_len(ncol(tilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     else if (identical(transform, "alr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         talr &lt;- alr(tcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         balr &lt;- walr &lt;- NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(talr) &lt;- paste0("alr", seq_len(ncol(talr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     else if (identical(transform, "clr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         tclr &lt;- clr(tcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         bclr &lt;- wclr &lt;- NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(tclr) &lt;- paste0("clr", seq_len(ncol(tclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (shape == "long") {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tcomp &lt;- acomp(tmp[, parts, with = FALSE], total = total)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     for (v in parts) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     bcomp &lt;- acomp(tmp[, parts, with = FALSE], total = total)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     wcomp &lt;- tcomp - bcomp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(bcomp) &lt;- paste0("b", parts)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(wcomp) &lt;- paste0("w", parts)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(tcomp) &lt;- parts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     if (identical(transform, "ilr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         tilr &lt;- ilr(tcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         bilr &lt;- ilr(bcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         wilr &lt;- ilr(wcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(bilr) &lt;- paste0("bilr", seq_len(ncol(bilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(wilr) &lt;- paste0("wilr", seq_len(ncol(wilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(tilr) &lt;- paste0("ilr", seq_len(ncol(tilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     if (identical(transform, "alr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         talr &lt;- alr(tcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         balr &lt;- alr(bcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         walr &lt;- alr(wcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(balr) &lt;- paste0("balr", seq_len(ncol(balr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(walr) &lt;- paste0("walr", seq_len(ncol(walr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(talr) &lt;- paste0("alr", seq_len(ncol(talr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     if (identical(transform, "clr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         tclr &lt;- clr(tcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         bclr &lt;- clr(bcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         wclr &lt;- clr(wcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(bclr) &lt;- paste0("bclr", seq_len(ncol(bclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(wclr) &lt;- paste0("wclr", seq_len(ncol(wclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         colnames(tclr) &lt;- paste0("clr", seq_len(ncol(tclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tcomp &lt;- acomp(tmp[, parts, with = FALSE], total = total)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: for (v in parts) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tmp[, `:=`((v), mean(get(v), na.rm = TRUE)), by = eval(idvar)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: bcomp &lt;- acomp(tmp[, parts, with = FALSE], total = total)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: wcomp &lt;- tcomp - bcomp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: colnames(bcomp) &lt;- paste0("b", parts)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: colnames(wcomp) &lt;- paste0("w", parts)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: colnames(tcomp) &lt;- parts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (identical(transform, "ilr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tilr &lt;- ilr(tcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     bilr &lt;- ilr(bcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     wilr &lt;- ilr(wcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(bilr) &lt;- paste0("bilr", seq_len(ncol(bilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(wilr) &lt;- paste0("wilr", seq_len(ncol(wilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(tilr) &lt;- paste0("ilr", seq_len(ncol(tilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: tilr &lt;- ilr(tcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: bilr &lt;- ilr(bcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: wilr &lt;- ilr(wcomp, V = psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: colnames(bilr) &lt;- paste0("bilr", seq_len(ncol(bilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: colnames(wilr) &lt;- paste0("wilr", seq_len(ncol(wilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: colnames(tilr) &lt;- paste0("ilr", seq_len(ncol(tilr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (identical(transform, "alr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     talr &lt;- alr(tcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     balr &lt;- alr(bcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     walr &lt;- alr(wcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(balr) &lt;- paste0("balr", seq_len(ncol(balr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(walr) &lt;- paste0("walr", seq_len(ncol(walr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(talr) &lt;- paste0("alr", seq_len(ncol(talr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: if (identical(transform, "clr")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tclr &lt;- clr(tcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     bclr &lt;- clr(bcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     wclr &lt;- clr(wcomp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(bclr) &lt;- paste0("bclr", seq_len(ncol(bclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(wclr) &lt;- paste0("wclr", seq_len(ncol(wclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colnames(tclr) &lt;- paste0("clr", seq_len(ncol(tclr)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: logratio &lt;- if (exists("tilr")) (tilr) else if (exists("talr")) (talr) else if (exists("tclr")) (tclr)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: (tilr)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: between_logratio &lt;- if (exists("bilr")) (bilr) else if (exists("balr")) (balr) else if (exists("bclr")) (bclr) else (NULL)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: (bilr)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: within_logratio &lt;- if (exists("wilr")) (wilr) else if (exists("walr")) (walr) else if (exists("wclr")) (wclr) else (NULL)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: (wilr)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: out &lt;- structure(list(comp = tcomp, between_comp = bcomp, within_comp = wcomp, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     logratio = logratio, between_logratio = between_logratio, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     within_logratio = within_logratio, data = data, transform = transform, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     psi = if (exists("psi")) (psi) else (NULL), sbp = if (exists("sbp")) (sbp) else (NULL), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     parts = parts, idvar = idvar, total = total), class = "complr")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: (psi)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: (sbp)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> debug: out</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
 </code></pre></div>
     </div>
