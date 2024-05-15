@@ -39,11 +39,11 @@ update.complr <- function(object, newdata, ...) {
       paste(object$parts %snin% colnames(newdata), collapse = ", ")))
   }
   
-  if (object$idvar %nin% colnames(newdata)) { # check ID
-    stop(sprintf(
-      "The names of the ID variable must be the \n same in 'object' (%s) and 'newdata'.",
-      object$idvar))
-  }
+  # if (object$idvar %nin% colnames(newdata)) { # check ID
+  #   stop(sprintf(
+  #     "The names of the ID variable must be the \n same in 'object' (%s) and 'newdata'.",
+  #     object$idvar))
+  # }
   
   # update complr
   transform <- object$transform
@@ -52,7 +52,7 @@ update.complr <- function(object, newdata, ...) {
   total <- object$total
   idvar <- object$idvar
 
-  complr(newdata, transform, parts, sbp, total, idvar)
+  complr(data = newdata, parts = parts, sbp = sbp, total = total, idvar = idvar, transform = transform)
 }
 
 #' Update \code{\link{brmcoda}} models
@@ -147,3 +147,4 @@ update.brmcoda <- function(object,
     
   }
 }
+
