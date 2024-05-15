@@ -12,9 +12,12 @@
 #' @aliases predict
 #' 
 #' @param object An object of class \code{brmcoda}.
-#' @param acomp Should the
-#' results be returned on the compositional scale of the response variable?
-#' Only applicable for models with compositional response
+#' @param scale Specifically for models with compositional responses,
+#' either \code{"response"} or \code{"linear"}.
+#' If \code{"linear"},
+#' results are returned on the log-ratio scale.
+#' If \code{"response"}, results are returned on the compositional scale
+#' of the response variable.
 #' @param ... Further arguments passed to \code{\link{predict.brmsfit}}
 #' that control additional aspects of prediction.
 #' @inheritParams brms::predict.brmsfit
@@ -54,32 +57,33 @@
 #'                 backend = "cmdstanr")
 #'   
 #'   ## predicted responses on compositional scale
-#'   predcomp <- predict(m2, acomp = TRUE)
+#'   predcomp <- predict(m2, scale = "linear")
 #'   head(predcomp)
 #' }}
 #' @export
 predict.brmcoda <- function(object,
-                            acomp = FALSE,
+                            scale = c("linear", "response"),
                             summary = TRUE,
                             ...) {
   
-  if (isFALSE(acomp)) {
-    out <- predict(
-      object$model,
-      summary = summary,
-      ...
-    )
-  } else {
-    if (isFALSE(inherits(object$model$formula, "mvbrmsformula"))) {
-      stop(sprintf(
-        "This is a %s model, but a model of class mvbrmsformula is required to
-  return results on compsitional scale.",
-  class(object$model$formula)[1]))
+  if (inherits(object$model$formula, "mvbrmsformula")) {
+    if ((length(grep("ilr", object$model$formula$responses, value = T)) > 0)) {
+      if (scale == "linear") {
+      warning(sprintf(
+        "This is a mvbrmsformula model, it is recommended to
+  set scale = \"response\" to return results on compsitional scale."))
       
-    } else {
+      out <- predict(
+        object$model,
+        summary = summary,
+        ...
+      )
+    }
+    if (scale == "response") {
       out <- predict(
         object$model,
         summary = FALSE,
+        scale = "response",
         ...
       )
       out <- lapply(asplit(out, 1), function(x) {
@@ -95,6 +99,12 @@ predict.brmcoda <- function(object,
         dimnames(out)[[3]] <- object$complr$parts
       }
     }
+  }} else {
+    out <- predict(
+      object$model,
+      summary = summary,
+      ...
+    )
   }
   out
 }
@@ -160,43 +170,50 @@ predict.brmcoda <- function(object,
 #' }}
 #' @export
 fitted.brmcoda <- function(object,
-                           acomp = FALSE,
+                           scale = c("linear", "response"),
                            summary = TRUE,
                            ...) {
   
-  if (isFALSE(acomp)) {
-    out <- fitted(
-      object$model,
-      summary = summary,
-      ...
-    )
-  } else {
-    if (isFALSE(inherits(object$model$formula, "mvbrmsformula"))) {
-      stop(sprintf(
-        "This is a %s model, but a model of class mvbrmsformula is required to
-  return results on compsitional scale.",
-  class(object$model$formula)[1]))
-      
-    } else {
+  if (inherits(object$model$formula, "mvbrmsformula")) {
+    if ((length(grep("ilr", object$model$formula$responses, value = T)) > 0)) {
+      if (scale == "linear") {
+        warning(sprintf(
+          "This is a mvbrmsformula model, it is recommended to
+  set scale = \"response\" to return results on compsitional scale."))
+        
+        out <- fitted(
+          object$model,
+          summary = summary,
+          ...
+        )
+      }
+      if (scale == "response") {
+        out <- fitted(
+          object$model,
+          summary = FALSE,
+          scale = "response",
+          ...
+        )
+        out <- lapply(asplit(out, 1), function(x) {
+          x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$complr$sbp)))
+          as.data.table(clo(x, total = object$complr$total))
+        })
+        
+        out <- brms::do_call(abind::abind, c(out, along = 3))
+        out <- aperm(out, c(3, 1, 2)) #draw-row-col
+        
+        if(isTRUE(summary)) {
+          out <- brms::posterior_summary(out)
+          dimnames(out)[[3]] <- object$complr$parts
+        }
+      }
+    }} else {
       out <- fitted(
         object$model,
-        summary = FALSE,
+        summary = summary,
         ...
       )
-      out <- lapply(asplit(out, 1), function(x) {
-        x <- compositions::ilrInv(x, V = gsi.buildilrBase(t(object$complr$sbp)))
-        as.data.table(clo(x, total = object$complr$total))
-      })
-      
-      out <- brms::do_call(abind::abind, c(out, along = 3))
-      out <- aperm(out, c(3, 1, 2)) #draw-row-col
-      
-      if(isTRUE(summary)) {
-        out <- brms::posterior_summary(out)
-        dimnames(out)[[3]] <- object$complr$parts
-      }
     }
-  }
   out
 }
 
