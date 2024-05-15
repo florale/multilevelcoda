@@ -36,8 +36,7 @@ summary.complr <- function(object,
   )
   out$data <- list(composition_parts = object$parts,
                    logratios = paste0(object$transform, seq_len(length(object$parts) - 1)),
-                   shape = object$shape,
-                   idvar = object$idvar,
+                   idvar = if(exists("object$idvar")) (object$idvar) else (NULL),
                    nobs = nrow(object$data),
                    ngrps = length(unique(object$data[[object$idvar]]))
   )
@@ -210,8 +209,8 @@ summary.substitution <- function(object, delta, to, from,
   if (isTRUE(missing(level))) {
     level <- object$level
   } else {
-    if (isFALSE(any(c("between", "within", "combined") %in% level))) {
-      stop("'level' should be either one of the following: \"between\", \"within\", \"combined\".")
+    if (isFALSE(any(c("between", "within", "aggregate") %in% level))) {
+      stop("'level' should be either one of the following: \"between\", \"within\", \"aggregate\".")
     }
     level <- as.character(level)
   }
