@@ -93,7 +93,8 @@ It is recommended that users run substitution model using the <code><a href="sub
 <span>  ref <span class="op">=</span> <span class="st">"clustermean"</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"between"</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">"proportional"</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"mc.cores"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  <span class="va">scale</span>,</span>
+<span>  cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -135,6 +136,13 @@ If <code>"equal"</code>, give equal weight to units (e.g., individuals).
 If <code>"proportional"</code>, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals).
 Default to <code>"equal"</code> for <code>ref = "grandmean"</code> and <code>"proportional"</code> for <code>ref = "clustermean"</code>.</p></dd>
+
+
+<dt>scale</dt>
+<dd><p>Either <code>"response"</code> or <code>"linear"</code>.
+If <code>"response"</code>, results are returned on the scale of the response variable.
+If <code>"linear"</code>, results are returned on the scale of the linear predictor term,
+that is without applying the inverse link function or other transformations.</p></dd>
 
 
 <dt>cores</dt>
