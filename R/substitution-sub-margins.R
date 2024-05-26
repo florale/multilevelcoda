@@ -34,7 +34,7 @@ sub <- function (object,
                  ref = "grandmean",
                  level = "aggregate",
                  weight = "equal",
-                 cores,
+                 cores = NULL,
                  ...) {
   
   level <- "aggregate"
@@ -70,7 +70,7 @@ sub <- function (object,
   if(isTRUE(any(delta > min(comp0)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
-  round(min(comp0), 2)
+      round(min(comp0), 2)
     ))
   }
   
@@ -79,6 +79,7 @@ sub <- function (object,
     object,
     newdata = d0,
     re_formula = NA,
+    scale = scale,
     summary = FALSE
   )
   
@@ -93,6 +94,7 @@ sub <- function (object,
     level = level,
     ref = ref,
     summary = summary,
+    scale = scale,
     cores = cores
   )
 }
@@ -132,7 +134,8 @@ submargins <- function (object,
                         ref = "clustermean",
                         level = "aggregate",
                         weight = "proportional",
-                        cores = getOption("mc.cores", 1),
+                        scale,
+                        cores = NULL,
                         ...) {
   
   ref <- "clustermean"
@@ -152,15 +155,16 @@ submargins <- function (object,
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
   the amount of composition part available for pairwise substitution.",
-  paste0(round(min(lapply(comp0, min))), collapse = ", ")
+      paste0(round(min(lapply(comp0, min))), collapse = ", ")
     ))
   }
-
+  
   # y0margins --------------------------------
   y0 <- fitted(
     object,
     newdata = d0,
     re_formula = NULL,
+    scale = scale,
     summary = FALSE
   )
   y0 <- rowMeans(as.data.frame(y0)) # average across participants when there is no change
@@ -176,6 +180,7 @@ submargins <- function (object,
     y0 = y0,
     level = level,
     ref = ref,
+    scale = scale,
     cores = cores
   )
 }

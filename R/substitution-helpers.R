@@ -421,7 +421,8 @@ NULL
 .get.bsub <- function(object, delta, basesub,
                       comp0, y0, d0,
                       summary,
-                      level, ref, cores,
+                      level, ref, scale,
+                      cores,
                       ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -501,6 +502,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NA,
+                            scale = scale,
                             summary = FALSE
                           )
                         delta_y <- ysub - y0[, h]
@@ -521,6 +523,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NA,
+                            scale = scale,
                             summary = FALSE
                           )
                         delta_y <- ysub - y0[, h]
@@ -549,7 +552,8 @@ NULL
 .get.wsub <- function(object, delta, basesub,
                       comp0, y0, d0,
                       summary,
-                      level, ref, cores,
+                      level, ref, scale,
+                      cores,
                       ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -629,6 +633,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NA,
+                            scale = scale,
                             summary = FALSE
                           )
                         delta_y <- ysub - y0[, h]
@@ -649,6 +654,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NA,
+                            scale = scale,
                             summary = FALSE
                           )
                         delta_y <- ysub - y0[, h]
@@ -677,7 +683,8 @@ NULL
 .get.sub <- function(object, delta, basesub,
                      comp0, y0, d0,
                      summary,
-                     level, ref, cores,
+                     level, ref, scale,
+                     cores,
                      ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -751,6 +758,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NA,
+                            scale = scale,
                             summary = FALSE
                           )
                         delta_y <- ysub - y0[, h]
@@ -771,6 +779,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NA,
+                            scale = scale,
                             summary = FALSE
                           )
                         delta_y <- ysub - y0[, h]
@@ -798,7 +807,8 @@ NULL
 # Clustermean Between-person Substitution model
 .get.bsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
-                             level, ref, cores,
+                             level, ref, scale,
+                             cores,
                              ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -866,6 +876,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NULL,
+                            scale = scale,
                             summary = FALSE
                           )
                         ysub <- rowMeans(as.data.frame(ysub))
@@ -901,7 +912,8 @@ NULL
 # Clustermean Within-person Substitution model
 .get.wsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
-                             level, ref, cores,
+                             level, ref, scale,
+                             cores,
                              ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -971,6 +983,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NULL,
+                            scale = scale,
                             summary = FALSE
                           )
                         ysub <- rowMeans(as.data.frame(ysub))
@@ -1007,7 +1020,8 @@ NULL
 # Clustermean Average Substitution
 .get.submargins <- function(object, delta, basesub,
                             comp0, y0, d0,
-                            level, ref, cores,
+                            level, ref, scale,
+                            cores,
                             ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -1072,6 +1086,7 @@ NULL
                             object,
                             newdata = dsub,
                             re_formula = NULL,
+                            scale = scale,
                             summary = FALSE
                           )
                         ysub <- rowMeans(as.data.frame(ysub))

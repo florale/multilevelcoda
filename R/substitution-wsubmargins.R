@@ -37,7 +37,8 @@ wsubmargins <- function (object,
                          ref = "clustermean",
                          level = "within",
                          weight = "proportional",
-                         cores = getOption("mc.cores", 1),
+                         scale,
+                         cores = NULL,
                          ...) {
   
   ref <- "clustermean"
@@ -65,6 +66,7 @@ wsubmargins <- function (object,
     object,
     newdata = d0,
     re_formula = NULL,
+    scale = scale,
     summary = FALSE
   )
   y0 <- rowMeans(as.data.frame(y0)) # average across participants when there is no change
@@ -80,6 +82,7 @@ wsubmargins <- function (object,
     y0 = y0,
     level = level,
     ref = ref,
+    scale = scale,
     cores = cores
   )
 }

@@ -11,7 +11,8 @@ wsubmargins(
   ref = "clustermean",
   level = "within",
   weight = "proportional",
-  cores = getOption("mc.cores", 1),
+  scale,
+  cores = NULL,
   ...
 )
 }
@@ -40,6 +41,11 @@ If \code{"equal"}, give equal weight to units (e.g., individuals).
 If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals).
 Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
+
+\item{scale}{Either \code{"response"} or \code{"linear"}.
+If \code{"response"}, results are returned on the scale of the response variable.
+If \code{"linear"}, results are returned on the scale of the linear predictor term,
+that is without applying the inverse link function or other transformations.}
 
 \item{cores}{Number of cores to use when executing the chains in parallel,
 we recommend setting the \code{mc.cores} option

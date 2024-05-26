@@ -38,7 +38,8 @@ wsub <- function(object,
                  ref = "grandmean",
                  level = "within",
                  weight = "equal",
-                 cores = getOption("mc.cores", 1),
+                 scale,
+                 cores = NULL,
                  ...) {
   
   # ref <- "grandmean"
@@ -84,7 +85,9 @@ wsub <- function(object,
     object,
     newdata = d0,
     re_formula = NA,
-    summary = FALSE)
+    scale = scale,
+    summary = FALSE
+  )
   
   # yw ---------------------------------
     # substitution model
@@ -98,6 +101,7 @@ wsub <- function(object,
       level = level,
       ref = ref,
       summary = summary,
+      scale = scale,
       cores = cores
     )
 

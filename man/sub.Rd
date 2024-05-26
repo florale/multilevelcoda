@@ -12,7 +12,7 @@ sub(
   ref = "grandmean",
   level = "aggregate",
   weight = "equal",
-  cores,
+  cores = NULL,
   ...
 )
 }
