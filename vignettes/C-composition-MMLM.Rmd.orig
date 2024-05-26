@@ -46,10 +46,10 @@ options(digits = 3)
 
 # Multilevel model with compositional outcomes.
 ## Computing compositions and isometric log ratio coordinates. 
-The ILR coordinates outcomes can be calculated using the `compilr()` functions.
+The ILR coordinates outcomes can be calculated using the `complr()` functions.
 
-```{r compilr}
-cilr <- compilr(data = mcompd, sbp = sbp,
+```{r complr}
+cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 head(cilr$TotalILR)
@@ -61,7 +61,7 @@ A model with multilevel compositional outcomes is multivariate, as it has multip
 Our `brms` model can be then fitted using the `brmcoda()` function.
 
 ```{r brmcoda, results = "hide", message=FALSE}
-mv <- brmcoda(compilr = cilr,
+mv <- brmcoda(complr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
 ```
@@ -93,12 +93,12 @@ Let's examine whether stress predicts the overall sleep-wake composition.
 
 ```{r bfmodel, results = "hide", message=FALSE}
 # intercept only
-mv0 <- brmcoda(compilr = cilr,
+mv0 <- brmcoda(complr = cilr,
                formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),
                iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
                backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 # full model
-mv <- brmcoda(compilr = cilr,
+mv <- brmcoda(complr = cilr,
               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
@@ -107,7 +107,7 @@ mv <- brmcoda(compilr = cilr,
 We can now compare these models with the `bayesfactor_models()` function
 
 ```{r bf, message=FALSE}
-bayes_factor(mv$Model, mv0$Model)
+bayes_factor(mv$model, mv0$model)
 ```
 
 

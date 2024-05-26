@@ -38,9 +38,25 @@ purpose.
 
 ```r
 library(multilevelcoda)
+#> 
+#> Attaching package: 'multilevelcoda'
+#> The following objects are masked _by_ '.GlobalEnv':
+#> 
+#>     psub, sbp
 library(brms)
+#> Loading required package: Rcpp
+#> Loading 'brms' package (version 2.21.0). Useful instructions
+#> can be found by typing help('brms'). A more detailed introduction
+#> to the package is available through vignette('brms_overview').
+#> 
+#> Attaching package: 'brms'
+#> The following object is masked from 'package:stats':
+#> 
+#>     ar
 library(bayestestR)
 library(doFuture)
+#> Loading required package: foreach
+#> Loading required package: future
 
 options(digits = 3) # reduce number of digits shown
 ```
@@ -64,14 +80,14 @@ The following table shows a few rows of data from `mcompd`.
 
 
 
-|  ID| Time| Stress| TST| WAKE|  MVPA| LPA|    SB|  Age| Female|
-|---:|----:|------:|---:|----:|-----:|---:|-----:|----:|------:|
-| 185|    1|   3.67| 542| 99.0| 297.4| 460|  41.4| 29.7|      0|
-| 185|    2|   7.21| 458| 49.4| 117.3| 653| 162.3| 29.7|      0|
-| 185|    3|   2.84| 271| 41.1| 488.7| 625|  14.5| 29.7|      0|
-| 184|   12|   2.36| 286| 52.7| 106.9| 906|  89.2| 22.3|      1|
-| 184|   13|   1.18| 281| 18.8| 403.0| 611| 126.3| 22.3|      1|
-| 184|   14|   0.00| 397| 26.5|  39.9| 587| 389.8| 22.3|      1|
+|  ID| Time| Stress| TST| WAKE| MVPA| LPA|  SB| Age| Female|
+|---:|----:|------:|---:|----:|----:|---:|---:|---:|------:|
+| 185|    1|      4| 542|   99|  297| 460|  41|  30|      0|
+| 185|    2|      7| 458|   49|  117| 653| 162|  30|      0|
+| 185|    3|      3| 271|   41|  489| 625|  15|  30|      0|
+| 184|   12|      2| 286|   53|  107| 906|  89|  22|      1|
+| 184|   13|      1| 281|   19|  403| 611| 126|  22|      1|
+| 184|   14|      0| 397|   26|   40| 587| 390|  22|      1|
 
 
 
@@ -125,16 +141,16 @@ contrasts are setup. Time substitutions work by taking time from the
 ## Compositions and isometric log ratio (ILR) coordinates. 
 
 Compositional data are often expressed as a set of isometric log ratio (ILR)
-coordinates in regression models. We can use the `compilr()` function to calculate 
+coordinates in regression models. We can use the `complr()` function to calculate 
 both between- and within-level ILR coordinates for use in subsequent models as 
 predictors.
 
 
-*Notes: `compilr()` also calculates total ILR coordinates to be used 
+*Notes: `complr()` also calculates total ILR coordinates to be used 
 as outcomes (or predictors) in models, if the decomposition into a 
 between- and within-level ILR coordinates was not desired.*
 
-The `compilr()` function for multilevel data requires four arguments:
+The `complr()` function for multilevel data requires four arguments:
 
 | Argument     | Description                                                                                                      |
 |--------------|------------------------------------------------------------------------------------------------------------------|
@@ -147,12 +163,12 @@ The `compilr()` function for multilevel data requires four arguments:
 
 
 ```r
-cilr <- compilr(data = mcompd, sbp = sbp,
+cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 ```
 
 ## Fitting model
-We now will use output from the `compilr()` to fit our `brms` model,
+We now will use output from the `complr()` to fit our `brms` model,
 using the `brmcoda()`. Here is a model predicting `Stress`
 from between- and within-person sleep-wake behaviours (expressed as ILR coordinates).
 
@@ -160,7 +176,7 @@ from between- and within-person sleep-wake behaviours (expressed as ILR coordina
 
 
 ```r
-m <- brmcoda(compilr = cilr,
+m <- brmcoda(complr = cilr,
              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
@@ -178,26 +194,26 @@ summary(m)
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 4000
 #> 
-#> Group-Level Effects: 
+#> Multilevel Hyperparameters:
 #> ~ID (Number of levels: 266) 
 #>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     1.00      0.06     0.88     1.13 1.00     1333     2488
+#> sd(Intercept)     1.00      0.06     0.88     1.12 1.00     1169     2516
 #> 
-#> Population-Level Effects: 
+#> Regression Coefficients:
 #>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept     2.57      0.48     1.63     3.48 1.00     1303     1965
-#> bilr1         0.17      0.32    -0.46     0.77 1.01     1013     1876
-#> bilr2         0.41      0.34    -0.25     1.07 1.01     1090     1781
-#> bilr3         0.13      0.22    -0.28     0.55 1.00     1177     1885
-#> bilr4        -0.04      0.28    -0.58     0.49 1.00     1319     2018
-#> wilr1        -0.34      0.12    -0.58    -0.10 1.00     3182     3218
-#> wilr2         0.05      0.14    -0.21     0.31 1.00     3750     3215
-#> wilr3        -0.11      0.08    -0.25     0.05 1.00     3444     3129
-#> wilr4         0.24      0.10     0.04     0.43 1.00     4051     3219
+#> Intercept     2.61      0.49     1.66     3.60 1.00     1101     1761
+#> bilr1         0.19      0.32    -0.46     0.82 1.00      943     1863
+#> bilr2         0.39      0.35    -0.29     1.06 1.00     1061     1922
+#> bilr3         0.14      0.22    -0.28     0.56 1.01      895     1673
+#> bilr4        -0.04      0.28    -0.59     0.51 1.00      976     1923
+#> wilr1        -0.33      0.12    -0.56    -0.09 1.00     3226     3037
+#> wilr2         0.06      0.13    -0.20     0.33 1.00     3469     2836
+#> wilr3        -0.09      0.08    -0.25     0.06 1.00     3088     2932
+#> wilr4         0.23      0.10     0.04     0.42 1.00     3225     2965
 #> 
-#> Family Specific Parameters: 
+#> Further Distributional Parameters:
 #>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sigma     2.37      0.03     2.31     2.43 1.00     4599     2577
+#> sigma     2.38      0.03     2.33     2.44 1.00     5896     2788
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -258,25 +274,25 @@ For precise Bayes factors, we will use 40,000 posterior draws for each model.
 
 ```r
 # intercept only model
-m0 <- brmcoda(compilr = cilr,
+m0 <- brmcoda(complr = cilr,
              formula = Stress ~ 1 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 
 # between-person composition only model
-m1 <- brmcoda(compilr = cilr,
+m1 <- brmcoda(complr = cilr,
              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 
 # within-person composition only model
-m2 <- brmcoda(compilr = cilr,
+m2 <- brmcoda(complr = cilr,
              formula = Stress ~ wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 
 # full model
-m <- brmcoda(compilr = cilr,
+m <- brmcoda(complr = cilr,
              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
@@ -288,7 +304,8 @@ model as reference.
 
 
 ```r
-comparison <- bayesfactor_models(m$Model, m1$Model, m2$Model, denominator = m0$Model)
+comparison <- bayesfactor_models(m$model, m1$model, m2$model, denominator = m0$model)
+#> Error in `[.data.frame`(x, i, j, drop): undefined columns selected
 ```
 
 
@@ -297,9 +314,9 @@ comparison
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                                                       BF
-#> [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.95
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.325
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.00
+#> [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.45
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID)                                 0.294
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)                                 11.63
 #> 
 #> * Against Denominator: [4] 1 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
@@ -315,9 +332,9 @@ update(comparison, reference = 1)
 #> Bayes Factors for Model Comparison
 #> 
 #>     Model                                       BF
-#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.082
-#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  2.79
-#> [4] 1 + (1 | ID)                             0.253
+#> [2] bilr1 + bilr2 + bilr3 + bilr4 + (1 | ID) 0.085
+#> [3] wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)  3.37
+#> [4] 1 + (1 | ID)                             0.290
 #> 
 #> * Against Denominator: [1] bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID)
 #> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
@@ -415,4 +432,4 @@ in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day.
 
 ## More interesting substitution models
 You can learn more about different types of substitution models at  
-[Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/substitution-model.html).
+[Compositional Multilevel Substitution Analysis](https://florale.github.io/multilevelcoda/articles/substitution.html).

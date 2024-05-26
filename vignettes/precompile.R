@@ -12,8 +12,8 @@ knit(
   "vignettes/C-composition-MMLM.Rmd.orig",
   "vignettes/C-composition-MMLM.Rmd")
 knit(
-  "vignettes/D-substitution-model.Rmd.orig",
-  "vignettes/D-substitution-model.Rmd")
+  "vignettes/D-substitution.Rmd.orig",
+  "vignettes/D-substitution.Rmd")
 knit(
   "vignettes/E-simmodel-diag.Rmd.orig",
   "vignettes/E-simmodel-diag.Rmd")

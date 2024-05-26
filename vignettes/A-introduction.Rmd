@@ -50,4 +50,4 @@ See below for vignettes:
 
 - [Multilevel Model with Compositional Predictors](https://florale.github.io/multilevelcoda/articles/B-composition-MLM.html)
 - [Multilevel Model with Compositional Outcomes](https://florale.github.io/multilevelcoda/articles/C-composition-MMLM.html)
-- [Compositional Multilevel Substitution Models](https://florale.github.io/multilevelcoda/articles/D-substitution-model.html)
+- [Compositional Multilevel Substitution Analyses](https://florale.github.io/multilevelcoda/articles/D-substitution.html)
