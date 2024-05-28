@@ -26,6 +26,9 @@ If \code{"proportional"}, weights in proportion to the frequencies of units bein
 (e.g., observations across individuals).
 Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
 
+\item{factors}{Type of summary for factors. Can be \code{"reference"} (set at the reference level),
+\code{"mode"} (set at the most common level) or \code{"all"} to keep all levels.}
+
 \item{fill}{Logical value only relevant when \code{ref} is an user's specified reference grid
 in which information about some, but not all covariates is provided
 (e.g., models including age and sex as covariate but only age was provided in the reference grid).

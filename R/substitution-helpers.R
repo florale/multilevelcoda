@@ -75,6 +75,8 @@ create_substitution <-
 #' If \code{TRUE}, the unspecified covariates are filled with the default reference grid.
 #' If \code{FALSE}, users will be asked to provide a full reference grid.
 #' Currently only support the default to \code{FALSE}.
+#' @param factors Type of summary for factors. Can be \code{"reference"} (set at the reference level), 
+#' \code{"mode"} (set at the most common level) or \code{"all"} to keep all levels.
 #' @inheritParams substitution
 #'
 #' @importFrom utils head
