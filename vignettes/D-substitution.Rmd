@@ -229,16 +229,14 @@ This is difference from the basic substitution model which yields prediction con
 an "average" person in the data set (e.g., by using the grand compositional mean
 as the reference composition). 
 Average substitution models models are generally more computationally expensive than basic subsitution models. All models can be run faster in shorter walltime using parallel execution. 
-In this example, we use package `doFuture` to parallel our models. `substitution()` will run 5 
-substitution models for 5 sleep-wake behaviours, so we will parallel them across 5 workers.
+In this example, we set `cores = 5`. `substitution()` will run 5 
+substitution models for 5 sleep-wake behaviours by parallel excuting them across 5 workers.
 
 
 ```r
-plan(multisession, workers = 5)
-
 subm2 <- substitution(object = m, delta = 1:10,
-                      ref = "grandmean", level = c("between", "within"))
-plan(sequential)
+                      ref = "grandmean", level = c("between", "within"),
+                      cores = 5)
 ```
 
 Below are the results.
