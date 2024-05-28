@@ -27,6 +27,7 @@
 #'              
 #' subm <- sub(object = m, basesub = psub, delta = 5)
 #' }}
+#' @export
 sub <- function (object,
                  delta,
                  basesub,
@@ -131,6 +132,7 @@ sub <- function (object,
 #'                      
 #' subm <- submargins(object = m, basesub = psub, delta = 5)
 #' }}
+#' @export
 submargins <- function (object,
                         delta,
                         basesub,
