@@ -39,7 +39,7 @@
     <a class="dropdown-item" href="../articles/A-introduction.html">Introduction to Bayesian Compositional Multilevel Modelling</a>
     <a class="dropdown-item" href="../articles/B-composition-MLM.html">Multilevel Models with Compositional Predictors</a>
     <a class="dropdown-item" href="../articles/C-composition-MMLM.html">Multilevel Model with Compositional Outcomes</a>
-    <a class="dropdown-item" href="../articles/D-substitution-model.html">Compositional Substitution Multilevel Models</a>
+    <a class="dropdown-item" href="../articles/D-substitution.html">Compositional Substitution Multilevel Analysis</a>
     <a class="dropdown-item" href="../articles/E-simmodel-diag.html">Improving MCMC Sampling for Bayesian Compositional Multilevel Models</a>
   </div>
 </li>
@@ -222,11 +222,11 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 494 494 494 494 494 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 249 249 249 249 249 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 504 504 504 504 504 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
@@ -295,11 +295,11 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 494 494 494 494 494 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 249 249 249 249 249 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 504 504 504 504 504 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
@@ -359,11 +359,11 @@ resulting in singular covariance matrices.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 494 494 494 494 494 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 249 249 249 249 249 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 504 504 504 504 504 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>

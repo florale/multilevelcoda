@@ -61,7 +61,7 @@
     <a class="dropdown-item" href="../articles/A-introduction.html">Introduction to Bayesian Compositional Multilevel Modelling</a>
     <a class="dropdown-item" href="../articles/B-composition-MLM.html">Multilevel Models with Compositional Predictors</a>
     <a class="dropdown-item" href="../articles/C-composition-MMLM.html">Multilevel Model with Compositional Outcomes</a>
-    <a class="dropdown-item" href="../articles/D-substitution-model.html">Compositional Substitution Multilevel Models</a>
+    <a class="dropdown-item" href="../articles/D-substitution.html">Compositional Substitution Multilevel Analysis</a>
     <a class="dropdown-item" href="../articles/E-simmodel-diag.html">Improving MCMC Sampling for Bayesian Compositional Multilevel Models</a>
   </div>
 </li>
@@ -128,21 +128,13 @@ and <code>sbp</code> (sequential binary partition).</p>
 <h3 id="computing-compositions-and-isometric-log-ratio-coordinates-">Computing compositions and isometric log ratio coordinates.<a class="anchor" aria-label="anchor" href="#computing-compositions-and-isometric-log-ratio-coordinates-"></a>
 </h3>
 <p>The ILR coordinates outcomes can be calculated using the
-<code><a href="../reference/compilr.html">compilr()</a></code> functions.</p>
+<code><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr()</a></code> functions.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compilr.html">compilr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
+<code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
 <span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">$</span><span class="va">TotalILR</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        ilr1 ilr2    ilr3  ilr4</span></span>
-<span><span class="co">#&gt; [1,]  0.287 1.20  0.6270 1.702</span></span>
-<span><span class="co">#&gt; [2,] -0.472 1.57 -0.8336 0.984</span></span>
-<span><span class="co">#&gt; [3,] -0.486 1.33  1.3344 2.659</span></span>
-<span><span class="co">#&gt; [4,] -0.316 1.37 -0.0332 0.551</span></span>
-<span><span class="co">#&gt; [5,]  0.205 1.43 -0.6893 0.733</span></span>
-<span><span class="co">#&gt; [6,] -0.446 1.16 -0.0950 0.670</span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "rmult"</span></span></code></pre></div>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fitting-model">Fitting model<a class="anchor" aria-label="anchor" href="#fitting-model"></a>
@@ -152,11 +144,11 @@ has multiple ILR coordinate outcomes,each of which is predicted by a set
 of predictors. Our <code>brms</code> model can be then fitted using the
 <code><a href="../reference/brmcoda.html">brmcoda()</a></code> function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
+<code class="sourceCode R"><span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>              formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">Stress</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>              cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'</span></span>
-<span><span class="co">#&gt; via 'set_rescor' instead of using the default.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus</span></span>
+<span><span class="co">#&gt; recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span></code></pre></div>
 <p>Here is a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of the model. We can see that stress
 significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -174,40 +166,40 @@ significantly predicted <code>ilr1</code> and <code>ilr2</code>.</p>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Group-Level Effects: </span></span>
+<span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~ID (Number of levels: 266) </span></span>
 <span><span class="co">#&gt;                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(ilr1_Intercept)     0.33      0.02     0.30     0.37 1.00     1203     1547</span></span>
-<span><span class="co">#&gt; sd(ilr2_Intercept)     0.30      0.01     0.28     0.34 1.00     1097     2116</span></span>
-<span><span class="co">#&gt; sd(ilr3_Intercept)     0.39      0.02     0.35     0.43 1.00     1594     2478</span></span>
-<span><span class="co">#&gt; sd(ilr4_Intercept)     0.30      0.02     0.27     0.33 1.00     1687     2483</span></span>
+<span><span class="co">#&gt; sd(ilr1_Intercept)     0.33      0.02     0.30     0.37 1.00     1228     2060</span></span>
+<span><span class="co">#&gt; sd(ilr2_Intercept)     0.30      0.01     0.28     0.33 1.00     1134     1929</span></span>
+<span><span class="co">#&gt; sd(ilr3_Intercept)     0.39      0.02     0.35     0.43 1.00     1731     2763</span></span>
+<span><span class="co">#&gt; sd(ilr4_Intercept)     0.30      0.02     0.27     0.33 1.00     1710     2483</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Population-Level Effects: </span></span>
+<span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; ilr1_Intercept    -0.43      0.02    -0.48    -0.38 1.00     1089     1836</span></span>
-<span><span class="co">#&gt; ilr2_Intercept     1.47      0.02     1.42     1.51 1.00      877     2029</span></span>
-<span><span class="co">#&gt; ilr3_Intercept    -0.87      0.03    -0.93    -0.82 1.00     1644     2583</span></span>
-<span><span class="co">#&gt; ilr4_Intercept     0.65      0.02     0.60     0.70 1.00     1948     2670</span></span>
-<span><span class="co">#&gt; ilr1_Stress       -0.01      0.00    -0.02    -0.00 1.00     6441     3679</span></span>
-<span><span class="co">#&gt; ilr2_Stress        0.01      0.00     0.00     0.01 1.00     5245     3596</span></span>
-<span><span class="co">#&gt; ilr3_Stress        0.00      0.00    -0.01     0.01 1.00     6436     3519</span></span>
-<span><span class="co">#&gt; ilr4_Stress        0.01      0.00    -0.00     0.01 1.00     6209     3303</span></span>
+<span><span class="co">#&gt; ilr1_Intercept    -0.44      0.02    -0.48    -0.39 1.00      942     1598</span></span>
+<span><span class="co">#&gt; ilr2_Intercept     1.47      0.02     1.42     1.51 1.01      876     1608</span></span>
+<span><span class="co">#&gt; ilr3_Intercept    -0.88      0.03    -0.94    -0.82 1.00     1740     2565</span></span>
+<span><span class="co">#&gt; ilr4_Intercept     0.65      0.02     0.60     0.69 1.00     1648     2562</span></span>
+<span><span class="co">#&gt; ilr1_Stress       -0.01      0.00    -0.02    -0.00 1.00     5967     3302</span></span>
+<span><span class="co">#&gt; ilr2_Stress        0.01      0.00     0.00     0.01 1.00     5446     3533</span></span>
+<span><span class="co">#&gt; ilr3_Stress        0.00      0.01    -0.01     0.01 1.00     6975     3101</span></span>
+<span><span class="co">#&gt; ilr4_Stress        0.01      0.00    -0.00     0.01 1.00     6794     3387</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Family Specific Parameters: </span></span>
+<span><span class="co">#&gt; Further Distributional Parameters:</span></span>
 <span><span class="co">#&gt;            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sigma_ilr1     0.44      0.01     0.43     0.45 1.00     5231     3458</span></span>
-<span><span class="co">#&gt; sigma_ilr2     0.38      0.00     0.37     0.39 1.00     5176     3232</span></span>
-<span><span class="co">#&gt; sigma_ilr3     0.70      0.01     0.68     0.71 1.00     5339     3388</span></span>
-<span><span class="co">#&gt; sigma_ilr4     0.53      0.01     0.51     0.54 1.00     5250     3363</span></span>
+<span><span class="co">#&gt; sigma_ilr1     0.44      0.01     0.43     0.45 1.00     6228     3088</span></span>
+<span><span class="co">#&gt; sigma_ilr2     0.38      0.00     0.37     0.39 1.00     6496     3182</span></span>
+<span><span class="co">#&gt; sigma_ilr3     0.70      0.01     0.68     0.71 1.00     5403     3385</span></span>
+<span><span class="co">#&gt; sigma_ilr4     0.53      0.01     0.51     0.54 1.00     5484     3418</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Residual Correlations: </span></span>
 <span><span class="co">#&gt;                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; rescor(ilr1,ilr2)    -0.54      0.01    -0.57    -0.52 1.00     5202     3296</span></span>
-<span><span class="co">#&gt; rescor(ilr1,ilr3)    -0.18      0.02    -0.21    -0.14 1.00     4833     3061</span></span>
-<span><span class="co">#&gt; rescor(ilr2,ilr3)    -0.05      0.02    -0.09    -0.02 1.00     5156     3254</span></span>
-<span><span class="co">#&gt; rescor(ilr1,ilr4)     0.11      0.02     0.07     0.14 1.00     4910     3445</span></span>
-<span><span class="co">#&gt; rescor(ilr2,ilr4)    -0.05      0.02    -0.08    -0.01 1.00     5286     3449</span></span>
-<span><span class="co">#&gt; rescor(ilr3,ilr4)     0.56      0.01     0.53     0.58 1.00     5255     3316</span></span>
+<span><span class="co">#&gt; rescor(ilr1,ilr2)    -0.54      0.01    -0.57    -0.52 1.00     5503     3659</span></span>
+<span><span class="co">#&gt; rescor(ilr1,ilr3)    -0.18      0.02    -0.21    -0.14 1.00     5662     3335</span></span>
+<span><span class="co">#&gt; rescor(ilr2,ilr3)    -0.05      0.02    -0.08    -0.02 1.00     4974     3475</span></span>
+<span><span class="co">#&gt; rescor(ilr1,ilr4)     0.11      0.02     0.07     0.14 1.00     6096     3480</span></span>
+<span><span class="co">#&gt; rescor(ilr2,ilr4)    -0.05      0.02    -0.08    -0.01 1.00     5544     3305</span></span>
+<span><span class="co">#&gt; rescor(ilr3,ilr4)     0.56      0.01     0.54     0.58 1.00     5224     3252</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -237,32 +229,23 @@ be fitted with an additional non-default argument
 <code>save_pars = save_pars(all = TRUE)</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># intercept only</span></span>
-<span><span class="va">mv0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
+<span><span class="va">mv0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>               formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>               iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>               backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'</span></span>
-<span><span class="co">#&gt; via 'set_rescor' instead of using the default.</span></span>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus</span></span>
+<span><span class="co">#&gt; recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span>
 <span><span class="co"># full model</span></span>
-<span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>compilr <span class="op">=</span> <span class="va">cilr</span>,</span>
+<span><span class="va">mv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span>
 <span>              formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span>, <span class="va">ilr3</span>, <span class="va">ilr4</span><span class="op">)</span> <span class="op">~</span> <span class="va">Stress</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span>
 <span>              iter <span class="op">=</span> <span class="fl">6000</span>, chains <span class="op">=</span> <span class="fl">8</span>, cores <span class="op">=</span> <span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">123</span>, warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>              backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, save_pars <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/save_pars.html" class="external-link">save_pars</a></span><span class="op">(</span>all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus recommended to explicitely set 'rescor'</span></span>
-<span><span class="co">#&gt; via 'set_rescor' instead of using the default.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus</span></span>
+<span><span class="co">#&gt; recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.</span></span></code></pre></div>
 <p>We can now compare these models with the
 <code><a href="https://easystats.github.io/bayestestR/reference/bayesfactor_models.html" class="external-link">bayesfactor_models()</a></code> function</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/bridgesampling/man/bf.html" class="external-link">bayes_factor</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">Model</span>, <span class="va">mv0</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Iteration: 1</span></span>
-<span><span class="co">#&gt; Iteration: 2</span></span>
-<span><span class="co">#&gt; Iteration: 3</span></span>
-<span><span class="co">#&gt; Iteration: 4</span></span>
-<span><span class="co">#&gt; Iteration: 5</span></span>
-<span><span class="co">#&gt; Iteration: 6</span></span>
-<span><span class="co">#&gt; Iteration: 7</span></span>
-<span><span class="co">#&gt; Iteration: 8</span></span>
-<span><span class="co">#&gt; Iteration: 9</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/bridgesampling/man/bf.html" class="external-link">bayes_factor</a></span><span class="op">(</span><span class="va">mv</span><span class="op">$</span><span class="va">model</span>, <span class="va">mv0</span><span class="op">$</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Iteration: 1</span></span>
 <span><span class="co">#&gt; Iteration: 2</span></span>
 <span><span class="co">#&gt; Iteration: 3</span></span>
@@ -273,7 +256,36 @@ be fitted with an additional non-default argument
 <span><span class="co">#&gt; Iteration: 8</span></span>
 <span><span class="co">#&gt; Iteration: 9</span></span>
 <span><span class="co">#&gt; Iteration: 10</span></span>
-<span><span class="co">#&gt; Estimated Bayes factor in favor of mv$Model over mv0$Model: 0.00001</span></span></code></pre></div>
+<span><span class="co">#&gt; Iteration: 11</span></span>
+<span><span class="co">#&gt; Iteration: 12</span></span>
+<span><span class="co">#&gt; Iteration: 13</span></span>
+<span><span class="co">#&gt; Iteration: 14</span></span>
+<span><span class="co">#&gt; Iteration: 15</span></span>
+<span><span class="co">#&gt; Iteration: 16</span></span>
+<span><span class="co">#&gt; Iteration: 17</span></span>
+<span><span class="co">#&gt; Iteration: 18</span></span>
+<span><span class="co">#&gt; Iteration: 19</span></span>
+<span><span class="co">#&gt; Iteration: 1</span></span>
+<span><span class="co">#&gt; Iteration: 2</span></span>
+<span><span class="co">#&gt; Iteration: 3</span></span>
+<span><span class="co">#&gt; Iteration: 4</span></span>
+<span><span class="co">#&gt; Iteration: 5</span></span>
+<span><span class="co">#&gt; Iteration: 6</span></span>
+<span><span class="co">#&gt; Iteration: 7</span></span>
+<span><span class="co">#&gt; Iteration: 8</span></span>
+<span><span class="co">#&gt; Iteration: 9</span></span>
+<span><span class="co">#&gt; Iteration: 10</span></span>
+<span><span class="co">#&gt; Iteration: 11</span></span>
+<span><span class="co">#&gt; Iteration: 12</span></span>
+<span><span class="co">#&gt; Iteration: 13</span></span>
+<span><span class="co">#&gt; Iteration: 14</span></span>
+<span><span class="co">#&gt; Iteration: 15</span></span>
+<span><span class="co">#&gt; Iteration: 16</span></span>
+<span><span class="co">#&gt; Iteration: 17</span></span>
+<span><span class="co">#&gt; Iteration: 18</span></span>
+<span><span class="co">#&gt; Iteration: 19</span></span>
+<span><span class="co">#&gt; Iteration: 20</span></span>
+<span><span class="co">#&gt; Estimated Bayes factor in favor of mv$model over mv0$model: 0.00015</span></span></code></pre></div>
 <p>With a <span class="math inline">\(BF\)</span> &lt; 1, our data
 favours the intercept only model, showing that there is insufficient
 evidence for stress predicting the overall sleep-wake composition.</p>

@@ -47,7 +47,7 @@ present in the brmcoda object."><!-- mathjax --><script src="https://cdnjs.cloud
     <a class="dropdown-item" href="../articles/A-introduction.html">Introduction to Bayesian Compositional Multilevel Modelling</a>
     <a class="dropdown-item" href="../articles/B-composition-MLM.html">Multilevel Models with Compositional Predictors</a>
     <a class="dropdown-item" href="../articles/C-composition-MMLM.html">Multilevel Model with Compositional Outcomes</a>
-    <a class="dropdown-item" href="../articles/D-substitution-model.html">Compositional Substitution Multilevel Models</a>
+    <a class="dropdown-item" href="../articles/D-substitution.html">Compositional Substitution Multilevel Analysis</a>
     <a class="dropdown-item" href="../articles/E-simmodel-diag.html">Improving MCMC Sampling for Bayesian Compositional Multilevel Models</a>
   </div>
 </li>
@@ -205,20 +205,20 @@ The first six lists contain the results of the substitution estimation for a com
 <span class="r-in"><span>  <span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                 parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># model with compositional predictor at between and between-person levels of variance</span></span></span>
 <span class="r-in"><span>  <span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span></span>
 <span class="r-in"><span>                  formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>                                     <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                  chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">sub1</span> <span class="op">&lt;-</span> <span class="fu">substitution</span><span class="op">(</span>object <span class="op">=</span> <span class="va">fit1</span>, delta <span class="op">=</span> <span class="fl">5</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># model with compositional predictor at aggregate level of variance</span></span></span>
 <span class="r-in"><span>  <span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span></span>
 <span class="r-in"><span>                  formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">ilr1</span> <span class="op">+</span> <span class="va">ilr2</span> <span class="op">+</span> <span class="va">ilr3</span> <span class="op">+</span> <span class="va">ilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                  chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">sub2</span> <span class="op">&lt;-</span> <span class="fu">substitution</span><span class="op">(</span>object <span class="op">=</span> <span class="va">fit2</span>, delta <span class="op">=</span> <span class="fl">5</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aggregate"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
 </code></pre></div>
