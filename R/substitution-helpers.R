@@ -80,7 +80,7 @@ create_substitution <-
 #' @importFrom utils head
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
-#' @importFrom emmeans ref_grid
+#' @importFrom insight get_datagrid
 #' @importFrom extraoperators %snin% %sin%
 #'
 #' @return A reference grid consisting of a combination of covariates in \code{brmcoda}

@@ -37,7 +37,6 @@ Imports:
     bayestestR,
     extraoperators,
     ggplot2,
-    emmeans,
     foreach,
     future,
     doFuture,
@@ -50,7 +49,8 @@ Imports:
     bslib,
     DT,
     loo,
-    bayesplot
+    bayesplot,
+    insight
 Suggests: 
     testthat (>= 3.0.0),
     covr,
