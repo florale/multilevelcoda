@@ -80,8 +80,7 @@ cilr <- complr(data = mcompd, sbp = sbp,
 
 # model with compositional predictor at between and within-person levels
 m <- brmcoda(complr = cilr, 
-             formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + 
-                                wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+             formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
              chain = 1, iter = 500,
              backend = "cmdstanr")
                      
