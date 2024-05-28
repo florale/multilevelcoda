@@ -34,6 +34,7 @@ sub <- function (object,
                  ref = "grandmean",
                  level = "aggregate",
                  weight = "equal",
+                 scale = c("response", "linear"),
                  cores = NULL,
                  ...) {
   
@@ -50,8 +51,10 @@ sub <- function (object,
     if (isFALSE(inherits(ref, c("data.table", "data.frame", "matrix")))) {
       stop("ref must be \"grandmean\" or a data table, data frame or matrix.")
     }
-    if(isFALSE(
-      (colnames(as.data.table(ref_grid(object$model)@grid)) %snin% ".wgt.") %ain% colnames(ref))) { # ensure all covs are provided
+    if(isFALSE(  # ensure all covs are provided
+      (colnames(as.data.table(insight::get_datagrid(model.frame(object),
+                                                    at = paste0(object$model$formula$formula[[2]]),
+                                                    length = NA)))) %ain% colnames(ref))) {
       stop(paste(
         "'ref' should contains information about",
         "  the covariates in 'brmcoda' model to estimate the substitution model.",
@@ -134,7 +137,7 @@ submargins <- function (object,
                         ref = "clustermean",
                         level = "aggregate",
                         weight = "proportional",
-                        scale,
+                        scale = c("response", "linear"),
                         cores = NULL,
                         ...) {
   

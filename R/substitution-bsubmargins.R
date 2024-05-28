@@ -35,7 +35,7 @@ bsubmargins <- function (object,
                          ref = "clustermean",
                          level = "between",
                          weight = "proportional",
-                         scale,
+                         scale = c("response", "linear"),
                          cores = NULL,
                          ...) {
   

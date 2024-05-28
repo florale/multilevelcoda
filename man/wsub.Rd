@@ -12,7 +12,7 @@ wsub(
   ref = "grandmean",
   level = "within",
   weight = "equal",
-  scale,
+  scale = c("response", "linear"),
   cores = NULL,
   ...
 )

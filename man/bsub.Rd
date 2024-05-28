@@ -12,7 +12,7 @@ bsub(
   ref = "grandmean",
   level = "between",
   weight = "equal",
-  scale,
+  scale = c("response", "linear"),
   cores = NULL,
   ...
 )

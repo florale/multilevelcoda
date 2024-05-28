@@ -11,7 +11,7 @@ wsubmargins(
   ref = "clustermean",
   level = "within",
   weight = "proportional",
-  scale,
+  scale = c("response", "linear"),
   cores = NULL,
   ...
 )

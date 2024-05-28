@@ -86,19 +86,19 @@ if(requireNamespace("cmdstanr")){
   cilr <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                  idvar = "ID", total = 1440)
-  
+
   # model with compositional predictor at between and between-person levels of variance
   fit1 <- brmcoda(complr = cilr,
                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                      wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
-  
+
   # model with compositional predictor at aggregate level of variance
   fit2 <- brmcoda(complr = cilr,
                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
   sub2 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
-  
+
 }}
 }

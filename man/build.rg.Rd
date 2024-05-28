@@ -4,7 +4,7 @@
 \alias{build.rg}
 \title{Reference Grid for \code{substitution} model.}
 \usage{
-build.rg(object, ref, level, weight, fill = FALSE)
+build.rg(object, ref, level, weight, factors = "all", fill = FALSE)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
