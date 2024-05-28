@@ -93,7 +93,7 @@ m <- brmcoda(complr = cilr,
              chain = 1, iter = 500,
              backend = "cmdstanr")
              
-subm <- wsub(object = m, basesub = psub, delta = 600)
+subm <- wsub(object = m, basesub = psub, delta = 60)
 }}
 }
 \seealso{
