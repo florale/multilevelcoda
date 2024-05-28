@@ -24,7 +24,7 @@ test_that("complr errors if it should", {
     bilr = 1:10,
     wilr = 1:10
   )
-  expect_error(x <- complr(d, sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+  expect_error(x <- complr(d, sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
   
   ## incorrect sbp
   sbp1 <- matrix(c(
@@ -33,7 +33,7 @@ test_that("complr errors if it should", {
     0, 0, 1, -1), ncol = 4, byrow = TRUE)
   
   expect_error(x <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID],
-                            sbp1, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+                          sbp = sbp1, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
   
   ## incorrect sbp type
   sbp2 <- data.table(v1 = c(1, -1, -1,-1),
@@ -41,12 +41,12 @@ test_that("complr errors if it should", {
                      v3 = c(0, 0, 1, -1))
   
   expect_error(x <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID],
-                            sbp2, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+                          sbp = sbp2, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
   
   ## dataset contains ilr
   mcompd[, bilr1 := .1]
   expect_error(x <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID],
-                            sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+                           sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
   
   # sbp contains invalid values
   sbpe <- matrix(c(
@@ -55,10 +55,10 @@ test_that("complr errors if it should", {
     0, 0, 1, -1, -2,
     0, 0, 0, 1, -1), ncol = 5, byrow = TRUE)
   expect_error(x <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID],
-                            sbpe, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+                           sbp = sbpe, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID"))
   
   # data has 0
   mcompd0 <- mcompd[ID %in% 1:10, .SD[1:3]][, .(TST = 0, WAKE = 0, MVPA = 0, LPA = 0, SB = 0)]
   expect_error(x <- complr(data =mcompd0,
-                            sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID" ))
+                           sbp = sbp, parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID"))
   })

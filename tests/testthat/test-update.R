@@ -59,7 +59,7 @@ test_that("update.complr errors where appropriate", {
 
 test_that("update.complr gives expected output", {
   
-  newcomplr <- update(cilr, mcompd[ID != 1:10])
+  newcomplr <- update(cilr, newdata = mcompd[ID != 1:10])
   
   expect_true(inherits(newcomplr, "complr"))
   
