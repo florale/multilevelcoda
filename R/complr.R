@@ -277,8 +277,8 @@ complr <- function(data,
 #'
 #' @param ... arguments passed to \code{\link{complr}}.
 #' @aliases complr
-#'
-#'
+#' @seealso \code{\link{complr}}
+#' 
 #' @inherit complr return
 #'
 #' @export

@@ -30,3 +30,6 @@ or a matrix of class \code{acomp} representing multiple closed within-person com
 \description{
 Compute sets of compositions and log ratio transformation for multilevel compositional data
 }
+\seealso{
+\code{\link{complr}}
+}
