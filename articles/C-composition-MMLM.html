@@ -128,9 +128,9 @@ and <code>sbp</code> (sequential binary partition).</p>
 <h3 id="computing-compositions-and-isometric-log-ratio-coordinates-">Computing compositions and isometric log ratio coordinates.<a class="anchor" aria-label="anchor" href="#computing-compositions-and-isometric-log-ratio-coordinates-"></a>
 </h3>
 <p>The ILR coordinates outcomes can be calculated using the
-<code><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr()</a></code> functions.</p>
+<code><a href="../reference/complr.html">complr()</a></code> functions.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
+<code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
 <span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">$</span><span class="va">TotalILR</span><span class="op">)</span></span>

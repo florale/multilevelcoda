@@ -66,13 +66,13 @@
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Update <code>complr</code></h1>
+      <img src="" class="logo" alt=""><h1>Update <code><a href="complr.html">complr</a></code></h1>
       <small class="dont-index">Source: <a href="https://github.com/florale/multilevelcoda/blob/HEAD/R/update.R" class="external-link"><code>R/update.R</code></a></small>
       <div class="d-none name"><code>update.complr.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
-    <p>This method allows for updating an existing <code>complr</code> object.</p>
+    <p>This method allows for updating an existing <code><a href="complr.html">complr</a></code> object.</p>
     </div>
 
     <div class="section level2">
@@ -84,13 +84,13 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>object</dt>
-<dd><p>A <code>complr</code> class object to be updated.</p></dd>
+<dd><p>A <code><a href="complr.html">complr</a></code> class object to be updated.</p></dd>
 
 
 <dt>newdata</dt>
 <dd><p>A <code>data.frame</code> or <code>data.table</code>
 containing data of all variables used in the analysis.
-It must include a composition and the same ID variable as the existing <code>complr</code> object.</p></dd>
+It must include a composition and the same ID variable as the existing <code><a href="complr.html">complr</a></code> object.</p></dd>
 
 
 <dt>...</dt>
@@ -101,7 +101,7 @@ It must include a composition and the same ID variable as the existing <code>com
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code>complr</code> object with at least the following elements.</p>
+<p>A <code><a href="complr.html">complr</a></code> object with at least the following elements.</p>
 <dl><dt><code>comp</code></dt>
 <dd><p>A vector of class <code>acomp</code> representing one closed composition
 or a matrix of class <code>acomp</code> representing multiple closed  compositions each in one row.</p></dd>
@@ -141,12 +141,12 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code>complr</code></p></div>
+    <div class="dont-index"><p><code><a href="complr.html">complr</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
 <span class="r-in"><span>               parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># update with new data</span></span></span>

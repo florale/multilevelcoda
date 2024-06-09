@@ -490,14 +490,14 @@ variable and adding time to the +1 variable.</p>
 </h3>
 <p>Compositional data are often expressed as a set of isometric log
 ratio (ILR) coordinates in regression models. We can use the
-<code><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr()</a></code> function to calculate both between- and
+<code><a href="../reference/complr.html">complr()</a></code> function to calculate both between- and
 within-level ILR coordinates for use in subsequent models as
 predictors.</p>
-<p><em>Notes: <code><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr()</a></code> also calculates total ILR
+<p><em>Notes: <code><a href="../reference/complr.html">complr()</a></code> also calculates total ILR
 coordinates to be used as outcomes (or predictors) in models, if the
 decomposition into a between- and within-level ILR coordinates was not
 desired.</em></p>
-<p>The <code><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr()</a></code> function for multilevel data requires four
+<p>The <code><a href="../reference/complr.html">complr()</a></code> function for multilevel data requires four
 arguments:</p>
 <table class="table">
 <colgroup>
@@ -540,13 +540,13 @@ should be closed.</td>
 </tbody>
 </table>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
+<code class="sourceCode R"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span>
 <span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fitting-model">Fitting model<a class="anchor" aria-label="anchor" href="#fitting-model"></a>
 </h3>
-<p>We now will use output from the <code><a href="https://florale.github.io/multilevelcoda/reference/compilr.html">complr()</a></code> to fit our
+<p>We now will use output from the <code><a href="../reference/complr.html">complr()</a></code> to fit our
 <code>brms</code> model, using the <code><a href="../reference/brmcoda.html">brmcoda()</a></code>. Here is a
 model predicting <code>Stress</code> from between- and within-person
 sleep-wake behaviours (expressed as ILR coordinates).</p>
