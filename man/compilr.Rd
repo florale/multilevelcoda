@@ -2,8 +2,7 @@
 % Please edit documentation in R/complr.R
 \name{compilr}
 \alias{compilr}
-\alias{complr}
-\title{Indices from a (dataset of) Multilevel Composition(s)}
+\title{Indices from a (dataset of) Multilevel Composition(s) (deprecated.)}
 \usage{
 compilr(...)
 }
@@ -28,7 +27,7 @@ or a matrix of class \code{acomp} representing multiple closed within-person com
 \item{\code{total}}{ Total amount to which the compositions is closed.}
 }
 \description{
-Compute sets of compositions and log ratio transformation for multilevel compositional data
+Indices from a (dataset of) Multilevel Composition(s) (deprecated.)
 }
 \seealso{
 \code{\link{complr}}
