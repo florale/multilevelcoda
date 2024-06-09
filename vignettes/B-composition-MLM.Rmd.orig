@@ -302,4 +302,4 @@ in bed predicted 0.02 higher stress [95% CI 0.00, 0.03], on a given day.
 
 ## More interesting substitution models
 You can learn more about different types of substitution models at  
-[Compositional Multilevel Substitution Analysis](https://florale.github.io/multilevelcoda/articles/substitution.html).
+[Compositional Multilevel Substitution Analysis](https://florale.github.io/multilevelcoda/articles/D-substitution.html).

@@ -209,7 +209,7 @@ substitution models for 5 sleep-wake behaviours by parallel excuting them across
 
 ```{r submargin}
 subm2 <- substitution(object = m, delta = 1:10,
-                      ref = "grandmean", level = c("between", "within"),
+                      ref = "clustermean", level = c("between", "within"),
                       cores = 5)
 ```
 

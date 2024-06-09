@@ -235,7 +235,7 @@ substitution models for 5 sleep-wake behaviours by parallel excuting them across
 
 ```r
 subm2 <- substitution(object = m, delta = 1:10,
-                      ref = "grandmean", level = c("between", "within"),
+                      ref = "clustermean", level = c("between", "within"),
                       cores = 5)
 ```
 
@@ -248,16 +248,16 @@ knitr::kable(summary(subm2, delta = 10, to = "TST"))
 
 
 
-|  Mean| CI_low| CI_high| Delta|From |To  |Level   |Reference |
-|-----:|------:|-------:|-----:|:----|:---|:-------|:---------|
-|  0.06|  -0.01|    0.13|    10|WAKE |TST |between |grandmean |
-|  0.01|  -0.03|    0.04|    10|MVPA |TST |between |grandmean |
-|  0.01|  -0.01|    0.03|    10|LPA  |TST |between |grandmean |
-|  0.01|  -0.01|    0.04|    10|SB   |TST |between |grandmean |
-|  0.04|   0.01|    0.07|    10|WAKE |TST |within  |grandmean |
-| -0.01|  -0.02|    0.01|    10|MVPA |TST |within  |grandmean |
-| -0.01|  -0.02|    0.00|    10|LPA  |TST |within  |grandmean |
-|  0.00|  -0.01|    0.01|    10|SB   |TST |within  |grandmean |
+|  Mean| CI_low| CI_high| Delta|To  |From |Level   |Reference   |
+|-----:|------:|-------:|-----:|:---|:----|:-------|:-----------|
+|  0.07|  -0.01|    0.15|    10|TST |WAKE |between |clustermean |
+|  0.01|  -0.03|    0.04|    10|TST |MVPA |between |clustermean |
+|  0.01|  -0.01|    0.04|    10|TST |LPA  |between |clustermean |
+|  0.01|  -0.02|    0.05|    10|TST |SB   |between |clustermean |
+|  0.05|   0.01|    0.08|    10|TST |WAKE |within  |clustermean |
+| -0.01|  -0.02|    0.01|    10|TST |MVPA |within  |clustermean |
+| -0.01|  -0.02|    0.00|    10|TST |LPA  |within  |clustermean |
+|  0.00|  -0.01|    0.01|    10|TST |SB   |within  |clustermean |
 
 
 
@@ -275,14 +275,7 @@ ggarrange(p1, p2,
 ```
 
 
-
-```
-#> 
-#> Attaching package: 'ggpubr'
-#> The following object is masked from 'package:cowplot':
-#> 
-#>     get_legend
-#> Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Please check that the arguments match with your substitution object.
-#> Error in summary.substitution(object = x, delta = delta, to = to, ref = ref, : An empty data.table returned. Please check that the arguments match with your substitution object.
-#> Error in eval(expr, envir, enclos): object 'p1' not found
-```
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-mlmcoda-submargins-1.png" alt="Example of Average Marginal Substitution Analysis"  />
+<p class="caption">Example of Average Marginal Substitution Analysis</p>
+</div>
