@@ -16,13 +16,13 @@
 #' 
 #' @details 
 #' The \emph{ilr}-transform maps the D-part compositional data from the simplex into non-overlapping 
-#' subgroups in the (D−1)-dimension Euclidean space isometrically by using an orthonormal basis, 
+#' subgroups in the (D-1)-dimension Euclidean space isometrically by using an orthonormal basis, 
 #' thereby preserving the compositional properties and yielding a full-rank covariance matrix.
 #' \emph{ilr} transformation should be preferred. 
 #' However, the \emph{alr} and \emph{clr} are alternatives.
 #' The \emph{alr}-transform maps a D-part composition 
 #' in the Aitchison-simplex non-isometrically to a 
-#' (D−1)-dimension Euclidian vectors, 
+#' (D-1)-dimension Euclidian vectors, 
 #' commonly treating the last part as the common denominator of the others.
 #' \emph{alr} transformation does not rely on distance which breaks 
 #' the constraint of compositional data.
