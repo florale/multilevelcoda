@@ -53,7 +53,6 @@
 #'
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
-#' @importFrom future sequential
 #'
 #' @examples
 #' \donttest{
