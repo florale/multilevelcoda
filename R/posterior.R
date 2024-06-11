@@ -103,7 +103,6 @@ predict.brmcoda <- function(object,
   }} else {
     out <- predict(
       object$model,
-      scale = scale,
       summary = summary,
       ...
     )
@@ -213,7 +212,6 @@ fitted.brmcoda <- function(object,
     }} else {
       out <- fitted(
         object$model,
-        scale = scale,
         summary = summary,
         ...
       )
