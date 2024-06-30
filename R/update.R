@@ -60,13 +60,14 @@ update.complr <- function(object, newdata, ...) {
 #' This method allows for updating an existing \code{\link{brmcoda}} object.
 #' 
 #' @param object A fitted \code{\link{brmcoda}} object to be updated.
-#' @param formula. Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.
+#' @param formula. Changes to the formula; for details see 
+#' \code{\link[stats:update.formula]{update.formula}} and \code{\link[brms:brmsformula]{brmsformula}}.
 #' @param newcomplr A \code{\link{complr}} object containing data of composition, 
 #' ILR coordinates, and other variables used in the updated model.
 #' @param newdata A \code{data.frame} or \code{data.table}
 #' containing data of all variables used in the analysis. 
 #' It must include a composition and the same ID variable as the existing \code{\link{complr}} object.
-#' @param ... Further arguments passed to \code{\link{brm}}.
+#' @param ... Further arguments passed to \code{\link[brms:brm]{brm}}.
 #' 
 #' @inherit brmcoda return
 #'  

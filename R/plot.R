@@ -7,7 +7,7 @@
 #' that were reallocated to in the model.
 #' @param ref A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),
 #' @param level A character value of (\code{"between"}, \code{"within"}), or \code{"aggregate"}).
-#' @param ... Further arguments passed to \code{\link{ggplot}}.
+#' @param ... Further components to the plot, followed by a plus sign (+).
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
 #' each pair of compositional variables are substituted for a specific time.
@@ -86,7 +86,7 @@ plot.substitution <- function(x, to,
 #' Make a plot of \code{brmcoda} model results.
 #'
 #' @param x A \code{\link{brmcoda}} class object.
-#' @param ... Further arguments passed to \code{\link{plot.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:plot.brmsfit]{plot.brmsfit}}.
 #'
 #' @inherit brms::plot.brmsfit return
 #'
@@ -96,11 +96,11 @@ plot.substitution <- function(x, to,
 #' @export
 #' @examples
 #' \dontrun{
-#' cilr <- compilr(data = mcompd, sbp = sbp,
+#' cilr <- complr(data = mcompd, sbp = sbp,
 #'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #'
 #' # model with compositional predictor at between and within-person levels
-#' fit <- brmcoda(compilr = cilr,
+#' fit <- brmcoda(complr = cilr,
 #'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                chain = 1, iter = 500)
@@ -110,13 +110,13 @@ plot.brmcoda <- function(x, ...) {
   plot(x$model, ...)
 }
 
-#' Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link{brmsfit}} object
+#' Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link[brms:brmsfit]{brmsfit}} object
 #'
 #' A \code{\link[graphics:pairs]{pairs}}
 #' method that is customized for MCMC output.
 #'
 #' @param x A \code{brmcoda} class object.
-#' @param ... Further arguments passed to \code{\link{pairs.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}.
 #'
 #' @inherit brms::pairs.brmsfit return
 #' 
@@ -127,11 +127,11 @@ plot.brmcoda <- function(x, ...) {
 #' @export
 #' @examples
 #' \dontrun{
-#' cilr <- compilr(data = mcompd, sbp = sbp,
+#' cilr <- complr(data = mcompd, sbp = sbp,
 #'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #'
 #' # model with compositional predictor at between and within-person levels
-#' fit <- brmcoda(compilr = cilr,
+#' fit <- brmcoda(complr = cilr,
 #'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                chain = 1, iter = 500)
@@ -147,7 +147,7 @@ pairs.brmcoda <- function(x, ...) {
 #' implemented in the \pkg{bayesplot} package.
 #'
 #' @param object A \code{brmcoda} class object.
-#' @param ... Further arguments passed to \code{\link{mcmc_plot.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:mcmc_plot.brmsfit]{mcmc_plot.brmsfit}}.
 #' 
 #' @inherit brms::mcmc_plot.brmsfit return
 #' 
@@ -159,11 +159,11 @@ pairs.brmcoda <- function(x, ...) {
 #' @export
 #' @examples
 #' \dontrun{
-#' cilr <- compilr(data = mcompd, sbp = sbp,
+#' cilr <- complr(data = mcompd, sbp = sbp,
 #'         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 #'
 #' # model with compositional predictor at between and within-person levels
-#' fit <- brmcoda(compilr = cilr,
+#' fit <- brmcoda(complr = cilr,
 #'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                chain = 1, iter = 500)

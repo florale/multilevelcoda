@@ -11,7 +11,7 @@
 
 \item{x2}{Another \code{brmcoda} object based on the same responses.}
 
-\item{...}{Other arguments passed to \code{\link{bayes_factor.brmsfit}}.}
+\item{...}{Other arguments passed to \code{\link[brms:bayes_factor.brmsfit]{bayes_factor.brmsfit}}.}
 }
 \description{
 Compute Bayes factors from marginal likelihoods

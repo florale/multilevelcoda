@@ -9,7 +9,8 @@
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object to be updated.}
 
-\item{formula.}{Changes to the formula; for details see \code{\link{update.formula}} and \code{\link{brmsformula}}.}
+\item{formula.}{Changes to the formula; for details see
+\code{\link[stats:update.formula]{update.formula}} and \code{\link[brms:brmsformula]{brmsformula}}.}
 
 \item{newdata}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.
@@ -18,7 +19,7 @@ It must include a composition and the same ID variable as the existing \code{\li
 \item{newcomplr}{A \code{\link{complr}} object containing data of composition,
 ILR coordinates, and other variables used in the updated model.}
 
-\item{...}{Further arguments passed to \code{\link{brm}}.}
+\item{...}{Further arguments passed to \code{\link[brms:brm]{brm}}.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements

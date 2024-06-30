@@ -39,7 +39,7 @@
 #' If \code{"response"}, results are returned on the scale of the response variable.
 #' If \code{"linear"}, results are returned on the scale of the linear predictor term,
 #' that is without applying the inverse link function or other transformations.
-#' @param ... Additional arguments passed to \code{\link{describe_posterior}}.
+#' @param ... currently ignored.
 #'
 #' @return A list containing the results of multilevel compositional substitution model.
 #' The first six lists contain the results of the substitution estimation for a compositional part.

@@ -2,14 +2,14 @@
 % Please edit documentation in R/plot.R
 \name{pairs.brmcoda}
 \alias{pairs.brmcoda}
-\title{Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link{brmsfit}} object}
+\title{Create a matrix of output plots from a \code{\link{brmcoda}}'s \code{\link[brms:brmsfit]{brmsfit}} object}
 \usage{
 \method{pairs}{brmcoda}(x, ...)
 }
 \arguments{
 \item{x}{A \code{brmcoda} class object.}
 
-\item{...}{Further arguments passed to \code{\link{pairs.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}.}
 }
 \description{
 A \code{\link[graphics:pairs]{pairs}}
@@ -17,11 +17,11 @@ method that is customized for MCMC output.
 }
 \examples{
 \dontrun{
-cilr <- compilr(data = mcompd, sbp = sbp,
+cilr <- complr(data = mcompd, sbp = sbp,
         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 # model with compositional predictor at between and within-person levels
-fit <- brmcoda(compilr = cilr,
+fit <- brmcoda(complr = cilr,
                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
                chain = 1, iter = 500)

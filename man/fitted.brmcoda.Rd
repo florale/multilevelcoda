@@ -20,7 +20,7 @@ of the response variable.}
 \item{summary}{Should summary statistics be returned
 instead of the raw values? Default is \code{TRUE}.}
 
-\item{...}{Further arguments passed to \code{\link{fitted.brmsfit}}
+\item{...}{Further arguments passed to \code{\link[brms:fitted.brmsfit]{fitted.brmsfit}}
 that control additional aspects of prediction.}
 }
 \value{

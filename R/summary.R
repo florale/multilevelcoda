@@ -94,7 +94,7 @@ print.complr <- function(x, ...) {
 #' Create a Summary of a fitted \code{brmsfit} model in a \code{brmcoda} object
 #' 
 #' @param object An object of class \code{brmcoda}.
-#' @param ... Other arguments passed to \code{\link{summary.brmsfit}}.
+#' @param ... Other arguments passed to \code{\link[brms:summary.brmsfit]{summary.brmsfit}}.
 #' 
 #' @method summary brmcoda
 #' 

@@ -16,7 +16,7 @@ that were reallocated to in the model.}
 
 \item{level}{A character value of (\code{"between"}, \code{"within"}), or \code{"aggregate"}).}
 
-\item{...}{Further arguments passed to \code{\link{ggplot}}.}
+\item{...}{Further components to the plot, followed by a plus sign (+).}
 }
 \value{
 A ggplot graph object showing the estimated difference in outcome when

@@ -415,7 +415,7 @@ build.rg <- function(object,
     #                                            factors = factors,
     #                                            length = NA))
     drg <- as.data.table(insight::get_datagrid(model.frame(object),
-                                               at = paste0(resp),
+                                               # at = paste0(resp),
                                                factors = factors,
                                                length = NA))
 

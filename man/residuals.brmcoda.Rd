@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{residuals.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}.}
 }
 \value{
 An \code{array} of predictive error/residual draws. If

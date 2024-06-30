@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{A \code{brmcoda} class object.}
 
-\item{...}{Further arguments passed to \code{\link{mcmc_plot.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link[brms:mcmc_plot.brmsfit]{mcmc_plot.brmsfit}}.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot}} object
@@ -21,11 +21,11 @@ implemented in the \pkg{bayesplot} package.
 }
 \examples{
 \dontrun{
-cilr <- compilr(data = mcompd, sbp = sbp,
+cilr <- complr(data = mcompd, sbp = sbp,
         parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 # model with compositional predictor at between and within-person levels
-fit <- brmcoda(compilr = cilr,
+fit <- brmcoda(complr = cilr,
                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
                chain = 1, iter = 500)

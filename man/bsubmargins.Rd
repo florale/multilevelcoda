@@ -52,7 +52,7 @@ we recommend setting the \code{mc.cores} option
 to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
 For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.}
 
-\item{...}{Additional arguments passed to \code{\link{describe_posterior}}.}
+\item{...}{currently ignored.}
 }
 \value{
 A list containing the results of multilevel compositional substitution model.

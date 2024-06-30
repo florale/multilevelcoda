@@ -10,7 +10,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{fixef.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link[brms:fixef.brmsfit]{fixef.brmsfit}}.}
 }
 \value{
 If \code{summary} is \code{TRUE}, a matrix returned

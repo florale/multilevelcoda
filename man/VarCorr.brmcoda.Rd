@@ -10,7 +10,7 @@
 \arguments{
 \item{x}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{VarCorr.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link[brms:VarCorr.brmsfit]{VarCorr.brmsfit}}.}
 }
 \value{
 A list of lists (one per grouping factor), each with

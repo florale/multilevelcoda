@@ -6,7 +6,8 @@
 #'
 #' @param object A fitted model object of class \code{brmcoda}.
 #' @param ... Optional arguments to pass to
-#' \code{\link{launch_shinystan.brmsfit}} or \code{\link[shiny:runApp]{runApp}}.
+#' \code{\link[shinystan:launch_shinystan]{launch_shinystan}} or 
+#' \code{\link[shiny:runApp]{runApp}}.
 #'
 #' @seealso \code{\link[shinystan:launch_shinystan]{launch_shinystan}}
 #'

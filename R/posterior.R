@@ -18,7 +18,7 @@
 #' results are returned on the log-ratio scale.
 #' If \code{"response"}, results are returned on the compositional scale
 #' of the response variable.
-#' @param ... Further arguments passed to \code{\link{predict.brmsfit}}
+#' @param ... Further arguments passed to \code{\link[brms:predict.brmsfit]{predict.brmsfit}}
 #' that control additional aspects of prediction.
 #' @inheritParams brms::predict.brmsfit
 #' 
@@ -68,19 +68,17 @@ predict.brmcoda <- function(object,
   
   if (inherits(object$model$formula, "mvbrmsformula")) {
     if ((length(grep("ilr", object$model$formula$responses, value = T)) > 0)) {
-      if (scale == "linear") {
-      warning(sprintf(
+      if (isFALSE(scale == "response")) {
+        warning(sprintf(
         "This is a mvbrmsformula model, it is recommended to
   set scale = \"response\" to return results on compsitional scale."))
       
       out <- predict(
         object$model,
-        scale = scale,
         summary = summary,
         ...
       )
-    }
-    if (scale == "response") {
+    } else {
       out <- predict(
         object$model,
         summary = FALSE,
@@ -126,7 +124,7 @@ predict.brmcoda <- function(object,
 #' @aliases fitted
 #' 
 #' @inheritParams predict.brmcoda
-#' @param ... Further arguments passed to \code{\link{fitted.brmsfit}}
+#' @param ... Further arguments passed to \code{\link[brms:fitted.brmsfit]{fitted.brmsfit}}
 #' that control additional aspects of prediction.
 #' 
 #' @inherit brms::fitted.brmsfit return
@@ -177,19 +175,17 @@ fitted.brmcoda <- function(object,
   
   if (inherits(object$model$formula, "mvbrmsformula")) {
     if ((length(grep("ilr", object$model$formula$responses, value = T)) > 0)) {
-      if (scale == "linear") {
+      if (isFALSE(scale == "response")) {
         warning(sprintf(
           "This is a mvbrmsformula model, it is recommended to
   set scale = \"response\" to return results on compsitional scale."))
         
         out <- fitted(
           object$model,
-          scale = scale,
           summary = summary,
           ...
         )
-      }
-      if (scale == "response") {
+      } else {
         out <- fitted(
           object$model,
           summary = FALSE,
@@ -227,7 +223,7 @@ fitted.brmcoda <- function(object,
 #' @aliases fixef
 #' 
 #' @param object An object of class \code{brmcoda}.
-#' @param ... Further arguments passed to \code{\link{fixef.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:fixef.brmsfit]{fixef.brmsfit}}.
 #' 
 #' @inherit brms::fixef.brmsfit return
 #' 
@@ -265,7 +261,7 @@ fixef.brmcoda <- function(object, ...) {
 #' of the \code{brmsfit} object in a \code{brmcoda} object.
 #'
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{vcov.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:vcov.brmsfit]{vcov.brmsfit}}.
 #' 
 #' @inherit brms::vcov.brmsfit return
 #' 
@@ -301,7 +297,7 @@ vcov.brmcoda <- function(object, ...) {
 #' @aliases ranef
 #' 
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{ranef.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:ranef.brmsfit]{ranef.brmsfit}}.
 #' 
 #' @inherit brms::ranef.brmsfit return
 #'
@@ -340,7 +336,7 @@ ranef.brmcoda <- function(object, ...) {
 #' @aliases coef
 #' 
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{coef.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:coef.brmsfit]{coef.brmsfit}}.
 #' 
 #' @inherit brms::coef.brmsfit return
 #'
@@ -382,7 +378,7 @@ coef.brmcoda <- function(object, ...) {
 #' @aliases VarCorr
 #' 
 #' @param x An object of class \code{brmcoda}.
-#' @param ... Further arguments passed to \code{\link{VarCorr.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:VarCorr.brmsfit]{VarCorr.brmsfit}}.
 #' 
 #' @inherit brms::VarCorr.brmsfit return
 #' 
@@ -416,7 +412,7 @@ VarCorr.brmcoda <- function(x, ...) {
 #' Compute posterior draws of residuals/predictive errors
 #' 
 #' @inheritParams fixef.brmcoda
-#' @param ... Further arguments passed to \code{\link{residuals.brmsfit}}.
+#' @param ... Further arguments passed to \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}.
 #' @inherit brms::residuals.brmsfit return
 #'   
 #' @seealso \code{\link[brms:residuals.brmsfit]{residuals.brmsfit}}

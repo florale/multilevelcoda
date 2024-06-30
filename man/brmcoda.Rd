@@ -13,9 +13,9 @@ ILR coordinates, and other variables used in the model.}
 
 \item{formula}{A object of class \code{formula}, \code{brmsformula}:
 A symbolic description of the model to be fitted.
-Details of the model specification can be found in \code{\link{brmsformula}}.}
+Details of the model specification can be found in \code{\link[brms:brmsformula]{brmsformula}}.}
 
-\item{...}{Further arguments passed to \code{\link{brm}}.}
+\item{...}{Further arguments passed to \code{\link[brms:brm]{brm}}.}
 }
 \value{
 A \code{\link{brmcoda}} with two elements

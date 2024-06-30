@@ -11,7 +11,8 @@
 \item{object}{A fitted model object of class \code{brmcoda}.}
 
 \item{...}{Optional arguments to pass to
-\code{\link{launch_shinystan.brmsfit}} or \code{\link[shiny:runApp]{runApp}}.}
+\code{\link[shinystan:launch_shinystan]{launch_shinystan}} or
+\code{\link[shiny:runApp]{runApp}}.}
 }
 \value{
 An S4 shinystan object

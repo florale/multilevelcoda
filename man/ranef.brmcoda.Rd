@@ -10,7 +10,7 @@
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link{ranef.brmsfit}}.}
+\item{...}{Further arguments passed to \code{\link[brms:ranef.brmsfit]{ranef.brmsfit}}.}
 }
 \value{
 A list of 3D arrays (one per grouping factor).
