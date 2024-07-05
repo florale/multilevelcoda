@@ -75,14 +75,12 @@ create_substitution <-
 #' If \code{TRUE}, the unspecified covariates are filled with the default reference grid.
 #' If \code{FALSE}, users will be asked to provide a full reference grid.
 #' Currently only support the default to \code{FALSE}.
-#' @param factors Type of summary for factors. Can be \code{"reference"} (set at the reference level), 
-#' \code{"mode"} (set at the most common level) or \code{"all"} to keep all levels.
 #' @inheritParams substitution
 #'
 #' @importFrom utils head
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo mean.acomp
-#' @importFrom insight get_datagrid
+#' @importFrom emmeans ref_grid
 #' @importFrom extraoperators %snin% %sin%
 #'
 #' @return A reference grid consisting of a combination of covariates in \code{brmcoda}
@@ -92,7 +90,6 @@ build.rg <- function(object,
                      ref,
                      level,
                      weight,
-                     factors = "all",
                      fill = FALSE) {
 
   covgrid <- NULL
@@ -193,14 +190,13 @@ build.rg <- function(object,
       # drg <- model.frame(object)
       # drg[] <- as.data.table(lapply(drg, function(j) if(is.numeric(j) && unique(j) %ain% c(0, 1)) as.factor(j) else j))
       # drg <- as.data.table(insight::get_datagrid(drg,
-      #                                            at = paste0(resp),
+      #                                            by = paste0(resp),
       #                                            factors = factors,
       #                                            length = NA))
-      drg <- as.data.table(insight::get_datagrid(model.frame(object),
-                                                 at = paste0(resp),
-                                                 factors = factors,
-                                                 length = NA))
-      # reference grid
+      
+      drg <- as.data.table(ref_grid(object$model)@grid)
+
+      # reference grid (only covariates and outcome)
       refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
 
       id <- data.table::data.table(1) # to make fitted() happy
@@ -411,15 +407,13 @@ build.rg <- function(object,
     # drg <- model.frame(object)
     # drg[] <- as.data.table(lapply(drg, function(j) if(is.numeric(j) && unique(j) %ain% c(0, 1)) as.factor(j) else j))
     # drg <- as.data.table(insight::get_datagrid(drg,
-    #                                            at = paste0(resp),
+    #                                            by = paste0(resp),
     #                                            factors = factors,
     #                                            length = NA))
-    drg <- as.data.table(insight::get_datagrid(model.frame(object),
-                                               # at = paste0(resp),
-                                               factors = factors,
-                                               length = NA))
+    
+    drg <- as.data.table(ref_grid(object$model)@grid)
 
-    # reference grid
+    # reference grid (only covariates and outcome)
     refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
 
     d0 <- if (all(dim(refgrid) == 0)) (cbind(ilr0, comp0)) else (expand.grid.df(ilr0, comp0, refgrid))

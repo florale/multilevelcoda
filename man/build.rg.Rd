@@ -4,7 +4,7 @@
 \alias{build.rg}
 \title{Reference Grid for \code{substitution} model.}
 \usage{
-build.rg(object, ref, level, weight, factors = "all", fill = FALSE)
+build.rg(object, ref, level, weight, fill = FALSE)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
@@ -25,9 +25,6 @@ If \code{"equal"}, give equal weight to units (e.g., individuals).
 If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals).
 Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
-
-\item{factors}{Type of summary for factors. Can be \code{"reference"} (set at the reference level),
-\code{"mode"} (set at the most common level) or \code{"all"} to keep all levels.}
 
 \item{fill}{Logical value only relevant when \code{ref} is an user's specified reference grid
 in which information about some, but not all covariates is provided
