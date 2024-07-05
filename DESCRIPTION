@@ -50,7 +50,8 @@ Imports:
     DT,
     loo,
     bayesplot,
-    emmeans
+    emmeans,
+    insight
 Suggests: 
     testthat (>= 3.0.0),
     covr,
