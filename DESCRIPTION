@@ -1,7 +1,7 @@
 Package: multilevelcoda
 Type: Package
 Title: Estimate Bayesian Multilevel Models for Compositional Data
-Version: 1.3.0.1
+Version: 1.3.0.2
 Date: 2024-6-13
 Authors@R: 
     c(person(given = "Flora",
