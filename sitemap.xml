@@ -1,204 +1,70 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/404.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/articles/A-introduction.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/articles/B-composition-MLM.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/articles/C-composition-MMLM.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/articles/D-substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/articles/E-simmodel-diag.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/index.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/VarCorr.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/as.data.frame.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/basesub.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/bayes_factor.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/bsub.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/bsubmargins.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/build.rg.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/coef.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/create_substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/fitted.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/fixef.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/get-substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/is.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/is.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/is.substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/launch_shinystan.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/loo.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/mcmc_plot.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/mcompd.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/mean.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/model.frame.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda_sim.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/nobs.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/pairs.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/plot.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/plot.substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/pp_check.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/predict.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/print.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/print.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/print.substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/print.summary.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/prior_summary.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/psub.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/ranef.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/residuals.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/sbp.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/sim.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/sub.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/submargins.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/summary.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/summary.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/summary.substitution.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/update.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/update.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/var.complr.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/vcov.brmcoda.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/wsub.html</loc>
-  </url>
-  <url>
-    <loc>https://florale.github.io/multilevelcoda/reference/wsubmargins.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://florale.github.io/multilevelcoda/404.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/LICENSE.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/articles/A-introduction.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/articles/B-composition-MLM.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/articles/C-composition-MMLM.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/articles/D-substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/articles/E-simmodel-diag.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/articles/index.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/authors.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/index.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/news/index.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/VarCorr.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/as.data.frame.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/basesub.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/bayes_factor.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/bsub.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/bsubmargins.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/build.rg.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/coef.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/create_substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/fitted.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/fixef.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/get-substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/index.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/is.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/is.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/is.substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/launch_shinystan.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/loo.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/mcmc_plot.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/mcompd.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/mean.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/model.frame.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda_sim.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/nobs.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/pairs.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/plot.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/plot.substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/pp_check.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/predict.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/print.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/print.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/print.substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/print.summary.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/prior_summary.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/psub.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/ranef.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/residuals.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/sbp.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/sim.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/sub.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/submargins.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/summary.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/summary.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/summary.substitution.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/update.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/update.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/var.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/vcov.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/wsub.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/wsubmargins.html</loc></url>
 </urlset>
+
