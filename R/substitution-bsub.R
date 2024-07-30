@@ -101,7 +101,8 @@ bsub <- function(object,
     ref = ref,
     summary = summary,
     scale = scale,
-    cores = cores
+    cores = cores,
+    ...
   )
   
   return(out)

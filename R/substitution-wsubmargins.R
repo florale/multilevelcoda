@@ -83,6 +83,7 @@ wsubmargins <- function (object,
     level = level,
     ref = ref,
     scale = scale,
-    cores = cores
+    cores = cores,
+    ...
   )
 }

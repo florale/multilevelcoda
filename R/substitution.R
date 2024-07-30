@@ -270,7 +270,8 @@ substitution <- function(object,
         level = "between",
         weight = weight,
         scale = scale,
-        cores = cores)
+        cores = cores,
+        ...)
     }
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       bout <- bsub(
@@ -282,7 +283,8 @@ substitution <- function(object,
         level = "between",
         weight = weight,
         scale = scale,
-        cores = cores)
+        cores = cores,
+        ...)
     }
     if ("clustermean" %in% ref) {
       bmout <-
@@ -294,7 +296,8 @@ substitution <- function(object,
           level = "between",
           weight = weight,
           scale = scale,
-          cores = cores)
+          cores = cores,
+          ...)
     }
   }
 
@@ -310,7 +313,8 @@ substitution <- function(object,
         level = "within",
         weight = weight,
         scale = scale,
-        cores = cores)
+        cores = cores,
+        ...)
     }
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       wout <- wsub(
@@ -322,7 +326,8 @@ substitution <- function(object,
         level = "within",
         weight = weight,
         scale = scale,
-        cores = cores)
+        cores = cores,
+        ...)
     }
     if ("clustermean" %in% ref) {
       wmout <-
@@ -334,7 +339,8 @@ substitution <- function(object,
           level = "within",
           weight = weight,
           scale = scale,
-          cores = cores)
+          cores = cores,
+          ...)
     }
   }
 
@@ -350,7 +356,8 @@ substitution <- function(object,
         level = "aggregate",
         weight = weight,
         scale = scale,
-        cores = cores)
+        cores = cores,
+        ...)
     }
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       tout <- sub(
@@ -362,7 +369,8 @@ substitution <- function(object,
         level = "aggregate",
         weight = weight,
         scale = scale,
-        cores = cores)
+        cores = cores,
+        ...)
     }
     if ("clustermean" %in% ref) {
       tmout <-
@@ -374,7 +382,8 @@ substitution <- function(object,
           level = "aggregate",
           weight = weight,
           scale = scale,
-          cores = cores)
+          cores = cores,
+          ...)
     }
   }
 

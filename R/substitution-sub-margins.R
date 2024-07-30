@@ -99,7 +99,8 @@ sub <- function (object,
     ref = ref,
     summary = summary,
     scale = scale,
-    cores = cores
+    cores = cores,
+    ...
   )
 }
 
@@ -185,6 +186,7 @@ submargins <- function (object,
     level = level,
     ref = ref,
     scale = scale,
-    cores = cores
+    cores = cores,
+    ...
   )
 }
