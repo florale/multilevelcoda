@@ -55,9 +55,7 @@ bsub <- function(object,
       stop("ref must be \"grandmean\" or a data table, data frame or matrix.")
     }
     if(isFALSE(  # ensure all covs are provided
-      (colnames(as.data.table(insight::get_datagrid(model.frame(object),
-                                                    at = paste0(object$model$formula$formula[[2]]),
-                                                    length = NA)))) %ain% colnames(ref))) {
+      (colnames(as.data.table(ref_grid(object$model)@grid)) %snin% ".wgt.") %ain% colnames(ref))) {
       stop(paste(
         "'ref' should contains information about",
         "  the covariates in 'brmcoda' model to estimate the substitution model.",
