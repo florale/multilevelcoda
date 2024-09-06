@@ -55,18 +55,17 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          dependencies: NA
           extra-packages: |
             any::rcmdcheck
-            BH
-            RcppEigen
+            any::BH
+            any::RcppEigen
             stan-dev/cmdstanr
-            testthat
-            knitr
-            rmarkdown
-            doFuture
-            lme4
-            covr
+            any::testthat
+            any::knitr
+            any::rmarkdown
+            any::doFuture
+            any::lme4
+            any::covr
           needs: check
             
       - name: Build Cmdstan
@@ -77,5 +76,6 @@ jobs:
         
       - uses: r-lib/actions/check-r-package@v2
         with:
+          upload-snapshots: true
           build_args: 'c("--no-manual", "--no-build-vignettes")'
           args: 'c("--no-manual", "--as-cran", "--ignore-vignettes")'
