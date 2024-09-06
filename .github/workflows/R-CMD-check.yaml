@@ -6,7 +6,9 @@ on:
   pull_request:
     branches: [main, master]
 
-name: R-CMD-check
+name: R-CMD-check.yaml
+
+permissions: read-all
 
 jobs:
   R-CMD-check:
@@ -20,7 +22,7 @@ jobs:
       matrix:
         config:
           - {os: macOS-latest,   r: 'release', rtools: ''}
-          - {os: windows-latest, r: 'release', rtools: '42'}
+          - {os: windows-latest, r: 'release', rtools: '44'}
           - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release', rtools: ''}
           - {os: ubuntu-latest,  r: 'release', rtools: ''}
 
@@ -29,9 +31,9 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
-      - uses: n1hility/cancel-previous-runs@v2
+      - uses: n1hility/cancel-previous-runs@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           
@@ -55,7 +57,7 @@ jobs:
         with:
           dependencies: NA
           extra-packages: |
-            rcmdcheck
+            any::rcmdcheck
             BH
             RcppEigen
             stan-dev/cmdstanr
@@ -65,6 +67,7 @@ jobs:
             doFuture
             lme4
             covr
+        needs: check
             
       - name: Build Cmdstan
         run: |
