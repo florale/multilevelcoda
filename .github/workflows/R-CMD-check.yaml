@@ -67,7 +67,7 @@ jobs:
             doFuture
             lme4
             covr
-        needs: check
+          needs: check
             
       - name: Build Cmdstan
         run: |
