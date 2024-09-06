@@ -1,10 +1,27 @@
-# multilevelcoda 0.0.9000
+# multilevelcoda 1.2.2
 
-### Initial release
+### New Features
 
-# multilevelcoda 1.0.0
+* Add a new function `multilevelcoda_sim()` to bundle simulation study results in a `shiny` app.
+* Add more methods for `brmcoda` (`loo` and `pp_check`).
 
-### First CRAN release
+# multilevelcoda 1.2.1
+
+### Other Changes
+
+* Fix a bug in the `summary` argument of `predict()` and `fitted()`.
+
+# multilevelcoda 1.2.0
+
+### New Features
+
+* Add various methods for `compilr`, `brmcoda`, and `substitution` objects.
+* Change the default `total` in `compilr` to `1` instead of `1440`.
+
+### Other Changes
+
+* Fix bugs in vignettes and reformat.
+* Add a new vignette to present a case study in `multilevelcoda` simulation study.
 
 # multilevelcoda 1.1.0
 
@@ -21,27 +38,10 @@
 * Deprecate argument `type` of `substitution` and replace with `ref`.
 * Deprecate argument `regrid` of `substitution`
 
-# multilevelcoda 1.2.0
+# multilevelcoda 1.0.0
 
-### New Features
+### First CRAN release
 
-* Add various methods for `compilr`, `brmcoda`, and `substitution` objects.
-* Change the default `total` in `compilr` to `1` instead of `1440`.
+# multilevelcoda 0.0.9000
 
-### Other Changes
-
-* Fix bugs in vignettes and reformat.
-* Add a new vignette to present a case study in `multilevelcoda` simulation study.
-
-# multilevelcoda 1.2.1
-
-### Other Changes
-
-* Fix a bug in the `summary` argument of `predict()` and `fitted()`.
-
-# multilevelcoda 1.2.2
-
-### New Features
-
-* Add a new function `multilevelcoda_sim()` to bundle simulation study results in a `shiny` app.
-* Add more methods for `brmcoda` (`loo` and `pp_check`).
+### Initial release
