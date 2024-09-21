@@ -224,7 +224,7 @@ NULL
   yseg <- y_breaks[[1]]
   yendseg <- y_breaks[[3]]
   
-  if (shiny == TRUE) {
+  if (isTRUE(shiny)) {
     gg <- 
       ggplot(data, 
              aes(x = xvar, y = est, 
