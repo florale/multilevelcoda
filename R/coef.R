@@ -5,7 +5,7 @@
 #'   Either \dQuote{between} or \dQuote{within}.
 #' @param h A numeric value specifying the step size for the substitution.
 #' @return A data table of results.
-#' @importFrom data.table as.data.table
+#' @importFrom data.table as.data.table copy
 #' @importFrom stats fitted model.frame
 #' @importFrom testthat expect_equal
 #' @importFrom brms posterior_summary
@@ -14,7 +14,7 @@
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
-#' sbp2 <- copy(sbp)
+#' sbp2 <- sbp
 #' sbp2[1, ] <- c(-1, 1, -1, -1, -1)
 #' sbp2[2, ] <- c( 1, 0, -1, -1, -1)
 #' sbp2[3, ] <- c( 0, 0,  1, -1, -1)
