@@ -1,29 +1,40 @@
-if (FALSE) {
-sbp2 <- copy(sbp)
-sbp2[1, ] <- c(-1, 1, -1, -1, -1)
-sbp2[2, ] <- c( 1, 0, -1, -1, -1)
-sbp2[3, ] <- c( 0, 0,  1, -1, -1)
-sbp2[4, ] <- c( 0, 0,  0,  1, -1)
-
-cilr <- complr(data = mcompd, sbp = sbp2, 
-  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-  idvar = "ID")
-
-m1 <- brmcoda(complr = cilr,
-              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
-              chain = 4, iter = 1000, cores = 4L,
-              backend = "cmdstanr")
-# summary(m1)
-substition_coef(m1, level = "between", h = 10)
-substition_coef(m1, level = "within", h = 10)
-
+#' Calculate "coefficients" based on substitutions for each compositional part
+#'
+#' @param object An object of class \code{brmcoda}.
+#' @param level A character string specifying the level of the coefficients to be calculated.
+#'   Either \dQuote{between} or \dQuote{within}.
+#' @param h A numeric value specifying the step size for the substitution.
+#' @return A data table of results.
+#' @importFrom data.table as.data.table
+#' @importFrom stats fitted model.frame
+#' @importFrom testthat expect_equal
+#' @importFrom brms posterior_summary
+#' @importFrom nlme fixef
+#' @export
+#' @examples
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
+#' sbp2 <- copy(sbp)
+#' sbp2[1, ] <- c(-1, 1, -1, -1, -1)
+#' sbp2[2, ] <- c( 1, 0, -1, -1, -1)
+#' sbp2[3, ] <- c( 0, 0,  1, -1, -1)
+#' sbp2[4, ] <- c( 0, 0,  0,  1, -1)
+#' 
+#' cilr <- complr(data = mcompd, sbp = sbp2, 
+#'   parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'   idvar = "ID")
+#' 
+#' m1 <- brmcoda(complr = cilr,
+#'               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'               chain = 4, iter = 1000, cores = 4L,
+#'               backend = "cmdstanr")
+#' substition_coef(m1, level = "between", h = 10)
+#' substition_coef(m1, level = "within", h = 10)
+#' rm(sbp2, cilr, m1) ## cleanup
+#' }
+#' }
 substition_coef <- function(object, level = c("between", "within"), h = 10) {
-  ## TODO remove after testing
-  # object <- m1
-  # h <- .1
-  # level <- "between"
-  # scale <- 60
   level <- match.arg(level)
   expect_s3_class(object, "brmcoda")
 
@@ -123,6 +134,4 @@ substition_coef <- function(object, level = c("between", "within"), h = 10) {
   )
 
   return(finalout)
-}
-
 }
