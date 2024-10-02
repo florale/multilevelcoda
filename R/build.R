@@ -12,29 +12,41 @@
 #' ps1 <- build.basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' print(ps1)
 #' 
-#' ps2 <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"))
+#' ps2 <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
 #' print(ps2)
-build.basesub <- function(parts) {
+build.basesub <- function(parts, comparison) {
   
   d <- length(parts)
   n <- d - 2
   
-  subvars1 <- c(1, -1)
-  subvars2 <- rep(0, n)
-  subvars <- c(subvars1, subvars2)
+  subvar1 <- c(1, -1)
+  subvar2 <- rep(0, n)
+  subvar <- c(subvar1, subvar2)
   
-  nc <- length(subvars)
+  nc <- length(subvar)
   nr <- (nc - 1) * d
-  
-  base_sub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, parts))
   k <- 0
   
-  for (i in 1:nc)
-    for (j in 1:nc)
-      if (i != j) {
-        k <- k + 1
-        base_sub[k, c(i, j)] <- c(1, -1)
-      }
+  if (comparison == "one-to-all") {
+    base_sub <- matrix(0, nrow = d, ncol = d, dimnames = list(NULL, parts))
+    
+    for (i in 1:nc)
+      for (j in 1:nc)
+        if (i == j) {
+          base_sub[i, j] <- 1
+          base_sub[i, -j] <- -(1/(d-1))
+        }
+    
+  } else {
+    base_sub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, parts))
+    
+    for (i in 1:nc)
+      for (j in 1:nc)
+        if (i != j) {
+          k <- k + 1
+          base_sub[k, c(i, j)] <- c(1, -1)
+        }
+  }
   
   base_sub <- as.data.table(base_sub)
   base_sub
@@ -71,10 +83,9 @@ build.sbp <- function(parts) {
   sbp <- base_sbp
   
   for (i in 1:nr) {
-        # k <- i - 1
-        base_sbp[i,  i] <- 1
-        base_sbp[i, -i] <- -1
-        base_sbp[i, 0:(i-1)] <- 0
+    base_sbp[i,  i] <- 1
+    base_sbp[i, -i] <- -1
+    base_sbp[i, 0:(i-1)] <- 0
   }
   base_sbp
 }
