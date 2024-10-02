@@ -7,7 +7,7 @@
 substitution(
   object,
   delta,
-  basesub = NULL,
+  basesub,
   summary = TRUE,
   ref = c("grandmean", "clustermean"),
   level = c("between", "within", "aggregate"),
@@ -22,9 +22,11 @@ substitution(
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
-\item{basesub}{A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
-This data set can be computed using function \code{\link{basesub}}.
-If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
+\item{basesub}{A base substitution.
+Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+which can be computed using function \code{\link{basesub}}.
+If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+If \code{NULL}, all possible one-to-one reallocations are estimated.}
 
 \item{summary}{A logical value.
 Should the estimate at each level of the reference grid (\code{FALSE})
@@ -87,18 +89,23 @@ if(requireNamespace("cmdstanr")){
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                  idvar = "ID", total = 1440)
 
-  # model with compositional predictor at between and between-person levels of variance
+  # model with compositional predictor at between and within-person levels
   fit1 <- brmcoda(complr = cilr,
                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
                                      wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
-  sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
+                  
+  # one to one reallocation at between and within-person levels
+  sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within))
+  
+  # one to all reallocation at between and within-person levels
+  sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within), basesub = "one-to-all")
 
   # model with compositional predictor at aggregate level of variance
   fit2 <- brmcoda(complr = cilr,
                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
-  sub2 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
+  sub3 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
 
 }}
 }

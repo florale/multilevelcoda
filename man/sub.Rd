@@ -22,9 +22,11 @@ sub(
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
 
-\item{basesub}{A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
-This data set can be computed using function \code{\link{basesub}}.
-If \code{NULL}, all possible pairwise substitution of compositional parts are used.}
+\item{basesub}{A base substitution.
+Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+which can be computed using function \code{\link{basesub}}.
+If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+If \code{NULL}, all possible one-to-one reallocations are estimated.}
 
 \item{summary}{A logical value.
 Should the estimate at each level of the reference grid (\code{FALSE})

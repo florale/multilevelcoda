@@ -28,14 +28,23 @@ build.basesub <- function(parts, comparison) {
   k <- 0
   
   if (comparison == "one-to-all") {
-    base_sub <- matrix(0, nrow = d, ncol = d, dimnames = list(NULL, parts))
-    
+    base_sub_to <- matrix(0, nrow = d, ncol = d, dimnames = list(NULL, parts))
     for (i in 1:nc)
       for (j in 1:nc)
         if (i == j) {
-          base_sub[i, j] <- 1
-          base_sub[i, -j] <- -(1/(d-1))
+          base_sub_to[i, j] <- 1
+          base_sub_to[i, -j] <- -(1/(d-1))
         }
+    
+    base_sub_from <- matrix(0, nrow = d, ncol = d, dimnames = list(NULL, parts))
+    for (i in 1:nc)
+      for (j in 1:nc)
+        if (i == j) {
+          base_sub_from[i, j] <- -1
+          base_sub_from[i, -j] <- (1/(d-1))
+        }
+    
+    base_sub <- rbind(base_sub_to, base_sub_from)
     
   } else {
     base_sub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, parts))

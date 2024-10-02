@@ -8,9 +8,11 @@
 #'
 #' @param object A fitted \code{\link{brmcoda}} object.
 #' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
-#' @param basesub A \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts.
-#' This data set can be computed using function \code{\link{basesub}}.
-#' If \code{NULL}, all possible pairwise substitution of compositional parts are used.
+#' @param basesub A base substitution. 
+#' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+#' which can be computed using function \code{\link{basesub}}.
+#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+#' If \code{NULL}, all possible one-to-one reallocations are estimated.
 #' @param ref Either a character value or vector or a dataset.
 #' Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
@@ -61,24 +63,29 @@
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                  idvar = "ID", total = 1440)
 #'
-#'   # model with compositional predictor at between and between-person levels of variance
+#'   # model with compositional predictor at between and within-person levels
 #'   fit1 <- brmcoda(complr = cilr,
 #'                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                      wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
+#'                   
+#'   # one to one reallocation at between and within-person levels
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within))
+#'   
+#'   # one to all reallocation at between and within-person levels
+#'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within), basesub = "one-to-all")
 #'
 #'   # model with compositional predictor at aggregate level of variance
 #'   fit2 <- brmcoda(complr = cilr,
 #'                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
-#'   sub2 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
+#'   sub3 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
 #'
 #' }}
 #' @export
 substitution <- function(object,
                          delta,
-                         basesub = NULL,
+                         basesub,
                          summary = TRUE,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "aggregate"),
@@ -86,7 +93,7 @@ substitution <- function(object,
                          scale = c("response", "linear"),
                          cores = NULL,
                          ...) {
-
+  
   if (missing(object)) {
     stop(paste(
       "'object' is a required argument and cannot be missing;",
@@ -94,15 +101,15 @@ substitution <- function(object,
       "  See ?bsub for details.",
       sep = "\n"))
   }
-
+  
   if (isFALSE(inherits(object, "brmcoda"))) {
     stop(sprintf(
       "Can't handle an object of class (%s)
   It should be a fitted 'brmcoda' object
   See ?bsub for details.",
-  class(object)))
+      class(object)))
   }
-
+  
   if (isFALSE(identical(object$complr$transform, "ilr"))) {
     stop(sprintf(
       "Can't handle an object of class (%s) in 'substitution',
@@ -110,7 +117,7 @@ substitution <- function(object,
       object$complr$transform)
     )
   }
-
+  
   if(isFALSE(missing(delta))) {
     if (isFALSE(is.integer(delta))) {
       if (isFALSE(delta > 0)) {
@@ -124,62 +131,48 @@ substitution <- function(object,
       "  to specify the change in units across compositional parts",
       sep = "\n"))
   }
-
+  
   # set default weight to be equal
   if (identical(weight, "proportional")) {
     weight <- "proportional"
   } else {
     weight <- "equal"
   }
-
+  
+  # base substitution
   if (missing(basesub)) {
-    count <- length(object$complr$parts)
-    n <- count - 2
-
-    subvars1 <- c(1, -1)
-    subvars2 <- rep(0, n)
-    subvars <- c(subvars1, subvars2)
-
-    nc <- length(subvars)
-    nr <- (nc - 1) * count
-
-    basesub <- matrix(0, nrow = nr, ncol = nc, dimnames = list(NULL, object$complr$parts))
-    k <- 0
-
-    for (i in 1:nc)
-      for (j in 1:nc)
-        if (i != j) {
-          k <- k + 1
-          basesub[k, c(i, j)] <- c(1, -1)
-        }
-
-    basesub <- as.data.table(basesub)
+    basesub <- build.basesub(parts = object$complr$parts)
     names(basesub) <- object$complr$parts
-
+    
   } else if(isFALSE(missing(basesub))) {
-    if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
-      stop(sprintf(
-        "The number of columns in 'basesub' (%d) should be the same as the compositional parts in 'parts' (%d).",
-        ncol(basesub),
-        length(object$complr$parts)
-      ))
+    if (basesub == "one-to-all") {
+      basesub <- build.basesub(parts = object$complr$parts, comparison = "one-to-all")
     }
-    if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
-      stop(sprintf(
-        "The names of compositional parts should be the same in 'basesub' (%s) and 'parts' (%s).",
-        colnames(basesub),
-        object$complr$parts
-      ))
+    else {
+      if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
+        stop(sprintf(
+          "The number of columns in 'basesub' (%d) should be the same as the compositional parts in 'parts' (%d).",
+          ncol(basesub),
+          length(object$complr$parts)
+        ))
+      }
+      if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
+        stop(sprintf(
+          "The names of compositional parts should be the same in 'basesub' (%s) and 'parts' (%s).",
+          colnames(basesub),
+          object$complr$parts
+        ))
+      }
     }
   }
-
+  
   # what type of model is being estimated
   model_fixef <- rownames(fixef(object))
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
-
+  
   model_fixef_level <- NULL
   model_fixef_coef <- NULL
-
+  
   if (length(grep("bilr", model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef, grep(".*bilr", model_fixef, value = T))
@@ -192,7 +185,7 @@ substitution <- function(object,
     model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
   }
-
+  
   # single level or multilevel
   if (length(model_ranef) > 0) {
     model_ranef_level <- "multilevel"
@@ -201,7 +194,7 @@ substitution <- function(object,
     model_ranef_level <- "single"
     model_ranef_coef <- NULL
   }
-
+  
   # ensure sub args make sense
   ## only grandmean and aggregate for single level model
   if ("aggregate" %in% model_fixef_level) {
@@ -217,7 +210,7 @@ substitution <- function(object,
       ref <- ref
     }
   }
-
+  
   ## no between or within for single level model
   if (any(c("between", "within") %in% model_fixef_level)) {
     if (model_ranef_level == "single") {
@@ -227,12 +220,12 @@ substitution <- function(object,
       ref <- ref
     }
   }
-
+  
   ## set default to be only between and within if level is not specified
   if (all(c("between", "within", "aggregate") %in% level)) {
     level <- c("between", "within")
   }
-
+  
   ## level args match with coefs in object
   if (any(c("between", "within") %in% level)) {
     if (isFALSE(any(c("between", "within") %in% model_fixef_level))) {
@@ -240,8 +233,8 @@ substitution <- function(object,
         "'between' and 'within' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-  model_fixef_level,
-  model_fixef_level
+        model_fixef_level,
+        model_fixef_level
       ))
     }
   }
@@ -251,12 +244,12 @@ substitution <- function(object,
         "'aggregate' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-  model_fixef_level,
-  model_fixef_level
+        model_fixef_level,
+        model_fixef_level
       ))
     }
   }
-
+  
   # deploy to substitution analysis
   bmout <- bout <- NULL
   if ("between" %in% level) {
@@ -300,7 +293,7 @@ substitution <- function(object,
           ...)
     }
   }
-
+  
   wmout <- wout <- NULL
   if ("within" %in% level) {
     if ("grandmean" %in% ref) {
@@ -343,7 +336,7 @@ substitution <- function(object,
           ...)
     }
   }
-
+  
   tmout <- tout <- NULL
   if ("aggregate" %in% level) {
     if ("grandmean" %in% ref) {
@@ -386,7 +379,7 @@ substitution <- function(object,
           ...)
     }
   }
-
+  
   # out
   structure(
     list(
@@ -404,5 +397,5 @@ substitution <- function(object,
       parts = object$complr$parts,
       summary = summary),
     class = "substitution")
-
+  
 }
