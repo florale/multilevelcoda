@@ -23,7 +23,7 @@ Calculate "coefficients" based on substitutions for each compositional part
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-sbp2 <- copy(sbp)
+sbp2 <- sbp
 sbp2[1, ] <- c(-1, 1, -1, -1, -1)
 sbp2[2, ] <- c( 1, 0, -1, -1, -1)
 sbp2[3, ] <- c( 0, 0,  1, -1, -1)

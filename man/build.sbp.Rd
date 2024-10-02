@@ -20,9 +20,9 @@ in the prediction for the dependent variable
 when that given part increases while all remaining parts decrease by a common proportion.
 }
 \examples{
-ps1 <- build.sbp(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-print(ps1)
+sbp1 <- build.sbp(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+print(sbp1)
 
-ps2 <- build.sbp(c("WAKE", "MVPA", "LPA", "SB"))
-print(ps2)
+sbp2 <- build.sbp(c("WAKE", "MVPA", "LPA", "SB"))
+print(sbp2)
 }

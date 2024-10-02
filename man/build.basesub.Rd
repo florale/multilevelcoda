@@ -4,7 +4,7 @@
 \alias{build.basesub}
 \title{Build Base Pairwise Substitution}
 \usage{
-build.basesub(parts)
+build.basesub(parts, comparison)
 }
 \arguments{
 \item{parts}{A character vector specifying the names of compositional variables to be used.}
@@ -20,6 +20,6 @@ the base for substitution models.
 ps1 <- build.basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 print(ps1)
 
-ps2 <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"))
+ps2 <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
 print(ps2)
 }
