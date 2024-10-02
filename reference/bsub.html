@@ -105,9 +105,11 @@ It is recommended that users run substitution model using the <code><a href="sub
 
 
 <dt id="arg-basesub">basesub<a class="anchor" aria-label="anchor" href="#arg-basesub"></a></dt>
-<dd><p>A <code>data.frame</code> or <code>data.table</code> of the base possible substitution of compositional parts.
-This data set can be computed using function <code>basesub</code>.
-If <code>NULL</code>, all possible pairwise substitution of compositional parts are used.</p></dd>
+<dd><p>A base substitution.
+Can be a <code>data.frame</code> or <code>data.table</code> of the base possible substitution of compositional parts,
+which can be computed using function <code>basesub</code>.
+If <code>"one-to-all"</code>, all possible one-to-remaining reallocations are estimated.
+If <code>NULL</code>, all possible one-to-one reallocations are estimated.</p></dd>
 
 
 <dt id="arg-summary">summary<a class="anchor" aria-label="anchor" href="#arg-summary"></a></dt>
