@@ -126,8 +126,9 @@ complr <- function(data,
   # specific for ilr
   if (identical(transform, "ilr")) {
     if (missing(sbp)) {
-      stop(" 'sbp', i.e., sequential binary partition, is required for ilr transform.")
-    }
+      message(" 'sbp' (sequential binary partition), is required for ilr transform. A default sbp, which is a pivot balance, will be buit.")
+      sbp <- build.sbp(parts = parts)
+   }
     if (isFALSE(inherits(sbp, "matrix"))) {
       stop(sprintf("sbp is a '%s' but must be a matrix.",
                    paste(class(sbp), collapse = " ")))
@@ -269,6 +270,7 @@ complr <- function(data,
     class = "complr"
   )
   out
+
 }
 
 #' Indices from a (dataset of) Multilevel Composition(s) (deprecated.)
