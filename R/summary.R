@@ -17,6 +17,9 @@
 #'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
 #'                idvar = "ID")
 #' summary(cilr)
+#' cilr <- complr(data = mcompd, sbp = sbp, 
+#'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' summary(cilr)
 #' @export
 summary.complr <- function(object,
                            weight = c("equal", "proportional"),

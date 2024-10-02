@@ -33,7 +33,7 @@ mean.complr <- function(x,
                        weight = weight)
   
   mean_comp <- do.call(rbind, lapply(stats[c("comp", "between_comp", "within_comp")], "[[", "mean"))
-  mean_lr <- do.call(rbind, lapply(stats[c("logratio", "between_logratio", "within_logratio")], function(x) x["Mean",]))
+  mean_lr   <- do.call(rbind, lapply(stats[c("logratio", "between_logratio", "within_logratio")], function(x) x["Mean",]))
   
   out <- list(mean_comp = mean_comp,
               mean_lr = mean_comp)

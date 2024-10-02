@@ -24,14 +24,15 @@ is.sequential <- function(x) {
                         weight = c("equal", "proportional"),
                         ...) {
   
-  if (identical(weight, "proportional")) {
+  if (identical(weight, "proportional") | is.null(object$idvar)) {
     out <- list(
-      summary(object$comp, robust = TRUE),
-      summary(object$between_comp, robust = TRUE),
-      summary(object$within_comp, robust = TRUE),
-      data.frame(summary(object$logratio)),
-      data.frame(summary(object$between_logratio)),
-      data.frame(summary(object$within_logratio))
+      if(!is.null(object$comp)) (summary(object$comp, robust = TRUE)) else (NULL),
+      if(!is.null(object$between_comp)) (summary(object$between_comp, robust = TRUE)) else (NULL),
+      if(!is.null(object$within_comp)) (summary(object$within_comp, robust = TRUE)) else (NULL),
+      if(!is.null(object$logratio)) (data.frame(summary(object$logratio))) else (NULL),
+      if(!is.null(object$between_logratio)) (data.frame(summary(object$between_logratio))) else (NULL),
+      
+      if(!is.null(object$within_logratio)) (data.frame(summary(object$within_logratio))) else (NULL)
     )
   } else {
     tcomp <- cbind(object$data[, object$idvar, with = FALSE], object$comp)[!duplicated(get(object$idvar))]
