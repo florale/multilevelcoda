@@ -54,11 +54,11 @@ build.basesub <- function(parts) {
 #' @importFrom data.table as.data.table 
 #' @export
 #' @examples
-#' ps1 <- build.sbp(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-#' print(ps1)
+#' sbp1 <- build.sbp(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' print(sbp1)
 #' 
-#' ps2 <- build.sbp(c("WAKE", "MVPA", "LPA", "SB"))
-#' print(ps2)
+#' sbp2 <- build.sbp(c("WAKE", "MVPA", "LPA", "SB"))
+#' print(sbp2)
 build.sbp <- function(parts) {
   
   d <- length(parts)
