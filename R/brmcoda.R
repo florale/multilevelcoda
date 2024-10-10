@@ -3,11 +3,11 @@
 #' 
 #' Fit a \code{brm} model with multilevel ILR coordinates
 #' 
+#' @param complr A \code{\link{complr}} object containing data of composition, 
+#' ILR coordinates, and other variables used in the model.
 #' @param formula A object of class \code{formula}, \code{brmsformula}:
 #' A symbolic description of the model to be fitted. 
 #' Details of the model specification can be found in \code{\link[brms:brmsformula]{brmsformula}}.
-#' @param complr A \code{\link{complr}} object containing data of composition, 
-#' ILR coordinates, and other variables used in the model.
 #' @param ... Further arguments passed to \code{\link[brms:brm]{brm}}.
 #' 
 #' @return A \code{\link{brmcoda}} with two elements
@@ -42,7 +42,7 @@
 #'   }}
 #' @export
 brmcoda <- function (complr, formula, ...) {
-
+  
   if (isTRUE(missing(complr))) {
     stop(paste(
       "'complr' is a required argument and cannot be missing;",
@@ -71,3 +71,72 @@ brmcoda <- function (complr, formula, ...) {
          model = m),
     class = "brmcoda")
 }
+
+#' Estimate pivot balance coordinates from 
+#' Bayesian generalised (non-)linear multilevel compositional model 
+#' via full Bayesian inference 
+#' 
+#' @param object An object of class \code{brmcoda}.
+#' @param ... Further arguments passed to \code{\link[brms:brm]{brm}}.
+#' 
+#' @return A \code{\link{brmcoda}} with two elements
+#'   \item{\code{complr}}{ An object of class \code{complr} used in the \code{brm} model. }
+#'   \item{\code{model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
+#'   along with many other useful information about the model.}
+#' @importFrom brms brm
+#' 
+#' @examples
+#' \donttest{
+#' if(requireNamespace("cmdstanr")){
+#'   cilr <- complr(data = mcompd, sbp = sbp,
+#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'   
+#'   # inspects ILRs before passing to brmcoda
+#'   names(cilr$between_logratio)
+#'   names(cilr$within_logratio)
+#'   names(cilr$logratio)
+#'   
+#'   # model with compositional predictor at between and within-person levels
+#'   m1 <- brmcoda(complr = cilr,
+#'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
+#'                                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 chain = 1, iter = 500,
+#'                 backend = "cmdstanr")
+#'   
+#'   m_pb <- brmcoda_pivot(m1)
+#'   }}
+#' @export
+brmcoda_pivot <- function (object, ...) {
+  
+  # loop through all possible pivot balance
+  out_d <- vector("list")
+  
+  for (i in object$complr$parts) {
+    parts_prime <- append(i, grep(i, object$complr$parts, value = T, invert = T))
+    sbp_prime   <- build.sbp(parts_prime)
+    
+    clr_prime <- complr(data  = object$complr$data, 
+                        sbp   = sbp_prime,
+                        parts = parts_prime,
+                        idvar = object$complr$idvar,
+                        total = object$complr$total)
+    
+    dat_prime <-  cbind(clr_prime$data,
+                        clr_prime$between_logratio,
+                        clr_prime$within_logratio,
+                        clr_prime$logratio)
+    
+    fit_prime <- update(object$model,
+                        newdata = dat_prime,
+                        ...)
+    
+    brmcoda_prime <- structure(list(complr = clr_prime,
+                                    model = fit_prime),
+                               class = "brmcoda")
+    
+    out_d[[i]] <-   brmcoda_prime
+    
+  }
+  structure(out_d, class = "brmcoda_pivot")
+}
+
