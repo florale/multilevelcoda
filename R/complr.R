@@ -213,7 +213,7 @@ complr <- function(data,
       colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
     }
     
-    # ALR 
+    # ALR ---------------
     if (identical(transform, "alr")) {
       
       talr <- alr(tcomp)
@@ -225,7 +225,7 @@ complr <- function(data,
       colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
     }
     
-    # CLR 
+    # CLR ---------------
     if (identical(transform, "clr")) {
       
       tclr <- clr(tcomp)
