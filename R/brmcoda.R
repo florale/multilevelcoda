@@ -72,24 +72,19 @@ brmcoda <- function (complr, formula, ...) {
     class = "brmcoda")
 }
 
-#' Estimate pivot balance coordinates from 
-#' Bayesian generalised (non-)linear multilevel compositional model 
-#' via full Bayesian inference 
+#' Estimate pivot balance coordinates
 #' 
 #' @param object An object of class \code{brmcoda}.
 #' @param ... Further arguments passed to \code{\link[brms:brm]{brm}}.
 #' 
-#' @return A \code{\link{brmcoda}} with two elements
-#'   \item{\code{complr}}{ An object of class \code{complr} used in the \code{brm} model. }
-#'   \item{\code{model}}{ An object of class \code{brmsfit}, which contains the posterior draws 
-#'   along with many other useful information about the model.}
-#' @importFrom brms brm
+#' @return A list of \code{\link{brmcoda}} for each pivot balance coordinate.
 #' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
 #'   cilr <- complr(data = mcompd, sbp = sbp,
-#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
+#'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID",
+#'                  total = 1440)
 #'   
 #'   # inspects ILRs before passing to brmcoda
 #'   names(cilr$between_logratio)
@@ -103,39 +98,39 @@ brmcoda <- function (complr, formula, ...) {
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
-#'   m_pb <- brmcoda_pivot(m1)
+#'   m_pb_1 <- brmcoda_pivot(m1)
 #'   }}
 #' @export
 brmcoda_pivot <- function (object, ...) {
   
-  # loop through all possible pivot balance
   out_d <- vector("list")
   
-  for (i in object$complr$parts) {
-    parts_prime <- append(i, grep(i, object$complr$parts, value = T, invert = T))
-    sbp_prime   <- build.sbp(parts_prime)
+  # loop through parts
+  for (d in object$complr$parts) {
+    parts_d <- append(d, grep(d, object$complr$parts, value = T, invert = T))
+    sbp_d   <- build.sbp(parts_d)
+    sbp_d   <- sbp_d[, object$complr$parts]
     
-    clr_prime <- complr(data  = object$complr$data, 
-                        sbp   = sbp_prime,
-                        parts = parts_prime,
-                        idvar = object$complr$idvar,
-                        total = object$complr$total)
+    clr_d <- complr(data  = object$complr$data, 
+                    sbp   = sbp_d,
+                    parts = object$complr$parts,
+                    idvar = object$complr$idvar,
+                    total = object$complr$total)
     
-    dat_prime <-  cbind(clr_prime$data,
-                        clr_prime$between_logratio,
-                        clr_prime$within_logratio,
-                        clr_prime$logratio)
+    dat_d <-  cbind(clr_d$data,
+                    clr_d$between_logratio,
+                    clr_d$within_logratio,
+                    clr_d$logratio)
     
-    fit_prime <- update(object$model,
-                        newdata = dat_prime,
-                        ...)
+    fit_d <- update(object$model,
+                    newdata = dat_d,
+                    ...)
     
-    brmcoda_prime <- structure(list(complr = clr_prime,
-                                    model = fit_prime),
-                               class = "brmcoda")
+    brmcoda_d <- structure(list(complr = clr_d,
+                                model  = fit_d),
+                           class = "brmcoda")
     
-    out_d[[i]] <-   brmcoda_prime
-    
+    out_d[[d]] <-   brmcoda_d
   }
   structure(out_d, class = "brmcoda_pivot")
 }

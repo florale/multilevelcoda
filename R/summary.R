@@ -183,14 +183,14 @@ summary.brmcoda_pivot <- function(object, digits = 2, ...) {
     model_fixef_all <- fixef(out_all_parts[[i]])
     
     if (length(grep("bilr1", row.names(model_fixef_all), value = T)) > 0) {
-      model_fixef_b <- rbind(model_fixef_all[grep("bilr1", rownames(model_fixef_all), value = T), ])
+      model_fixef_b <- rbind(model_fixef_all[grep(".*bilr1", rownames(model_fixef_all), value = T), ])
       model_fixef_b <- cbind.data.frame(Level = "between", 
                                         model_fixef_b)
     } else { 
       model_fixef_b <- NULL
     }
     if (length(grep("wilr1", row.names(model_fixef_all), value = T)) > 0) {
-      model_fixef_w <- rbind(model_fixef_all[grep("wilr1", rownames(model_fixef_all), value = T), ])
+      model_fixef_w <- rbind(model_fixef_all[grep(".*wilr1", rownames(model_fixef_all), value = T), ])
       model_fixef_w <- cbind.data.frame(Level = "within", 
                                         model_fixef_w)
       
@@ -198,7 +198,7 @@ summary.brmcoda_pivot <- function(object, digits = 2, ...) {
       model_fixef_w <- NULL
     }
     if ((length(grep("ilr1", row.names(model_fixef_all), value = T)) > 0) && (length(grep("[b|w]ilr1", row.names(model_fixef_all), value = T)) == 0)) {
-      model_fixef_t <- rbind(model_fixef_all[grep("ilr1", rownames(model_fixef_all), value = T), ])
+      model_fixef_t <- rbind(model_fixef_all[grep(".*ilr1", rownames(model_fixef_all), value = T), ])
       model_fixef_t <- cbind.data.frame(Level = "aggregate", 
                                         model_fixef_t)
     } else { 
@@ -212,7 +212,7 @@ summary.brmcoda_pivot <- function(object, digits = 2, ...) {
   }
   
   out <- as.data.table(do.call(rbind, fixef_all_parts))
-  
+
   if(isFALSE(digits == "asis")) {
     # out[, 1:3] <- round(out[, 1:3], digits)
     out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
