@@ -22,20 +22,21 @@
 #'   names(cilr$logratio)
 #'   
 #'   # model with compositional predictor at between and within-person levels
-#'   m1 <- brmcoda(complr = cilr,
+#'   m <- brmcoda(complr = cilr,
 #'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
 #'                                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
-#'   m_pb <- pivot_coord(m1)
+#'   m_pivot_coord <- pivot_coord(m)
+#'   summary(m_pivot_coord)
 #'   }}
 #' @export
 pivot_coord <- function (object, summary = TRUE, 
                          method = c("rotate", "refit"),
                          ...) {
   
-  if (all(c("rotate", "refit")) %in% method) {
+  if (all(c("rotate", "refit") %in% method)) {
     method <- "rotate"
   }
   if (method == "rotate") {
@@ -72,9 +73,11 @@ pivot_coord <- function (object, summary = TRUE,
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
-#'   m_pb_rotate <- pivot_coord_rotate(m)
-#'   m_pb_raw <-  pivot_coord_rotate(m, summary = FALSE)
-#'   brms::posterior_summary(m_pb_raw)
+#'   m_pivot_coord_rotate <- pivot_coord_rotate(m)
+#'   summary(m_pivot_coord_rotate)
+#'   
+#'   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
+#'   brms::posterior_summary(m_pivot_coord_raw)
 #'   }}
 #' @export
 pivot_coord_rotate <- function (object, summary = TRUE, ...) {
@@ -220,7 +223,8 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
-#'   m_pb <- pivot_coord_refit(m)
+#'   m_pivot_coord_refit <- pivot_coord_refit(m)
+#'   summary(m_pivot_coord_refit)
 #'   }}
 #' @export
 pivot_coord_refit <- function (object, ...) {

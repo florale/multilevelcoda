@@ -30,6 +30,7 @@ if(requireNamespace("cmdstanr")){
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
   
-  m_pb <- pivot_coord_refit(m)
+  m_pivot_coord_refit <- pivot_coord_refit(m)
+  summary(m_pivot_coord_refit)
   }}
 }

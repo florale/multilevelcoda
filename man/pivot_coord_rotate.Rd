@@ -32,8 +32,10 @@ if(requireNamespace("cmdstanr")){
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
   
-  m_pb_rotate <- pivot_coord_rotate(m)
-  m_pb_raw <-  pivot_coord_rotate(m, summary = FALSE)
-  brms::posterior_summary(m_pb_raw)
+  m_pivot_coord_rotate <- pivot_coord_rotate(m)
+  summary(m_pivot_coord_rotate)
+  
+  m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
+  brms::posterior_summary(m_pivot_coord_raw)
   }}
 }
