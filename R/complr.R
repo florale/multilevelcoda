@@ -51,7 +51,7 @@
 #' @importFrom data.table copy as.data.table :=
 #' 
 #' @examples
-#' cilr <- complr(data = mcompd, sbp = sbp,
+#' cilr <- complr(data = mcompd,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID", total = 1440)
 #' str(cilr)
@@ -125,8 +125,9 @@ complr <- function(data,
   
   # specific for ilr
   if (identical(transform, "ilr")) {
-    if (missing(sbp)) {
-      message(" 'sbp' (sequential binary partition), is required for ilr transform. A default sbp, which is a pivot balance, will be buit.")
+    if (missing(sbp)) { # build default sbp
+      message(" A sequential binary partition (sbp), is required for ilr transform but is not supplied. 
+ A default sbp, which is a pivot balance, will be applied.")
       sbp <- build.sbp(parts = parts)
    }
     if (isFALSE(inherits(sbp, "matrix"))) {

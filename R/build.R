@@ -4,6 +4,7 @@
 #' Make a data set of all possible pairwise substitution of a composition which can be used as 
 #' the base for substitution models.
 #' @param parts A character vector specifying the names of compositional variables to be used.
+#' @param comparison Either \code{"one-to-one"} or \code{"one-to-all"}. Default is \code{"one-to-one"}.
 #' 
 #' @return A data table of all possible pairwise substitution.
 #' @importFrom data.table as.data.table 
@@ -14,7 +15,11 @@
 #' 
 #' ps2 <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
 #' print(ps2)
-build.basesub <- function(parts, comparison) {
+build.basesub <- function(parts, comparison = NULL) {
+  
+  if (is.null(comparison)) {
+    comparison <- "one-to-one"
+  }
   
   d <- length(parts)
   n <- d - 2

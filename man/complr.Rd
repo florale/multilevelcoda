@@ -62,7 +62,7 @@ isometrically to a D-dimensional Euclidian vector subspace.
 resulting in singular covariance matrices.
 }
 \examples{
-cilr <- complr(data = mcompd, sbp = sbp,
+cilr <- complr(data = mcompd,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID", total = 1440)
 str(cilr)

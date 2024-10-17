@@ -4,10 +4,12 @@
 \alias{build.basesub}
 \title{Build Base Pairwise Substitution}
 \usage{
-build.basesub(parts, comparison)
+build.basesub(parts, comparison = NULL)
 }
 \arguments{
 \item{parts}{A character vector specifying the names of compositional variables to be used.}
+
+\item{comparison}{Either \code{"one-to-one"} or \code{"one-to-all"}. Default is \code{"one-to-one"}.}
 }
 \value{
 A data table of all possible pairwise substitution.
