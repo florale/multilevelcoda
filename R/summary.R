@@ -147,15 +147,15 @@ print.brmcoda <- function(x, ...) {
   
 }
 
-#' Create a Summary of a fitted \code{brmsfit} model from a \code{brmcoda_pivot} object
+#' Create a Summary of a fitted \code{brmsfit} model from a \code{pivot_coord} object
 #' 
-#' @param object An object of class \code{brmcoda_pivot}.
+#' @param object An object of class \code{pivot_coord}.
 #' @param digits A integer value used for number formatting. Default is \code{2}.
 #' @param ... currently ignored.
 #' 
 #' @return A data table of results.
 #' 
-#' @method summary brmcoda_pivot
+#' @method summary pivot_coord
 #' 
 #' @examples
 #' \donttest{
@@ -168,51 +168,56 @@ print.brmcoda <- function(x, ...) {
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
-#'   m_pb <- brmcoda_pivot(m)
+#'   m_pb <- pivot_coord(m)
 #'   summary(m_pb)
 #' }}
 #' @export
-summary.brmcoda_pivot <- function(object, digits = 2, ...) {
+summary.pivot_coord <- function(object, digits = 2, ...) {
   
-  out_all_parts <- lapply(object, `[[`, 2)
-  fixef_all_parts <- vector("list")
-  
-  for (i in seq_along(out_all_parts)) {
-    part <- names(out_all_parts)[i]
+  if (object$method == "refit") {
     
-    model_fixef_all <- fixef(out_all_parts[[i]])
+    out_all_parts <- lapply(object$output, `[[`, 2)
+    fixef_all_parts <- vector("list")
     
-    if (length(grep("bilr1", row.names(model_fixef_all), value = T)) > 0) {
-      model_fixef_b <- rbind(model_fixef_all[grep(".*bilr1", rownames(model_fixef_all), value = T), ])
-      model_fixef_b <- cbind.data.frame(Level = "between", 
-                                        model_fixef_b)
-    } else { 
-      model_fixef_b <- NULL
-    }
-    if (length(grep("wilr1", row.names(model_fixef_all), value = T)) > 0) {
-      model_fixef_w <- rbind(model_fixef_all[grep(".*wilr1", rownames(model_fixef_all), value = T), ])
-      model_fixef_w <- cbind.data.frame(Level = "within", 
-                                        model_fixef_w)
+    for (i in seq_along(out_all_parts)) {
+      part <- names(out_all_parts)[i]
       
-    } else { 
-      model_fixef_w <- NULL
-    }
-    if ((length(grep("ilr1", row.names(model_fixef_all), value = T)) > 0) && (length(grep("[b|w]ilr1", row.names(model_fixef_all), value = T)) == 0)) {
-      model_fixef_t <- rbind(model_fixef_all[grep(".*ilr1", rownames(model_fixef_all), value = T), ])
-      model_fixef_t <- cbind.data.frame(Level = "aggregate", 
-                                        model_fixef_t)
-    } else { 
-      model_fixef_t <- NULL
+      model_fixef_all <- fixef(out_all_parts[[i]])
+      
+      if (length(grep("bilr1", row.names(model_fixef_all), value = T)) > 0) {
+        model_fixef_b <- rbind(model_fixef_all[grep(".*bilr1", rownames(model_fixef_all), value = T), ])
+        model_fixef_b <- cbind.data.frame(Level = "between", 
+                                          model_fixef_b)
+      } else { 
+        model_fixef_b <- NULL
+      }
+      if (length(grep("wilr1", row.names(model_fixef_all), value = T)) > 0) {
+        model_fixef_w <- rbind(model_fixef_all[grep(".*wilr1", rownames(model_fixef_all), value = T), ])
+        model_fixef_w <- cbind.data.frame(Level = "within", 
+                                          model_fixef_w)
+        
+      } else { 
+        model_fixef_w <- NULL
+      }
+      if ((length(grep("ilr1", row.names(model_fixef_all), value = T)) > 0) && (length(grep("[b|w]ilr1", row.names(model_fixef_all), value = T)) == 0)) {
+        model_fixef_t <- rbind(model_fixef_all[grep(".*ilr1", rownames(model_fixef_all), value = T), ])
+        model_fixef_t <- cbind.data.frame(Level = "aggregate", 
+                                          model_fixef_t)
+      } else { 
+        model_fixef_t <- NULL
+      }
+      
+      fixef_part <- cbind(`Pivot coordinate` = paste0(part, "_vs_remaining"), 
+                          rbind(model_fixef_b, model_fixef_w, model_fixef_t)
+      )
+      fixef_all_parts[[i]] <- fixef_part
     }
     
-    fixef_part <- cbind(Part = part, 
-                        rbind(model_fixef_b, model_fixef_w, model_fixef_t)
-    )
-    fixef_all_parts[[i]] <- fixef_part
+    out <- as.data.table(do.call(rbind, fixef_all_parts))
+  } else {
+    out <- object$output
   }
   
-  out <- as.data.table(do.call(rbind, fixef_all_parts))
-
   if(isFALSE(digits == "asis")) {
     # out[, 1:3] <- round(out[, 1:3], digits)
     out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
