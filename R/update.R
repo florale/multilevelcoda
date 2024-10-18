@@ -27,11 +27,11 @@ update.complr <- function(object, newdata, ...) {
   
   if (isTRUE(missing(newdata))) {
     stop("'newdata' is required when updating a 'complr' object.")
-    } else {
-      if (isFALSE(inherits(newdata, c("data.table", "data.frame", "matrix")))) {
-        stop("newdata must be a data table, data frame or matrix.")
-      }
+  } else {
+    if (isFALSE(inherits(newdata, c("data.table", "data.frame", "matrix")))) {
+      stop("newdata must be a data table, data frame or matrix.")
     }
+  }
   
   if (isFALSE(object$parts %ain% colnames(newdata))) { # check compositional variables
     stop(sprintf(
@@ -51,7 +51,7 @@ update.complr <- function(object, newdata, ...) {
   sbp <- object$sbp
   total <- object$total
   idvar <- object$idvar
-
+  
   complr(data = newdata, parts = parts, sbp = sbp, total = total, idvar = idvar, transform = transform)
 }
 
@@ -109,30 +109,29 @@ update.brmcoda <- function(object,
       sep = "\n"))
   }
   
-  # check args
-  if (is.null(formula.) && is.null(newcomplr) && is.null(newdata)) {
-    stop("either 'formula.', 'newdata', or 'newcomplr' is required when updating a 'brmcoda' object.")
-  }
+  # # check args
+  # if (is.null(formula.) && is.null(newcomplr) && is.null(newdata)) {
+  #   stop("either 'formula.', 'newdata', or 'newcomplr' is required when updating a 'brmcoda' object.")
+  # }
+  # 
   
-  # updating only formula
-  if (!is.null(formula.) && is.null(newcomplr) && is.null(newdata)) {
+  # updating only brms related args
+  if (is.null(newcomplr) && is.null(newdata)) {
     fit_new <- update(object$model, formula. = formula., ...)
     
     structure(
       list(complr = object$complr,
            model = fit_new),
       class = "brmcoda")
+  }
+  
+  # updating newdata/newcomplr (with and without updating formula)
+  if (is.null(newcomplr) && !is.null(newdata)) { 
     
-  } else { # updating newdata/newcomplr (with and without updating formula)
-    
-    if(is.null(newcomplr)) {
-      if(!is.null(newdata)) {
-        newcomplr <- update(object$complr, newdata = newdata)
-      }} else {
-        if(isFALSE(inherits(newcomplr, "complr"))) {
-          stop("'newcomplr' must be an object of class 'complr'.")
-        }
-      }
+    if(isFALSE(inherits(newcomplr, "complr"))) {
+      stop("'newcomplr' must be an object of class 'complr'.")
+    }
+    newcomplr <- update(object$complr, newdata = newdata)
     
     newdata <- cbind(newcomplr$data,
                      newcomplr$between_logratio,
@@ -145,7 +144,6 @@ update.brmcoda <- function(object,
       list(complr = newcomplr,
            model = fit_new),
       class = "brmcoda")
-    
   }
 }
 
