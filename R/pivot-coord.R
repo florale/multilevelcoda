@@ -169,7 +169,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
       b_sbp_target_summary <- lapply(b_sbp_target_i, posterior_summary)
       b_sbp_target_summary <- do.call(rbind, b_sbp_target_summary)
       
-      rownames(b_sbp_target_summary) <- varnames
+      rownames(b_sbp_target_summary) <- c("Intercept", varnames)
       b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bilr1", "wilr1", "ilr1"), ]
       
       # assemble output table
@@ -178,7 +178,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
                                                b_sbp_target_summary)
     } else {
       b_sbp_target_summary <- matrix(unlist(b_sbp_target_i), ncol = ndraws(object), byrow = TRUE)
-      rownames(b_sbp_target_summary) <- varnames
+      rownames(b_sbp_target_summary) <- c("Intercept", varnames)
       b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bilr1", "wilr1", "ilr1"), ]
     }
     b_sbp_summary_d[[d]] <- b_sbp_target_summary
