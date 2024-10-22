@@ -92,7 +92,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
   
   # what type of model is being estimated
   model_fixef <- rownames(fixef(object))
-  model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
+  # model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   ilr_vars  <- grep("ilr", model_fixef, value = T)
   bilr_vars <- grep(".*bilr", model_fixef, value = T)
@@ -152,15 +152,16 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
         }
       }
     }
-    # browser()
-    
+
     # take only non-empty elements (between vs within vs aggregate results)
     b_sbp_target_i <- Filter(Negate(is.null), b_sbp_target_i)
     
     if ("logratio" %in% names(b_sbp_target_i)) {
       level <- "aggregate"
+      varnames <- c(bilr_vars, wilr_vars)
     } else {
       level <- c("between", "within")
+      varnames <- c(ilr_vars)
     }
     
     # summarise posteriors
@@ -168,7 +169,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
       b_sbp_target_summary <- lapply(b_sbp_target_i, posterior_summary)
       b_sbp_target_summary <- do.call(rbind, b_sbp_target_summary)
       
-      rownames(b_sbp_target_summary) <- rownames(fixef(object))
+      rownames(b_sbp_target_summary) <- varnames
       b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bilr1", "wilr1", "ilr1"), ]
       
       # assemble output table
@@ -177,7 +178,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
                                                b_sbp_target_summary)
     } else {
       b_sbp_target_summary <- matrix(unlist(b_sbp_target_i), ncol = ndraws(object), byrow = TRUE)
-      rownames(b_sbp_target_summary) <- rownames(fixef(object))
+      rownames(b_sbp_target_summary) <- varnames
       b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bilr1", "wilr1", "ilr1"), ]
     }
     b_sbp_summary_d[[d]] <- b_sbp_target_summary
