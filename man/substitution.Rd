@@ -24,7 +24,7 @@ substitution(
 
 \item{basesub}{A base substitution.
 Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
-which can be computed using function \code{\link{basesub}}.
+which can be computed using function \code{\link{build.basesub}}.
 If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 If \code{NULL}, all possible one-to-one reallocations are estimated.}
 
@@ -96,11 +96,14 @@ if(requireNamespace("cmdstanr")){
                   chain = 1, iter = 500, backend = "cmdstanr")
                   
   # one to one reallocation at between and within-person levels
-  sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within))
+  sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
+  summary(sub1) 
   
   # one to all reallocation at between and within-person levels
-  sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within), basesub = "one-to-all")
-
+  sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
+                       basesub = "one-to-all")
+  summary(sub2) 
+  
   # model with compositional predictor at aggregate level of variance
   fit2 <- brmcoda(complr = cilr,
                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),

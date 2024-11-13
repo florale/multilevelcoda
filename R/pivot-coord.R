@@ -60,6 +60,8 @@ pivot_coord <- function (object, summary = TRUE,
 #' 
 #' @return A list of \code{\link{brmcoda}} for each pivot balance coordinate.
 #' 
+#' @importFrom posterior summarise_draws as_draws_array
+#' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
@@ -77,7 +79,7 @@ pivot_coord <- function (object, summary = TRUE,
 #'   summary(m_pivot_coord_rotate)
 #'   
 #'   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
-#'   brms::posterior_summary(m_pivot_coord_raw)
+#'   posterior::summarise_draws(posterior::as_draws_array(m_pivot_coord_raw$output))
 #'   }}
 #' @export
 pivot_coord_rotate <- function (object, summary = TRUE, ...) {
@@ -188,7 +190,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
     out <- do.call(rbind, b_sbp_summary_d)
     rownames(out) <- NULL
   } else {
-    out <- array(unlist(out), 
+    out <- array(unlist(b_sbp_summary_d), 
                  dim = c(length(level),
                          ndraws(object),
                          length(object$complr$parts))

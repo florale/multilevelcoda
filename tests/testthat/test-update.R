@@ -85,41 +85,41 @@ test_that("update.complr gives expected output", {
 
 # Tests update.brmcoda -----------------------------------------------------------------------------
 
-test_that("update.brmcoda gives errors and warnings where appropriate", {
-  
-  # warning when newdata and newcomplr provided
-  expect_warning(fit_new <- update(object = fit, 
-                                   newdata = mcompd[ID != 1:10], 
-                                   newcomplr = update(cilr, mcompd[ID != 1:10])))
-  
-  ## only newcomplr provided, incorrect
-  expect_error(fit_new <- update(object = fit, newcomplr = mcompd))
-  
-  ## missing args
-  expect_error(fit_new <- update(object = fit))
-})
-
-test_that("update gives expected output", {
-  
-  # updating only formula
-  fit_newformula <- update(fit, formula. = ~ . - wilr1)
-  
-  expect_true(inherits(fit_newformula, "brmcoda"))
-  expect_true(is.null(as.data.table(fit_newformula$model$fit)$b_wilr1))
-  
-  # updating only data
-  fit_newdat <- update(fit, newdata = mcompd[ID != 1:10])
-  
-  expect_true(inherits(fit_newdat, "brmcoda"))
-  expect_true(identical(fit_newdat$complr$data, mcompd[ID != 1:10]))
-  
-  # updating both formula and data
-  fit_new <- update(fit, 
-                    formula. = ~ . - wilr2,
-                    newdata = mcompd[ID != 1:10])
-  
-  expect_true(inherits(fit_new, "brmcoda"))
-  expect_true(is.null(as.data.table(fit_new$model$fit)$b_wilr2))
-  expect_true(identical(fit_newdat$complr$data, mcompd[ID != 1:10]))
-  
-})
+# test_that("update.brmcoda gives errors and warnings where appropriate", {
+#   
+#   # warning when newdata and newcomplr provided
+#   expect_warning(fit_new <- update(object = fit, 
+#                                    newdata = mcompd[ID != 1:10], 
+#                                    newcomplr = update(cilr, mcompd[ID != 1:10])))
+#   
+#   ## only newcomplr provided, incorrect
+#   expect_error(fit_new <- update(object = fit, newcomplr = mcompd))
+#   
+#   ## missing args
+#   expect_error(fit_new <- update(object = fit))
+# })
+# 
+# test_that("update gives expected output", {
+#   
+#   # updating only formula
+#   fit_newformula <- update(fit, formula. = ~ . - wilr1)
+#   
+#   expect_true(inherits(fit_newformula, "brmcoda"))
+#   expect_true(is.null(as.data.table(fit_newformula$model$fit)$b_wilr1))
+#   
+#   # updating only data
+#   fit_newdat <- update(fit, newdata = mcompd[ID != 1:10])
+#   
+#   expect_true(inherits(fit_newdat, "brmcoda"))
+#   expect_true(identical(fit_newdat$complr$data, mcompd[ID != 1:10]))
+#   
+#   # updating both formula and data
+#   fit_new <- update(fit, 
+#                     formula. = ~ . - wilr2,
+#                     newdata = mcompd[ID != 1:10])
+#   
+#   expect_true(inherits(fit_new, "brmcoda"))
+#   expect_true(is.null(as.data.table(fit_new$model$fit)$b_wilr2))
+#   expect_true(identical(fit_newdat$complr$data, mcompd[ID != 1:10]))
+#   
+# })

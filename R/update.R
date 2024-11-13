@@ -126,12 +126,14 @@ update.brmcoda <- function(object,
   }
   
   # updating newdata/newcomplr (with and without updating formula)
-  if (is.null(newcomplr) && !is.null(newdata)) { 
-    
-    if(isFALSE(inherits(newcomplr, "complr"))) {
-      stop("'newcomplr' must be an object of class 'complr'.")
+  if (!is.null(newdata)) { 
+    if (is.null(newcomplr)) {
+      newcomplr <- update(object$complr, newdata = newdata)
+    } else {
+      if(isFALSE(inherits(newcomplr, "complr"))) {
+        stop("'newcomplr' must be an object of class 'complr'.")
+      }
     }
-    newcomplr <- update(object$complr, newdata = newdata)
     
     newdata <- cbind(newcomplr$data,
                      newcomplr$between_logratio,

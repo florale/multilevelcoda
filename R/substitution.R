@@ -10,7 +10,7 @@
 #' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
 #' @param basesub A base substitution. 
 #' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
-#' which can be computed using function \code{\link{basesub}}.
+#' which can be computed using function \code{\link{build.basesub}}.
 #' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 #' If \code{NULL}, all possible one-to-one reallocations are estimated.
 #' @param ref Either a character value or vector or a dataset.
@@ -70,11 +70,14 @@
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within))
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
+#'   summary(sub1) 
 #'   
 #'   # one to all reallocation at between and within-person levels
-#'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within), basesub = "one-to-all")
-#'
+#'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
+#'                        basesub = "one-to-all")
+#'   summary(sub2) 
+#'   
 #'   # model with compositional predictor at aggregate level of variance
 #'   fit2 <- brmcoda(complr = cilr,
 #'                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
@@ -139,14 +142,24 @@ substitution <- function(object,
     weight <- "equal"
   }
   
+  # # set default ref to be grandmean
+  # if (identical(ref, "clustermean")) {
+  #   ref <- "clustermean"
+  # } else {
+  #   ref <- "grandmean"
+  # }
+  
   # base substitution
   if (missing(basesub)) {
     basesub <- build.basesub(parts = object$complr$parts)
     names(basesub) <- object$complr$parts
+    comparison <- "one-to-one"
     
   } else if(isFALSE(missing(basesub))) {
     if (basesub == "one-to-all") {
       basesub <- build.basesub(parts = object$complr$parts, comparison = "one-to-all")
+      comparison <- "one-to-all"
+      
     }
     else {
       if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
@@ -165,7 +178,6 @@ substitution <- function(object,
       }
     }
   }
-  
   # what type of model is being estimated
   model_fixef <- rownames(fixef(object))
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
@@ -395,7 +407,8 @@ substitution <- function(object,
       level = level,
       weight = weight,
       parts = object$complr$parts,
-      summary = summary),
+      summary = summary,
+      comparison = if(exists("comparison")) (comparison) else (NULL)),
     class = "substitution")
   
 }

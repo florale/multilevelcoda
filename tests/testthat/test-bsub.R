@@ -65,11 +65,11 @@ x <- bsub(object = m, basesub = psub, delta = 2)
 #   expect_error(x <- substitution(object = m1, basesub = psub))
 # 
 #   ## basesub does not have the same components as parts in cilr
-#   ps <- basesub(c("WAKE", "MVPA", "LPA", "SB"))
+#   ps <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"))
 #   expect_error(x <- bsub(object = m, basesub = ps, delta = 2))
 # 
 #   ## basesub does have the same names as parts in cilr
-#   ps <- basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
+#   ps <- build.basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
 #   expect_error(x <- bsub(object = m, basesub = ps, delta = 2))
 # 
 
@@ -306,7 +306,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("TST", "WAKE"), idvar = "ID", total = 1440)
-  psub <- basesub(c("TST", "WAKE"))
+  psub <- build.basesub(c("TST", "WAKE"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -337,7 +337,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("TST", "MVPA"), idvar = "ID", total = 1440)
-  psub <- basesub(c("TST", "MVPA"))
+  psub <- build.basesub(c("TST", "MVPA"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -368,7 +368,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("TST", "LPA"), idvar = "ID", total = 1440)
-  psub <- basesub(c("TST", "LPA"))
+  psub <- build.basesub(c("TST", "LPA"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -399,7 +399,7 @@ test_that("bsub's results matches with brm model for 2-component composition (TS
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("TST", "SB"), idvar = "ID", total = 1440)
-  psub <- basesub(c("TST", "SB"))
+  psub <- build.basesub(c("TST", "SB"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -430,7 +430,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("WAKE", "MVPA"), idvar = "ID", total = 1440)
-  psub <- basesub(c("WAKE", "MVPA"))
+  psub <- build.basesub(c("WAKE", "MVPA"))
   
   suppressWarnings(
     m <- brmcoda(complr = cilr,
@@ -462,7 +462,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("WAKE", "LPA"), idvar = "ID", total = 1440)
-  psub <- basesub(c("WAKE", "LPA"))
+  psub <- build.basesub(c("WAKE", "LPA"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -493,7 +493,7 @@ test_that("bsub's results matches with brm model for 2-component composition (WA
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("WAKE", "SB"), idvar = "ID", total = 1440)
-  psub <- basesub(c("WAKE", "SB"))
+  psub <- build.basesub(c("WAKE", "SB"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -524,7 +524,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("MVPA", "LPA"), idvar = "ID", total = 1440)
-  psub <- basesub(c("MVPA", "LPA"))
+  psub <- build.basesub(c("MVPA", "LPA"))
   suppressWarnings(m <- brmcoda(complr = cilr,
                                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
                                 chain = 1, iter = 500, seed = 123,
@@ -554,7 +554,7 @@ test_that("bsub's results matches with brm model for 2-component composition (MV
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("MVPA", "SB"), idvar = "ID", total = 1440)
-  psub <- basesub(c("MVPA", "SB"))
+  psub <- build.basesub(c("MVPA", "SB"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
@@ -585,7 +585,7 @@ test_that("bsub's results matches with brm model for 2-component composition (LP
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
                   parts = c("LPA", "SB"), idvar = "ID", total = 1440)
-  psub <- basesub(c("LPA", "SB"))
+  psub <- build.basesub(c("LPA", "SB"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),

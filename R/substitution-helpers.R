@@ -461,7 +461,7 @@ NULL
                       basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
-                      sub_to_var <- c(i, "remaining")
+                      sub_to_var  <- c(i, "remaining")
                     }
                     else {
                       # possible pairwise substitution of 1 compositional variable
@@ -471,7 +471,7 @@ NULL
                       basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
                       
                       sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
-                      sub_to_var <- i
+                      sub_to_var   <- i
                     }
                     
                     # loop substitution
@@ -492,10 +492,10 @@ NULL
                     
                     # useful information for the final results
                     dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew$To <- sub_to_var
-                    dnew$Delta <- as.numeric(dnew$Delta)
-                    dnew$Level <- level
-                    dnew$Reference <- ref
+                    dnew[, To := sub_to_var]
+                    dnew[, Delta := as.numeric(Delta)]
+                    dnew[, Level := level]
+                    dnew[, Reference := ref]
                     
                     # remove impossible reallocation that result in negative values
                     cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
@@ -568,6 +568,7 @@ NULL
                       }
                       posterior_delta_y <- rbindlist(hout)
                     }
+                    
                     # final results for entire composition
                     out <- list(posterior_delta_y)
                     names(out) <- i
@@ -618,7 +619,6 @@ NULL
                     }
                     
                     # loop substitution
-                    
                     kout <- vector("list", length = nrow(basesub_tmp))
                     jout <- vector("list", length = length(delta))
                     
@@ -636,10 +636,10 @@ NULL
                     
                     # useful information for the final results
                     dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew$To <- sub_to_var
-                    dnew$Delta <- as.numeric(dnew$Delta)
-                    dnew$Level <- level
-                    dnew$Reference <- ref
+                    dnew[, To := sub_to_var]
+                    dnew[, Delta := as.numeric(Delta)]
+                    dnew[, Level := level]
+                    dnew[, Reference := ref]
                     
                     # remove impossible reallocation that result in negative values
                     cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
@@ -780,10 +780,10 @@ NULL
                     
                     # useful information for the final results
                     dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew$To <- sub_to_var
-                    dnew$Delta <- as.numeric(dnew$Delta)
-                    dnew$Level <- level
-                    dnew$Reference <- ref
+                    dnew[, To := sub_to_var]
+                    dnew[, Delta := as.numeric(Delta)]
+                    dnew[, Level := level]
+                    dnew[, Reference := ref]
                     
                     # remove impossible reallocation that result in negative values
                     cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
@@ -915,10 +915,11 @@ NULL
                         dnew <- cbind(comp0, comp1,
                                       d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE],
                                       Delta)
-                        # useful information for the final results
-                        dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
-                        dnew$To <- sub_to_var
-                        dnew$Delta <- as.numeric(dnew$Delta)
+                        
+                        # # useful information for the final results
+                        # dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
+                        # dnew[, To := rep(sub_to_var, length.out = nrow(dnew))[k]]
+                        # dnew[, Delta := abs(as.numeric(Delta))]
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
@@ -958,15 +959,17 @@ NULL
                         kout[[k]] <- posterior_delta_y
                       }
                       jout[[j]] <- rbindlist(kout)
-                    }
+                    }                        
+
                     jout <- rbindlist(jout)
-                    jout$To <- sub_to_var
+                    jout[, Delta := as.numeric(Delta)]
                     jout[, From := rep(sub_from_var, length.out = nrow(jout))]
-                    jout$Level <- level
-                    jout$Reference <- ref
+                    jout[, To := sub_to_var]
+                    jout[, Level := level]
+                    jout[, Reference := ref]
                     
                     names(jout) <- c("Mean", "CI_low", "CI_high",
-                                     "Delta", "To", "From", "Level", "Reference")
+                                     "Delta", "From", "To", "Level", "Reference")
                     
                     # store final results for entire composition
                     jout <- list(jout)
@@ -1034,10 +1037,10 @@ NULL
                                       d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE],
                                       Delta)
                         
-                        # useful information for the final output
-                        dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
-                        dnew$To <- sub_to_var
-                        dnew$Delta <- as.numeric(dnew$Delta)
+                        # # useful information for the final output
+                        # dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
+                        # dnew[, To := rep(sub_to_var, length.out = nrow(dnew))[k]]
+                        # dnew[, Delta := abs(as.numeric(Delta))]
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
@@ -1081,14 +1084,16 @@ NULL
                       # results
                       jout[[j]] <- rbindlist(kout)
                     }
+                    
                     jout <- rbindlist(jout)
-                    jout$To <- sub_to_var
+                    jout[, Delta := as.numeric(Delta)]
                     jout[, From := rep(sub_from_var, length.out = nrow(jout))]
-                    jout$Level <- level
-                    jout$Reference <- ref
+                    jout[, To := sub_to_var]
+                    jout[, Level := level]
+                    jout[, Reference := ref]
                     
                     names(jout) <- c("Mean", "CI_low", "CI_high",
-                                     "Delta", "To", "From", "Level", "Reference")
+                                     "Delta", "From", "To", "Level", "Reference")
                     
                     # final results for entire composition
                     jout <- list(jout)
@@ -1156,10 +1161,10 @@ NULL
                                       d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE],
                                       Delta)
                         
-                        # useful information for the final results
-                        dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
-                        dnew$To <- sub_to_var
-                        dnew$Delta <- as.numeric(dnew$Delta)
+                        # # useful information for the final results
+                        # dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
+                        # dnew[, To := rep(sub_to_var, length.out = nrow(dnew))[k]]
+                        # dnew[, Delta := abs(as.numeric(Delta))]
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
@@ -1196,14 +1201,16 @@ NULL
                       }
                       jout[[j]] <- rbindlist(kout)
                     }
+                    
                     jout <- rbindlist(jout)
-                    jout$To <- sub_to_var
+                    jout[, Delta := as.numeric(Delta)]
                     jout[, From := rep(sub_from_var, length.out = nrow(jout))]
-                    jout$Level <- level
-                    jout$Reference <- ref
+                    jout[, To := sub_to_var]
+                    jout[, Level := level]
+                    jout[, Reference := ref]
                     
                     names(jout) <- c("Mean", "CI_low", "CI_high",
-                                     "Delta", "To", "From", "Level", "Reference")
+                                     "Delta", "From", "To", "Level", "Reference")
                     
                     # store final results for entire composition
                     jout <- list(jout)

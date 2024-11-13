@@ -317,7 +317,13 @@ summary.substitution <- function(object, delta, to, from,
                          "between_avg_sub", "within_avg_sub", "avg_sub")],
                 rbindlist)
   out <- rbindlist(out, use.names = TRUE)
-  out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
+  
+  if (object$comparison == "one-to-all") {
+    out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
+    out[, Delta := abs(Delta)]
+  } else {
+    out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
+  }
   
   if(isTRUE(dim(out)[1] == 0)) {
     stop("An empty data.table returned. Please check that the arguments match with your substitution object.")

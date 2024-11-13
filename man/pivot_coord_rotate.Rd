@@ -36,6 +36,6 @@ if(requireNamespace("cmdstanr")){
   summary(m_pivot_coord_rotate)
   
   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
-  brms::posterior_summary(m_pivot_coord_raw)
+  posterior::summarise_draws(posterior::as_draws_array(m_pivot_coord_raw$output))
   }}
 }

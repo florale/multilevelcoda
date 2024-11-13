@@ -63,7 +63,7 @@ test_that("wilr from brmcoda gives expected predictions", {
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = daydata, sbp = sbp,
                  parts = c("TST", "Wake"), idvar = "ID")
-  psub <- basesub(c("TST", "Wake"))
+  psub <- build.basesub(c("TST", "Wake"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
                  formula = PA ~ wilr1 + (1 | ID),
