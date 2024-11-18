@@ -291,7 +291,7 @@ When there is enough data, however,
 this parameterization is unnecessary and it may be more efficient to use the centered parameterisation.
 Reparameterisation is further discussed 
 in [Betancourt's case study](https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html) and
-[Nicenboim, Schad, and Vasishth's chapter on complex models and reparameterisation](https://vasishth.github.io/bayescogsci/book/ch-complexstan.html).
+[Nicenboim, Schad, and Vasishth's chapter on complex models and reparameterisation](https://bruno.nicenboim.me/bayescogsci/).
 
 Given that there is a small variation in our large simulated data set,
 we are going to test if centered parameterisation improves the sampling.
