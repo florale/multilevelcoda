@@ -22,7 +22,9 @@ Description: Implement Bayesian Multilevel Modelling for compositional data
              Isometric log ratio (ILR) at between and within-person levels, 
              fit Bayesian multilevel models for compositional predictors and outcomes, 
              and run post-hoc analyses such as isotemporal substitution models.
-             References: Le et al. (2024) <https://doi.org/10.48550/arXiv.2405.03985>.
+             References: 
+             Le, Stanford, Dumuid, and Wiley (2024) <doi:10.48550/arXiv.2405.03985>,
+             Le, Dumuid, Stanford, and Wiley (2024) <doi:10.48550/arXiv.2411.12407>.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

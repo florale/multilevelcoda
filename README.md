@@ -34,7 +34,7 @@ if (!requireNamespace("remotes")) {
 remotes::install_github("florale/multilevelcoda")
 ```
 
-Because `multilevelcoda` is built on `brms`, which is based on Stan, a C++ compiler is required. 
+Because multilevelcoda is built on brms, which is based on Stan, a C++ compiler is required. 
 The program Rtools (available on https://cran.r-project.org/bin/windows/Rtools/) comes with a C++ compiler for Windows. On Mac, Xcode is required. For further instructions on how to get the compilers running, see the prerequisites section on https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started.
 
 ## Resources
@@ -47,5 +47,30 @@ You can learn about the package from these vignettes:
 - [Compositional Substitution Multilevel Analysis](https://florale.github.io/multilevelcoda/articles/D-substitution.html)
 
 ## Citing `multilevelcoda` and related software 
-TBA
+When using multilevelcoda, please cite one or more of the following publications:
 
+-   Le F., Dumuid D., Stanford T. E., Wiley J. F. (2024). 
+    Bayesian multilevel compositional data analysis with the R package multilevelcoda.
+    *arXiv preprint arXiv:2411.12407*.
+-   Le, F., Stanford, T. E., Dumuid, D., & Wiley, J. F. (2024). 
+    Bayesian Multilevel Compositional Data Analysis: 
+    Introduction, Evaluation, and Application. 
+    *arXiv preprint arXiv:2405.03985*.
+
+As multilevelcoda depends on brms and Stan, please also consider citing:
+
+-   Bürkner P. C. (2017). brms: An R Package for Bayesian Multilevel
+    Models using Stan. *Journal of Statistical Software*. 80(1), 1-28.
+    doi.org/10.18637/jss.v080.i01
+-   Bürkner P. C. (2018). Advanced Bayesian Multilevel Modeling with the
+    R Package brms. *The R Journal*. 10(1), 395-411.
+    doi.org/10.32614/RJ-2018-017
+-   Bürkner P. C. (2021). Bayesian Item Response Modeling in R with brms
+    and Stan. *Journal of Statistical Software*, 100(5), 1-54.
+    doi.org/10.18637/jss.v100.i05
+-   Stan Development Team. YEAR. Stan Modeling Language Users Guide and
+    Reference Manual, VERSION. <https://mc-stan.org>
+-   Carpenter B., Gelman A., Hoffman M. D., Lee D., Goodrich B.,
+    Betancourt M., Brubaker M., Guo J., Li P., and Riddell A. (2017).
+    Stan: A probabilistic programming language. *Journal of Statistical
+    Software*. 76(1). doi.org/10.18637/jss.v076.i01
