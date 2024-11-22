@@ -4,7 +4,7 @@
 \alias{var.complr}
 \title{Variance of compositions presented in a \code{complr} object.}
 \usage{
-var.complr(x, weight = c("equal", "proportional"), ...)
+\method{var}{complr}(x, weight = c("equal", "proportional"), ...)
 }
 \arguments{
 \item{x}{An object of class \code{complr}.}
@@ -19,10 +19,4 @@ Default is \code{equal}.}
 }
 \description{
 Variance of compositions presented in a \code{complr} object.
-}
-\examples{
-cilr <- complr(data = mcompd, sbp = sbp, 
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-                idvar = "ID")
-var.complr(cilr)
 }

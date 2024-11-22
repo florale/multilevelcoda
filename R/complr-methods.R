@@ -44,16 +44,14 @@ mean.complr <- function(x,
 #' 
 #' @inheritParams mean.complr
 #' 
-#' @examples
-#' cilr <- complr(data = mcompd, sbp = sbp, 
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-#'                 idvar = "ID")
-#' var.complr(cilr)
+#' @importFrom compositions var
+#' 
+#' @method var complr
 #' @export
 var.complr <- function(x,
                        weight = c("equal", "proportional"),
                        ...) {
-  
+
   stats <- .get.complr(object = x,
                        weight = weight)
   
