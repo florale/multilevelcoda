@@ -47,7 +47,7 @@ You can learn about the package from these vignettes:
 - [Compositional Substitution Multilevel Analysis](https://florale.github.io/multilevelcoda/articles/D-substitution.html)
 
 ## Citing `multilevelcoda` and related software 
-When using multilevelcoda, please cite one or more of the following publications:
+We work hard to develop and maintain multilevelcoda. When using multilevelcoda, we would appreciate if you could please cite the following publications:
 
 -   Le F., Dumuid D., Stanford T. E., Wiley J. F. (2024). 
     Bayesian multilevel compositional data analysis with the R package multilevelcoda.
