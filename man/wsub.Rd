@@ -8,11 +8,12 @@ wsub(
   object,
   basesub,
   delta,
-  summary = TRUE,
   ref = "grandmean",
   level = "within",
   weight = "equal",
+  aorg = TRUE,
   scale = c("response", "linear"),
+  comparison,
   cores = NULL,
   ...
 )
@@ -27,13 +28,6 @@ If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimate
 If \code{NULL}, all possible one-to-one reallocations are estimated.}
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
-
-\item{summary}{A logical value.
-Should the estimate at each level of the reference grid (\code{FALSE})
-or their average (\code{TRUE}) be returned?
-Default is \code{TRUE}.
-Only applicable for model with covariates in addition to
-the isometric log-ratio coordinates (i.e., adjusted model).}
 
 \item{ref}{Either a character value or vector or a dataset.
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
@@ -52,10 +46,19 @@ If \code{"proportional"}, weights in proportion to the frequencies of units bein
 (e.g., observations across individuals).
 Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
 
+\item{aorg}{A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
+Should the estimate at each level of the reference grid (\code{FALSE})
+or their average (\code{TRUE}) be returned?
+Default is \code{TRUE}.
+Only applicable for model with covariates in addition to
+the isometric log-ratio coordinates (i.e., adjusted model).}
+
 \item{scale}{Either \code{"response"} or \code{"linear"}.
 If \code{"response"}, results are returned on the scale of the response variable.
 If \code{"linear"}, results are returned on the scale of the linear predictor term,
 that is without applying the inverse link function or other transformations.}
+
+\item{comparison}{internally used only.}
 
 \item{cores}{Number of cores to use when executing the chains in parallel,
 we recommend setting the \code{mc.cores} option

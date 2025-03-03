@@ -38,6 +38,7 @@ wsubmargins <- function (object,
                          level = "within",
                          weight = "proportional",
                          scale = c("response", "linear"),
+                         comparison,
                          cores = NULL,
                          ...) {
   
@@ -83,6 +84,7 @@ wsubmargins <- function (object,
     level = level,
     ref = ref,
     scale = scale,
+    comparison = comparison,
     cores = cores,
     ...
   )

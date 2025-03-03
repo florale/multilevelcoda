@@ -318,10 +318,13 @@ summary.substitution <- function(object, delta, to, from,
                 rbindlist)
   out <- rbindlist(out, use.names = TRUE)
   
-  if (object$comparison == "one-to-all") {
-    out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
-    out[, Delta := abs(Delta)]
-  } else {
+  if (!is.null(object$comparison)) {
+    if (object$comparison == "one-to-all") {
+      out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
+      out[, Delta := abs(Delta)]
+    }
+  }
+  else {
     out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   }
   

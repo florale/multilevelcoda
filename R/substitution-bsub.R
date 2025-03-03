@@ -32,11 +32,12 @@
 bsub <- function(object,
                  delta,
                  basesub,
-                 summary = TRUE,
                  ref = "grandmean",
                  level = "between",
                  weight = "equal",
+                 aorg = TRUE,
                  scale = c("response", "linear"),
+                 comparison,
                  cores = NULL,
                  ...) {
   
@@ -97,8 +98,9 @@ bsub <- function(object,
     y0 = y0,
     level = level,
     ref = ref,
-    summary = summary,
+    aorg = aorg,
     scale = scale,
+    comparison = comparison,
     cores = cores,
     ...
   )

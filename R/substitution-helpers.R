@@ -34,7 +34,7 @@ create_substitution <-
            level,
            weight,
            parts,
-           summary) {
+           aorg) {
     
     stopifnot(is.list(between_simple_sub) || is.null(between_simple_sub))
     stopifnot(is.list(within_simple_sub) || is.null(within_simple_sub))
@@ -56,7 +56,7 @@ create_substitution <-
       level = level,
       weight = weight,
       parts = parts,
-      summary = summary
+      aorg = aorg
     )
     
     class(out) <- "substitution"
@@ -436,8 +436,8 @@ NULL
 # Grandmean Between-person Substitution model
 .get.bsub <- function(object, delta, basesub,
                       comp0, y0, d0,
-                      summary,
-                      level, ref, scale,
+                      aorg,
+                      level, ref, scale, comparison,
                       cores,
                       ...) {
   
@@ -452,9 +452,9 @@ NULL
   
   iout <- foreach(i = colnames(basesub), .combine = c,
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
-                    
+
                     # substitution variables
-                    if (nrow(basesub) == length(object$complr$parts)*2) {
+                    if (comparison == "one-to-all") {
                       
                       # one to remaining
                       basesub_tmp <- as.data.table(basesub)
@@ -492,7 +492,7 @@ NULL
                     
                     # useful information for the final results
                     dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew[, To := sub_to_var]
+                    dnew[, To := rep(sub_to_var, length.out = nrow(dnew))]
                     dnew[, Delta := as.numeric(Delta)]
                     dnew[, Level := level]
                     dnew[, Reference := ref]
@@ -522,7 +522,7 @@ NULL
                     
                     # predictions
                     hout <- vector("list", length = nrow(d0))
-                    if (summary) { # unadj OR adj averaging over reference grid
+                    if (aorg) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(d0))) {
                         dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
                         ysub <-
@@ -580,8 +580,8 @@ NULL
 # Grandmean Within-person Substitution model
 .get.wsub <- function(object, delta, basesub,
                       comp0, y0, d0,
-                      summary,
-                      level, ref, scale,
+                      aorg,
+                      level, ref, scale, comparison,
                       cores,
                       ...) {
   
@@ -598,7 +598,7 @@ NULL
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
                     
                     # substitution variables
-                    if (nrow(basesub) == length(object$complr$parts)*2) {
+                    if (comparison == "one-to-all") {
                       
                       # one to remaining
                       basesub_tmp <- as.data.table(basesub)
@@ -636,7 +636,7 @@ NULL
                     
                     # useful information for the final results
                     dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew[, To := sub_to_var]
+                    dnew[, To := rep(sub_to_var, length.out = nrow(dnew))]
                     dnew[, Delta := as.numeric(Delta)]
                     dnew[, Level := level]
                     dnew[, Reference := ref]
@@ -667,7 +667,7 @@ NULL
                     
                     # predictions
                     hout <- vector("list", length = nrow(d0))
-                    if (summary) { # unadj OR adj averaging over reference grid
+                    if (aorg) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(d0))) {
                         dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
                         ysub <-
@@ -724,8 +724,8 @@ NULL
 # Grandmean Simple Substitution
 .get.sub <- function(object, delta, basesub,
                      comp0, y0, d0,
-                     summary,
-                     level, ref, scale,
+                     aorg,
+                     level, ref, scale, comparison,
                      cores,
                      ...) {
   
@@ -742,7 +742,7 @@ NULL
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
                     
                     # substitution variables
-                    if (nrow(basesub) == length(object$complr$parts)*2) {
+                    if (comparison == "one-to-all") {
                       
                       # one to remaining
                       basesub_tmp <- as.data.table(basesub)
@@ -804,7 +804,7 @@ NULL
                     
                     # predictions
                     hout <- vector("list", length = nrow(d0))
-                    if (summary) { # unadj OR adj averaging over reference grid
+                    if (aorg) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(d0))) {
                         dsub <- cbind(dnew, ilrsub, refgrid[h, ])
                         ysub <-
@@ -861,7 +861,7 @@ NULL
 # Clustermean Between-person Substitution model
 .get.bsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
-                             level, ref, scale,
+                             level, ref, scale, comparison,
                              cores,
                              ...) {
   
@@ -878,7 +878,7 @@ NULL
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
                     
                     # substitution variables
-                    if (nrow(basesub) == length(object$complr$parts)*2) {
+                    if (comparison == "one-to-all") {
                       
                       # one to remaining
                       basesub_tmp <- as.data.table(basesub)
@@ -982,7 +982,7 @@ NULL
 # Clustermean Within-person Substitution model
 .get.wsubmargins <- function(object, delta, basesub,
                              comp0, y0, d0,
-                             level, ref, scale,
+                             level, ref, scale, comparison,
                              cores,
                              ...) {
   
@@ -999,7 +999,7 @@ NULL
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
                     
                     # substitution variables
-                    if (nrow(basesub) == length(object$complr$parts)*2) {
+                    if (comparison == "one-to-all") {
                       
                       # one to remaining
                       basesub_tmp <- as.data.table(basesub)
@@ -1106,7 +1106,7 @@ NULL
 # Clustermean Average Substitution
 .get.submargins <- function(object, delta, basesub,
                             comp0, y0, d0,
-                            level, ref, scale,
+                            level, ref, scale, comparison,
                             cores,
                             ...) {
   
@@ -1123,7 +1123,7 @@ NULL
                   .options.future = list(packages = "multilevelcoda")) %dofuture% {
                     
                     # substitution variables
-                    if (nrow(basesub) == length(object$complr$parts)*2) {
+                    if (comparison == "one-to-all") {
                       
                       # one to remaining
                       basesub_tmp <- as.data.table(basesub)

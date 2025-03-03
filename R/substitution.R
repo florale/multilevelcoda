@@ -19,7 +19,7 @@
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid is only possible for simple substitution.
 #' Single level models are default to \code{"grandmean"}.
-#' @param summary A logical value.
+#' @param aorg A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
 #' Should the estimate at each level of the reference grid (\code{FALSE})
 #' or their average (\code{TRUE}) be returned?
 #' Default is \code{TRUE}.
@@ -41,6 +41,7 @@
 #' If \code{"response"}, results are returned on the scale of the response variable.
 #' If \code{"linear"}, results are returned on the scale of the linear predictor term,
 #' that is without applying the inverse link function or other transformations.
+#' @param comparison internally used only.
 #' @param ... currently ignored.
 #'
 #' @return A list containing the results of multilevel compositional substitution model.
@@ -89,11 +90,12 @@
 substitution <- function(object,
                          delta,
                          basesub,
-                         summary = TRUE,
+                         aorg = TRUE,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "aggregate"),
                          weight = c("equal", "proportional"),
                          scale = c("response", "linear"),
+                         comparison = NULL,
                          cores = NULL,
                          ...) {
   
@@ -148,7 +150,7 @@ substitution <- function(object,
   # } else {
   #   ref <- "grandmean"
   # }
-  
+
   # base substitution
   if (missing(basesub)) {
     basesub <- build.basesub(parts = object$complr$parts)
@@ -158,6 +160,7 @@ substitution <- function(object,
   } else if(isFALSE(missing(basesub))) {
     if (basesub == "one-to-all") {
       basesub <- build.basesub(parts = object$complr$parts, comparison = "one-to-all")
+      names(basesub) <- object$complr$parts
       comparison <- "one-to-all"
       
     }
@@ -270,11 +273,12 @@ substitution <- function(object,
         object = object,
         delta = delta,
         basesub = basesub,
-        summary = summary,
+        aorg = aorg,
         ref = "grandmean",
         level = "between",
         weight = weight,
         scale = scale,
+        comparison = comparison,
         cores = cores,
         ...)
     }
@@ -283,11 +287,12 @@ substitution <- function(object,
         object = object,
         delta = delta,
         basesub = basesub,
-        summary = summary,
+        aorg = aorg,
         ref = ref,
         level = "between",
         weight = weight,
         scale = scale,
+        comparison = comparison,
         cores = cores,
         ...)
     }
@@ -301,6 +306,7 @@ substitution <- function(object,
           level = "between",
           weight = weight,
           scale = scale,
+          comparison = comparison,
           cores = cores,
           ...)
     }
@@ -313,11 +319,12 @@ substitution <- function(object,
         object = object,
         delta = delta,
         basesub = basesub,
-        summary = summary,
+        aorg = aorg,
         ref = "grandmean",
         level = "within",
         weight = weight,
         scale = scale,
+        comparison = comparison,
         cores = cores,
         ...)
     }
@@ -326,11 +333,12 @@ substitution <- function(object,
         object = object,
         delta = delta,
         basesub = basesub,
-        summary = summary,
+        aorg = aorg,
         ref = ref,
         level = "within",
         weight = weight,
         scale = scale,
+        comparison = comparison,
         cores = cores,
         ...)
     }
@@ -344,6 +352,7 @@ substitution <- function(object,
           level = "within",
           weight = weight,
           scale = scale,
+          comparison = comparison,
           cores = cores,
           ...)
     }
@@ -356,11 +365,12 @@ substitution <- function(object,
         object = object,
         delta = delta,
         basesub = basesub,
-        summary = summary,
+        aorg = aorg,
         ref = "grandmean",
         level = "aggregate",
         weight = weight,
         scale = scale,
+        comparison = comparison,
         cores = cores,
         ...)
     }
@@ -369,11 +379,12 @@ substitution <- function(object,
         object = object,
         delta = delta,
         basesub = basesub,
-        summary = summary,
+        aorg = aorg,
         ref = ref,
         level = "aggregate",
         weight = weight,
         scale = scale,
+        comparison = comparison,
         cores = cores,
         ...)
     }
@@ -387,6 +398,7 @@ substitution <- function(object,
           level = "aggregate",
           weight = weight,
           scale = scale,
+          comparison = comparison,
           cores = cores,
           ...)
     }
@@ -407,7 +419,7 @@ substitution <- function(object,
       level = level,
       weight = weight,
       parts = object$complr$parts,
-      summary = summary,
+      aorg = aorg,
       comparison = if(exists("comparison")) (comparison) else (NULL)),
     class = "substitution")
   

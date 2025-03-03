@@ -31,11 +31,12 @@
 sub <- function (object,
                  delta,
                  basesub,
-                 summary = TRUE,
                  ref = "grandmean",
                  level = "aggregate",
                  weight = "equal",
+                 aorg = TRUE,
                  scale = c("response", "linear"),
+                 comparison,
                  cores = NULL,
                  ...) {
   
@@ -95,8 +96,9 @@ sub <- function (object,
     y0 = y0,
     level = level,
     ref = ref,
-    summary = summary,
+    aorg = aorg,
     scale = scale,
+    comparison = comparison,
     cores = cores,
     ...
   )
@@ -138,6 +140,7 @@ submargins <- function (object,
                         level = "aggregate",
                         weight = "proportional",
                         scale = c("response", "linear"),
+                        comparison,
                         cores = NULL,
                         ...) {
   
@@ -184,6 +187,7 @@ submargins <- function (object,
     level = level,
     ref = ref,
     scale = scale,
+    comparison = comparison,
     cores = cores,
     ...
   )

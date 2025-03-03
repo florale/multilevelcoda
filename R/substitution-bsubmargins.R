@@ -36,6 +36,7 @@ bsubmargins <- function (object,
                          level = "between",
                          weight = "proportional",
                          scale = c("response", "linear"),
+                         comparison,
                          cores = NULL,
                          ...) {
   
@@ -81,6 +82,7 @@ bsubmargins <- function (object,
     level = level,
     ref = ref,
     scale = scale,
+    comparison = comparison,
     cores = cores,
     ...
   )

@@ -34,11 +34,12 @@
 wsub <- function(object,
                  basesub,
                  delta,
-                 summary = TRUE,
                  ref = "grandmean",
                  level = "within",
                  weight = "equal",
+                 aorg = TRUE,
                  scale = c("response", "linear"),
+                 comparison,
                  cores = NULL,
                  ...) {
   
@@ -100,8 +101,9 @@ wsub <- function(object,
       y0 = y0,
       level = level,
       ref = ref,
-      summary = summary,
+      aorg = aorg,
       scale = scale,
+      comparison = comparison,
       cores = cores,
       ...
     )

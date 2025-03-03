@@ -8,11 +8,12 @@ substitution(
   object,
   delta,
   basesub,
-  summary = TRUE,
+  aorg = TRUE,
   ref = c("grandmean", "clustermean"),
   level = c("between", "within", "aggregate"),
   weight = c("equal", "proportional"),
   scale = c("response", "linear"),
+  comparison = NULL,
   cores = NULL,
   ...
 )
@@ -28,7 +29,7 @@ which can be computed using function \code{\link{build.basesub}}.
 If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 If \code{NULL}, all possible one-to-one reallocations are estimated.}
 
-\item{summary}{A logical value.
+\item{aorg}{A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
 Should the estimate at each level of the reference grid (\code{FALSE})
 or their average (\code{TRUE}) be returned?
 Default is \code{TRUE}.
@@ -56,6 +57,8 @@ Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"}
 If \code{"response"}, results are returned on the scale of the response variable.
 If \code{"linear"}, results are returned on the scale of the linear predictor term,
 that is without applying the inverse link function or other transformations.}
+
+\item{comparison}{internally used only.}
 
 \item{cores}{Number of cores to use when executing the chains in parallel,
 we recommend setting the \code{mc.cores} option

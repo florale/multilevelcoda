@@ -12,6 +12,7 @@ submargins(
   level = "aggregate",
   weight = "proportional",
   scale = c("response", "linear"),
+  comparison,
   cores = NULL,
   ...
 )
@@ -48,6 +49,8 @@ Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"}
 If \code{"response"}, results are returned on the scale of the response variable.
 If \code{"linear"}, results are returned on the scale of the linear predictor term,
 that is without applying the inverse link function or other transformations.}
+
+\item{comparison}{internally used only.}
 
 \item{cores}{Number of cores to use when executing the chains in parallel,
 we recommend setting the \code{mc.cores} option
