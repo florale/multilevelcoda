@@ -273,6 +273,10 @@ summary.substitution <- function(object, delta, to, from,
                                  ref, level,
                                  digits = 2, ...) { 
   
+  if(isFALSE(object$summary)) {
+    stop("The 'summary' method is currently not available for substitution draws.")
+  }
+  
   if (isTRUE(missing(delta))) {
     delta <- object$delta
   } else {
@@ -323,9 +327,9 @@ summary.substitution <- function(object, delta, to, from,
       out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
       out[, Delta := abs(Delta)]
     }
-  }
-  else {
-    out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
+    else {
+      out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
+    }
   }
   
   if(isTRUE(dim(out)[1] == 0)) {
