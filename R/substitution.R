@@ -25,6 +25,8 @@
 #' Default is \code{TRUE}.
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
+#' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+#' Currently only support outputing raw values for model using grandmean as reference composition.
 #' @param level A character string or vector.
 #' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
 #' Single-level models are default to \code{"aggregate"}.
@@ -71,7 +73,7 @@
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"), summary = FALSE)
 #'   summary(sub1) 
 #'   
 #'   # one to all reallocation at between and within-person levels
@@ -91,6 +93,7 @@ substitution <- function(object,
                          delta,
                          basesub,
                          aorg = TRUE,
+                         summary = TRUE,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "aggregate"),
                          weight = c("equal", "proportional"),
@@ -144,12 +147,19 @@ substitution <- function(object,
     weight <- "equal"
   }
   
-  # # set default ref to be grandmean
-  # if (identical(ref, "clustermean")) {
-  #   ref <- "clustermean"
-  # } else {
-  #   ref <- "grandmean"
-  # }
+  # set default ref to be grandmean
+  if (identical(ref, "clustermean")) {
+    ref <- "clustermean"
+  } else {
+    ref <- "grandmean"
+  }
+  
+  # currently not allowed exporting draws for cluster mean as ref
+  if(identical(ref, "clustermean")) {
+    if (isFALSE(summary)) {
+      stop("Currently can't output raw values when 'clustermean' is used as reference composition.")
+    }
+  }
 
   # base substitution
   if (missing(basesub)) {
@@ -274,6 +284,7 @@ substitution <- function(object,
         delta = delta,
         basesub = basesub,
         aorg = aorg,
+        summary = summary,
         ref = "grandmean",
         level = "between",
         weight = weight,
@@ -288,6 +299,7 @@ substitution <- function(object,
         delta = delta,
         basesub = basesub,
         aorg = aorg,
+        summary = summary,
         ref = ref,
         level = "between",
         weight = weight,
@@ -302,6 +314,7 @@ substitution <- function(object,
           object = object,
           delta = delta,
           basesub = basesub,
+          summary = summary,
           ref = "clustermean",
           level = "between",
           weight = weight,
@@ -320,6 +333,7 @@ substitution <- function(object,
         delta = delta,
         basesub = basesub,
         aorg = aorg,
+        summary = summary,
         ref = "grandmean",
         level = "within",
         weight = weight,
@@ -334,6 +348,7 @@ substitution <- function(object,
         delta = delta,
         basesub = basesub,
         aorg = aorg,
+        summary = summary,
         ref = ref,
         level = "within",
         weight = weight,
@@ -348,6 +363,7 @@ substitution <- function(object,
           object = object,
           delta = delta,
           basesub = basesub,
+          summary = summary,
           ref = "clustermean",
           level = "within",
           weight = weight,
@@ -366,6 +382,7 @@ substitution <- function(object,
         delta = delta,
         basesub = basesub,
         aorg = aorg,
+        summary = summary,
         ref = "grandmean",
         level = "aggregate",
         weight = weight,
@@ -380,6 +397,7 @@ substitution <- function(object,
         delta = delta,
         basesub = basesub,
         aorg = aorg,
+        summary = summary,
         ref = ref,
         level = "aggregate",
         weight = weight,
@@ -394,6 +412,7 @@ substitution <- function(object,
           object = object,
           delta = delta,
           basesub = basesub,
+          summary = summary,
           ref = "clustermean",
           level = "aggregate",
           weight = weight,
@@ -420,6 +439,7 @@ substitution <- function(object,
       weight = weight,
       parts = object$complr$parts,
       aorg = aorg,
+      summary = summary,
       comparison = if(exists("comparison")) (comparison) else (NULL)),
     class = "substitution")
   

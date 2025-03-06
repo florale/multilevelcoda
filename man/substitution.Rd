@@ -9,6 +9,7 @@ substitution(
   delta,
   basesub,
   aorg = TRUE,
+  summary = TRUE,
   ref = c("grandmean", "clustermean"),
   level = c("between", "within", "aggregate"),
   weight = c("equal", "proportional"),
@@ -35,6 +36,9 @@ or their average (\code{TRUE}) be returned?
 Default is \code{TRUE}.
 Only applicable for model with covariates in addition to
 the isometric log-ratio coordinates (i.e., adjusted model).}
+
+\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+Currently only support outputing raw values for model using grandmean as reference composition.}
 
 \item{ref}{Either a character value or vector or a dataset.
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
@@ -99,7 +103,7 @@ if(requireNamespace("cmdstanr")){
                   chain = 1, iter = 500, backend = "cmdstanr")
                   
   # one to one reallocation at between and within-person levels
-  sub1 <- substitution(object = fit1, delta = 5, level = c("between", "within"))
+  sub1 <- substitution(object = fit1, delta = 5, level = c("between"), summary = FALSE)
   summary(sub1) 
   
   # one to all reallocation at between and within-person levels

@@ -8,6 +8,7 @@ submargins(
   object,
   delta,
   basesub,
+  summary = TRUE,
   ref = "clustermean",
   level = "aggregate",
   weight = "proportional",
@@ -27,6 +28,9 @@ Can be a \code{data.frame} or \code{data.table} of the base possible substitutio
 which can be computed using function \code{\link{build.basesub}}.
 If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 If \code{NULL}, all possible one-to-one reallocations are estimated.}
+
+\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+Currently only support outputing raw values for model using grandmean as reference composition.}
 
 \item{ref}{Either a character value or vector or a dataset.
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or

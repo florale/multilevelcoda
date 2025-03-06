@@ -12,6 +12,7 @@ sub(
   level = "aggregate",
   weight = "equal",
   aorg = TRUE,
+  summary = TRUE,
   scale = c("response", "linear"),
   comparison,
   cores = NULL,
@@ -52,6 +53,9 @@ or their average (\code{TRUE}) be returned?
 Default is \code{TRUE}.
 Only applicable for model with covariates in addition to
 the isometric log-ratio coordinates (i.e., adjusted model).}
+
+\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+Currently only support outputing raw values for model using grandmean as reference composition.}
 
 \item{scale}{Either \code{"response"} or \code{"linear"}.
 If \code{"response"}, results are returned on the scale of the response variable.
