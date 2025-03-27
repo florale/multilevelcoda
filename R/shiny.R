@@ -62,8 +62,12 @@ launch_shinystan.brmcoda <- function(object, ...) {
 multilevelcoda_sim <- function() {
 
   # shiny input
-  data("sim", envir = environment())
-
+  tryCatch({
+    data("sim", package = "multilevelcoda", envir = environment())
+  }, error = function(e) {
+    message("Please install the package multilevelcoda first.")
+  })
+  
   brmcoda_tab <- sim[["brmcoda_tab"]]
   sub_tab <- sim[["sub_tab"]]
 
@@ -388,9 +392,8 @@ multilevelcoda_sim <- function() {
     })
 
     output$coda <- renderImage({
-      filename <- normalizePath(file.path('./inst',
-                                          paste('coda.png')))
-
+      filename <- normalizePath(fs::path_package(package = 'multilevelcoda', "coda.png"))
+      
       # Return a list containing the filename and alt text
       list(src = filename,
            heigh = "40px", width = "50px")
