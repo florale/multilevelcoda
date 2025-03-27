@@ -39,9 +39,9 @@ summary.complr <- function(object,
   )
   out$data <- list(composition_parts = object$parts,
                    logratios         = paste0(object$transform, seq_len(length(object$parts) - 1)),
-                   idvar             = if(exists("object$idvar")) (object$idvar) else (NULL),
+                   idvar             = if(!is.null(object$idvar)) (object$idvar) else (NULL),
                    nobs              = nrow(object$data),
-                   ngrps             = if(exists("object$idvar")) (length(unique(object$data[[object$idvar]]))) else (nrow(object$data))
+                   ngrps             = if(!is.null(object$idvar)) (length(unique(object$data[[object$idvar]]))) else (nrow(object$data))
   )
   
   out$geometry <- list(composition_geometry = class(object$comp),
