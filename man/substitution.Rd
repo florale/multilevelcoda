@@ -7,11 +7,11 @@
 substitution(
   object,
   delta,
+  ref = c("grandmean", "clustermean"),
+  level = c("between", "within", "aggregate"),
   basesub,
   aorg = TRUE,
   summary = TRUE,
-  ref = c("grandmean", "clustermean"),
-  level = c("between", "within", "aggregate"),
   weight = c("equal", "proportional"),
   scale = c("response", "linear"),
   comparison = NULL,
@@ -23,6 +23,17 @@ substitution(
 \item{object}{A fitted \code{\link{brmcoda}} object.}
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
+
+\item{ref}{Either a character value or vector or a dataset.
+Can be \code{"grandmean"} and/or \code{"clustermean"}, or
+a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
+of combinations of covariates over which predictions are made.
+User's specified reference grid is only possible for simple substitution.
+Single level models are default to \code{"grandmean"}.}
+
+\item{level}{A character string or vector.
+Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
+Single-level models are default to \code{"aggregate"}.}
 
 \item{basesub}{A base substitution.
 Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
@@ -39,17 +50,6 @@ the isometric log-ratio coordinates (i.e., adjusted model).}
 
 \item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 Currently only support outputing raw values for model using grandmean as reference composition.}
-
-\item{ref}{Either a character value or vector or a dataset.
-Can be \code{"grandmean"} and/or \code{"clustermean"}, or
-a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
-of combinations of covariates over which predictions are made.
-User's specified reference grid is only possible for simple substitution.
-Single level models are default to \code{"grandmean"}.}
-
-\item{level}{A character string or vector.
-Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
-Single-level models are default to \code{"aggregate"}.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -104,7 +104,7 @@ if(requireNamespace("cmdstanr")){
                   
   # one to one reallocation at between and within-person levels
   sub1 <- substitution(object = fit1, delta = 5, level = c("between"), summary = FALSE)
-  summary(sub1) 
+  summary(sub1)
   
   # one to all reallocation at between and within-person levels
   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 

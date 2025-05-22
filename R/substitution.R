@@ -8,17 +8,20 @@
 #'
 #' @param object A fitted \code{\link{brmcoda}} object.
 #' @param delta A integer, numeric value or vector indicating the amount of substituted change between compositional parts.
-#' @param basesub A base substitution. 
-#' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
-#' which can be computed using function \code{\link{build.basesub}}.
-#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
-#' If \code{NULL}, all possible one-to-one reallocations are estimated.
 #' @param ref Either a character value or vector or a dataset.
 #' Can be \code{"grandmean"} and/or \code{"clustermean"}, or
 #' a \code{data.frame} or \code{data.table} of user's specified reference grid consisting
 #' of combinations of covariates over which predictions are made.
 #' User's specified reference grid is only possible for simple substitution.
 #' Single level models are default to \code{"grandmean"}.
+#' @param level A character string or vector.
+#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
+#' Single-level models are default to \code{"aggregate"}.
+#' @param basesub A base substitution. 
+#' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+#' which can be computed using function \code{\link{build.basesub}}.
+#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+#' If \code{NULL}, all possible one-to-one reallocations are estimated.
 #' @param aorg A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
 #' Should the estimate at each level of the reference grid (\code{FALSE})
 #' or their average (\code{TRUE}) be returned?
@@ -27,9 +30,6 @@
 #' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 #' Currently only support outputing raw values for model using grandmean as reference composition.
-#' @param level A character string or vector.
-#' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
-#' Single-level models are default to \code{"aggregate"}.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
@@ -74,7 +74,7 @@
 #'                   
 #'   # one to one reallocation at between and within-person levels
 #'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"), summary = FALSE)
-#'   summary(sub1) 
+#'   summary(sub1)
 #'   
 #'   # one to all reallocation at between and within-person levels
 #'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
@@ -91,11 +91,11 @@
 #' @export
 substitution <- function(object,
                          delta,
+                         ref = c("grandmean", "clustermean"),
+                         level = c("between", "within", "aggregate"),
                          basesub,
                          aorg = TRUE,
                          summary = TRUE,
-                         ref = c("grandmean", "clustermean"),
-                         level = c("between", "within", "aggregate"),
                          weight = c("equal", "proportional"),
                          scale = c("response", "linear"),
                          comparison = NULL,
@@ -167,30 +167,34 @@ substitution <- function(object,
     names(basesub) <- object$complr$parts
     comparison <- "one-to-one"
     
-  } else if(isFALSE(missing(basesub))) {
-    if (basesub == "one-to-all") {
+  } 
+  if(isFALSE(missing(basesub))) {
+      if (inherits(basesub, "character") && identical(basesub, "one-to-all")) {
       basesub <- build.basesub(parts = object$complr$parts, comparison = "one-to-all")
       names(basesub) <- object$complr$parts
       comparison <- "one-to-all"
       
     }
-    else {
-      if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
-        stop(sprintf(
-          "The number of columns in 'basesub' (%d) should be the same as the compositional parts in 'parts' (%d).",
-          ncol(basesub),
-          length(object$complr$parts)
-        ))
-      }
-      if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
-        stop(sprintf(
-          "The names of compositional parts should be the same in 'basesub' (%s) and 'parts' (%s).",
-          colnames(basesub),
-          object$complr$parts
-        ))
-      }
+    if (inherits(basesub, c("data.table", "data.frame", "matrix"))) {
+      stop("Currently not support customised base substitution, this will be implemented in the future.")
+      
+      # if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
+      #   stop(sprintf(
+      #     "The number of columns in 'basesub' (%d) should be the same as the compositional parts in 'parts' (%d).",
+      #     ncol(basesub),
+      #     length(object$complr$parts)
+      #   ))
+      # }
+      # if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
+      #   stop(sprintf(
+      #     "The names of compositional parts should be the same in 'basesub' (%s) and 'parts' (%s).",
+      #     colnames(basesub),
+      #     object$complr$parts
+      #   ))
+      # }
     }
   }
+  
   # what type of model is being estimated
   model_fixef <- rownames(fixef(object))
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
