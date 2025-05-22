@@ -327,21 +327,21 @@ summary.substitution <- function(object, delta, to, from,
       out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
       out[, Delta := abs(Delta)]
     }
-    else {
-      out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
-    }
   }
-  
-  if(isTRUE(dim(out)[1] == 0)) {
-    stop("An empty data.table returned. Please check that the arguments match with your substitution object.")
+  else {
+    out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   }
-  
-  if(isFALSE(digits == "asis")) {
-    # out[, 1:3] <- round(out[, 1:3], digits)
-    out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
-  }
-  
-  out
+
+if(isTRUE(dim(out)[1] == 0)) {
+  stop("An empty data.table returned. Please check that the arguments match with your substitution object.")
+}
+
+if(isFALSE(digits == "asis")) {
+  # out[, 1:3] <- round(out[, 1:3], digits)
+  out[] <- lapply(out, function(X) if(is.numeric(X)) round(X, digits) else X)
+}
+
+out
 }
 
 #' Print a Summary for a \code{substitution} object
