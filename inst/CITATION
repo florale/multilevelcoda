@@ -1,0 +1,42 @@
+bibentry(
+  bibtype = "Article",
+  title = "Bayesian multilevel compositional data analysis: Introduction, evaluation, and application",
+  author = c(
+             person(given = "Flora", family = "Le"),
+             person(given = "Tyman E.", family = "Stanford"),
+             person(given = "Dorothea", family = "Dumuid"),
+             person(given = "Joshua F.", family = "Wiley")
+             ),
+  journal = "Psychological Methods",
+  year = "2025",
+  doi = "10.1037/met0000750",
+  header = "To cite multilevelcoda in publications use:",
+  textVersion = paste(
+    "F Le, TE Stanford, D Dumuid, JF Wiley (2025).",
+    "Bayesian multilevel compositional data analysis: Introduction, evaluation, and application.",
+    "Psychological Methods",
+    "doi:10.1037/met0000750"
+  ),
+  encoding = "UTF-8"
+)
+
+bibentry(
+  bibtype = "Article",
+  title = "Bayesian multilevel compositional data analysis with the R package {multilevelcoda}",
+  author = c(
+             person(given = "Flora", family = "Le"),
+             person(given = "Dorothea", family = "Dumuid"),
+             person(given = "Tyman E.", family = "Stanford"),
+             person(given = "Joshua F.", family = "Wiley")
+             ),
+  journal = "arXiv",
+  year = "2024",
+  doi = "10.48550/arXiv.2411.12407",
+  textVersion = paste(
+    "F Le, D Dumuid, TE Stanford, JF Wiley (2024).",
+    "Bayesian multilevel compositional data analysis with the R package multilevelcoda.",
+    "arXiv preprint",
+    "doi:10.48550/arXiv.2411.12407"
+  ),
+  encoding = "UTF-8"
+)

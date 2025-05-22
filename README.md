@@ -49,13 +49,13 @@ You can learn about the package from these vignettes:
 ## Citing `multilevelcoda` and related software 
 When using multilevelcoda, please cite one or more of the following publications:
 
+-   Le, F., Stanford, T. E., Dumuid, D., & Wiley, J. F. (2025). 
+    Bayesian Multilevel Compositional Data Analysis: 
+    Introduction, Evaluation, and Application. 
+    *Psychological Methods*. https://doi.org/10.1037/met0000750
 -   Le F., Dumuid D., Stanford T. E., Wiley J. F. (2024). 
     Bayesian multilevel compositional data analysis with the R package multilevelcoda.
     *arXiv preprint arXiv:2411.12407*.
--   Le, F., Stanford, T. E., Dumuid, D., & Wiley, J. F. (2024). 
-    Bayesian Multilevel Compositional Data Analysis: 
-    Introduction, Evaluation, and Application. 
-    *arXiv preprint arXiv:2405.03985*.
 
 As multilevelcoda depends on brms and Stan, please also consider citing:
 
