@@ -42,7 +42,9 @@ jobs:
           
       - name: Install dependencies
         run: 
-          pak::pkg_install("preferably", dependencies = TRUE)
+          remotes::install_deps(dependencies = TRUE)
+          install.packages("pkgdown", type = "binary")
+          install.packages("preferably")
         shell: Rscript {0}	  
 
       - name: Build site
