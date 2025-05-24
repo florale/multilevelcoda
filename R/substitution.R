@@ -174,8 +174,7 @@ substitution <- function(object,
       names(basesub) <- object$complr$parts
       comparison <- "one-to-all"
       
-    }
-    if (inherits(basesub, c("data.table", "data.frame", "matrix"))) {
+    } else if (inherits(basesub, c("data.table", "data.frame", "matrix"))) {
       stop("Currently not support customised base substitution, this will be implemented in the future.")
       
       # if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
