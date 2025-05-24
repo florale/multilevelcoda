@@ -50,7 +50,8 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
-          install.packages("preferably")
+          install.packages(c("pkgdown", "devtools"))
+          remotes::install_github("amirmasoudabdol/preferably")
         shell: Rscript {0}	  
 
       - name: Build site
