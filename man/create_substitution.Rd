@@ -42,7 +42,7 @@ create_substitution(
 
 \item{parts}{The parts of the composition}
 
-\item{summary}{A logical value specifying whether to summarize the results}
+\item{aorg}{A logical value specifying whether to summarize the results (average over the reference grid)}
 }
 \value{
 An object of class \code{substitution}

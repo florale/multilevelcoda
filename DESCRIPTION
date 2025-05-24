@@ -54,7 +54,8 @@ Imports:
     loo,
     bayesplot,
     emmeans,
-    posterior
+    posterior,
+    fs
 Suggests: 
     testthat (>= 3.0.0),
     covr,

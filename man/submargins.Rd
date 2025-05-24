@@ -13,7 +13,7 @@ submargins(
   level = "aggregate",
   weight = "proportional",
   scale = c("response", "linear"),
-  comparison,
+  comparison = "one-to-one",
   cores = NULL,
   ...
 )

@@ -73,7 +73,7 @@
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"), summary = FALSE)
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
 #'   summary(sub1)
 #'   
 #'   # one to all reallocation at between and within-person levels
@@ -168,7 +168,7 @@ substitution <- function(object,
     comparison <- "one-to-one"
     
   } 
-  if(isFALSE(missing(basesub))) {
+  else if(isFALSE(missing(basesub))) {
       if (inherits(basesub, "character") && identical(basesub, "one-to-all")) {
       basesub <- build.basesub(parts = object$complr$parts, comparison = "one-to-all")
       names(basesub) <- object$complr$parts

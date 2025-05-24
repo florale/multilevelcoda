@@ -58,6 +58,7 @@ launch_shinystan.brmcoda <- function(object, ...) {
 #' @importFrom DT dataTableOutput
 #' @importFrom DT DTOutput
 #' @importFrom utils data
+#' @importFrom fs path_package
 #' @export
 multilevelcoda_sim <- function() {
 
@@ -392,7 +393,7 @@ multilevelcoda_sim <- function() {
     })
 
     output$coda <- renderImage({
-      filename <- normalizePath(fs::path_package(package = 'multilevelcoda', "coda.png"))
+      filename <- normalizePath(path_package(package = 'multilevelcoda', "coda.png"))
       
       # Return a list containing the filename and alt text
       list(src = filename,

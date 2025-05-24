@@ -20,7 +20,7 @@ is.substitution <- function(x) {
 #' @param level A character value specifying the level of substitution
 #' @param weight The weight to use in calculation of the reference composition
 #' @param parts The parts of the composition
-#' @param summary A logical value specifying whether to summarize the results
+#' @param aorg A logical value specifying whether to summarize the results (average over the reference grid)
 #'
 #' @seealso \code{\link{substitution}}
 #'

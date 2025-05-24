@@ -14,7 +14,7 @@ sub(
   aorg = TRUE,
   summary = TRUE,
   scale = c("response", "linear"),
-  comparison,
+  comparison = "one-to-one",
   cores = NULL,
   ...
 )
