@@ -41,7 +41,7 @@ jobs:
           needs: website
           
       - name: Install dependencies
-        run: 
+        run: |
           remotes::install_deps(dependencies = TRUE)
           install.packages("pkgdown", type = "binary")
           install.packages("preferably")
