@@ -17,9 +17,9 @@ Authors@R:
 URL: https://florale.github.io/multilevelcoda/,
      https://github.com/florale/multilevelcoda
 BugReports: https://github.com/florale/multilevelcoda/issues
-Description: Implement Bayesian Multilevel Modelling for compositional data 
-             in a multilevel framework. Compute multilevel compositional data and 
-             Isometric log ratio (ILR) at between and within-person levels, 
+Description: Implement Bayesian multilevel modelling for compositional data. 
+             Compute multilevel compositional data and 
+             perform log-ratio transforms at between and within-person levels, 
              fit Bayesian multilevel models for compositional predictors and outcomes, 
              and run post-hoc analyses such as isotemporal substitution models.
              References: 
