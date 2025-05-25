@@ -50,8 +50,8 @@ You can learn about the package from these vignettes:
 When using multilevelcoda, please cite one or more of the following publications:
 
 -   Le, F., Stanford, T. E., Dumuid, D., & Wiley, J. F. (2025). 
-    Bayesian Multilevel Compositional Data Analysis: 
-    Introduction, Evaluation, and Application. 
+    Bayesian multilevel compositional data analysis: 
+    introduction, evaluation, and application. 
     *Psychological Methods*. https://doi.org/10.1037/met0000750
 -   Le F., Dumuid D., Stanford T. E., Wiley J. F. (2024). 
     Bayesian multilevel compositional data analysis with the R package multilevelcoda.

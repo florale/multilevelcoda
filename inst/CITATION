@@ -32,6 +32,7 @@ bibentry(
   journal = "arXiv",
   year = "2024",
   doi = "10.48550/arXiv.2411.12407",
+  header = "and",
   textVersion = paste(
     "F Le, D Dumuid, TE Stanford, JF Wiley (2024).",
     "Bayesian multilevel compositional data analysis with the R package multilevelcoda.",
