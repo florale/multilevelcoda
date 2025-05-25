@@ -53,12 +53,12 @@ Imports:
     posterior,
     plotly,
     hrbrthemes,
+    htmltools,
     bslib,
     DT,
     fs
 Suggests: 
     testthat (>= 3.0.0),
-    htmltools,
     covr,
     withr,
     knitr,

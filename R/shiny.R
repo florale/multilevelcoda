@@ -59,6 +59,7 @@ launch_shinystan.brmcoda <- function(object, ...) {
 #' @importFrom DT DTOutput
 #' @importFrom utils data
 #' @importFrom fs path_package
+#' @importFrom htmltools a
 #' @export
 multilevelcoda_sim <- function() {
   
