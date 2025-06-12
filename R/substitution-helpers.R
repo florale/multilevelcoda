@@ -451,7 +451,7 @@ NULL
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c,
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
                     if (comparison == "one-to-all") {
@@ -572,7 +572,7 @@ NULL
                           posterior_delta_y <- t(delta_y)
                           posterior_delta_y <- cbind(dsub[, .(Delta, From, To, Level, Reference)], posterior_delta_y)
                         }
-
+                        
                         hout[[h]] <- posterior_delta_y
                       }
                       posterior_delta_y <- rbindlist(hout)
@@ -604,7 +604,7 @@ NULL
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c,
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
                     if (comparison == "one-to-all") {
@@ -757,7 +757,7 @@ NULL
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c,
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
                     if (comparison == "one-to-all") {
@@ -902,7 +902,7 @@ NULL
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c,
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
                     if (comparison == "one-to-all") {
@@ -1023,7 +1023,7 @@ NULL
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c,
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
                     if (comparison == "one-to-all") {
@@ -1147,7 +1147,7 @@ NULL
   on.exit(options(oopts))
   
   iout <- foreach(i = colnames(basesub), .combine = c,
-                  .options.future = list(packages = "multilevelcoda")) %dofuture% {
+                  .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
                     if (comparison == "one-to-all") {
