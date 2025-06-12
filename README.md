@@ -7,6 +7,7 @@
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- [![Coverage Status](https://codecov.io/gh/florale/multilevelcoda/branch/main/graphs/badge.svg?branch=main)](https://app.codecov.io/gh/florale/multilevelcoda)  -->
 <!-- badges: end -->
+[![](https://cranlogs.r-pkg.org/badges/grand-total/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
 
 ## Overview
 
