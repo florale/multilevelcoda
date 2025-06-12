@@ -32,8 +32,8 @@
 #' }}
 #' @export
 wsub <- function(object,
-                 basesub,
                  delta,
+                 basesub,
                  ref = "grandmean",
                  level = "within",
                  weight = "equal",
