@@ -5,9 +5,9 @@
 [![R-CMD-check](https://github.com/florale/multilevelcoda/workflows/R-CMD-check/badge.svg)](https://github.com/florale/multilevelcoda/actions)
 [![CRAN Version](https://www.r-pkg.org/badges/version/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
 <!-- [![Coverage Status](https://codecov.io/gh/florale/multilevelcoda/branch/main/graphs/badge.svg?branch=main)](https://app.codecov.io/gh/florale/multilevelcoda)  -->
 <!-- badges: end -->
-[![](https://cranlogs.r-pkg.org/badges/grand-total/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
 
 ## Overview
 
