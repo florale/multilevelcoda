@@ -4,7 +4,7 @@
 \alias{build.rg}
 \title{Reference Grid for \code{substitution} model.}
 \usage{
-build.rg(object, ref, at, level, weight, fill = FALSE)
+build.rg(object, ref, at, parts, level, weight, fill = FALSE)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
@@ -17,6 +17,10 @@ User's specified reference grid is only possible for simple substitution.
 Single level models are default to \code{"grandmean"}.}
 
 \item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
+
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object.}
 
 \item{level}{A character string or vector.
 Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?

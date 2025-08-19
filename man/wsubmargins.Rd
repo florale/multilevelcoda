@@ -11,6 +11,7 @@ wsubmargins(
   level = "within",
   summary = TRUE,
   at = NULL,
+  parts,
   base,
   weight = "proportional",
   scale = c("response", "linear"),
@@ -39,6 +40,10 @@ Single-level models are default to \code{"aggregate"}.}
 Currently only support outputing raw values for model using grandmean as reference composition.}
 
 \item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
+
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object.}
 
 \item{base}{An optional base substitution.
 Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
