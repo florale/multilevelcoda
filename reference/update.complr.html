@@ -113,7 +113,7 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 <dd><p>Log ratio transform of within-person composition.</p></dd>
 
 <dt><code>data</code></dt>
-<dd><p>The user's dataset or imputed dataset if the input data contains zeros.</p></dd>
+<dd><p>The user's dataset or imputed dataset if the iiut data contains zeros.</p></dd>
 
 <dt><code>transform</code></dt>
 <dd><p>Type of transform applied on compositional data.</p></dd>
@@ -141,6 +141,7 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 <span class="r-in"><span><span class="co"># update with new data</span></span></span>
 <span class="r-in"><span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="va">mcompd</span><span class="op">[</span><span class="va">ID</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">]</span> <span class="co"># excluding ID 1</span></span></span>
 <span class="r-in"><span><span class="va">cilr1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">cilr</span>, newdata <span class="op">=</span> <span class="va">newdat</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in complr(data = newdata, parts = parts, sbp = sbp, total = total,     idvar = idvar, transform = transform):</span> parts should be a character vector or a list of character vectors.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

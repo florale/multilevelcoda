@@ -80,15 +80,19 @@ It must include a composition and a ID variable. Required.</p></dd>
 
 
 <dt id="arg-parts">parts<a class="anchor" aria-label="anchor" href="#arg-parts"></a></dt>
-<dd><p>A character vector specifying the names of compositional variables to be used.</p></dd>
+<dd><p>A character vector specifying the names of compositional variables to be used.
+For multiple compositions, a list of character vectors can be supplied.</p></dd>
 
 
 <dt id="arg-sbp">sbp<a class="anchor" aria-label="anchor" href="#arg-sbp"></a></dt>
-<dd><p>A signary matrix indicating sequential binary partition.</p></dd>
+<dd><p>A signary matrix indicating sequential binary partition when <code>transform = "ilr"</code>.
+If not supplied, a default sequential binary partition (sbp) will be built using function <code><a href="build.sbp.html">build.sbp</a></code>.
+For multiple compositions, a list of signary sbps can be supplied.</p></dd>
 
 
 <dt id="arg-total">total<a class="anchor" aria-label="anchor" href="#arg-total"></a></dt>
 <dd><p>A numeric value of the total amount to which the compositions should be closed.
+For multiple compositions, a list of numeric values can be supplied.
 Default is <code>1</code>.</p></dd>
 
 
@@ -127,7 +131,7 @@ or a matrix of class <code>acomp</code> representing multiple closed within-pers
 <dd><p>Log ratio transform of within-person composition.</p></dd>
 
 <dt><code>data</code></dt>
-<dd><p>The user's dataset or imputed dataset if the input data contains zeros.</p></dd>
+<dd><p>The user's dataset or imputed dataset if the iiut data contains zeros.</p></dd>
 
 <dt><code>transform</code></dt>
 <dd><p>Type of transform applied on compositional data.</p></dd>
@@ -169,250 +173,483 @@ resulting in singular covariance matrices.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  A sequential binary partition (sbp), is required for ilr transform but is not supplied. </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  A default sbp, which is a pivot balance, will be applied.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 542.4 458.3 270.8 525 651 99.1 49 41 76 86 297.2 117.1 488.7 259 112 460.3 653.5 624.6 398 436 41 162.1 15 182 155 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_comp    : 'acomp' num [1:3540, 1:5] 494.2 494.2 494.2 494.2 494.2 72.3 72.3 72.3 72.3 72.3 249.3 249.3 249.3 249.3 249.3 503.9 503.9 503.9 503.9 503.| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_comp     : 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ logratio        : 'rmult' num [1:3540, 1:4] 1.1286 0.958 0.7506 0.889 1.2567 -0.5061 -1.344 -1.2117 -1.084 -0.7149 0.6298 -0.8348 1.3223 -0.0314 -0.6875 1.70| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "ilr1" "ilr2" "ilr3" "ilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_logratio: 'rmult' num [1:3540, 1:4] 0.89436 0.89436 0.89436 0.89436 0.89436 -1.06558 -1.06558 -1.06558 -1.06558 -1.06558 0.00968 0.00968 0.00968 0.00| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "bilr1" "bilr2" "bilr3" "bilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_logratio : 'rmult' num [1:3540, 1:4] 0.23428 0.06364 -0.14377 -0.00539 0.36234 0.55948 -0.27846 -0.14612 -0.01842 0.35066 0.62011 -0.84448 1.31261 -0.| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "wilr1" "wilr2" "wilr3" "wilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data            :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ output   :List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ comp            : 'acomp' num [1:3540, 1:5] 542.4 458.3 270.8 525 651 99.1 49 41 76 86 297.2 117.1 488.7 259 112 460.3 653.5 624.6 398 436 41 162.1 15 182 155 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_comp    : 'acomp' num [1:3540, 1:5] 494.2 494.2 494.2 494.2 494.2 72.3 72.3 72.3 72.3 72.3 249.3 249.3 249.3 249.3 249.3 503.9 503.9 503.9 503.9 503.| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_comp     : 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ logratio        : 'rmult' num [1:3540, 1:4] 1.1286 0.958 0.7506 0.889 1.2567 -0.5061 -1.344 -1.2117 -1.084 -0.7149 0.6298 -0.8348 1.3223 -0.0314 -0.6875 1.70| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "z1_1" "z2_1" "z3_1" "z4_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_logratio: 'rmult' num [1:3540, 1:4] 0.89436 0.89436 0.89436 0.89436 0.89436 -1.06558 -1.06558 -1.06558 -1.06558 -1.06558 0.00968 0.00968 0.00968 0.00| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "bz1_1" "bz2_1" "bz3_1" "bz4_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_logratio : 'rmult' num [1:3540, 1:4] 0.23428 0.06364 -0.14377 -0.00539 0.36234 0.55948 -0.27846 -0.14612 -0.01842 0.35066 0.62011 -0.84448 1.31261 -0.| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "wz1_1" "wz2_1" "wz3_1" "wz4_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dataout         : num [1:3540, 1:27] 542 458 271 525 651 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:27] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ total           : num 1440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ sbp             : num [1:4, 1:5] 1 0 0 0 -1 1 0 0 -1 -1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ psi             : num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ datain   :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "index")= int(0) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "__ID")= int [1:3540] 981 982 983 984 985 986 987 988 989 990 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform       : chr "ilr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ psi             : num [1:5, 1:4] 0.894 -0.224 -0.224 -0.224 -0.224 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : num [1:4, 1:5] 1 0 0 0 -1 1 0 0 -1 -1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ dataout  :Classes ‘data.table’ and 'data.frame':	3540 obs. of  37 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST     : num [1:3540] 542 458 271 525 651 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE    : num [1:3540] 99.1 49 41 76 86 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA    : num [1:3540] 297 117 489 259 112 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA     : num [1:3540] 460 653 625 398 436 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB      : num [1:3540] 41 162 15 182 155 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bTST    : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bWAKE   : num [1:3540] 72.3 72.3 72.3 72.3 72.3 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bMVPA   : num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bLPA    : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bSB     : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wTST    : num [1:3540] 0.223 0.197 0.123 0.195 0.258 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wWAKE   : num [1:3540] 0.279 0.144 0.128 0.193 0.233 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wMVPA   : num [1:3540] 0.2426 0.0995 0.4416 0.1905 0.0879 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wLPA    : num [1:3540] 0.186 0.275 0.279 0.145 0.169 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wSB     : num [1:3540] 0.0693 0.2853 0.028 0.2771 0.2519 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z1_1    : num [1:3540] 1.129 0.958 0.751 0.889 1.257 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z2_1    : num [1:3540] -0.506 -1.344 -1.212 -1.084 -0.715 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z3_1    : num [1:3540] 0.6298 -0.8348 1.3223 -0.0314 -0.6875 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z4_1    : num [1:3540] 1.71 0.986 2.637 0.553 0.731 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz1_1   : num [1:3540] 0.894 0.894 0.894 0.894 0.894 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz2_1   : num [1:3540] -1.07 -1.07 -1.07 -1.07 -1.07 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz3_1   : num [1:3540] 0.00968 0.00968 0.00968 0.00968 0.00968 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz4_1   : num [1:3540] 1.01 1.01 1.01 1.01 1.01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz1_1   : num [1:3540] 0.23428 0.06364 -0.14377 -0.00539 0.36234 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz2_1   : num [1:3540] 0.5595 -0.2785 -0.1461 -0.0184 0.3507 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz3_1   : num [1:3540] 0.62 -0.844 1.313 -0.041 -0.697 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz4_1   : num [1:3540] 0.6975 -0.0264 1.6252 -0.4588 -0.2808 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform: chr "ilr"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar    : chr "ID"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">calr</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
-<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">calr</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, </span></span>
+<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1440</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1440</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span>,</span></span>
-<span class="r-in"><span>                transform <span class="op">=</span> <span class="st">"alr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                transform <span class="op">=</span> <span class="st">"ilr"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  A sequential binary partition (sbp), is required for ilr transform but is not supplied. </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  A default sbp, which is a pivot balance, will be applied.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  A sequential binary partition (sbp), is required for ilr transform but is not supplied. </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  A default sbp, which is a pivot balance, will be applied.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">calr</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_comp    : 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_comp     : 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ logratio        : 'rmult' num [1:3540, 1:4] 2.582 1.039 2.894 1.059 1.435 0.882 -1.196 1.006 -0.873 -0.589 1.98 -0.325 3.484 0.353 -0.325 2.418 1.394 3.73 0.782 1.034 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "alr1" "alr2" "alr3" "alr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.8 -0.2 -0.2 -0.2 -0.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_logratio: 'rmult' num [1:3540, 1:4] 1.412 1.412 1.412 1.412 1.412 -0.511 -0.511 -0.511 -0.511 -0.511 0.727 0.727 0.727 0.727 0.727 1.431 1.431 1.431 1.431 1.431 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "balr1" "balr2" "balr3" "balr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.8 -0.2 -0.2 -0.2 -0.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_logratio : 'rmult' num [1:3540, 1:4] 1.1698 -0.3726 1.4822 -0.3525 0.0232 1.3924 -0.685 1.5163 -0.3624 -0.0783 1.2527 -1.0529 2.7568 -0.3747 -1.0524 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "walr1" "walr2" "walr3" "walr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.8 -0.2 -0.2 -0.2 -0.2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data            :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ output   :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ comp            : 'acomp' num [1:3540, 1:2] 1218 1301 1251 1258 1272 222 139 189 182 168 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "TST" "WAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_comp    : 'acomp' num [1:3540, 1:2] 1256 1256 1256 1256 1256 184 184 184 184 184 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "bTST" "bWAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_comp     : 'acomp' num [1:3540, 1:2] 0.445 0.577 0.491 0.502 0.525 0.555 0.423 0.509 0.498 0.475 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "wTST" "wWAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ logratio        : 'rmult' num [1:3540, 1] 1.2 1.58 1.34 1.37 1.43 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:2] 0.8456 0.9034 0.8686 0.8735 0.8833 0.1544 0.0966 0.1314 0.1265 0.1167 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:2] "TST" "WAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:2, 1] 0.707 -0.707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr "z1_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_logratio: 'rmult' num [1:3540, 1] 1.36 1.36 1.36 1.36 1.36 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:2] 0.872 0.872 0.872 0.872 0.872 0.128 0.128 0.128 0.128 0.128 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:2] "bTST" "bWAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:2, 1] 0.707 -0.707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr "bz1_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_logratio : 'rmult' num [1:3540, 1] -0.1574 0.22084 -0.02418 0.00702 0.07172 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:2] 0.445 0.577 0.491 0.502 0.525 0.555 0.423 0.509 0.498 0.475 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:2] "wTST" "wWAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:2, 1] 0.707 -0.707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr "wz1_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dataout         : num [1:3540, 1:9] 1218 1301 1251 1258 1272 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:9] "TST" "WAKE" "bTST" "bWAKE" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ parts           : chr [1:2] "TST" "WAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ total           : num 1440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ sbp             : num [1, 1:2] 1 -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "TST" "WAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ psi             : num [1:2, 1] 0.707 -0.707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "TST" "WAKE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ comp            : 'acomp' num [1:3540, 1:3] 535.9 180.8 623.7 444.5 229.4 830.1 1008.9 797.2 683.1 893.1 74 250.3 19.1 312.4 317.5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:3] "MVPA" "LPA" "SB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_comp    : 'acomp' num [1:3540, 1:3] 411 411 411 411 411 831 831 831 831 831 199 199 199 199 199 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:3] "bMVPA" "bLPA" "bSB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_comp     : 'acomp' num [1:3540, 1:3] 0.4873 0.1509 0.5897 0.3111 0.1727 0.3734 0.4166 0.3729 0.2365 0.3326 0.1393 0.4325 0.0374 0.4525 0.4947 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:3] "wMVPA" "wLPA" "wSB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ logratio        : 'rmult' num [1:3540, 1:2] 0.6298 -0.8348 1.3223 -0.0314 -0.6875 1.7095 0.9857 2.6373 0.5533 0.7313 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:3] 0.3722 0.1255 0.4331 0.3087 0.1593 0.5764 0.7006 0.5536 0.4744 0.6202 0.0514 0.1738 0.0133 0.2169 0.2205 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:3] "MVPA" "LPA" "SB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:3, 1:2] 8.16e-01 -4.08e-01 -4.08e-01 -2.02e-17 7.07e-01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "z1_2" "z2_2"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_logratio: 'rmult' num [1:3540, 1:2] 0.00968 0.00968 0.00968 0.00968 0.00968 1.01207 1.01207 1.01207 1.01207 1.01207 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:3] 0.285 0.285 0.285 0.285 0.285 0.577 0.577 0.577 0.577 0.577 0.138 0.138 0.138 0.138 0.138 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:3] "bMVPA" "bLPA" "bSB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:3, 1:2] 8.16e-01 -4.08e-01 -4.08e-01 -2.02e-17 7.07e-01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "bz1_2" "bz2_2"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_logratio : 'rmult' num [1:3540, 1:2] 0.6201 -0.8445 1.3126 -0.041 -0.6972 0.6975 -0.0264 1.6252 -0.4588 -0.2808 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:3] 0.4873 0.1509 0.5897 0.3111 0.1727 0.3734 0.4166 0.3729 0.2365 0.3326 0.1393 0.4325 0.0374 0.4525 0.4947 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:3] "wMVPA" "wLPA" "wSB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:3, 1:2] 8.16e-01 -4.08e-01 -4.08e-01 -2.02e-17 7.07e-01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:2] "wz1_2" "wz2_2"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dataout         : num [1:3540, 1:15] 536 181 624 445 229 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:15] "MVPA" "LPA" "SB" "bMVPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ parts           : chr [1:3] "MVPA" "LPA" "SB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ total           : num 1440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ sbp             : num [1:2, 1:3] 1 0 -1 1 -1 -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:3] "MVPA" "LPA" "SB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ psi             : num [1:3, 1:2] 0.816 -0.408 -0.408 0 0.707 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:3] "MVPA" "LPA" "SB"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ datain   :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "index")= int(0) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "__ID")= int [1:3540] 981 982 983 984 985 986 987 988 989 990 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform       : chr "alr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ psi             : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ dataout  :Classes ‘data.table’ and 'data.frame':	3540 obs. of  34 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST     : num [1:3540] 1218 1301 1251 1258 1272 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE    : num [1:3540] 222 139 189 182 168 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bTST    : num [1:3540] 1256 1256 1256 1256 1256 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bWAKE   : num [1:3540] 184 184 184 184 184 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wTST    : num [1:3540] 0.445 0.577 0.491 0.502 0.525 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wWAKE   : num [1:3540] 0.555 0.423 0.509 0.498 0.475 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z1_1    : num [1:3540] 1.2 1.58 1.34 1.37 1.43 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz1_1   : num [1:3540] 1.36 1.36 1.36 1.36 1.36 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz1_1   : num [1:3540] -0.1574 0.22084 -0.02418 0.00702 0.07172 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA    : num [1:3540] 536 181 624 445 229 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA     : num [1:3540] 830 1009 797 683 893 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB      : num [1:3540] 74 250.3 19.1 312.4 317.5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bMVPA   : num [1:3540] 411 411 411 411 411 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bLPA    : num [1:3540] 831 831 831 831 831 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bSB     : num [1:3540] 199 199 199 199 199 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wMVPA   : num [1:3540] 0.487 0.151 0.59 0.311 0.173 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wLPA    : num [1:3540] 0.373 0.417 0.373 0.236 0.333 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wSB     : num [1:3540] 0.1393 0.4325 0.0374 0.4525 0.4947 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z1_2    : num [1:3540] 0.6298 -0.8348 1.3223 -0.0314 -0.6875 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z2_2    : num [1:3540] 1.71 0.986 2.637 0.553 0.731 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz1_2   : num [1:3540] 0.00968 0.00968 0.00968 0.00968 0.00968 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz2_2   : num [1:3540] 1.01 1.01 1.01 1.01 1.01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz1_2   : num [1:3540] 0.62 -0.844 1.313 -0.041 -0.697 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz2_2   : num [1:3540] 0.6975 -0.0264 1.6252 -0.4588 -0.2808 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform: chr "ilr"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar    : chr "ID"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cclr</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span>,</span></span>
-<span class="r-in"><span>                 transform <span class="op">=</span> <span class="st">"clr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                 transform <span class="op">=</span> <span class="st">"ilr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cclr</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_comp    : 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_comp     : 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ logratio        : 'rmult' num [1:3540, 1:5] 1.0095 0.8569 0.6713 0.7951 1.124 -0.6907 -1.3782 -1.2172 -1.1376 -0.9001 0.4079 -0.5078 1.2616 0.0885 -0.636 0.8| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "clr1" "clr2" "clr3" "clr4" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_logratio: 'rmult' num [1:3540, 1:5] 0.8 0.8 0.8 0.8 0.8 -1.123 -1.123 -1.123 -1.123 -1.123 0.116 0.116 0.116 0.116 0.116 0.819 0.819 0.819 0.819 0.81| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "bclr1" "bclr2" "bclr3" "bclr4" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_logratio : 'rmult' num [1:3540, 1:5] 0.20954 0.05692 -0.12859 -0.00483 0.32409 0.43214 -0.25539 -0.0944 -0.01475 0.22266 0.29243 -0.62336 1.14607 -0.0| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "wclr1" "wclr2" "wclr3" "wclr4" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data            :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:3540] 542 458 271 525 651 431 501 518 458 510 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:3540] 99 49 41 76 86 84 29 32 72 143 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:3540] 297 117 489 259 112 264 458 111 398 145 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:3540] 460 653 625 398 436 476 283 670 466 577 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:3540] 41 162 15 182 155 185 169 110 47 64 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ output   :List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ comp            : 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_comp    : 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_comp     : 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ logratio        : 'rmult' num [1:3540, 1:4] 0.291 -0.4759 -0.4983 -0.3126 0.2044 1.2022 1.5804 1.3354 1.3666 1.4313 0.6298 -0.8348 1.3223 -0.0314 -0.6875 1.7| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3767 0.3183 0.1881 0.3646 0.4521 0.0688 0.0341 0.0285 0.0528 0.0597 0.2064 0.0813 0.3393 0.1799 0.0778 0.3197 0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "z1_1" "z2_1" "z3_1" "z4_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_logratio: 'rmult' num [1:3540, 1:4] -0.29473 -0.29473 -0.29473 -0.29473 -0.29473 1.35958 1.35958 1.35958 1.35958 1.35958 0.00968 0.00968 0.00968 0.00| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.3432 0.3432 0.3432 0.3432 0.3432 0.0502 0.0502 0.0502 0.0502 0.0502 0.1731 0.1731 0.1731 0.1731 0.1731 0.3499 0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "bTST" "bWAKE" "bMVPA" "bLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "bz1_1" "bz2_1" "bz3_1" "bz4_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_logratio : 'rmult' num [1:3540, 1:4] 0.58577 -0.18117 -0.20356 -0.01787 0.49911 -0.1574 0.22084 -0.02418 0.00702 0.07172 0.62011 -0.84448 1.31261 -0.0| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:3540, 1:5] 0.2233 0.1965 0.1234 0.1948 0.2578 0.279 0.1438 0.1277 0.1928 0.233 0.2426 0.0995 0.4416 0.1905 0.0879 0.1859 0.2| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "wTST" "wWAKE" "wMVPA" "wLPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "wz1_1" "wz2_1" "wz3_1" "wz4_1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dataout         : num [1:3540, 1:27] 0.377 0.318 0.188 0.365 0.452 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:27] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ total           : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ sbp             : num [1:4, 1:5] 1 1 0 0 1 -1 0 0 -1 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ psi             : num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ datain   :Classes ‘data.table’ and 'data.frame':	3540 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "index")= int(0) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "__ID")= int [1:3540] 981 982 983 984 985 986 987 988 989 990 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform       : chr "clr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ psi             : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : chr "ID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ dataout  :Classes ‘data.table’ and 'data.frame':	3540 obs. of  37 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:3540] 185 185 185 185 185 185 185 185 185 185 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:3540] 1 2 3 4 5 6 7 8 9 10 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:3540] 4 7 3 2 8 8 6 2 5 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:3540] 494 494 494 494 494 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:3540] 72.2 72.2 72.2 72.2 72.2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:3540] 249 249 249 249 249 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:3540] 504 504 504 504 504 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:3540] 120 120 120 120 120 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:3540] 30 30 30 30 30 30 30 30 30 30 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:3540] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST     : num [1:3540] 0.377 0.318 0.188 0.365 0.452 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE    : num [1:3540] 0.0688 0.0341 0.0285 0.0528 0.0597 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA    : num [1:3540] 0.2064 0.0813 0.3393 0.1799 0.0778 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA     : num [1:3540] 0.32 0.454 0.434 0.276 0.303 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB      : num [1:3540] 0.0285 0.1126 0.0104 0.1264 0.1076 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bTST    : num [1:3540] 0.343 0.343 0.343 0.343 0.343 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bWAKE   : num [1:3540] 0.0502 0.0502 0.0502 0.0502 0.0502 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bMVPA   : num [1:3540] 0.173 0.173 0.173 0.173 0.173 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bLPA    : num [1:3540] 0.35 0.35 0.35 0.35 0.35 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bSB     : num [1:3540] 0.0836 0.0836 0.0836 0.0836 0.0836 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wTST    : num [1:3540] 0.223 0.197 0.123 0.195 0.258 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wWAKE   : num [1:3540] 0.279 0.144 0.128 0.193 0.233 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wMVPA   : num [1:3540] 0.2426 0.0995 0.4416 0.1905 0.0879 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wLPA    : num [1:3540] 0.186 0.275 0.279 0.145 0.169 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wSB     : num [1:3540] 0.0693 0.2853 0.028 0.2771 0.2519 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z1_1    : num [1:3540] 0.291 -0.476 -0.498 -0.313 0.204 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z2_1    : num [1:3540] 1.2 1.58 1.34 1.37 1.43 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z3_1    : num [1:3540] 0.6298 -0.8348 1.3223 -0.0314 -0.6875 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ z4_1    : num [1:3540] 1.71 0.986 2.637 0.553 0.731 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz1_1   : num [1:3540] -0.295 -0.295 -0.295 -0.295 -0.295 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz2_1   : num [1:3540] 1.36 1.36 1.36 1.36 1.36 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz3_1   : num [1:3540] 0.00968 0.00968 0.00968 0.00968 0.00968 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ bz4_1   : num [1:3540] 1.01 1.01 1.01 1.01 1.01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz1_1   : num [1:3540] 0.5858 -0.1812 -0.2036 -0.0179 0.4991 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz2_1   : num [1:3540] -0.1574 0.22084 -0.02418 0.00702 0.07172 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz3_1   : num [1:3540] 0.62 -0.844 1.313 -0.041 -0.697 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ wz4_1   : num [1:3540] 0.6975 -0.0264 1.6252 -0.4588 -0.2808 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform: chr "ilr"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar    : chr "ID"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cilr_wide</span> <span class="op">&lt;-</span> <span class="fu">complr</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">]</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cilr_wide</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ comp            : 'acomp' num [1:266, 1:5] 0.3767 0.3569 0.2771 0.4357 0.3678 0.0688 0.0437 0.0826 0.0368 0.05 0.2064 0.0785 0.0229 0.0716 0.0749 0.3197 0.3| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_comp    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_comp     : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ logratio        : 'rmult' num [1:266, 1:4] 0.291 -0.339 0.211 -0.218 -0.232 1.202 1.484 0.855 1.747 1.412 0.63 -0.949 -2.076 -0.943 -0.985 1.71 0.386 0.484 0.108 0.228 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "orig")= 'acomp' num [1:266, 1:5] 0.3767 0.3569 0.2771 0.4357 0.3678 0.0688 0.0437 0.0826 0.0368 0.05 0.2064 0.0785 0.0229 0.0716 0.0749 0.3197 0.3| __truncated__ ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "V")= num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "ilr1" "ilr2" "ilr3" "ilr4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ between_logratio: NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ within_logratio : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data            :Classes ‘data.table’ and 'data.frame':	266 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID    : num [1:266] 185 186 187 188 189 190 191 192 193 194 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time  : num [1:266] 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress: num [1:266] 4 3 4 0 0 2 4 4 0 2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST   : num [1:266] 542 514 399 627 530 345 415 471 350 267 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE  : num [1:266] 99 63 119 53 72 204 37 179 56 50 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA  : num [1:266] 297 113 33 103 108 244 88 84 25 113 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA   : num [1:266] 460 475 591 353 424 516 781 477 657 699 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB    : num [1:266] 41 275 298 303 307 131 119 229 351 311 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age   : num [1:266] 30 20 22 27 22 25 21 20 20 32 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female: num [1:266] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ output   :List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ comp            : 'acomp' num [1:266, 1:5] 0.3767 0.3569 0.2771 0.4357 0.3678 0.0688 0.0437 0.0826 0.0368 0.05 0.2064 0.0785 0.0229 0.0716 0.0749 0.3197 0.3| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_comp    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_comp     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ logratio        : 'rmult' num [1:266, 1:4] 0.291 -0.339 0.211 -0.218 -0.232 1.202 1.484 0.855 1.747 1.412 0.63 -0.949 -2.076 -0.943 -0.985 1.71 0.386 0.484 0.108 0.228 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "orig")= 'acomp' num [1:266, 1:5] 0.3767 0.3569 0.2771 0.4357 0.3678 0.0688 0.0437 0.0826 0.0368 0.05 0.2064 0.0785 0.0229 0.0716 0.0749 0.3197 0.3| __truncated__ ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "V")= num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:4] "ilr1" "ilr2" "ilr3" "ilr4"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ between_logratio: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ within_logratio : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dataout         : num [1:266, 1:9] 0.377 0.357 0.277 0.436 0.368 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:9] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ total           : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ sbp             : num [1:4, 1:5] 1 1 0 0 1 -1 0 0 -1 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ psi             : num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ datain   :Classes ‘data.table’ and 'data.frame':	266 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:266] 185 186 187 188 189 190 191 192 193 194 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:266] 1 1 1 1 1 1 1 1 1 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:266] 4 3 4 0 0 2 4 4 0 2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:266] 542 514 399 627 530 345 415 471 350 267 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:266] 99 63 119 53 72 204 37 179 56 50 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:266] 297 113 33 103 108 244 88 84 25 113 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:266] 460 475 591 353 424 516 781 477 657 699 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:266] 41 275 298 303 307 131 119 229 351 311 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:266] 30 20 22 27 22 25 21 20 20 32 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:266] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform       : chr "ilr"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ psi             : num [1:5, 1:4] 0.548 0.548 -0.365 -0.365 -0.365 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ sbp             : num [1:4, 1:5] 1 1 0 0 1 -1 0 0 -1 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ parts           : chr [1:5] "TST" "WAKE" "MVPA" "LPA" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar           : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ total           : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ dataout  :Classes ‘data.table’ and 'data.frame':	266 obs. of  19 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ID      : num [1:266] 185 186 187 188 189 190 191 192 193 194 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Time    : num [1:266] 1 1 1 1 1 1 1 1 1 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Stress  : num [1:266] 4 3 4 0 0 2 4 4 0 2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST_raw : num [1:266] 542 514 399 627 530 345 415 471 350 267 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE_raw: num [1:266] 99 63 119 53 72 204 37 179 56 50 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA_raw: num [1:266] 297 113 33 103 108 244 88 84 25 113 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA_raw : num [1:266] 460 475 591 353 424 516 781 477 657 699 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB_raw  : num [1:266] 41 275 298 303 307 131 119 229 351 311 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Age     : num [1:266] 30 20 22 27 22 25 21 20 20 32 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Female  : num [1:266] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TST     : num [1:266] 0.377 0.357 0.277 0.436 0.368 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ WAKE    : num [1:266] 0.0688 0.0437 0.0826 0.0368 0.05 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ MVPA    : num [1:266] 0.2064 0.0785 0.0229 0.0716 0.0749 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LPA     : num [1:266] 0.32 0.33 0.41 0.245 0.294 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ SB      : num [1:266] 0.0285 0.191 0.2069 0.2106 0.213 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ilr1    : num [1:266] 0.291 -0.339 0.211 -0.218 -0.232 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ilr2    : num [1:266] 1.202 1.484 0.855 1.747 1.412 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ilr3    : num [1:266] 0.63 -0.949 -2.076 -0.943 -0.985 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ilr4    : num [1:266] 1.71 0.386 0.484 0.108 0.228 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ transform: chr "ilr"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ idvar    : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "complr"</span>
 </code></pre></div>
     </div>

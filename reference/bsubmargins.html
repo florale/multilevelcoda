@@ -78,14 +78,15 @@ It is recommended that users run substitution model using the <code><a href="sub
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bsubmargins</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">delta</span>,</span>
-<span>  <span class="va">basesub</span>,</span>
-<span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ref <span class="op">=</span> <span class="st">"clustermean"</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"between"</span>,</span>
+<span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  at <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">base</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">"proportional"</span>,</span>
 <span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response"</span>, <span class="st">"linear"</span><span class="op">)</span>,</span>
-<span>  comparison <span class="op">=</span> <span class="st">"one-to-one"</span>,</span>
 <span>  cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"one-to-one"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -100,19 +101,6 @@ It is recommended that users run substitution model using the <code><a href="sub
 
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
 <dd><p>A integer, numeric value or vector indicating the amount of substituted change between compositional parts.</p></dd>
-
-
-<dt id="arg-basesub">basesub<a class="anchor" aria-label="anchor" href="#arg-basesub"></a></dt>
-<dd><p>A base substitution.
-Can be a <code>data.frame</code> or <code>data.table</code> of the base possible substitution of compositional parts,
-which can be computed using function <code><a href="build.basesub.html">build.basesub</a></code>.
-If <code>"one-to-all"</code>, all possible one-to-remaining reallocations are estimated.
-If <code>NULL</code>, all possible one-to-one reallocations are estimated.</p></dd>
-
-
-<dt id="arg-summary">summary<a class="anchor" aria-label="anchor" href="#arg-summary"></a></dt>
-<dd><p>A logical value to obtain summary statistics instead of the raw values. Default is <code>TRUE</code>.
-Currently only support outputing raw values for model using grandmean as reference composition.</p></dd>
 
 
 <dt id="arg-ref">ref<a class="anchor" aria-label="anchor" href="#arg-ref"></a></dt>
@@ -130,6 +118,21 @@ Should the estimate of multilevel models focus on the <code>"between"</code> and
 Single-level models are default to <code>"aggregate"</code>.</p></dd>
 
 
+<dt id="arg-summary">summary<a class="anchor" aria-label="anchor" href="#arg-summary"></a></dt>
+<dd><p>A logical value to obtain summary statistics instead of the raw values. Default is <code>TRUE</code>.
+Currently only support outputing raw values for model using grandmean as reference composition.</p></dd>
+
+
+<dt id="arg-at">at<a class="anchor" aria-label="anchor" href="#arg-at"></a></dt>
+<dd><p>An optional named list of levels for the corresponding variables in the reference grid.</p></dd>
+
+
+<dt id="arg-base">base<a class="anchor" aria-label="anchor" href="#arg-base"></a></dt>
+<dd><p>An optional base substitution.
+Can be a <code>data.frame</code> or <code>data.table</code> of the base possible substitution of compositional parts,
+which can be computed using function <code><a href="build.base.html">build.base</a></code>.</p></dd>
+
+
 <dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
 <dd><p>A character value specifying the weight to use in calculation of the reference composition.
 If <code>"equal"</code>, give equal weight to units (e.g., individuals).
@@ -145,15 +148,18 @@ If <code>"linear"</code>, results are returned on the scale of the linear predic
 that is without applying the inverse link function or other transformations.</p></dd>
 
 
-<dt id="arg-comparison">comparison<a class="anchor" aria-label="anchor" href="#arg-comparison"></a></dt>
-<dd><p>internally used only.</p></dd>
-
-
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>Number of cores to use when executing the chains in parallel,
 we recommend setting the <code>mc.cores</code> option
 to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
-For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.</p></dd>
+For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
+Default to <code>"one-to-one"</code>.</p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>A character string to indicate the type of substitution to be made.
+If <code>"one-to-all"</code>, all possible one-to-remaining reallocations are estimated.
+If <code>"one-to-one"</code>, all possible one-to-one reallocations are estimated.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -204,9 +210,10 @@ The first six lists contain the results of the substitution estimation for a com
 <span class="r-in"><span>             chains <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
 <span class="r-in"><span>             backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>             </span></span>
-<span class="r-in"><span><span class="va">subm</span> <span class="op">&lt;-</span> <span class="fu">bsubmargins</span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, basesub <span class="op">=</span> <span class="va">psub</span>, delta <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">subm</span> <span class="op">&lt;-</span> <span class="fu">bsubmargins</span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, base <span class="op">=</span> <span class="va">psub</span>, delta <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> The following variables can neither be found in 'data' nor in 'data2':</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> 'bilr1', 'bilr2', 'bilr3', 'bilr4', 'wilr1', 'wilr2', 'wilr3', 'wilr4'</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
