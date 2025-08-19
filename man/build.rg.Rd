@@ -4,7 +4,7 @@
 \alias{build.rg}
 \title{Reference Grid for \code{substitution} model.}
 \usage{
-build.rg(object, ref, level, weight, fill = FALSE)
+build.rg(object, ref, at, level, weight, fill = FALSE)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object.}
@@ -15,6 +15,8 @@ a \code{data.frame} or \code{data.table} of user's specified reference grid cons
 of combinations of covariates over which predictions are made.
 User's specified reference grid is only possible for simple substitution.
 Single level models are default to \code{"grandmean"}.}
+
+\item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
 
 \item{level}{A character string or vector.
 Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?

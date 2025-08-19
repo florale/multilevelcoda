@@ -8,9 +8,13 @@
 #' @param transform A character value naming a log ratio transformation to be applied on compositional data.
 #' Can be either \code{"ilr"} (isometric logratio), \code{"alr"} (additive logratio), or \code{"clr"} (centered logratio).
 #' Default is \code{"ilr"}.
-#' @param parts A character vector specifying the names of compositional variables to be used.
-#' @param sbp A signary matrix indicating sequential binary partition.
+#' @param parts A character vector specifying the names of compositional variables to be used. 
+#' For multiple compositions, a list of character vectors can be supplied.
+#' @param sbp A signary matrix indicating sequential binary partition when \code{transform = "ilr"}.
+#' If not supplied, a default sequential binary partition (sbp) will be built using function \code{\link{build.sbp}}.
+#' For multiple compositions, a list of signary sbps can be supplied.
 #' @param total A numeric value of the total amount to which the compositions should be closed.
+#' For multiple compositions, a list of numeric values can be supplied.
 #' Default is \code{1}.
 #' @param idvar Only for multilevel data, a character string specifying the name of the variable containing IDs.
 #' 
@@ -41,7 +45,7 @@
 #'   \item{\code{logratio}}{ Log ratio transform of composition.}
 #'   \item{\code{between_logratio}}{ Log ratio transform of between-person composition.}
 #'   \item{\code{within_logratio}}{ Log ratio transform of within-person composition.}
-#'   \item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
+#'   \item{\code{data}}{ The user's dataset or imputed dataset if the iiut data contains zeros.}
 #'   \item{\code{transform}}{ Type of transform applied on compositional data.}
 #'   \item{\code{parts}}{ Names of compositional variables.}
 #'   \item{\code{idvar}}{ Name of the variable containing IDs.}
@@ -56,16 +60,17 @@
 #'                 idvar = "ID", total = 1440)
 #' str(cilr)
 #' 
-#' calr <- complr(data = mcompd, sbp = sbp,
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#' calr <- complr(data = mcompd, 
+#'                 parts = list(c("TST", "WAKE"), c("MVPA", "LPA", "SB")),
+#'                 total = list(c(1440), c(1440)),
 #'                 idvar = "ID",
-#'                 transform = "alr")
+#'                 transform = "ilr")
 #' str(calr)
 #' 
 #' cclr <- complr(data = mcompd, sbp = sbp,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID",
-#'                  transform = "clr")
+#'                  transform = "ilr")
 #' str(cclr)
 #' 
 #' cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,
@@ -85,34 +90,13 @@ complr <- function(data,
   }
   
   tmp <- as.data.table(data)
-  
-  # check NAs
-  if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) any(is.na(x)))))) {
-    stop(paste(
-      "This dataset of composition contains missing data;",
-      "  Missind data hinder the application of compositional data analysis",
-      "  because the analysis is based on log-ratios",
-      "  Please deal with missing data before running 'complr'.",
-      sep = "\n"))
-  }
-  
-  # check 0s
-  if (isTRUE(any(apply(tmp[, parts, with = FALSE], 2, function(x) x == 0)))) {
-    stop(paste(
-      "This dataset of composition contains zero(s);",
-      "  Zeros hinder the application of compositional data analysis",
-      "  because the analysis is based on log-ratios",
-      "  Please deal with zeros before running 'complr'.",
-      sep = "\n"))
-  }
-  
   # check single level or multilevel
   if (is.null(idvar)) {
     shape <- "wide"
   } else {
     shape <- "long"
   }
-
+  
   # allow one transform at a time
   if (length(transform) > 1) {
     stop("only one type of transforms can be done at a time.")
@@ -121,32 +105,6 @@ complr <- function(data,
   # check transform
   if (isFALSE(any(transform %in% c("ilr", "alr", "clr")))) {
     stop(" 'transform' should be one of the following: \"ilr\", \"alr\", \"clr\".")
-  }
-  
-  # specific for ilr
-  if (identical(transform, "ilr")) {
-    if (missing(sbp)) { # build default sbp
-      message(" A sequential binary partition (sbp), is required for ilr transform but is not supplied. 
- A default sbp, which is a pivot balance, will be applied.")
-      sbp <- build.sbp(parts = parts)
-   }
-    if (isFALSE(inherits(sbp, "matrix"))) {
-      stop(sprintf("sbp is a '%s' but must be a matrix.",
-                   paste(class(sbp), collapse = " ")))
-    }
-    if (isTRUE(any(apply(sbp, 2, function(x) x %nin% c(-1, 0, 1))))) {
-      stop("sbp should only contain 1, -1 and 0 (a partition)")
-    }
-    if (isFALSE(identical(length(parts), ncol(sbp)))) {
-      stop(sprintf(
-        "The number of compositional variables in parts (%d) 
-  must be the same as in sbp (%d).",
-  length(parts),
-  ncol(sbp)))
-    }
-    psi <- gsi.buildilrBase(t(sbp))
-  } else {
-    psi <- sbp <- NULL
   }
   
   # check var names
@@ -159,119 +117,228 @@ complr <- function(data,
         sep = "\n"))
   }
   
-  # composition and lr
-  if (shape == "wide") {
-    # make composition
-    tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
-    bcomp <- wcomp <- NULL
-    colnames(tcomp) <- parts
-    
-    # ILR
-    if (identical(transform, "ilr")) {
-      tilr <- ilr(tcomp, V = psi)
-      bilr <- wilr <- NULL
-      colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
-      
-    } else if (identical(transform, "alr")) {
-      talr <- alr(tcomp)
-      balr <- walr <- NULL
-      colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
-      
-    } else if (identical(transform, "clr")) {
-      tclr <- clr(tcomp)
-      bclr <- wclr <- NULL
-      colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))
+  
+  ## CHECK NUMBER OF COMPOSITION HERE?
+  # check if parts is a list
+  if (is.list(parts)) {
+    if (length(parts) == 0) {
+      stop("parts cannot be an empty list.")
     }
+    if (isTRUE(any(sapply(parts, function(x) !is.character(x))))) {
+      stop("parts should be a character vector or a list of character vectors.")
+    }
+    
+  } else if (is.character(parts)) {
+    parts <- list(parts)
+  } else {
+    stop("parts should be a character vector or a list of character vectors.")
   }
   
-  if (shape == "long") {
-    # make composition
-    # combined
-    tcomp <- acomp(tmp[, parts, with = FALSE], total = total)
-    # between-person
-    for (v in parts) {
-      tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
+  # loop through list to compute composition and lr 
+  output <- vector("list", length = length(parts))
+  
+  for (i in seq_along(parts)) {
+    
+    parts_i <- parts[[i]]
+    total_i <- total[[i]]
+    
+    if (length(parts) == 1) {
+      sbp_i   <- sbp
     }
-    bcomp <- acomp(tmp[, parts, with = FALSE], total = total)
+    else {
+      if (length(parts) != length(total)) {
+        stop("parts and total should have the same length.")
+      }
+      if (isFALSE(is.null(sbp))) {
+        if (length(parts) != length(sbp)) {
+          stop("parts and sbp should have the same length.")
+        }
+      }
+      sbp_i   <- sbp[[i]]
+    }
     
-    # within-person 
-    wcomp <- tcomp - bcomp
+    # check NAs
+    if (isTRUE(any(apply(tmp[, parts_i, with = FALSE], 2, function(x) any(is.na(x)))))) {
+      stop(paste(
+        "This dataset of composition contains missing data;",
+        "  Missind data hinder the application of compositional data analysis",
+        "  because the analysis is based on log-ratios",
+        "  Please deal with missing data before running 'complr'.",
+        sep = "\n"))
+    }
     
-    # name them for later use
-    colnames(bcomp) <- paste0("b", parts)
-    colnames(wcomp) <- paste0("w", parts)
-    colnames(tcomp) <- parts
+    # check 0s
+    if (isTRUE(any(apply(tmp[, parts_i, with = FALSE], 2, function(x) x == 0)))) {
+      stop(paste(
+        "This dataset of composition contains zero(s);",
+        "  Zeros hinder the application of compositional data analysis",
+        "  because the analysis is based on log-ratios",
+        "  Please deal with zeros before running 'complr'.",
+        sep = "\n"))
+    }
     
-    # ILR ---------------
+    # specific for ilr
     if (identical(transform, "ilr")) {
-      
-      tilr <- ilr(tcomp, V = psi)
-      bilr <- ilr(bcomp, V = psi)
-      wilr <- ilr(wcomp, V = psi)
-      
-      colnames(bilr)  <- paste0("bilr", seq_len(ncol(bilr)))
-      colnames(wilr)  <- paste0("wilr", seq_len(ncol(wilr)))
-      colnames(tilr)  <- paste0("ilr", seq_len(ncol(tilr)))
+      if (is.null(sbp_i)) { # build default sbp
+        message(" A sequential binary partition (sbp), is required for ilr transform but is not supplied. 
+ A default sbp, which is a pivot balance, will be applied.")
+        sbp_i <- build.sbp(parts = parts_i)
+      }
+      if (isFALSE(inherits(sbp_i, "matrix"))) {
+        message(sprintf("sbp is a '%s' but must be a matrix.",
+                        paste(class(sbp_i), collapse = " ")))
+        sbp_i <- as.matrix(sbp_i)
+      }
+      if (isTRUE(any(apply(sbp_i, 2, function(x) x %nin% c(-1, 0, 1))))) {
+        stop("sbp should only contain 1, -1 and 0 (a partition)")
+      }
+      if (isFALSE(identical(length(parts_i), ncol(sbp_i)))) {
+        stop(sprintf(
+          "The number of compositional variables in parts (%d) 
+  must be the same as in sbp (%d).",
+          length(parts_i),
+          ncol(sbp_i)))
+      }
+      psi_i <- gsi.buildilrBase(t(sbp_i))
+    } else {
+      psi_i <- sbp_i <- NULL
     }
     
-    # ALR ---------------
-    if (identical(transform, "alr")) {
+    # MAKE COMPOSITION AND LOG RATIO TRANSFORMATIONS ----------------
+    if (shape == "wide") {
+      # make composition
+      tcomp_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
+      bcomp_i <- wcomp_i <- NULL
+      colnames(tcomp_i) <- parts_i
       
-      talr <- alr(tcomp)
-      balr <- alr(bcomp)
-      walr <- alr(wcomp)
-      
-      colnames(balr)  <- paste0("balr", seq_len(ncol(balr)))
-      colnames(walr)  <- paste0("walr", seq_len(ncol(walr)))
-      colnames(talr)  <- paste0("alr", seq_len(ncol(talr)))
-    }
+      # ILR
+      if (identical(transform, "ilr")) {
+        tilr_i <- ilr(tcomp_i, V = psi_i)
+        bilr_i <- wilr_i <- NULL
+        colnames(tilr_i)  <- paste0("ilr", seq_len(ncol(tilr_i)))
+        
+      } else if (identical(transform, "alr")) {
+        talr_i <- alr(tcomp_i)
+        balr_i <- walr_i <- NULL
+        colnames(talr_i)  <- paste0("alr", seq_len(ncol(talr_i)))
+        
+      } else if (identical(transform, "clr")) {
+        tclr_i <- clr(tcomp_i)
+        bclr_i <- wclr_i <- NULL
+        colnames(tclr_i)  <- paste0("clr", seq_len(ncol(tclr_i)))
+      }
+    }   
     
-    # CLR ---------------
-    if (identical(transform, "clr")) {
+    if (shape == "long") {
+      # make composition
+      # combined
+      tcomp_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
+      # between-person
+      for (v in parts_i) {
+        tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
+      }
+      bcomp_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
       
-      tclr <- clr(tcomp)
-      bclr <- clr(bcomp)
-      wclr <- clr(wcomp)
+      # within-person 
+      wcomp_i <- tcomp_i - bcomp_i
       
-      colnames(bclr)  <- paste0("bclr", seq_len(ncol(bclr)))
-      colnames(wclr)  <- paste0("wclr", seq_len(ncol(wclr)))
-      colnames(tclr)  <- paste0("clr", seq_len(ncol(tclr)))
-    }
+      # name them for later use
+      colnames(bcomp_i) <- paste0("b", parts_i)
+      colnames(wcomp_i) <- paste0("w", parts_i)
+      colnames(tcomp_i) <- parts_i
+      
+      ## ILR ---------------
+      if (identical(transform, "ilr")) {
+        
+        tilr_i <- ilr(tcomp_i, V = psi_i)
+        bilr_i <- ilr(bcomp_i, V = psi_i)
+        wilr_i <- ilr(wcomp_i, V = psi_i)
+        
+        colnames(bilr_i)  <- paste0("bz", seq_len(ncol(bilr_i)), "_", i)
+        colnames(wilr_i)  <- paste0("wz", seq_len(ncol(wilr_i)), "_", i)
+        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", i)
+      }
+      
+      ## ALR ---------------
+      if (identical(transform, "alr")) {
+        
+        talr_i <- alr(tcomp_i)
+        balr_i <- alr(bcomp_i)
+        walr_i <- alr(wcomp_i)
+        
+        colnames(balr_i)  <- paste0("bz", seq_len(ncol(balr_i)), "_", i)
+        colnames(walr_i)  <- paste0("bz", seq_len(ncol(walr_i)), "_", i)
+        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", i)
+      }
+      
+      ## CLR ---------------
+      if (identical(transform, "clr")) {
+        
+        tclr_i <- clr(tcomp_i)
+        bclr_i <- clr(bcomp_i)
+        wclr_i <- clr(wcomp_i)
+        
+        colnames(bclr_i)  <- paste0("bz", seq_len(ncol(bclr_i)), "_", i)
+        colnames(wclr_i)  <- paste0("bz", seq_len(ncol(wclr_i)), "_", i)
+        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", i)
+      }
+    }     
+    
+    logratio_i <-  if (exists("tilr_i")) (tilr_i)
+    else if (exists("talr_i")) (talr_i)
+    else if (exists("tclr_i")) (tclr_i)
+    
+    between_logratio_i <- if (exists("bilr_i")) (bilr_i)
+    else if (exists("balr_i")) (balr_i)
+    else if (exists("bclr_i")) (bclr_i)
+    else (NULL)
+    
+    within_logratio_i <- if (exists("wilr_i")) (wilr_i)
+    else if (exists("walr_i")) (walr_i)
+    else if (exists("wclr_i")) (wclr_i) 
+    else (NULL)
+    
+    # cbind data output
+    dataout_i <- cbind(tcomp_i, bcomp_i, wcomp_i,
+                       logratio_i, between_logratio_i, within_logratio_i)
+    
+    output[[i]] <- list(
+      comp = tcomp_i,
+      between_comp = bcomp_i,
+      within_comp = wcomp_i,
+      
+      logratio = logratio_i,
+      between_logratio = between_logratio_i,
+      within_logratio = within_logratio_i,
+      
+      dataout = dataout_i,
+      parts = parts_i,
+      total = total_i,
+      sbp = sbp_i,
+      psi = psi_i
+      
+    )
   }
-  logratio <-  if (exists("tilr")) (tilr)
-  else if (exists("talr")) (talr)
-  else if (exists("tclr")) (tclr)
   
-  between_logratio <- if (exists("bilr")) (bilr)
-  else if (exists("balr")) (balr)
-  else if (exists("bclr")) (bclr)
-  else (NULL)
+  # PATCH OUTPUT ----------------
+  parts_all <- unlist(lapply(output, function(x) x$parts))
+  data.table::setnames(tmp, parts_all, paste0(parts_all, "_raw"))
   
-  within_logratio <- if (exists("wilr")) (wilr)
-  else if (exists("walr")) (walr)
-  else if (exists("wclr")) (wclr) 
-  else (NULL)
+  dataout <- do.call(cbind, lapply(output, function(x) x$dataout))
+  dataout <- cbind(tmp, dataout)
   
-  out <- structure(
+  complr_out <- structure(
     list(
-      comp = tcomp,
-      between_comp = bcomp,
-      within_comp = wcomp,
-      logratio = logratio,
-      between_logratio = between_logratio,
-      within_logratio = within_logratio,
-      data = as.data.table(data),
+      output = output,
+      datain = as.data.table(tmp),
+      dataout = dataout,
       transform = transform,
-      psi = if(exists("psi")) (psi) else (NULL),
-      sbp = if(exists("sbp")) (sbp) else (NULL),
-      parts = parts,
-      idvar = idvar,
-      total = total
+      idvar = idvar
     ),
     class = "complr"
   )
-  out
-
+  complr_out
+  
 }
 
 #' Indices from a (dataset of) Multilevel Composition(s) (deprecated.)

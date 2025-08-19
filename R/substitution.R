@@ -17,33 +17,38 @@
 #' @param level A character string or vector.
 #' Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
 #' Single-level models are default to \code{"aggregate"}.
-#' @param basesub A base substitution. 
-#' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
-#' which can be computed using function \code{\link{build.basesub}}.
-#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
-#' If \code{NULL}, all possible one-to-one reallocations are estimated.
+#' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+#' Currently only support outputing raw values for model using grandmean as reference composition.
 #' @param aorg A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
 #' Should the estimate at each level of the reference grid (\code{FALSE})
 #' or their average (\code{TRUE}) be returned?
 #' Default is \code{TRUE}.
 #' Only applicable for model with covariates in addition to
 #' the isometric log-ratio coordinates (i.e., adjusted model).
-#' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
-#' Currently only support outputing raw values for model using grandmean as reference composition.
+#' @param at An optional named list of levels for the corresponding variables in the reference grid.
+#' @param type A character string to indicate the type of substitution to be made.
+#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+#' If \code{"one-to-one"}, all possible one-to-one reallocations are estimated. 
+#' @param base An optional base substitution. 
+#' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+#' which can be computed using function \code{\link{build.base}}.
+#' @param parts A optional character string specifying names of compositional parts that should be considered
+#' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+#' in the \code{complr} object.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 #' (e.g., observations across individuals).
 #' Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.
-#' @param cores Number of cores to use when executing the chains in parallel,
-#' we recommend setting the \code{mc.cores} option
-#' to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
-#' For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 #' @param scale Either \code{"response"} or \code{"linear"}.
 #' If \code{"response"}, results are returned on the scale of the response variable.
 #' If \code{"linear"}, results are returned on the scale of the linear predictor term,
 #' that is without applying the inverse link function or other transformations.
-#' @param comparison internally used only.
+#' @param cores Number of cores to use when executing the chains in parallel,
+#' we recommend setting the \code{mc.cores} option
+#' to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
+#' For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
+#' Default to \code{"one-to-one"}.
 #' @param ... currently ignored.
 #'
 #' @return A list containing the results of multilevel compositional substitution model.
@@ -68,8 +73,8 @@
 #'
 #'   # model with compositional predictor at between and within-person levels
 #'   fit1 <- brmcoda(complr = cilr,
-#'                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                      wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                   formula = Stress ~ bz2_1 + bz2_1 + bz2_1 + bz2_1 +
+#'                                      wz2_1 + wz2_1 + wz2_1 + wz2_1 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
@@ -78,7 +83,7 @@
 #'   
 #'   # one to all reallocation at between and within-person levels
 #'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
-#'                        basesub = "one-to-all")
+#'                        type = "one-to-all")
 #'   summary(sub2) 
 #'   
 #'   # model with compositional predictor at aggregate level of variance
@@ -93,13 +98,15 @@ substitution <- function(object,
                          delta,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "aggregate"),
-                         basesub,
-                         aorg = TRUE,
                          summary = TRUE,
+                         aorg = TRUE,
+                         at = NULL,
+                         parts,
+                         base,
                          weight = c("equal", "proportional"),
                          scale = c("response", "linear"),
-                         comparison = NULL,
                          cores = NULL,
+                         type,
                          ...) {
   
   if (missing(object)) {
@@ -160,37 +167,52 @@ substitution <- function(object,
       stop("Currently can't output raw values when 'clustermean' is used as reference composition.")
     }
   }
-
-  # base substitution
-  if (missing(basesub)) {
-    basesub <- build.basesub(parts = object$complr$parts)
-    names(basesub) <- object$complr$parts
-    comparison <- "one-to-one"
-    
-  } 
-  else if(isFALSE(missing(basesub))) {
-      if (inherits(basesub, "character") && identical(basesub, "one-to-all")) {
-      basesub <- build.basesub(parts = object$complr$parts, comparison = "one-to-all")
-      names(basesub) <- object$complr$parts
-      comparison <- "one-to-all"
-      
-    } else if (inherits(basesub, c("data.table", "data.frame", "matrix"))) {
-      stop("Currently not support customised base substitution, this will be implemented in the future.")
-      
-      # if (isFALSE(identical(ncol(basesub), length(object$complr$parts)))) {
-      #   stop(sprintf(
-      #     "The number of columns in 'basesub' (%d) should be the same as the compositional parts in 'parts' (%d).",
-      #     ncol(basesub),
-      #     length(object$complr$parts)
-      #   ))
-      # }
-      # if (isFALSE(identical(colnames(basesub), object$complr$parts))) {
-      #   stop(sprintf(
-      #     "The names of compositional parts should be the same in 'basesub' (%s) and 'parts' (%s).",
-      #     colnames(basesub),
-      #     object$complr$parts
-      #   ))
-      # }
+  
+  # check parts
+  if (missing(parts)) {
+    message(sprintf("No 'parts' specified, %s will be used as the composition for substitution analysis.",
+                    paste(object$complr$output[[1]]$parts, collapse = ", ")))
+    parts <- object$complr$output[[1]]$parts
+  } else {
+    if (isFALSE(inherits(parts, "character"))) {
+      stop(" 'parts' should be a character vector of compositional parts.")
+    }
+    ## parts should be identical with either one of the parts presented in output of complr
+    if (isFALSE((any(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))))) {
+      stop(sprintf(
+        "The specified 'parts' (%s) are not found in the complr object.",
+        "  It should corespond to one set of compositional parts, either one of the following:",
+        "%s",
+        paste(parts, collapse = ", "),
+        invisible(lapply(object$complr$output, function(x) cat(paste(x$parts, collapse = ", "), "\n"))),
+        sep = "\n"))
+    }
+  }
+  ## get the index of which index elements of object$complr$output does the parts correspond to
+  parts_index <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
+  
+  # type
+  if (missing(type)) {
+    if (missing(base)) {
+      base <- build.base(parts = object$complr$output[[parts_index]]$parts)
+      names(base) <- object$complr$output[[parts_index]]$parts
+      type <- "one-to-one"
+    } else {
+      if (inherits(base, "data.frame") || inherits(base, "data.table")) {
+        type <- "one-to-one"
+      } else {
+        stop("If 'base' is provided, it should be a data frame or data table.")
+      }
+    }
+  } else {
+    if (inherits(type, "character") && identical(type, "one-to-one")) {
+      base <- build.base(parts = object$complr$output[[parts_index]]$parts)
+      names(base) <- object$complr$output[[parts_index]]$parts
+      type <- "one-to-one"
+    } else if (inherits(type, "character") && identical(type, "one-to-all")) {
+      base <- build.base(parts = object$complr$output[[parts_index]]$parts, type = "one-to-all")
+      names(base) <- object$complr$output[[parts_index]]$parts
+      type <- "one-to-all"
     }
   }
   
@@ -199,19 +221,29 @@ substitution <- function(object,
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   model_fixef_level <- NULL
-  model_fixef_coef <- NULL
+  model_fixef_coef  <- NULL
   
-  if (length(grep("bilr", model_fixef, value = T)) > 0) {
+  # grab the correct logratio names
+  z_vars  <- names(object$complr$output[[parts_index]]$logratio)
+  bz_vars <- names(object$complr$output[[parts_index]]$between_logratio)
+  wz_vars <- names(object$complr$output[[parts_index]]$within_logratio)
+  
+  if (length(grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
-    model_fixef_coef  <- append(model_fixef_coef, grep(".*bilr", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef,
+                                grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (length(grep("wilr", model_fixef, value = T)) > 0) {
+  if (length(grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "within")
-    model_fixef_coef  <- append(model_fixef_coef, grep(".*wilr", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef,
+                                grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if ((length(grep("ilr", model_fixef, value = T)) > 0) && (length(grep("[b|w]ilr", model_fixef, value = T)) == 0)) {
+  if ((length(grep(paste0(z_vars, collapse = "|"), model_fixef, value = T)) > 0) && (length(grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = T)) == 0)) {
     model_fixef_level <- append(model_fixef_level, "aggregate")
-    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, setdiff(
+      grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
+      grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
+    ))
   }
   
   # single level or multilevel
@@ -285,14 +317,15 @@ substitution <- function(object,
       bout <- bsub(
         object = object,
         delta = delta,
-        basesub = basesub,
+        base = base,
+        parts = parts,
         aorg = aorg,
         summary = summary,
         ref = "grandmean",
         level = "between",
         weight = weight,
         scale = scale,
-        comparison = comparison,
+        type = type,
         cores = cores,
         ...)
     }
@@ -300,14 +333,15 @@ substitution <- function(object,
       bout <- bsub(
         object = object,
         delta = delta,
-        basesub = basesub,
+        base = base,
+        parts = parts,
         aorg = aorg,
         summary = summary,
         ref = ref,
         level = "between",
         weight = weight,
         scale = scale,
-        comparison = comparison,
+        type = type,
         cores = cores,
         ...)
     }
@@ -316,13 +350,14 @@ substitution <- function(object,
         bsubmargins(
           object = object,
           delta = delta,
-          basesub = basesub,
+          base = base,
+          parts = parts,
           summary = summary,
           ref = "clustermean",
           level = "between",
           weight = weight,
           scale = scale,
-          comparison = comparison,
+          type = type,
           cores = cores,
           ...)
     }
@@ -334,14 +369,15 @@ substitution <- function(object,
       wout <- wsub(
         object = object,
         delta = delta,
-        basesub = basesub,
+        base = base,
+        parts = parts,
         aorg = aorg,
         summary = summary,
         ref = "grandmean",
         level = "within",
         weight = weight,
         scale = scale,
-        comparison = comparison,
+        type = type,
         cores = cores,
         ...)
     }
@@ -349,14 +385,15 @@ substitution <- function(object,
       wout <- wsub(
         object = object,
         delta = delta,
-        basesub = basesub,
+        base = base,
+        parts = parts,
         aorg = aorg,
         summary = summary,
         ref = ref,
         level = "within",
         weight = weight,
         scale = scale,
-        comparison = comparison,
+        type = type,
         cores = cores,
         ...)
     }
@@ -365,13 +402,14 @@ substitution <- function(object,
         wsubmargins(
           object = object,
           delta = delta,
-          basesub = basesub,
+          base = base,
+          parts = parts,
           summary = summary,
           ref = "clustermean",
           level = "within",
           weight = weight,
           scale = scale,
-          comparison = comparison,
+          type = type,
           cores = cores,
           ...)
     }
@@ -383,14 +421,15 @@ substitution <- function(object,
       tout <- sub(
         object = object,
         delta = delta,
-        basesub = basesub,
+        base = base,
+        parts = parts,
         aorg = aorg,
         summary = summary,
         ref = "grandmean",
         level = "aggregate",
         weight = weight,
         scale = scale,
-        comparison = comparison,
+        type = type,
         cores = cores,
         ...)
     }
@@ -398,14 +437,15 @@ substitution <- function(object,
       tout <- sub(
         object = object,
         delta = delta,
-        basesub = basesub,
+        base = base,
+        parts = parts,
         aorg = aorg,
         summary = summary,
         ref = ref,
         level = "aggregate",
         weight = weight,
         scale = scale,
-        comparison = comparison,
+        type = type,
         cores = cores,
         ...)
     }
@@ -414,13 +454,14 @@ substitution <- function(object,
         submargins(
           object = object,
           delta = delta,
-          basesub = basesub,
+          base = base,
+          parts = parts,
           summary = summary,
           ref = "clustermean",
           level = "aggregate",
           weight = weight,
           scale = scale,
-          comparison = comparison,
+          type = type,
           cores = cores,
           ...)
     }
@@ -440,10 +481,10 @@ substitution <- function(object,
       ref = ref,
       level = level,
       weight = weight,
-      parts = object$complr$parts,
+      parts = parts,
       aorg = aorg,
       summary = summary,
-      comparison = if(exists("comparison")) (comparison) else (NULL)),
+      type = if(exists("type")) (type) else (NULL)),
     class = "substitution")
   
 }

@@ -26,19 +26,21 @@
 #'              chains = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
-#' subm <- bsubmargins(object = m, basesub = psub, delta = 5)
+#' subm <- bsubmargins(object = m, base = psub, delta = 5)
 #' }}
 #' @export
 bsubmargins <- function (object,
                          delta,
-                         basesub,
-                         summary = TRUE,
                          ref = "clustermean",
                          level = "between",
+                         summary = TRUE,
+                         at = NULL,
+                         parts,
+                         base,
                          weight = "proportional",
                          scale = c("response", "linear"),
-                         comparison = "one-to-one",
                          cores = NULL,
+                         type = "one-to-one",
                          ...) {
   
   ref   <- "clustermean"
@@ -46,18 +48,19 @@ bsubmargins <- function (object,
   
   d0 <- build.rg(object = object,
                  ref = ref,
+                 parts = parts,
                  level = level,
                  weight = weight,
                  fill = FALSE)
   
   # error if delta out of range
-  comp0 <- d0[, colnames(object$complr$between_comp), with = FALSE]
+  x0 <- d0[, colnames(object$complr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
-  if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
+  if(isTRUE(any(all(delta) > lapply(x0, min)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
-  paste0(round(min(lapply(comp0, min))), collapse = ", ")
+  paste0(round(min(lapply(x0, min))), collapse = ", ")
     ))
   }
   
@@ -75,16 +78,16 @@ bsubmargins <- function (object,
   # substitution model
   out <- .get.bsubmargins(
     object = object,
-    basesub = basesub,
+    base = base,
     delta = delta,
-    comp0 = comp0,
+    x0 = x0,
     d0 = d0,
     y0 = y0,
     level = level,
     ref = ref,
     summary = summary,
     scale = scale,
-    comparison = comparison,
+    type = type,
     cores = cores,
     ...
   )

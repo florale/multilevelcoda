@@ -26,20 +26,22 @@
 #'                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
-#' subm <- bsub(object = m, basesub = psub, delta = 5)
+#' subm <- bsub(object = m, base = psub, delta = 5)
 #' }}
 #' @export
 bsub <- function(object,
                  delta,
-                 basesub,
-                 summary = TRUE,
                  ref = "grandmean",
                  level = "between",
-                 weight = "equal",
+                 summary = TRUE,
                  aorg = TRUE,
+                 at = NULL,
+                 parts,
+                 base,
+                 weight = "equal",
                  scale = c("response", "linear"),
-                 comparison = "one-to-one",
                  cores = NULL,
+                 type = "one-to-one",
                  ...) {
   
   # ref <- "grandmean"
@@ -49,6 +51,7 @@ bsub <- function(object,
   if (isTRUE(ref == "grandmean")) {
     d0 <- build.rg(object = object,
                    ref = ref,
+                   parts = parts,
                    level = level,
                    weight = weight,
                    fill = FALSE)
@@ -70,13 +73,13 @@ bsub <- function(object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
+  x0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
-  if(isTRUE(any(delta > min(comp0)))) {
+  if(isTRUE(any(delta > min(x0)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
-  round(min(comp0), 2)
+  round(min(x0), 2)
     ))
   }
   
@@ -92,9 +95,9 @@ bsub <- function(object,
   # yb ---------------------------------
   out <- .get.bsub(
     object = object,
-    basesub = basesub,
+    base = base,
     delta = delta,
-    comp0 = comp0,
+    x0 = x0,
     d0 = d0,
     y0 = y0,
     level = level,
@@ -102,7 +105,7 @@ bsub <- function(object,
     aorg = aorg,
     summary = summary,
     scale = scale,
-    comparison = comparison,
+    type = type,
     cores = cores,
     ...
   )

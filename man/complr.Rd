@@ -11,11 +11,15 @@ complr(data, parts, sbp = NULL, total = 1, idvar = NULL, transform = "ilr")
 containing data of all variables used in the analysis.
 It must include a composition and a ID variable. Required.}
 
-\item{parts}{A character vector specifying the names of compositional variables to be used.}
+\item{parts}{A character vector specifying the names of compositional variables to be used.
+For multiple compositions, a list of character vectors can be supplied.}
 
-\item{sbp}{A signary matrix indicating sequential binary partition.}
+\item{sbp}{A signary matrix indicating sequential binary partition when \code{transform = "ilr"}.
+If not supplied, a default sequential binary partition (sbp) will be built using function \code{\link{build.sbp}}.
+For multiple compositions, a list of signary sbps can be supplied.}
 
 \item{total}{A numeric value of the total amount to which the compositions should be closed.
+For multiple compositions, a list of numeric values can be supplied.
 Default is \code{1}.}
 
 \item{idvar}{Only for multilevel data, a character string specifying the name of the variable containing IDs.}
@@ -35,7 +39,7 @@ or a matrix of class \code{acomp} representing multiple closed within-person com
 \item{\code{logratio}}{ Log ratio transform of composition.}
 \item{\code{between_logratio}}{ Log ratio transform of between-person composition.}
 \item{\code{within_logratio}}{ Log ratio transform of within-person composition.}
-\item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
+\item{\code{data}}{ The user's dataset or imputed dataset if the iiut data contains zeros.}
 \item{\code{transform}}{ Type of transform applied on compositional data.}
 \item{\code{parts}}{ Names of compositional variables.}
 \item{\code{idvar}}{ Name of the variable containing IDs.}
@@ -67,16 +71,17 @@ cilr <- complr(data = mcompd,
                 idvar = "ID", total = 1440)
 str(cilr)
 
-calr <- complr(data = mcompd, sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+calr <- complr(data = mcompd, 
+                parts = list(c("TST", "WAKE"), c("MVPA", "LPA", "SB")),
+                total = list(c(1440), c(1440)),
                 idvar = "ID",
-                transform = "alr")
+                transform = "ilr")
 str(calr)
 
 cclr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID",
-                 transform = "clr")
+                 transform = "ilr")
 str(cclr)
 
 cilr_wide <- complr(data = mcompd[!duplicated(ID)], sbp = sbp,

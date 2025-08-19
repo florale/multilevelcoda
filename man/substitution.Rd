@@ -9,13 +9,15 @@ substitution(
   delta,
   ref = c("grandmean", "clustermean"),
   level = c("between", "within", "aggregate"),
-  basesub,
-  aorg = TRUE,
   summary = TRUE,
+  aorg = TRUE,
+  at = NULL,
+  base,
+  parts,
   weight = c("equal", "proportional"),
   scale = c("response", "linear"),
-  comparison = NULL,
   cores = NULL,
+  type,
   ...
 )
 }
@@ -35,11 +37,8 @@ Single level models are default to \code{"grandmean"}.}
 Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
 Single-level models are default to \code{"aggregate"}.}
 
-\item{basesub}{A base substitution.
-Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
-which can be computed using function \code{\link{build.basesub}}.
-If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
-If \code{NULL}, all possible one-to-one reallocations are estimated.}
+\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+Currently only support outputing raw values for model using grandmean as reference composition.}
 
 \item{aorg}{A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
 Should the estimate at each level of the reference grid (\code{FALSE})
@@ -48,8 +47,15 @@ Default is \code{TRUE}.
 Only applicable for model with covariates in addition to
 the isometric log-ratio coordinates (i.e., adjusted model).}
 
-\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
-Currently only support outputing raw values for model using grandmean as reference composition.}
+\item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
+
+\item{base}{An optional base substitution.
+Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+which can be computed using function \code{\link{build.base}}.}
+
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object.}
 
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -62,12 +68,15 @@ If \code{"response"}, results are returned on the scale of the response variable
 If \code{"linear"}, results are returned on the scale of the linear predictor term,
 that is without applying the inverse link function or other transformations.}
 
-\item{comparison}{internally used only.}
-
 \item{cores}{Number of cores to use when executing the chains in parallel,
 we recommend setting the \code{mc.cores} option
 to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
-For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.}
+For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
+Default to \code{"one-to-one"}.}
+
+\item{type}{A character string to indicate the type of substitution to be made.
+If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.}
 
 \item{...}{currently ignored.}
 }
@@ -98,8 +107,8 @@ if(requireNamespace("cmdstanr")){
 
   # model with compositional predictor at between and within-person levels
   fit1 <- brmcoda(complr = cilr,
-                  formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+                  formula = Stress ~ bz2_1 + bz2_1 + bz2_1 + bz2_1 +
+                                     wz2_1 + wz2_1 + wz2_1 + wz2_1 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
                   
   # one to one reallocation at between and within-person levels
@@ -108,7 +117,7 @@ if(requireNamespace("cmdstanr")){
   
   # one to all reallocation at between and within-person levels
   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
-                       basesub = "one-to-all")
+                       type = "one-to-all")
   summary(sub2) 
   
   # model with compositional predictor at aggregate level of variance

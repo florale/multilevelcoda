@@ -28,20 +28,22 @@
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
-#' subm <- wsub(object = m, basesub = psub, delta = 60)
+#' subm <- wsub(object = m, base = psub, delta = 60)
 #' }}
 #' @export
 wsub <- function(object,
                  delta,
-                 basesub,
                  ref = "grandmean",
                  level = "within",
-                 weight = "equal",
-                 aorg = TRUE,
                  summary = TRUE,
+                 aorg = TRUE,
+                 at = NULL,
+                 parts,
+                 base,
+                 weight = "equal",
                  scale = c("response", "linear"),
-                 comparison = "one-to-one",
                  cores = NULL,
+                 type = "one-to-one",
                  ...) {
   
   # ref <- "grandmean"
@@ -51,6 +53,7 @@ wsub <- function(object,
   if (isTRUE(ref == "grandmean")) {
     d0 <- build.rg(object = object,
                    ref = ref,
+                   parts = parts,
                    level = level,
                    weight = weight,
                    fill = FALSE)
@@ -72,13 +75,13 @@ wsub <- function(object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
+  x0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
   
   delta <- as.integer(delta)
-  if(isTRUE(any(delta > min(comp0)))) {
+  if(isTRUE(any(delta > min(x0)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
-  round(min(comp0), 2)
+  round(min(x0), 2)
     ))
   }
   
@@ -95,9 +98,9 @@ wsub <- function(object,
     # substitution model
     out <- .get.wsub(
       object = object,
-      basesub = basesub,
+      base = base,
       delta = delta,
-      comp0 = comp0,
+      x0 = x0,
       d0 = d0,
       y0 = y0,
       level = level,
@@ -105,7 +108,7 @@ wsub <- function(object,
       aorg = aorg,
       summary = summary,
       scale = scale,
-      comparison = comparison,
+      type = type,
       cores = cores,
       ...
     )

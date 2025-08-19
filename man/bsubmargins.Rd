@@ -7,14 +7,15 @@
 bsubmargins(
   object,
   delta,
-  basesub,
-  summary = TRUE,
   ref = "clustermean",
   level = "between",
+  summary = TRUE,
+  at = NULL,
+  base,
   weight = "proportional",
   scale = c("response", "linear"),
-  comparison = "one-to-one",
   cores = NULL,
+  type = "one-to-one",
   ...
 )
 }
@@ -22,15 +23,6 @@ bsubmargins(
 \item{object}{A fitted \code{\link{brmcoda}} object.}
 
 \item{delta}{A integer, numeric value or vector indicating the amount of substituted change between compositional parts.}
-
-\item{basesub}{A base substitution.
-Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
-which can be computed using function \code{\link{build.basesub}}.
-If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
-If \code{NULL}, all possible one-to-one reallocations are estimated.}
-
-\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
-Currently only support outputing raw values for model using grandmean as reference composition.}
 
 \item{ref}{Either a character value or vector or a dataset.
 Can be \code{"grandmean"} and/or \code{"clustermean"}, or
@@ -43,6 +35,15 @@ Single level models are default to \code{"grandmean"}.}
 Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
 Single-level models are default to \code{"aggregate"}.}
 
+\item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
+Currently only support outputing raw values for model using grandmean as reference composition.}
+
+\item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
+
+\item{base}{An optional base substitution.
+Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
+which can be computed using function \code{\link{build.base}}.}
+
 \item{weight}{A character value specifying the weight to use in calculation of the reference composition.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
 If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
@@ -54,12 +55,15 @@ If \code{"response"}, results are returned on the scale of the response variable
 If \code{"linear"}, results are returned on the scale of the linear predictor term,
 that is without applying the inverse link function or other transformations.}
 
-\item{comparison}{internally used only.}
-
 \item{cores}{Number of cores to use when executing the chains in parallel,
 we recommend setting the \code{mc.cores} option
 to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
-For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.}
+For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
+Default to \code{"one-to-one"}.}
+
+\item{type}{A character string to indicate the type of substitution to be made.
+If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.}
 
 \item{...}{currently ignored.}
 }
@@ -92,7 +96,7 @@ m <- brmcoda(complr = cilr,
              chains = 1, iter = 500,
              backend = "cmdstanr")
              
-subm <- bsubmargins(object = m, basesub = psub, delta = 5)
+subm <- bsubmargins(object = m, base = psub, delta = 5)
 }}
 }
 \seealso{

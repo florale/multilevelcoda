@@ -56,11 +56,7 @@ brmcoda <- function (complr, formula, ...) {
       "  See ?multilevelcoda::complr for details.",
       sep = "\n"))
   }
-  
-  tmp <- cbind(complr$data,
-               complr$between_logratio,
-               complr$within_logratio,
-               complr$logratio)
+  tmp <- complr$dataout
   
   m <- brm(formula,
            data = tmp,

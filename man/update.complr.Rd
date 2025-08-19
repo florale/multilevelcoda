@@ -26,7 +26,7 @@ or a matrix of class \code{acomp} representing multiple closed within-person com
 \item{\code{logratio}}{ Log ratio transform of composition.}
 \item{\code{between_logratio}}{ Log ratio transform of between-person composition.}
 \item{\code{within_logratio}}{ Log ratio transform of within-person composition.}
-\item{\code{data}}{ The user's dataset or imputed dataset if the input data contains zeros.}
+\item{\code{data}}{ The user's dataset or imputed dataset if the iiut data contains zeros.}
 \item{\code{transform}}{ Type of transform applied on compositional data.}
 \item{\code{parts}}{ Names of compositional variables.}
 \item{\code{idvar}}{ Name of the variable containing IDs.}

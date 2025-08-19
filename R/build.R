@@ -10,12 +10,12 @@
 #' @importFrom data.table as.data.table 
 #' @export
 #' @examples
-#' ps1 <- build.basesub(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
+#' ps1 <- build.base(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' print(ps1)
 #' 
-#' ps2 <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
+#' ps2 <- build.base(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
 #' print(ps2)
-build.basesub <- function(parts, comparison = NULL) {
+build.base <- function(parts, comparison = NULL) {
   
   if (is.null(comparison)) {
     comparison <- "one-to-one"

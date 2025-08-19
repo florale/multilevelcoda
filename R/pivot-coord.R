@@ -160,10 +160,10 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
     
     if ("logratio" %in% names(b_sbp_target_i)) {
       level <- "aggregate"
-      varnames <- c(bilr_vars, wilr_vars)
+      varnames <- c(ilr_vars)
     } else {
       level <- c("between", "within")
-      varnames <- c(ilr_vars)
+      varnames <- c(bilr_vars, wilr_vars)
     }
     
     # summarise posteriors

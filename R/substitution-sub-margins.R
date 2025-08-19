@@ -25,20 +25,22 @@
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
-#' subm <- sub(object = m, basesub = psub, delta = 5)
+#' subm <- sub(object = m, base = psub, delta = 5)
 #' }}
 #' @export
 sub <- function (object,
                  delta,
-                 basesub,
                  ref = "grandmean",
                  level = "aggregate",
-                 weight = "equal",
-                 aorg = TRUE,
                  summary = TRUE,
+                 aorg = TRUE,
+                 at = NULL,
+                 parts,
+                 base,
+                 weight = "equal",
                  scale = c("response", "linear"),
-                 comparison = "one-to-one",
                  cores = NULL,
+                 type = "one-to-one",
                  ...) {
   
   level <- "aggregate"
@@ -47,6 +49,7 @@ sub <- function (object,
   if (isTRUE(ref == "grandmean")) {
     d0 <- build.rg(object = object,
                    ref = ref,
+                   parts = parts,
                    level = level,
                    weight = weight,
                    fill = FALSE)
@@ -68,13 +71,13 @@ sub <- function (object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  comp0 <- d0[1, colnames(object$complr$comp), with = FALSE]
+  x0 <- d0[1, colnames(object$complr$comp), with = FALSE]
   
   delta <- as.integer(delta)
-  if(isTRUE(any(delta > min(comp0)))) {
+  if(isTRUE(any(delta > min(x0)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
-      round(min(comp0), 2)
+      round(min(x0), 2)
     ))
   }
   
@@ -90,9 +93,9 @@ sub <- function (object,
   # y ---------------------------------
   out <- .get.sub(
     object = object,
-    basesub = basesub,
+    base = base,
     delta = delta,
-    comp0 = comp0,
+    x0 = x0,
     d0 = d0,
     y0 = y0,
     level = level,
@@ -100,7 +103,7 @@ sub <- function (object,
     aorg = aorg,
     summary = summary,
     scale = scale,
-    comparison = comparison,
+    type = type,
     cores = cores,
     ...
   )
@@ -132,19 +135,21 @@ sub <- function (object,
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'                      
-#' subm <- submargins(object = m, basesub = psub, delta = 5)
+#' subm <- submargins(object = m, base = psub, delta = 5)
 #' }}
 #' @export
 submargins <- function (object,
                         delta,
-                        basesub,
-                        summary = TRUE,
                         ref = "clustermean",
                         level = "aggregate",
+                        summary = TRUE,
+                        at = NULL,
+                        parts,
+                        base,
                         weight = "proportional",
                         scale = c("response", "linear"),
-                        comparison = "one-to-one",
                         cores = NULL,
+                        type = "one-to-one",
                         ...) {
   
   ref <- "clustermean"
@@ -152,19 +157,20 @@ submargins <- function (object,
   
   d0 <- build.rg(object = object,
                  ref = ref,
+                 parts = parts,
                  level = level,
                  weight = weight,
                  fill = FALSE)
   
   # error if delta out of range
-  comp0 <- d0[, colnames(object$complr$comp), with = FALSE]
+  x0 <- d0[, colnames(object$complr$comp), with = FALSE]
   
   delta <- as.integer(delta)
-  if(isTRUE(any(all(delta) > lapply(comp0, min)))) {
+  if(isTRUE(any(all(delta) > lapply(x0, min)))) {
     stop(sprintf(
       "delta value should be less than or equal to %s, which is
   the amount of composition part available for pairwise substitution.",
-      paste0(round(min(lapply(comp0, min))), collapse = ", ")
+      paste0(round(min(lapply(x0, min))), collapse = ", ")
     ))
   }
   
@@ -182,16 +188,16 @@ submargins <- function (object,
   # substitution model
   out <- .get.submargins(
     object = object,
-    basesub = basesub,
+    base = base,
     delta = delta,
-    comp0 = comp0,
+    x0 = x0,
     d0 = d0,
     y0 = y0,
     level = level,
     ref = ref,
     summary = summary,
     scale = scale,
-    comparison = comparison,
+    type = type,
     cores = cores,
     ...
   )

@@ -21,3 +21,5 @@ data/adjusted-brmcoda.RData
 data/unadjusted-mvmcoda.RData
 data/adjusted-mvmcoda.RData
 vignettes/fit_centered
+
+*.pdf

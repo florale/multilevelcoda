@@ -88,11 +88,16 @@ create_substitution <-
 #' @export
 build.rg <- function(object,
                      ref,
+                     at,
+                     parts,
                      level,
                      weight,
                      fill = FALSE) {
   
   covgrid <- NULL
+  
+  ## get the index of which index elements of object$complr$output does the parts correspond to
+  parts_index <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   ## NOTES
   # # ignore weight for clustermean
@@ -103,31 +108,41 @@ build.rg <- function(object,
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   model_fixef_level <- NULL
-  model_fixef_coef <- NULL
+  model_fixef_coef  <- NULL
   
-  if (length(grep("bilr", model_fixef, value = T)) > 0) {
+  # grab the correct logratio names
+  z_vars  <- names(object$complr$output[[parts_index]]$logratio)
+  bz_vars <- names(object$complr$output[[parts_index]]$between_logratio)
+  wz_vars <- names(object$complr$output[[parts_index]]$within_logratio)
+  
+  if (length(grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
-    model_fixef_coef  <- append(model_fixef_coef, grep(".*bilr", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef,
+                                grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (length(grep("wilr", model_fixef, value = T)) > 0) {
+  if (length(grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "within")
-    model_fixef_coef  <- append(model_fixef_coef, grep(".*wilr", model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef,
+                                grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if ((length(grep("ilr", model_fixef, value = T)) > 0) && (length(grep("[b|w]ilr", model_fixef, value = T)) == 0)) {
+  if ((length(grep(paste0(z_vars, collapse = "|"), model_fixef, value = T)) > 0) && (length(grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = T)) == 0)) {
     model_fixef_level <- append(model_fixef_level, "aggregate")
-    model_fixef_coef  <- append(model_fixef_coef, grep(paste0(names(object$complr$logratio), collapse = "|"), model_fixef, value = T))
+    model_fixef_coef  <- append(model_fixef_coef, setdiff(
+      grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
+      grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
+    ))
   }
   
   # single level or multilevel
   if (length(model_ranef) > 0) {
     model_ranef_level <- "multilevel"
-    model_ranef_coef <- model_ranef
+    model_ranef_coef  <- model_ranef
   } else {
     model_ranef_level <- "single"
-    model_ranef_coef <- NULL
+    model_ranef_coef  <- NULL
   }
   
-  # d0 and comp0 for multilevel level model
+  # d0 and x0 for multilevel level model
   if (model_ranef_level == "multilevel") {
     
     # for clustermean
@@ -136,48 +151,49 @@ build.rg <- function(object,
       
       # aggregate
       if ("aggregate" %in% level) {
-        d0 <- cbind(object$complr$comp, object$complr$data[, -colnames(object$complr$comp), with = FALSE])
+        d0 <- cbind(object$complr$output[[parts_index]]$comp, object$complr$output[[parts_index]]$dataout[, -colnames(object$complr$output[[parts_index]]$comp), with = FALSE])
         d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
-        comp0 <- acomp(d0[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
+        x0 <- acomp(d0[, colnames(object$complr$output[[parts_index]]$comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
         
-        ilr0 <- ilr(comp0, V = object$complr$psi)
-        ilr0 <- as.data.table(ilr0)
+        z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
+        z0 <- as.data.table(z0)
         
-        colnames(ilr0)  <- colnames(object$complr$logratio)
-        colnames(comp0) <- colnames(object$complr$comp)
+        colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+        colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
         
-        d0 <- cbind(ilr0, comp0,
-                    d0[, -colnames(comp0), with = FALSE])
+        d0 <- cbind(z0, x0,
+                    d0[, -colnames(x0), with = FALSE])
       }
       
       # between and within
       if (any(c("between", "within") %in% level)) {
-        d0 <- cbind(object$complr$between_comp, object$complr$data)
+        d0 <- cbind(object$complr$output[[parts_index]]$between_comp, 
+                    object$complr$output[[parts_index]]$dataout)
         d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
-        comp0 <- acomp(d0[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-        bcomp0 <- comp0
+        x0  <- acomp(d0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+        bx0 <- x0
         
-        bilr0 <- ilr(bcomp0, V = object$complr$psi)
-        bilr0 <- as.data.table(bilr0)
+        bz0 <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
+        bz0 <- as.data.table(bz0)
         
-        wcomp0 <- as.data.table(matrix(1, nrow = nrow(bcomp0), ncol = ncol(bcomp0)))
-        wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
+        wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
+        wz0    <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
         
-        colnames(bilr0) <- colnames(object$complr$between_logratio)
-        colnames(wilr0) <- colnames(object$complr$within_logratio)
-        colnames(bcomp0) <- colnames(object$complr$between_comp)
-        colnames(wcomp0) <- colnames(object$complr$within_comp)
+        colnames(bz0)    <- colnames(object$complr$output[[parts_index]]$between_logratio)
+        colnames(wz0)    <- colnames(object$complr$output[[parts_index]]$within_logratio)
+        colnames(bx0) <- colnames(object$complr$output[[parts_index]]$between_comp)
+        colnames(wx0) <- colnames(object$complr$output[[parts_index]]$within_comp)
         
-        d0 <- cbind(bilr0, wilr0, bcomp0, wcomp0,
-                    d0[, colnames(d0) %in% colnames(object$complr$data), with = FALSE])
+        d0 <- cbind(bz0, wz0, bx0, wx0,
+                    d0[, colnames(d0) %in% colnames(object$complr$output[[parts_index]]$dataout), with = FALSE])
       }
     } else {
       
       # assemble reference grid
       # get var names
-      ilrnames <- c(colnames(object$complr$between_logratio),
-                    colnames(object$complr$within_logratio),
-                    colnames(object$complr$logratio))
+      ilrnames <- c(colnames(object$complr$output[[parts_index]]$between_logratio),
+                    colnames(object$complr$output[[parts_index]]$within_logratio),
+                    colnames(object$complr$output[[parts_index]]$logratio))
       
       vars  <- colnames(model.frame(object))
       resp  <- object$model$formula$formula[[2]]
@@ -186,15 +202,7 @@ build.rg <- function(object,
       covs  <- vars %snin% c(resp, grp, ilrnames)
       
       # default reference grid
-      # set binary
-      # drg <- model.frame(object)
-      # drg[] <- as.data.table(lapply(drg, function(j) if(is.numeric(j) && unique(j) %ain% c(0, 1)) as.factor(j) else j))
-      # drg <- as.data.table(insight::get_datagrid(drg,
-      #                                            by = paste0(resp),
-      #                                            factors = factors,
-      #                                            length = NA))
-      
-      drg <- as.data.table(ref_grid(object$model)@grid)
+      drg <- as.data.table(ref_grid(object$model, at = at)@grid)
       
       # reference grid (only covariates and outcome)
       refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
@@ -208,72 +216,72 @@ build.rg <- function(object,
         # aggregate
         if ("aggregate" %in% level) {
           if (weight == "proportional") {
-            comp0 <- mean.acomp(object$complr$comp, robust = TRUE)
+            x0 <- mean.acomp(object$complr$output[[parts_index]]$comp, robust = TRUE)
             
           } else {
-            comp0 <- cbind(object$complr$comp,
-                           object$complr$data[, object$complr$idvar, with = FALSE])
-            comp0 <- comp0[, head(.SD, 1), by = eval(object$complr$idvar)]
-            comp0 <- acomp(comp0[, colnames(object$complr$comp), with = FALSE], total = object$complr$total)
-            comp0 <- mean.acomp(comp0, robust = TRUE)
+            x0 <- cbind(object$complr$output[[parts_index]]$comp,
+                        object$complr$output[[parts_index]]$dataout[, object$complr$idvar, with = FALSE])
+            x0 <- x0[, head(.SD, 1), by = eval(object$complr$idvar)]
+            x0 <- acomp(x0[, colnames(object$complr$output[[parts_index]]$comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+            x0 <- mean.acomp(x0, robust = TRUE)
           }
           
-          comp0 <- acomp(comp0, total = object$complr$total)
-          comp0 <- as.data.table(t(comp0))
+          x0 <- acomp(x0, total = object$complr$output[[parts_index]]$total)
+          x0 <- as.data.table(t(x0))
           
-          ilr0 <- ilr(comp0, V = object$complr$psi)
-          ilr0 <- as.data.table(t(ilr0))
+          z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
+          z0 <- as.data.table(t(z0))
           
-          colnames(ilr0)  <- colnames(object$complr$logratio)
-          colnames(comp0) <- colnames(object$complr$comp)
+          colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+          colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
           
-          d0 <- if (all(dim(refgrid) == 0)) (cbind(ilr0, comp0, id)) else (expand.grid.df(ilr0, comp0, id, refgrid))
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
         }
         
         # between and/or within
         if (any(c("between", "within") %in% level)) {
           if (weight == "proportional") {
-            comp0 <- mean.acomp(object$complr$between_comp, robust = TRUE)
+            x0 <- mean.acomp(object$complr$output[[parts_index]]$between_comp, robust = TRUE)
             
           } else {
-            comp0 <- cbind(object$complr$between_comp,
-                           object$complr$data[, object$complr$idvar, with = FALSE])
-            comp0 <- comp0[, head(.SD, 1), by = eval(object$complr$idvar)]
-            comp0 <- acomp(comp0[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-            comp0 <- mean.acomp(comp0, robust = TRUE)
+            x0 <- cbind(object$complr$output[[parts_index]]$between_comp,
+                        object$complr$output[[parts_index]]$dataout[, object$complr$idvar, with = FALSE])
+            x0 <- x0[, head(.SD, 1), by = eval(object$complr$idvar)]
+            x0 <- acomp(x0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+            x0 <- mean.acomp(x0, robust = TRUE)
           }
           
-          comp0 <- acomp(comp0, total = object$complr$total)
-          comp0 <- as.data.table(t(comp0))
-          bcomp0 <- comp0
+          x0  <- acomp(x0, total = object$complr$output[[parts_index]]$total)
+          x0  <- as.data.table(t(x0))
+          bx0 <- x0
           
-          bilr0 <- ilr(bcomp0, V = object$complr$psi)
-          bilr0 <- as.data.table(t(bilr0))
+          bz0 <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
+          bz0 <- as.data.table(t(bz0))
           
-          wcomp0 <- as.data.table(matrix(1, nrow = nrow(bcomp0), ncol = ncol(bcomp0)))
-          wilr0 <- as.data.table(matrix(0, nrow = nrow(bilr0), ncol = ncol(bilr0)))
+          wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
+          wz0 <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
           
-          colnames(bilr0)  <- colnames(object$complr$between_logratio)
-          colnames(wilr0)  <- colnames(object$complr$within_logratio)
-          colnames(bcomp0) <- colnames(object$complr$between_comp)
-          colnames(wcomp0) <- colnames(object$complr$within_comp)
+          colnames(bz0) <- colnames(object$complr$output[[parts_index]]$between_logratio)
+          colnames(wz0) <- colnames(object$complr$output[[parts_index]]$within_logratio)
+          colnames(bx0) <- colnames(object$complr$output[[parts_index]]$between_comp)
+          colnames(wx0) <- colnames(object$complr$output[[parts_index]]$within_comp)
           
-          d0 <- if (all(dim(refgrid) == 0)) (cbind(bilr0, wilr0, bcomp0, wcomp0, id)) else (expand.grid.df(bilr0, wilr0, bcomp0, wcomp0, id, refgrid))
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
         }
       }
       
       if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
         weight <- NULL
         
-        if (isFALSE(object$complr$parts %in% colnames(ref))) {  # get user's composition
+        if (isFALSE(object$complr$output[[parts_index]]$parts %in% colnames(ref))) {  # get user's composition
           stop(
             sprintf(
               "The reference grid should include all compositional components but (%s) are missing.",
-              paste0(object$complr$parts %nin% colnames(ref), collapse = ", ")
+              paste0(object$complr$output[[parts_index]]$parts %nin% colnames(ref), collapse = ", ")
             ))
         } else {
-          comp_user <- ref[, object$complr$parts, with = FALSE]
-          comp_user <- acomp(comp_user, total = object$complr$total)
+          comp_user <- ref[, object$complr$output[[parts_index]]$parts, with = FALSE]
+          comp_user <- acomp(comp_user, total = object$complr$output[[parts_index]]$total)
           comp_user <- as.data.table(t(comp_user))
         }
         
@@ -281,23 +289,23 @@ build.rg <- function(object,
         if (nrow(ref) > 1) {
           stop("Only one reference composition is allowed at a time.")
         }
-        if(isFALSE(sum(comp_user) == object$complr$total)) {
+        if(isFALSE(sum(comp_user) == object$complr$output[[parts_index]]$total)) {
           stop(sprintf(
             "The total amount of the reference composition (%s) should be the same as the composition (%s).",
             sum(comp_user),
-            object$complr$total
+            object$complr$output[[parts_index]]$total
           ))
         }
-        if (isTRUE((any(comp_user > lapply(object$complr$data[, object$complr$parts, with = FALSE], max)) |
-                    any(comp_user < lapply(object$complr$data[, object$complr$parts, with = FALSE], min))))) {
+        if (isTRUE((any(comp_user > lapply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], max)) |
+                    any(comp_user < lapply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], min))))) {
           stop(paste(
             sprintf(
               "composition should be numeric or interger values that are between (%s) and (%s)",
-              paste0(round(apply(object$complr$data[, object$complr$parts, with = FALSE], 2, min)), collapse = ", "),
-              paste0(round(apply(object$complr$data[, object$complr$parts, with = FALSE], 2, max)), collapse = ", ")),
+              paste0(round(apply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], 2, min)), collapse = ", "),
+              paste0(round(apply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], 2, max)), collapse = ", ")),
             "\n",
             " for",
-            paste0(object$complr$parts, collapse = ", "),
+            paste0(object$complr$output[[parts_index]]$parts, collapse = ", "),
             "respectively"
           ))
         }
@@ -305,7 +313,7 @@ build.rg <- function(object,
         # user's specified reference grid
         ## any covariates left in the ref
         if (ncol(ref) > ncol(comp_user)) {
-          covgrid <- ref[, -object$complr$parts, with = FALSE]
+          covgrid <- ref[, -object$complr$output[[parts_index]]$parts, with = FALSE]
           
           if (isFALSE(fill)) {
             if (isFALSE(identical(colnames(covgrid), covs))) {
@@ -329,72 +337,72 @@ build.rg <- function(object,
         }
         
         if (level == "aggregate") {
-          comp0 <- comp_user
+          x0 <- comp_user
           
-          ilr0 <- ilr(comp0, V = object$complr$psi)
-          ilr0 <- as.data.table(t(ilr0))
+          z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
+          z0 <- as.data.table(t(z0))
           
-          colnames(ilr0)  <- colnames(object$complr$logratio)
-          colnames(comp0) <- colnames(object$complr$comp)
+          colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+          colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
           
-          d0 <- if (all(dim(refgrid) == 0)) (cbind(ilr0, comp0, id)) else (expand.grid.df(ilr0, comp0, id, refgrid))
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
           
         }
         if (level %in% c("between", "within")) {
-          comp0 <- cbind(object$complr$between_comp,
-                         object$complr$data[, object$complr$idvar, with = FALSE])
-          comp0 <- comp0[, head(.SD, 1), by = eval(object$complr$idvar)]
-          comp0 <- acomp(comp0[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-          comp0 <- mean.acomp(comp0, robust = TRUE)
+          x0 <- cbind(object$complr$output[[parts_index]]$between_comp,
+                      object$complr$output[[parts_index]]$dataout[, object$complr$idvar, with = FALSE])
+          x0 <- x0[, head(.SD, 1), by = eval(object$complr$idvar)]
+          x0 <- acomp(x0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+          x0 <- mean.acomp(x0, robust = TRUE)
           
           # assemble d0
-          # bilr0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
-          bcomp0 <- comp_user
-          bilr0 <- ilr(bcomp0, V = object$complr$psi)
-          bilr0 <- as.data.table(t(bilr0))
+          # bz0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
+          bx0 <- comp_user
+          bz0 <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
+          bz0 <- as.data.table(t(bz0))
           
-          # wcomp0 and wilr0 are the difference between the actual compositional mean of the dataset and bilr
+          # wx0 and wz0 are the difference between the actual compositional mean of the dataset and bilr
           # is 0 if ref comp is compositional mean
           # but is different if not
-          wcomp0 <- bcomp0 - comp0
-          wilr0 <- as.data.table(t(ilr(wcomp0, V = object$complr$psi)))
+          wx0 <- bx0 - x0
+          wz0 <- as.data.table(t(ilr(wx0, V = object$complr$output[[parts_index]]$psi)))
           
           id <- data.table::data.table(1) # to make fitted() happy
           
-          colnames(bilr0)  <- colnames(object$complr$between_logratio)
-          colnames(wilr0)  <- colnames(object$complr$within_logratio)
-          colnames(bcomp0) <- colnames(object$complr$between_comp)
-          colnames(wcomp0) <- colnames(object$complr$within_comp)
+          colnames(bz0)  <- colnames(object$complr$output[[parts_index]]$between_logratio)
+          colnames(wz0)  <- colnames(object$complr$output[[parts_index]]$within_logratio)
+          colnames(bx0) <- colnames(object$complr$output[[parts_index]]$between_comp)
+          colnames(wx0) <- colnames(object$complr$output[[parts_index]]$within_comp)
           colnames(id)     <- object$complr$idvar
           
-          d0 <- if (all(dim(refgrid) == 0)) (cbind(bilr0, wilr0, bcomp0, wcomp0, id)) else (expand.grid.df(bilr0, wilr0, bcomp0, wcomp0, id, refgrid))
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
         }
       }
     }
   }
   
-  ## d0 and comp0 for single level model
+  ## d0 and x0 for single level model
   if (model_ranef_level == "single") {
     
-    comp0 <- object$complr$comp
-    comp0 <- mean.acomp(comp0, robust = TRUE)
-    comp0 <- acomp(comp0, total = object$complr$total)
-    comp0 <- as.data.table(t(comp0))
-    bcomp0 <- comp0
+    x0 <- object$complr$output[[parts_index]]$comp
+    x0 <- mean.acomp(x0, robust = TRUE)
+    x0 <- acomp(x0, total = object$complr$output[[parts_index]]$total)
+    x0 <- as.data.table(t(x0))
+    bx0 <- x0
     
-    d0 <- object$complr$data
+    d0 <- object$complr$output[[parts_index]]$dataout
     
-    ilr0 <- ilr(comp0, V = object$complr$psi)
-    ilr0 <- as.data.table(t(ilr0))
+    z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
+    z0 <- as.data.table(t(z0))
     
-    colnames(ilr0)  <- colnames(object$complr$logratio)
-    colnames(comp0) <- colnames(object$complr$comp)
+    colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+    colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
     
     # assemble reference grid
     # get var names
-    ilrnames <- c(colnames(object$complr$between_logratio),
-                  colnames(object$complr$within_logratio),
-                  colnames(object$complr$logratio))
+    ilrnames <- c(colnames(object$complr$output[[parts_index]]$between_logratio),
+                  colnames(object$complr$output[[parts_index]]$within_logratio),
+                  colnames(object$complr$output[[parts_index]]$logratio))
     
     vars  <- colnames(model.frame(object))
     resp  <- object$model$formula$formula[[2]]
@@ -411,12 +419,12 @@ build.rg <- function(object,
     #                                            factors = factors,
     #                                            length = NA))
     
-    drg <- as.data.table(ref_grid(object$model)@grid)
+    drg <- as.data.table(ref_grid(object$model, at = at)@grid)
     
     # reference grid (only covariates and outcome)
     refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
     
-    d0 <- if (all(dim(refgrid) == 0)) (cbind(ilr0, comp0)) else (expand.grid.df(ilr0, comp0, refgrid))
+    d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0)) else (expand.grid.df(z0, x0, refgrid))
   }
   as.data.table(d0)
 }
@@ -434,11 +442,20 @@ build.rg <- function(object,
 NULL
 
 # Grandmean Between-person Substitution model
-.get.bsub <- function(object, delta, basesub,
-                      comp0, y0, d0,
-                      aorg, summary,
-                      level, ref, scale, comparison,
+.get.bsub <- function(object,
+                      delta,
+                      base,
+                      x0,
+                      y0,
+                      d0,
+                      aorg,
+                      summary,
+                      level,
+                      ref,
+                      scale,
+                      type,
                       cores,
+                      
                       ...) {
   
   if (isFALSE(is.null(cores))) {
@@ -450,15 +467,15 @@ NULL
   oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
-  iout <- foreach(i = colnames(basesub), .combine = c,
+  iout <- foreach(i = colnames(base), .combine = c,
                   .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
-                    if (comparison == "one-to-all") {
+                    if (type == "one-to-all") {
                       
                       # one to remaining
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
                       sub_to_var  <- c(i, "remaining")
@@ -466,57 +483,57 @@ NULL
                     else {
                       # possible pairwise substitution of 1 compositional variable
                       # one to one
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) != 0)]
-                      basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) != 0)]
+                      base_tmp <- base_tmp[order(-rank(get(i)))]
                       
-                      sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
+                      sub_from_var <- colnames(base_tmp) %snin% eval(i)
                       sub_to_var   <- i
                     }
                     
                     # loop substitution
-                    kout <- vector("list", length = nrow(basesub_tmp))
+                    kout <- vector("list", length = nrow(base_tmp))
                     jout <- vector("list", length = length(delta))
                     
                     for (j in seq_along(delta)) { # delta level
-                      sub_tmp_j <- basesub_tmp * delta[j]
+                      sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
-                        comp1 <- comp0 + sub_tmp_j[k,]
-                        names(comp1) <- object$complr$parts
+                        x1 <- x0 + sub_tmp_j[k,]
+                        names(x1) <- object$complr$output[[parts_index]]$parts
                         Delta <- sub_tmp_j[k, get(i)]
-                        kout[[k]] <- cbind(comp0, comp1, Delta)
+                        kout[[k]] <- cbind(x0, x1, Delta)
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
-                    dnew <- setDT(do.call(rbind, jout))
+                    d1 <- setDT(do.call(rbind, jout))
                     
                     # useful information for the final results
-                    dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew[, To := rep(sub_to_var, length.out = nrow(dnew))]
-                    dnew[, Delta := as.numeric(Delta)]
-                    dnew[, Level := level]
-                    dnew[, Reference := ref]
+                    d1[, From := rep(sub_from_var, length.out = nrow(d1))]
+                    d1[, To := rep(sub_to_var, length.out = nrow(d1))]
+                    d1[, Delta := as.numeric(Delta)]
+                    d1[, Level := level]
+                    d1[, Reference := ref]
                     
                     # remove impossible reallocation that result in negative values
-                    cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
-                    dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
+                    cols <- colnames(d1) %snin% c("Delta", "From", "To", "Level")
+                    d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
                     
                     # compositions and ilrs for predictions
-                    bcomp0 <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-                    bcompsub  <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
+                    bx0 <- acomp(d1[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+                    bcompsub  <- acomp(d1[, object$complr$output[[parts_index]]$parts, with = FALSE], total = object$complr$output[[parts_index]]$total)
                     
-                    bilrsub <- ilr(bcompsub, V = object$complr$psi)
-                    wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
+                    bilrsub <- ilr(bcompsub, V = object$complr$output[[parts_index]]$psi)
+                    wz0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
                     
-                    colnames(bilrsub) <- colnames(object$complr$between_logratio)
-                    colnames(wilr0) <- colnames(object$complr$within_logratio)
+                    colnames(bilrsub) <- colnames(object$complr$output[[parts_index]]$between_logratio)
+                    colnames(wz0) <- colnames(object$complr$output[[parts_index]]$within_logratio)
                     
                     # reference grid
                     ## get covariate + idvar names
-                    covs <- colnames(d0) %snin% c(colnames(object$complr$between_logratio),
-                                                  colnames(object$complr$within_logratio),
-                                                  colnames(object$complr$between_comp),
-                                                  colnames(object$complr$within_comp)
+                    covs <- colnames(d0) %snin% c(colnames(object$complr$output[[parts_index]]$between_logratio),
+                                                  colnames(object$complr$output[[parts_index]]$within_logratio),
+                                                  colnames(object$complr$output[[parts_index]]$between_comp),
+                                                  colnames(object$complr$output[[parts_index]]$within_comp)
                     )
                     refgrid <- d0[, covs, with = FALSE]
                     
@@ -524,7 +541,7 @@ NULL
                     hout <- vector("list", length = nrow(d0))
                     if (aorg) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(d0))) {
-                        dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
+                        dsub <- cbind(d1, bilrsub, wz0, refgrid[h, ])
                         ysub <-
                           fitted(
                             object,
@@ -551,7 +568,7 @@ NULL
                       
                     } else { # adj keeping prediction at each level of reference grid
                       for (h in seq_len(nrow(d0))) {
-                        dsub <- cbind(dnew, bilrsub, wilr0, refgrid[h, ])
+                        dsub <- cbind(d1, bilrsub, wz0, refgrid[h, ])
                         ysub <-
                           fitted(
                             object,
@@ -587,12 +604,21 @@ NULL
 }
 
 # Grandmean Within-person Substitution model
-.get.wsub <- function(object, delta, basesub,
-                      comp0, y0, d0,
-                      aorg, summary,
-                      level, ref, scale, comparison,
+.get.wsub <- function(object,
+                      delta,
+                      base,
+                      x0,
+                      y0,
+                      d0,
+                      aorg,
+                      summary,
+                      level,
+                      ref,
+                      scale,
+                      type,
                       cores,
                       ...) {
+  
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -603,15 +629,15 @@ NULL
   oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
-  iout <- foreach(i = colnames(basesub), .combine = c,
+  iout <- foreach(i = colnames(base), .combine = c,
                   .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
-                    if (comparison == "one-to-all") {
+                    if (type == "one-to-all") {
                       
                       # one to remaining
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
                       sub_to_var <- c(i, "remaining")
@@ -619,58 +645,58 @@ NULL
                     else {
                       # possible pairwise substitution of 1 compositional variable
                       # one to one
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) != 0)]
-                      basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) != 0)]
+                      base_tmp <- base_tmp[order(-rank(get(i)))]
                       
-                      sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
+                      sub_from_var <- colnames(base_tmp) %snin% eval(i)
                       sub_to_var <- i
                     }
                     
                     # loop substitution
-                    kout <- vector("list", length = nrow(basesub_tmp))
+                    kout <- vector("list", length = nrow(base_tmp))
                     jout <- vector("list", length = length(delta))
                     
                     for (j in seq_along(delta)) { # delta level
-                      sub_tmp_j <- basesub_tmp * delta[j]
+                      sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
-                        comp1 <- comp0 + sub_tmp_j[k, ]
-                        names(comp1) <- object$complr$parts
+                        x1 <- x0 + sub_tmp_j[k, ]
+                        names(x1) <- object$complr$output[[parts_index]]$parts
                         Delta <- sub_tmp_j[k, get(i)]
-                        kout[[k]] <- cbind(comp0, comp1, Delta)
+                        kout[[k]] <- cbind(x0, x1, Delta)
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
-                    dnew <- setDT(do.call(rbind, jout))
+                    d1 <- setDT(do.call(rbind, jout))
                     
                     # useful information for the final results
-                    dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew[, To := rep(sub_to_var, length.out = nrow(dnew))]
-                    dnew[, Delta := as.numeric(Delta)]
-                    dnew[, Level := level]
-                    dnew[, Reference := ref]
+                    d1[, From := rep(sub_from_var, length.out = nrow(d1))]
+                    d1[, To := rep(sub_to_var, length.out = nrow(d1))]
+                    d1[, Delta := as.numeric(Delta)]
+                    d1[, Level := level]
+                    d1[, Reference := ref]
                     
                     # remove impossible reallocation that result in negative values
-                    cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
-                    dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
+                    cols <- colnames(d1) %snin% c("Delta", "From", "To", "Level")
+                    d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
                     
                     # compositions and ilrs for predictions
-                    bcomp0   <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-                    bcompsub <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
+                    bx0   <- acomp(d1[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+                    bcompsub <- acomp(d1[, object$complr$output[[parts_index]]$parts, with = FALSE], total = object$complr$output[[parts_index]]$total)
                     
-                    bilr0   <- ilr(bcomp0, V = object$complr$psi)
-                    bilrsub <- ilr(bcompsub, V = object$complr$psi)
-                    wilrsub <- bilrsub - bilr0
+                    bz0   <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
+                    bilrsub <- ilr(bcompsub, V = object$complr$output[[parts_index]]$psi)
+                    wilrsub <- bilrsub - bz0
                     
-                    colnames(bilr0) <- colnames(object$complr$between_logratio)
-                    colnames(wilrsub) <- colnames(object$complr$within_logratio)
+                    colnames(bz0) <- colnames(object$complr$output[[parts_index]]$between_logratio)
+                    colnames(wilrsub) <- colnames(object$complr$output[[parts_index]]$within_logratio)
                     
                     # reference grid
                     ## get covariate + idvar names
-                    covs <- colnames(d0) %snin% c(colnames(object$complr$between_logratio),
-                                                  colnames(object$complr$within_logratio),
-                                                  colnames(object$complr$between_comp),
-                                                  colnames(object$complr$within_comp)
+                    covs <- colnames(d0) %snin% c(colnames(object$complr$output[[parts_index]]$between_logratio),
+                                                  colnames(object$complr$output[[parts_index]]$within_logratio),
+                                                  colnames(object$complr$output[[parts_index]]$between_comp),
+                                                  colnames(object$complr$output[[parts_index]]$within_comp)
                     )
                     refgrid <- d0[, covs, with = FALSE]
                     
@@ -678,7 +704,7 @@ NULL
                     hout <- vector("list", length = nrow(d0))
                     if (aorg) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(d0))) {
-                        dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
+                        dsub <- cbind(d1, bz0, wilrsub, refgrid[h, ])
                         ysub <-
                           fitted(
                             object,
@@ -705,7 +731,7 @@ NULL
                       
                     } else { # adj keeping prediction at each level of reference grid
                       for (h in seq_len(nrow(d0))) {
-                        dsub <- cbind(dnew, bilr0, wilrsub, refgrid[h, ])
+                        dsub <- cbind(d1, bz0, wilrsub, refgrid[h, ])
                         ysub <-
                           fitted(
                             object,
@@ -740,10 +766,18 @@ NULL
 }
 
 # Grandmean Simple Substitution
-.get.sub <- function(object, delta, basesub,
-                     comp0, y0, d0,
-                     aorg, summary,
-                     level, ref, scale, comparison,
+.get.sub <- function(object,
+                     delta,
+                     base,
+                     x0,
+                     y0,
+                     d0,
+                     aorg,
+                     summary,
+                     level,
+                     ref,
+                     scale,
+                     type,
                      cores,
                      ...) {
   
@@ -756,15 +790,15 @@ NULL
   oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
-  iout <- foreach(i = colnames(basesub), .combine = c,
+  iout <- foreach(i = colnames(base), .combine = c,
                   .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
-                    if (comparison == "one-to-all") {
+                    if (type == "one-to-all") {
                       
                       # one to remaining
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
                       sub_to_var <- c(i, "remaining")
@@ -772,51 +806,51 @@ NULL
                     else {
                       # possible pairwise substitution of 1 compositional variable
                       # one to one
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) != 0)]
-                      basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) != 0)]
+                      base_tmp <- base_tmp[order(-rank(get(i)))]
                       
-                      sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
+                      sub_from_var <- colnames(base_tmp) %snin% eval(i)
                       sub_to_var <- i
                     }
                     
                     # loop substitution
-                    kout <- vector("list", length = nrow(basesub_tmp))
+                    kout <- vector("list", length = nrow(base_tmp))
                     jout <- vector("list", length = length(delta))
                     
                     for (j in seq_along(delta)) { # delta level
-                      sub_tmp_j <- basesub_tmp * delta[j]
+                      sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
-                        comp1 <- comp0 + sub_tmp_j[k,]
-                        names(comp1) <- object$complr$parts
+                        x1 <- x0 + sub_tmp_j[k,]
+                        names(x1) <- object$complr$output[[parts_index]]$parts
                         Delta <- sub_tmp_j[k, get(i)]
-                        kout[[k]] <- cbind(comp1, Delta)
+                        kout[[k]] <- cbind(x1, Delta)
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
-                    dnew <- setDT(do.call(rbind, jout))
+                    d1 <- setDT(do.call(rbind, jout))
                     
                     # useful information for the final results
-                    dnew[, From := rep(sub_from_var, length.out = nrow(dnew))]
-                    dnew[, To := sub_to_var]
-                    dnew[, Delta := as.numeric(Delta)]
-                    dnew[, Level := level]
-                    dnew[, Reference := ref]
+                    d1[, From := rep(sub_from_var, length.out = nrow(d1))]
+                    d1[, To := sub_to_var]
+                    d1[, Delta := as.numeric(Delta)]
+                    d1[, Level := level]
+                    d1[, Reference := ref]
                     
                     # remove impossible reallocation that result in negative values
-                    cols <- colnames(dnew) %snin% c("Delta", "From", "To", "Level")
-                    dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
+                    cols <- colnames(d1) %snin% c("Delta", "From", "To", "Level")
+                    d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
                     
                     # compositions and ilrs for predictions
-                    compsub  <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
+                    compsub  <- acomp(d1[, object$complr$output[[parts_index]]$parts, with = FALSE], total = object$complr$output[[parts_index]]$total)
                     
-                    ilrsub <- ilr(compsub, V = object$complr$psi)
-                    colnames(ilrsub) <- colnames(object$complr$logratio)
+                    ilrsub <- ilr(compsub, V = object$complr$output[[parts_index]]$psi)
+                    colnames(ilrsub) <- colnames(object$complr$output[[parts_index]]$logratio)
                     
                     # reference grid
                     ## get covariate + idvar names
-                    covs <- colnames(d0) %snin% c(colnames(object$complr$logratio),
-                                                  colnames(object$complr$comp)
+                    covs <- colnames(d0) %snin% c(colnames(object$complr$output[[parts_index]]$logratio),
+                                                  colnames(object$complr$output[[parts_index]]$comp)
                     )
                     refgrid <- d0[, covs, with = FALSE]
                     
@@ -824,7 +858,7 @@ NULL
                     hout <- vector("list", length = nrow(d0))
                     if (aorg) { # unadj OR adj averaging over reference grid
                       for (h in seq_len(nrow(d0))) {
-                        dsub <- cbind(dnew, ilrsub, refgrid[h, ])
+                        dsub <- cbind(d1, ilrsub, refgrid[h, ])
                         ysub <-
                           fitted(
                             object,
@@ -851,7 +885,7 @@ NULL
                       
                     } else { # adj keeping prediction at each level of reference grid
                       for (h in seq_len(nrow(d0))) {
-                        dsub <- cbind(dnew, ilrsub, refgrid[h, ])
+                        dsub <- cbind(d1, ilrsub, refgrid[h, ])
                         ysub <-
                           fitted(
                             object,
@@ -886,11 +920,20 @@ NULL
 }
 
 # Clustermean Between-person Substitution model
-.get.bsubmargins <- function(object, delta, basesub,
-                             comp0, y0, d0, summary,
-                             level, ref, scale, comparison,
+.get.bsubmargins <- function(object,
+                             delta,
+                             base,
+                             x0,
+                             y0,
+                             d0,
+                             summary,
+                             level,
+                             ref,
+                             scale,
+                             type,
                              cores,
                              ...) {
+  
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -901,15 +944,15 @@ NULL
   oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
-  iout <- foreach(i = colnames(basesub), .combine = c,
+  iout <- foreach(i = colnames(base), .combine = c,
                   .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
-                    if (comparison == "one-to-all") {
+                    if (type == "one-to-all") {
                       
                       # one to remaining
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
                       sub_to_var <- c(i, "remaining")
@@ -917,55 +960,55 @@ NULL
                     else {
                       # possible pairwise substitution of 1 compositional variable
                       # one to one
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) != 0)]
-                      basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) != 0)]
+                      base_tmp <- base_tmp[order(-rank(get(i)))]
                       
-                      sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
+                      sub_from_var <- colnames(base_tmp) %snin% eval(i)
                       sub_to_var <- i
                     }
                     
                     # loop substitution
-                    kout <- vector("list", length = nrow(basesub_tmp))
+                    kout <- vector("list", length = nrow(base_tmp))
                     jout <- vector("list", length = length(delta))
                     
                     for (j in seq_along(delta)) { # delta level
-                      sub_tmp_j <- basesub_tmp * delta[j]
+                      sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) { # reallocation level
                         sub_tmp_k <- sub_tmp_j[k, ]
-                        sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(comp0)), ]
-                        comp1 <- comp0 + sub_tmp_k
-                        names(comp1) <- object$complr$parts
+                        sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
+                        x1 <- x0 + sub_tmp_k
+                        names(x1) <- object$complr$output[[parts_index]]$parts
                         
                         Delta <- sub_tmp_k[, get(i)]
                         
-                        dnew <- cbind(comp0, comp1,
-                                      d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE],
-                                      Delta)
+                        d1 <- cbind(x0, x1,
+                                    d0[, colnames(d0) %in% colnames(object$complr$output[[parts_index]]$dataout[, -object$complr$output[[parts_index]]$part, with = FALSE]), with = FALSE],
+                                    Delta)
                         
                         # # useful information for the final results
-                        # dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
-                        # dnew[, To := rep(sub_to_var, length.out = nrow(dnew))[k]]
-                        # dnew[, Delta := abs(as.numeric(Delta))]
+                        # d1[, From := rep(sub_from_var, length.out = nrow(d1))[k]]
+                        # d1[, To := rep(sub_to_var, length.out = nrow(d1))[k]]
+                        # d1[, Delta := abs(as.numeric(Delta))]
                         
                         # remove impossible reallocation that result in negative values
-                        cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
-                        dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
+                        cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
+                        d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
                         
                         # compositions and ilrs for predictions
-                        bcomp0    <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-                        bcompsub  <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
+                        bx0    <- acomp(d1[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+                        bcompsub  <- acomp(d1[, object$complr$output[[parts_index]]$parts, with = FALSE], total = object$complr$output[[parts_index]]$total)
                         
-                        bilr0    <- ilr(bcomp0, V = object$complr$psi)
-                        bilrsub  <- ilr(bcompsub, V = object$complr$psi)
+                        bz0    <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
+                        bilrsub  <- ilr(bcompsub, V = object$complr$output[[parts_index]]$psi)
                         
-                        wilr0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
+                        wz0 <- as.data.table(matrix(0, nrow = nrow(bilrsub), ncol = ncol(bilrsub)))
                         
-                        colnames(bilrsub) <- colnames(object$complr$between_logratio)
-                        colnames(wilr0)   <- colnames(object$complr$within_logratio)
+                        colnames(bilrsub) <- colnames(object$complr$output[[parts_index]]$between_logratio)
+                        colnames(wz0)   <- colnames(object$complr$output[[parts_index]]$within_logratio)
                         
                         # prediction
-                        dsub <- cbind(dnew, bilrsub, wilr0)
+                        dsub <- cbind(d1, bilrsub, wz0)
                         ysub <-
                           fitted(
                             object,
@@ -1007,11 +1050,20 @@ NULL
 }
 
 # Clustermean Within-person Substitution model
-.get.wsubmargins <- function(object, delta, basesub,
-                             comp0, y0, d0, summary,
-                             level, ref, scale, comparison,
+.get.wsubmargins <- function(object,
+                             delta,
+                             base,
+                             x0,
+                             y0,
+                             d0,
+                             summary,
+                             level,
+                             ref,
+                             scale,
+                             type,
                              cores,
                              ...) {
+  
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -1022,15 +1074,15 @@ NULL
   oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
-  iout <- foreach(i = colnames(basesub), .combine = c,
+  iout <- foreach(i = colnames(base), .combine = c,
                   .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
-                    if (comparison == "one-to-all") {
+                    if (type == "one-to-all") {
                       
                       # one to remaining
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
                       sub_to_var <- c(i, "remaining")
@@ -1038,55 +1090,55 @@ NULL
                     else {
                       # possible pairwise substitution of 1 compositional variable
                       # one to one
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) != 0)]
-                      basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) != 0)]
+                      base_tmp <- base_tmp[order(-rank(get(i)))]
                       
-                      sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
+                      sub_from_var <- colnames(base_tmp) %snin% eval(i)
                       sub_to_var <- i
                     }
                     
                     # loop substitution
-                    kout <- vector("list", length = nrow(basesub_tmp))
+                    kout <- vector("list", length = nrow(base_tmp))
                     jout <- vector("list", length = length(delta))
                     
                     for (j in seq_along(delta)) { # delta level
-                      sub_tmp_j <- basesub_tmp * delta[j]
+                      sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         sub_tmp_k <- sub_tmp_j[k, ]
-                        sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(comp0)), ]
-                        comp1 <- comp0 + sub_tmp_k
-                        names(comp1) <- object$complr$parts
+                        sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
+                        x1 <- x0 + sub_tmp_k
+                        names(x1) <- object$complr$output[[parts_index]]$parts
                         
                         Delta <- sub_tmp_k[, get(i)]
                         
-                        dnew <- cbind(comp0, comp1,
-                                      d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE],
-                                      Delta)
+                        d1 <- cbind(x0, x1,
+                                    d0[, colnames(d0) %in% colnames(object$complr$output[[parts_index]]$dataout[, -object$complr$output[[parts_index]]$part, with = FALSE]), with = FALSE],
+                                    Delta)
                         
                         # # useful information for the final output
-                        # dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
-                        # dnew[, To := rep(sub_to_var, length.out = nrow(dnew))[k]]
-                        # dnew[, Delta := abs(as.numeric(Delta))]
+                        # d1[, From := rep(sub_from_var, length.out = nrow(d1))[k]]
+                        # d1[, To := rep(sub_to_var, length.out = nrow(d1))[k]]
+                        # d1[, Delta := abs(as.numeric(Delta))]
                         
                         # remove impossible reallocation that result in negative values
-                        cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
-                        dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
+                        cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
+                        d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
                         
                         # compositions and ilr for predictions
-                        bcomp0   <- acomp(dnew[, colnames(object$complr$between_comp), with = FALSE], total = object$complr$total)
-                        bcompsub <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
+                        bx0   <- acomp(d1[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+                        bcompsub <- acomp(d1[, object$complr$output[[parts_index]]$parts, with = FALSE], total = object$complr$output[[parts_index]]$total)
                         
-                        bilr0   <- ilr(bcomp0, V = object$complr$psi)
-                        bilrsub <- ilr(bcompsub, V = object$complr$psi)
+                        bz0   <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
+                        bilrsub <- ilr(bcompsub, V = object$complr$output[[parts_index]]$psi)
                         
-                        wilrsub <- bilrsub - bilr0
+                        wilrsub <- bilrsub - bz0
                         
-                        colnames(bilr0)   <- colnames(object$complr$between_logratio)
-                        colnames(wilrsub) <- colnames(object$complr$within_logratio)
+                        colnames(bz0)   <- colnames(object$complr$output[[parts_index]]$between_logratio)
+                        colnames(wilrsub) <- colnames(object$complr$output[[parts_index]]$within_logratio)
                         
                         # substitution data
-                        dsub <- cbind(dnew, bilr0, wilrsub)
+                        dsub <- cbind(d1, bz0, wilrsub)
                         
                         # prediction
                         ysub <-
@@ -1131,11 +1183,20 @@ NULL
 }
 
 # Clustermean Average Substitution
-.get.submargins <- function(object, delta, basesub,
-                            comp0, y0, d0, summary,
-                            level, ref, scale, comparison,
+.get.submargins <- function(object,
+                            delta,
+                            base,
+                            x0,
+                            y0,
+                            d0,
+                            summary,
+                            level,
+                            ref,
+                            scale,
+                            type,
                             cores,
                             ...) {
+  
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -1146,15 +1207,15 @@ NULL
   oopts <- options(future.globals.maxSize = +Inf, future.globals.onReference = NULL)
   on.exit(options(oopts))
   
-  iout <- foreach(i = colnames(basesub), .combine = c,
+  iout <- foreach(i = colnames(base), .combine = c,
                   .options.future = list(packages = "multilevelcoda", seed = TRUE)) %dofuture% {
                     
                     # substitution variables
-                    if (comparison == "one-to-all") {
+                    if (type == "one-to-all") {
                       
                       # one to remaining
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) %in% c(1, -1))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) %in% c(1, -1))]
                       
                       sub_from_var <- c("remaining", i)
                       sub_to_var <- c(i, "remaining")
@@ -1162,49 +1223,49 @@ NULL
                     else {
                       # possible pairwise substitution of 1 compositional variable
                       # one to one
-                      basesub_tmp <- as.data.table(basesub)
-                      basesub_tmp <- basesub_tmp[(get(i) != 0)]
-                      basesub_tmp <- basesub_tmp[order(-rank(get(i)))]
+                      base_tmp <- as.data.table(base)
+                      base_tmp <- base_tmp[(get(i) != 0)]
+                      base_tmp <- base_tmp[order(-rank(get(i)))]
                       
-                      sub_from_var <- colnames(basesub_tmp) %snin% eval(i)
+                      sub_from_var <- colnames(base_tmp) %snin% eval(i)
                       sub_to_var <- i
                     }
                     
                     # loop substitution
-                    kout <- vector("list", length = nrow(basesub_tmp))
+                    kout <- vector("list", length = nrow(base_tmp))
                     jout <- vector("list", length = length(delta))
                     
                     for (j in seq_along(delta)) { # delta level
-                      sub_tmp_j <- basesub_tmp * delta[j]
+                      sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         sub_tmp_k <- sub_tmp_j[k, ]
-                        sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(comp0)), ]
-                        comp1 <- comp0 + sub_tmp_k
-                        names(comp1) <- object$complr$parts
+                        sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
+                        x1 <- x0 + sub_tmp_k
+                        names(x1) <- object$complr$output[[parts_index]]$parts
                         
                         Delta <- sub_tmp_k[, get(i)]
                         
-                        dnew <- cbind(comp1,
-                                      d0[, colnames(d0) %in% colnames(object$complr$data[, -object$complr$part, with = FALSE]), with = FALSE],
-                                      Delta)
+                        d1 <- cbind(x1,
+                                    d0[, colnames(d0) %in% colnames(object$complr$output[[parts_index]]$dataout[, -object$complr$output[[parts_index]]$part, with = FALSE]), with = FALSE],
+                                    Delta)
                         
                         # # useful information for the final results
-                        # dnew[, From := rep(sub_from_var, length.out = nrow(dnew))[k]]
-                        # dnew[, To := rep(sub_to_var, length.out = nrow(dnew))[k]]
-                        # dnew[, Delta := abs(as.numeric(Delta))]
+                        # d1[, From := rep(sub_from_var, length.out = nrow(d1))[k]]
+                        # d1[, To := rep(sub_to_var, length.out = nrow(d1))[k]]
+                        # d1[, Delta := abs(as.numeric(Delta))]
                         
                         # remove impossible reallocation that result in negative values
-                        cols <- colnames(dnew) %sin% c(colnames(comp0), colnames(basesub))
-                        dnew <- dnew[rowSums(dnew[, ..cols] < 0) == 0]
+                        cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
+                        d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
                         
                         # compositions and ilrs for predictions
-                        tcomp <- acomp(dnew[, object$complr$parts, with = FALSE], total = object$complr$total)
-                        tilr <- ilr(tcomp, V = object$complr$psi)
+                        tcomp <- acomp(d1[, object$complr$output[[parts_index]]$parts, with = FALSE], total = object$complr$output[[parts_index]]$total)
+                        tilr <- ilr(tcomp, V = object$complr$output[[parts_index]]$psi)
                         
-                        colnames(tilr) <- colnames(object$complr$logratio)
+                        colnames(tilr) <- colnames(object$complr$output[[parts_index]]$logratio)
                         
                         # substitution data
-                        dsub <- cbind(dnew, tilr)
+                        dsub <- cbind(d1, tilr)
                         
                         # prediction
                         ysub <-
