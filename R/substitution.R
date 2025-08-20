@@ -188,24 +188,26 @@ substitution <- function(object,
         sep = "\n"))
     }
   }
-  ## get the index of which index elements of object$complr$output does the parts correspond to
-  parts_index <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
+  ## get the index of which index elements of object$complr$output does the parts correspond to - check w JW
+  parts_index <- which(vapply(lapply(object$complr$output, 
+                                     function(x) x$parts), 
+                              function(p) identical(parts, p), logical(1)))
   
-  # type
+  # type - check with JW what would be the best way to detect onetoone vs onetoall
   if (missing(type)) {
     if (missing(base)) {
       base <- build.base(parts = object$complr$output[[parts_index]]$parts)
       names(base) <- object$complr$output[[parts_index]]$parts
       type <- "one-to-one"
     } else {
-      if (inherits(base, "data.frame") || inherits(base, "data.table")) {
+      if (inherits(base, c("data.frame", "data.table", "matrix"))) {
         type <- "one-to-one"
       } else {
         stop("If 'base' is provided, it should be a data frame or data table.")
       }
     }
   } else {
-    if (inherits(type, "character") && identical(type, "one-to-one")) {
+    if (identical(type, "one-to-one")) {
       base <- build.base(parts = object$complr$output[[parts_index]]$parts)
       names(base) <- object$complr$output[[parts_index]]$parts
       type <- "one-to-one"
@@ -220,9 +222,8 @@ substitution <- function(object,
   model_fixef <- rownames(fixef(object))
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
-  model_fixef_level <- NULL
-  model_fixef_coef  <- NULL
-  
+  model_fixef_level <- model_fixef_coef <- NULL
+
   # grab the correct logratio names
   z_vars  <- names(object$complr$output[[parts_index]]$logratio)
   bz_vars <- names(object$complr$output[[parts_index]]$between_logratio)
@@ -245,6 +246,7 @@ substitution <- function(object,
       grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
     ))
   }
+  z_vars <- bz_vars <- wz_vars <- NULL
   
   # single level or multilevel
   if (length(model_ranef) > 0) {

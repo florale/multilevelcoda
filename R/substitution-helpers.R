@@ -100,16 +100,15 @@ build.rg <- function(object,
   parts_index <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   ## NOTES
-  # # ignore weight for clustermean
-  # equal weight is default for grandmean
+  ## ignore weight for clustermean
+  ## equal weight is default for grandmean
   
   # what type of model is being estimated
   model_fixef <- rownames(fixef(object))
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
-  model_fixef_level <- NULL
-  model_fixef_coef  <- NULL
-  
+  model_fixef_level <- model_fixef_coef <- NULL
+
   # grab the correct logratio names
   z_vars  <- names(object$complr$output[[parts_index]]$logratio)
   bz_vars <- names(object$complr$output[[parts_index]]$between_logratio)
@@ -132,6 +131,7 @@ build.rg <- function(object,
       grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
     ))
   }
+  z_vars <- bz_vars <- wz_vars <- NULL
   
   # single level or multilevel
   if (length(model_ranef) > 0) {
@@ -143,70 +143,64 @@ build.rg <- function(object,
   }
   
   # d0 and x0 for multilevel level model
-  if (model_ranef_level == "multilevel") {
+  if (identical(model_ranef_level, "multilevel")) {
     
     # for clustermean
     if ("clustermean" %in% ref) {
       weight <- NULL # ignore weight
       
-      # aggregate
+      ## aggregate
       if ("aggregate" %in% level) {
-        d0 <- cbind(object$complr$output[[parts_index]]$comp, object$complr$output[[parts_index]]$dataout[, -colnames(object$complr$output[[parts_index]]$comp), with = FALSE])
-        d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
+        d0 <- object$complr$output[[parts_index]]$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
         x0 <- acomp(d0[, colnames(object$complr$output[[parts_index]]$comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
         
         z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
         z0 <- as.data.table(z0)
         
-        colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+        colnames(z0) <- colnames(object$complr$output[[parts_index]]$logratio)
         colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
         
-        d0 <- cbind(z0, x0,
-                    d0[, -colnames(x0), with = FALSE])
+        d0 <- cbind(z0, x0, d0[, -colnames(x0), with = FALSE])
       }
       
-      # between and within
+      ## between and within
       if (any(c("between", "within") %in% level)) {
-        d0 <- cbind(object$complr$output[[parts_index]]$between_comp, 
-                    object$complr$output[[parts_index]]$dataout)
-        d0 <- d0[, head(.SD, 1), by = eval(object$complr$idvar)]
-        x0  <- acomp(d0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
-        bx0 <- x0
-        
+        d0  <- object$complr$output[[parts_index]]$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+        bx0  <- acomp(d0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+
         bz0 <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
         bz0 <- as.data.table(bz0)
         
         wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
-        wz0    <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
+        wz0 <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
         
-        colnames(bz0)    <- colnames(object$complr$output[[parts_index]]$between_logratio)
-        colnames(wz0)    <- colnames(object$complr$output[[parts_index]]$within_logratio)
+        colnames(bz0) <- colnames(object$complr$output[[parts_index]]$between_logratio)
+        colnames(wz0) <- colnames(object$complr$output[[parts_index]]$within_logratio)
         colnames(bx0) <- colnames(object$complr$output[[parts_index]]$between_comp)
         colnames(wx0) <- colnames(object$complr$output[[parts_index]]$within_comp)
         
-        d0 <- cbind(bz0, wz0, bx0, wx0,
-                    d0[, colnames(d0) %in% colnames(object$complr$output[[parts_index]]$dataout), with = FALSE])
+        d0 <- cbind(bz0, wz0, bx0, wx0, d0[, colnames(d0) %in% colnames(object$complr$output[[parts_index]]$dataout), with = FALSE])
       }
     } else {
-      
-      # assemble reference grid
-      # get var names
-      ilrnames <- c(colnames(object$complr$output[[parts_index]]$between_logratio),
-                    colnames(object$complr$output[[parts_index]]$within_logratio),
-                    colnames(object$complr$output[[parts_index]]$logratio))
+      ## assemble reference grid
+      ## get var names
+      znames <- c(colnames(object$complr$output[[parts_index]]$between_logratio),
+                  colnames(object$complr$output[[parts_index]]$within_logratio),
+                  colnames(object$complr$output[[parts_index]]$logratio))
       
       vars  <- colnames(model.frame(object))
       resp  <- object$model$formula$formula[[2]]
       grp   <- object$model$ranef$group
       preds <- vars %snin% c(resp, grp)
-      covs  <- vars %snin% c(resp, grp, ilrnames)
+      covs  <- vars %snin% c(resp, grp, znames)
       
-      # default reference grid
+      ## default reference grid
       drg <- as.data.table(ref_grid(object$model, at = at)@grid)
       
-      # reference grid (only covariates and outcome)
+      ## reference grid (only covariates and outcome)
       refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
       
+      ## to make fitted() happy
       id <- data.table::data.table(1) # to make fitted() happy
       colnames(id) <- object$complr$idvar
       
@@ -219,9 +213,7 @@ build.rg <- function(object,
             x0 <- mean.acomp(object$complr$output[[parts_index]]$comp, robust = TRUE)
             
           } else {
-            x0 <- cbind(object$complr$output[[parts_index]]$comp,
-                        object$complr$output[[parts_index]]$dataout[, object$complr$idvar, with = FALSE])
-            x0 <- x0[, head(.SD, 1), by = eval(object$complr$idvar)]
+            x0 <- object$complr$output[[parts_index]]$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
             x0 <- acomp(x0[, colnames(object$complr$output[[parts_index]]$comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
             x0 <- mean.acomp(x0, robust = TRUE)
           }
@@ -232,7 +224,7 @@ build.rg <- function(object,
           z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
           z0 <- as.data.table(t(z0))
           
-          colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+          colnames(z0) <- colnames(object$complr$output[[parts_index]]$logratio)
           colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
@@ -241,20 +233,17 @@ build.rg <- function(object,
         # between and/or within
         if (any(c("between", "within") %in% level)) {
           if (weight == "proportional") {
-            x0 <- mean.acomp(object$complr$output[[parts_index]]$between_comp, robust = TRUE)
+            bx0 <- mean.acomp(object$complr$output[[parts_index]]$between_comp, robust = TRUE)
             
           } else {
-            x0 <- cbind(object$complr$output[[parts_index]]$between_comp,
-                        object$complr$output[[parts_index]]$dataout[, object$complr$idvar, with = FALSE])
-            x0 <- x0[, head(.SD, 1), by = eval(object$complr$idvar)]
-            x0 <- acomp(x0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
-            x0 <- mean.acomp(x0, robust = TRUE)
+            bx0 <- object$complr$output[[parts_index]]$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+            bx0 <- acomp(bx0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
+            bx0 <- mean.acomp(bx0, robust = TRUE)
           }
           
-          x0  <- acomp(x0, total = object$complr$output[[parts_index]]$total)
-          x0  <- as.data.table(t(x0))
-          bx0 <- x0
-          
+          bx0 <- acomp(bx0, total = object$complr$output[[parts_index]]$total)
+          bx0 <- as.data.table(t(bx0))
+
           bz0 <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
           bz0 <- as.data.table(t(bz0))
           
@@ -270,6 +259,7 @@ build.rg <- function(object,
         }
       }
       
+      # user specified
       if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
         weight <- NULL
         
@@ -280,24 +270,24 @@ build.rg <- function(object,
               paste0(object$complr$output[[parts_index]]$parts %nin% colnames(ref), collapse = ", ")
             ))
         } else {
-          comp_user <- ref[, object$complr$output[[parts_index]]$parts, with = FALSE]
-          comp_user <- acomp(comp_user, total = object$complr$output[[parts_index]]$total)
-          comp_user <- as.data.table(t(comp_user))
+          xu <- ref[, object$complr$output[[parts_index]]$parts, with = FALSE]
+          xu <- acomp(xu, total = object$complr$output[[parts_index]]$total)
+          xu <- as.data.table(t(xu))
         }
         
         # sanity checks
         if (nrow(ref) > 1) {
           stop("Only one reference composition is allowed at a time.")
         }
-        if(isFALSE(sum(comp_user) == object$complr$output[[parts_index]]$total)) {
+        if(isFALSE(sum(xu) == object$complr$output[[parts_index]]$total)) {
           stop(sprintf(
             "The total amount of the reference composition (%s) should be the same as the composition (%s).",
-            sum(comp_user),
+            sum(xu),
             object$complr$output[[parts_index]]$total
           ))
         }
-        if (isTRUE((any(comp_user > lapply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], max)) |
-                    any(comp_user < lapply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], min))))) {
+        if (isTRUE((any(xu > lapply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], max)) |
+                    any(xu < lapply(object$complr$output[[parts_index]]$dataout[, object$complr$output[[parts_index]]$parts, with = FALSE], min))))) {
           stop(paste(
             sprintf(
               "composition should be numeric or interger values that are between (%s) and (%s)",
@@ -310,9 +300,9 @@ build.rg <- function(object,
           ))
         }
         
-        # user's specified reference grid
+        # user's specified reference grid - edit to allow for new var names
         ## any covariates left in the ref
-        if (ncol(ref) > ncol(comp_user)) {
+        if (ncol(ref) > ncol(xu)) {
           covgrid <- ref[, -object$complr$output[[parts_index]]$parts, with = FALSE]
           
           if (isFALSE(fill)) {
@@ -337,27 +327,25 @@ build.rg <- function(object,
         }
         
         if (level == "aggregate") {
-          x0 <- comp_user
+          x0 <- xu
           
           z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
           z0 <- as.data.table(t(z0))
           
-          colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+          colnames(z0) <- colnames(object$complr$output[[parts_index]]$logratio)
           colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
           
         }
         if (level %in% c("between", "within")) {
-          x0 <- cbind(object$complr$output[[parts_index]]$between_comp,
-                      object$complr$output[[parts_index]]$dataout[, object$complr$idvar, with = FALSE])
-          x0 <- x0[, head(.SD, 1), by = eval(object$complr$idvar)]
+          x0 <- object$complr$output[[parts_index]]$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
           x0 <- acomp(x0[, colnames(object$complr$output[[parts_index]]$between_comp), with = FALSE], total = object$complr$output[[parts_index]]$total)
           x0 <- mean.acomp(x0, robust = TRUE)
           
           # assemble d0
           # bz0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
-          bx0 <- comp_user
+          bx0 <- xu
           bz0 <- ilr(bx0, V = object$complr$output[[parts_index]]$psi)
           bz0 <- as.data.table(t(bz0))
           
@@ -369,11 +357,11 @@ build.rg <- function(object,
           
           id <- data.table::data.table(1) # to make fitted() happy
           
-          colnames(bz0)  <- colnames(object$complr$output[[parts_index]]$between_logratio)
-          colnames(wz0)  <- colnames(object$complr$output[[parts_index]]$within_logratio)
+          colnames(bz0) <- colnames(object$complr$output[[parts_index]]$between_logratio)
+          colnames(wz0) <- colnames(object$complr$output[[parts_index]]$within_logratio)
           colnames(bx0) <- colnames(object$complr$output[[parts_index]]$between_comp)
           colnames(wx0) <- colnames(object$complr$output[[parts_index]]$within_comp)
-          colnames(id)     <- object$complr$idvar
+          colnames(id)  <- object$complr$idvar
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
         }
@@ -388,36 +376,24 @@ build.rg <- function(object,
     x0 <- mean.acomp(x0, robust = TRUE)
     x0 <- acomp(x0, total = object$complr$output[[parts_index]]$total)
     x0 <- as.data.table(t(x0))
-    bx0 <- x0
-    
-    d0 <- object$complr$output[[parts_index]]$dataout
     
     z0 <- ilr(x0, V = object$complr$output[[parts_index]]$psi)
     z0 <- as.data.table(t(z0))
     
-    colnames(z0)  <- colnames(object$complr$output[[parts_index]]$logratio)
+    colnames(z0) <- colnames(object$complr$output[[parts_index]]$logratio)
     colnames(x0) <- colnames(object$complr$output[[parts_index]]$comp)
     
     # assemble reference grid
     # get var names
-    ilrnames <- c(colnames(object$complr$output[[parts_index]]$between_logratio),
-                  colnames(object$complr$output[[parts_index]]$within_logratio),
-                  colnames(object$complr$output[[parts_index]]$logratio))
+    znames <- c(colnames(object$complr$output[[parts_index]]$between_logratio),
+                colnames(object$complr$output[[parts_index]]$within_logratio),
+                colnames(object$complr$output[[parts_index]]$logratio))
     
     vars  <- colnames(model.frame(object))
     resp  <- object$model$formula$formula[[2]]
     # grp   <- object$model$ranef$group
     preds <- vars %snin% c(resp)
-    covs  <- vars %snin% c(resp, ilrnames)
-    
-    # default reference grid
-    # set binary
-    # drg <- model.frame(object)
-    # drg[] <- as.data.table(lapply(drg, function(j) if(is.numeric(j) && unique(j) %ain% c(0, 1)) as.factor(j) else j))
-    # drg <- as.data.table(insight::get_datagrid(drg,
-    #                                            by = paste0(resp),
-    #                                            factors = factors,
-    #                                            length = NA))
+    covs  <- vars %snin% c(resp, znames)
     
     drg <- as.data.table(ref_grid(object$model, at = at)@grid)
     

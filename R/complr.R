@@ -107,17 +107,6 @@ complr <- function(data,
     stop(" 'transform' should be one of the following: \"ilr\", \"alr\", \"clr\".")
   }
   
-  # check var names
-  if (isTRUE(any(grep("ilr|alr|clr", colnames(tmp))))) {
-    stop(
-      paste(
-        "'data' should not have any column names with patterns of \"ilr\", \"alr\", or \"clr\";",
-        "  these variables will be computed by 'complr' used in subsequent models.",
-        "  Please remove or rename them before running 'complr'.",
-        sep = "\n"))
-  }
-  
-  
   ## CHECK NUMBER OF COMPOSITION HERE?
   # check if parts is a list
   if (is.list(parts)) {
@@ -325,6 +314,18 @@ complr <- function(data,
   data.table::setnames(tmp, parts_all, paste0(parts_all, "_raw"))
   
   dataout <- do.call(cbind, lapply(output, function(x) x$dataout))
+  
+  # check any repetitive names between tmp and dataout before cbind
+  if (isTRUE(any(colnames(tmp) %in% colnames(dataout)))) {
+    stop(
+      sprintf(
+        "'data' cannot have any column names the same with logratio variables",
+        "  Please ensure that the names of the columns in 'data' are not any of the following:",
+        "  %s",
+        paste(colnames(tmp)[colnames(tmp) %in% colnames(dataout)], collapse = ", "),
+        sep = "\n"))
+  }
+  
   dataout <- cbind(tmp, dataout)
   
   complr_out <- structure(
