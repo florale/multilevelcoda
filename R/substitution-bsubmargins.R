@@ -21,8 +21,9 @@
 #'                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 #' 
 #' m <- brmcoda(complr = cilr, 
-#'              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + 
-#'                                 wilr2 + wilr3 + wilr4 + Female + (1 | ID), 
+#'              formula = Stress ~ bz1 + bz2 + bz3 + bz4 + 
+#'                                 wz1 + wz2 + wz3 + wz4 + 
+#'                                 Female + (1 | ID), 
 #'              chains = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
@@ -54,7 +55,7 @@ bsubmargins <- function (object,
                  fill = FALSE)
   
   # error if delta out of range
-  x0 <- d0[, colnames(object$complr$between_comp), with = FALSE]
+  x0 <- d0[, paste0("b", parts), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(x0, min)))) {
@@ -80,6 +81,7 @@ bsubmargins <- function (object,
     object = object,
     base = base,
     delta = delta,
+    parts = parts,
     x0 = x0,
     d0 = d0,
     y0 = y0,

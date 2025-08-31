@@ -21,7 +21,7 @@
 #' 
 #' # model with compositional predictor at between and within-person levels
 #' m <- brmcoda(complr = cilr, 
-#'              formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
+#'              formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID), 
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
@@ -71,7 +71,7 @@ sub <- function (object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  x0 <- d0[1, colnames(object$complr$comp), with = FALSE]
+  x0 <- d0[1, parts, with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(x0)))) {
@@ -95,6 +95,7 @@ sub <- function (object,
     object = object,
     base = base,
     delta = delta,
+    parts = parts,
     x0 = x0,
     d0 = d0,
     y0 = y0,
@@ -131,7 +132,7 @@ sub <- function (object,
 #' 
 #' # model with compositional predictor at between and within-person levels
 #' m <- brmcoda(complr = cilr, 
-#'              formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID), 
+#'              formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID), 
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'                      
@@ -163,7 +164,7 @@ submargins <- function (object,
                  fill = FALSE)
   
   # error if delta out of range
-  x0 <- d0[, colnames(object$complr$comp), with = FALSE]
+  x0 <- d0[, parts, with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(x0, min)))) {
@@ -190,6 +191,7 @@ submargins <- function (object,
     object = object,
     base = base,
     delta = delta,
+    parts = parts,
     x0 = x0,
     d0 = d0,
     y0 = y0,

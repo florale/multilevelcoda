@@ -23,8 +23,8 @@
 #' 
 #' # model with compositional predictor at between and within-person levels
 #' m <- brmcoda(complr = cilr, 
-#'              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + 
-#'                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
+#'              formula = Stress ~ bz1 + bz2 + bz3 + bz4 + 
+#'                                 wz1 + wz2 + wz3 + wz4 + (1 | ID), 
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'              
@@ -75,7 +75,7 @@ wsub <- function(object,
   d0 <- as.data.table(d0)
   
   # error if delta out of range
-  x0 <- d0[1, colnames(object$complr$between_comp), with = FALSE]
+  x0 <- d0[1, paste0("b", parts), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(x0)))) {
@@ -100,6 +100,7 @@ wsub <- function(object,
       object = object,
       base = base,
       delta = delta,
+      parts = parts,
       x0 = x0,
       d0 = d0,
       y0 = y0,

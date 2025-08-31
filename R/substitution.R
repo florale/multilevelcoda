@@ -73,8 +73,8 @@
 #'
 #'   # model with compositional predictor at between and within-person levels
 #'   fit1 <- brmcoda(complr = cilr,
-#'                   formula = Stress ~ bz2_1 + bz2_1 + bz2_1 + bz2_1 +
-#'                                      wz2_1 + wz2_1 + wz2_1 + wz2_1 + (1 | ID),
+#'                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
@@ -88,7 +88,7 @@
 #'   
 #'   # model with compositional predictor at aggregate level of variance
 #'   fit2 <- brmcoda(complr = cilr,
-#'                   formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
+#'                   formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'   sub3 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
 #'
@@ -101,7 +101,7 @@ substitution <- function(object,
                          summary = TRUE,
                          aorg = TRUE,
                          at = NULL,
-                         parts,
+                         parts = 1,
                          base,
                          weight = c("equal", "proportional"),
                          scale = c("response", "linear"),
@@ -169,16 +169,23 @@ substitution <- function(object,
   }
   
   # check parts
-  if (missing(parts)) {
-    message(sprintf("No 'parts' specified, %s will be used as the composition for substitution analysis.",
-                    paste(object$complr$output[[1]]$parts, collapse = ", ")))
-    parts <- object$complr$output[[1]]$parts
+  if (is.numeric(parts)) {
+    if (length(parts) > 1) {
+      stop(" 'parts' should be a single numeric value indicating which set of compositional parts to use.")
+    }
+    if (parts < 1 || parts > length(object$complr$output)) {
+      stop(sprintf(
+        " 'parts' should be a single numeric value between 1 and %s, corresponding to the number of sets of compositional parts in the 'complr' object.",
+        length(object$complr$output)))
+    }
+    parts <- object$complr$output[[parts]]$parts
+    
   } else {
     if (isFALSE(inherits(parts, "character"))) {
       stop(" 'parts' should be a character vector of compositional parts.")
     }
     ## parts should be identical with either one of the parts presented in output of complr
-    if (isFALSE((any(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))))) {
+    if (isFALSE((any(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(sort(parts), sort(p)), logical(1)))))) {
       stop(sprintf(
         "The specified 'parts' (%s) are not found in the complr object.",
         "  It should corespond to one set of compositional parts, either one of the following:",
@@ -188,16 +195,17 @@ substitution <- function(object,
         sep = "\n"))
     }
   }
+  
   ## get the index of which index elements of object$complr$output does the parts correspond to - check w JW
-  parts_index <- which(vapply(lapply(object$complr$output, 
-                                     function(x) x$parts), 
-                              function(p) identical(parts, p), logical(1)))
+  idx <- which(vapply(lapply(object$complr$output, 
+                             function(x) x$parts), 
+                      function(p) identical(sort(parts), sort(p)), logical(1)))
   
   # type - check with JW what would be the best way to detect onetoone vs onetoall
   if (missing(type)) {
     if (missing(base)) {
-      base <- build.base(parts = object$complr$output[[parts_index]]$parts)
-      names(base) <- object$complr$output[[parts_index]]$parts
+      base <- build.base(parts = object$complr$output[[idx]]$parts)
+      names(base) <- object$complr$output[[idx]]$parts
       type <- "one-to-one"
     } else {
       if (inherits(base, c("data.frame", "data.table", "matrix"))) {
@@ -208,12 +216,12 @@ substitution <- function(object,
     }
   } else {
     if (identical(type, "one-to-one")) {
-      base <- build.base(parts = object$complr$output[[parts_index]]$parts)
-      names(base) <- object$complr$output[[parts_index]]$parts
+      base <- build.base(parts = object$complr$output[[idx]]$parts)
+      names(base) <- object$complr$output[[idx]]$parts
       type <- "one-to-one"
     } else if (inherits(type, "character") && identical(type, "one-to-all")) {
-      base <- build.base(parts = object$complr$output[[parts_index]]$parts, type = "one-to-all")
-      names(base) <- object$complr$output[[parts_index]]$parts
+      base <- build.base(parts = object$complr$output[[idx]]$parts, type = "one-to-all")
+      names(base) <- object$complr$output[[idx]]$parts
       type <- "one-to-all"
     }
   }
@@ -223,11 +231,11 @@ substitution <- function(object,
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   model_fixef_level <- model_fixef_coef <- NULL
-
+  
   # grab the correct logratio names
-  z_vars  <- names(object$complr$output[[parts_index]]$logratio)
-  bz_vars <- names(object$complr$output[[parts_index]]$between_logratio)
-  wz_vars <- names(object$complr$output[[parts_index]]$within_logratio)
+  z_vars  <- names(object$complr$output[[idx]]$logratio)
+  bz_vars <- names(object$complr$output[[idx]]$between_logratio)
+  wz_vars <- names(object$complr$output[[idx]]$within_logratio)
   
   if (length(grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")
