@@ -2,7 +2,7 @@
 % Please edit documentation in R/brmcoda-methods.R
 \name{model.frame.brmcoda}
 \alias{model.frame.brmcoda}
-\title{Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object}
+\title{Extracting the Model Frame from a Formula or Fit from \code{brmcoda} object}
 \usage{
 \method{model.frame}{brmcoda}(formula, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{Further arguments to be passed to methods.}
 }
 \description{
-Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object
+Extracting the Model Frame from a Formula or Fit from \code{brmcoda} object
 }

@@ -7,7 +7,17 @@ is.brmcoda <- function(x) {
   inherits(x, "brmcoda")
 }
 
-#' Extract Number of Observations from \pkg{brmcoda} object
+#' Extract variable names from a \code{brmcoda} object.
+#' @param object A \code{brmcoda} object
+#' 
+#' @method get_variables brmcoda
+#' @rdname get_variables
+#' @export
+get_variables.brmcoda <- function(object) {
+  colnames(model.frame(object))
+}
+
+#' Extract Number of Observations from \code{brmcoda} object
 #'
 #' @param object A \code{brmcoda} object.
 #' @param ... Further arguments to be passed to methods.
@@ -19,7 +29,7 @@ nobs.brmcoda <- function(object, ...) {
   nobs(object$model, ...)
 }
 
-#' Extracting the Model Frame from a Formula or Fit from \pkg{brmcoda} object
+#' Extracting the Model Frame from a Formula or Fit from \code{brmcoda} object
 #'
 #' @param formula A \code{brmcoda} object.
 #' @param ... Further arguments to be passed to methods.

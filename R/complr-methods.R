@@ -74,12 +74,17 @@ as.matrix.complr <- function(x, ...) {
   as.matrix(as.data.frame(x, ...))
 }
 
-#' Extract names from a \code{complr} object.
-#' @param complr A \code{complr} object
-#'
-
+#' Extract variable names from a \code{complr} object.
+#' @param object A \code{complr} object
+#' 
+#' @method get_variables complr
+#' 
 #' @export
-get.names.complr <- function(object) {
+get_variables = function(object) UseMethod("get_variables")
+
+#' @rdname get_variables
+#' @export
+get_variables.complr <- function(object) {
   
   out <- lapply(object$output, function(x) {
     list(names(x$X),

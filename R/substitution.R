@@ -233,9 +233,9 @@ substitution <- function(object,
   model_fixef_level <- model_fixef_coef <- NULL
   
   # grab the correct logratio names
-  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
   if (length(grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
     model_fixef_level <- append(model_fixef_level, "between")

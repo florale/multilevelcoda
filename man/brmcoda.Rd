@@ -32,14 +32,12 @@ if(requireNamespace("cmdstanr")){
   x1 <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
-  # inspects ILRs before passing to brmcoda
-  names(clr1$between_logratio)
-  names(clr1$within_logratio)
-  names(clr1$logratio)
+  # inspect variables before passing to brmcoda
+  get_variables(x1)
 
   ## model with compositional predictor at between and within-person levels
   m1 <- brmcoda(complr = x1,
-                formula = Stress ~ bz1_1 bz2_1 + bz3_1 + bz4_1 +
+                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
