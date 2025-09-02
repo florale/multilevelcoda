@@ -488,9 +488,7 @@ NULL
                       sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         xsub <- x0 + sub_tmp_j[k,]
-                        names(xsub) <- x_vars
-                        Delta <- sub_tmp_j[k, get(i)]
-                        kout[[k]] <- cbind(x0, xsub, Delta)
+                        kout[[k]] <- setNames(cbind(x0, xsub, sub_tmp_j[k, get(i)]), c(bx_vars, x_vars, "Delta"))
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
@@ -645,9 +643,7 @@ NULL
                       sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         xsub <- x0 + sub_tmp_j[k, ]
-                        names(xsub) <- x_vars
-                        Delta <- sub_tmp_j[k, get(i)]
-                        kout[[k]] <- cbind(x0, xsub, Delta)
+                        kout[[k]] <- setNames(cbind(x0, xsub, sub_tmp_j[k, get(i)]), c(bx_vars, x_vars, "Delta"))
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
@@ -799,9 +795,7 @@ NULL
                       sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         xsub <- x0 + sub_tmp_j[k,]
-                        names(xsub) <- x_vars
-                        Delta <- sub_tmp_j[k, get(i)]
-                        kout[[k]] <- cbind(xsub, Delta)
+                        kout[[k]] <- setNames(cbind(xsub, sub_tmp_j[k, get(i)]), c(x_vars, "Delta"))
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
@@ -948,13 +942,9 @@ NULL
                         sub_tmp_k <- sub_tmp_j[k, ]
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
-                        names(xsub) <- x_vars
-                        
-                        Delta <- sub_tmp_k[, get(i)]
-                        
-                        d1 <- cbind(x0, xsub,
-                                    d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE],
-                                    Delta)
+
+                        d1 <- setNames(cbind(x0, xsub, sub_tmp_k[, get(i)]), c(bx_vars, x_vars, "Delta"))
+                        d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
@@ -1085,18 +1075,9 @@ NULL
                         sub_tmp_k <- sub_tmp_j[k, ]
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
-                        names(xsub) <- x_vars
-                        
-                        Delta <- sub_tmp_k[, get(i)]
-                        
-                        d1 <- cbind(x0, xsub,
-                                    d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE],
-                                    Delta)
-                        
-                        # # useful information for the final output
-                        # d1[, From := rep(sub_from_var, length.out = nrow(d1))[k]]
-                        # d1[, To := rep(sub_to_var, length.out = nrow(d1))[k]]
-                        # d1[, Delta := abs(as.numeric(Delta))]
+
+                        d1 <- setNames(cbind(x0, xsub, sub_tmp_k[, get(i)]), c(bx_vars, x_vars, "Delta"))
+                        d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
@@ -1230,19 +1211,10 @@ NULL
                         sub_tmp_k <- sub_tmp_j[k, ]
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
-                        names(xsub) <- x_vars
                         
-                        Delta <- sub_tmp_k[, get(i)]
-                        
-                        d1 <- cbind(xsub,
-                                    d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE],
-                                    Delta)
-                        
-                        # # useful information for the final results
-                        # d1[, From := rep(sub_from_var, length.out = nrow(d1))[k]]
-                        # d1[, To := rep(sub_to_var, length.out = nrow(d1))[k]]
-                        # d1[, Delta := abs(as.numeric(Delta))]
-                        
+                        d1 <- setNames(cbind(xsub, sub_tmp_k[, get(i)]), c(x_vars, "Delta"))
+                        d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
+
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
                         d1   <- d1[rowSums(d1[, ..cols] < 0) == 0]
