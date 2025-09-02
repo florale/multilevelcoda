@@ -100,13 +100,13 @@ build.rg <- function(object,
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   ## NOTES
   ## ignore weight for clustermean
@@ -437,13 +437,13 @@ NULL
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   grid <- d0[, colnames(d0) %nin% c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars, object$complr$idvar), with = FALSE]
   
@@ -592,13 +592,13 @@ NULL
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   grid <- d0[, colnames(d0) %nin% c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars, object$complr$idvar), with = FALSE]
   
@@ -744,13 +744,13 @@ NULL
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   grid <- d0[, colnames(d0) %nin% c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars, object$complr$idvar), with = FALSE]
   
@@ -891,13 +891,13 @@ NULL
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -942,7 +942,7 @@ NULL
                         sub_tmp_k <- sub_tmp_j[k, ]
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
-
+                        
                         d1 <- setNames(cbind(x0, xsub, sub_tmp_k[, get(i)]), c(bx_vars, x_vars, "Delta"))
                         d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
@@ -1024,13 +1024,13 @@ NULL
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -1075,7 +1075,7 @@ NULL
                         sub_tmp_k <- sub_tmp_j[k, ]
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
-
+                        
                         d1 <- setNames(cbind(x0, xsub, sub_tmp_k[, get(i)]), c(bx_vars, x_vars, "Delta"))
                         d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
@@ -1160,13 +1160,13 @@ NULL
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- names(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- names(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- names(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get.names(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get.names(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get.names(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  x_vars  <- names(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- names(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- names(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get.names(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get.names(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get.names(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -1214,7 +1214,7 @@ NULL
                         
                         d1 <- setNames(cbind(xsub, sub_tmp_k[, get(i)]), c(x_vars, "Delta"))
                         d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
-
+                        
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
                         d1   <- d1[rowSums(d1[, ..cols] < 0) == 0]

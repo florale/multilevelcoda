@@ -77,21 +77,17 @@ as.matrix.complr <- function(x, ...) {
 #' Extract names from a \code{complr} object.
 #' @param complr A \code{complr} object
 #'
-#' @method names complr
-#'
+
 #' @export
-names.complr <- function(object) {
+get.names.complr <- function(object) {
   
   out <- lapply(object$output, function(x) {
-    X  <- names(x$X)
-    bX <- names(x$bX)
-    wX <- names(x$wX)
-    
-    Z  <- names(x$Z)
-    bZ <- names(x$bZ)
-    wZ <- names(x$wZ)
-    
-    list(X, bX, wX, Z, bZ, wZ)
+    list(names(x$X),
+         names(x$bX),
+         names(x$wX),
+         names(x$Z),
+         names(x$bZ),
+         names(x$wZ))
   })
   
   out <- as.data.frame(do.call(cbind, out))

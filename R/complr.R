@@ -83,6 +83,7 @@ complr <- function(data,
                    total = 1,
                    idvar = NULL,
                    transform = "ilr") {
+  
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
   }
@@ -209,29 +210,28 @@ complr <- function(data,
     } else {
       psi_i <- sbp_i <- NULL
     }
-    
     # MAKE COMPOSITION AND LOG RATIO TRANSFORMATIONS ----------------
     if (shape == "wide") {
       # make composition
       tX_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
       bX_i <- wX_i <- NULL
-      colnames(tX_i) <- parts_i
+      colnames(tX_i) <- paste0("t", parts_i)
       
       # ILR
       if (identical(transform, "ilr")) {
         tilr_i <- ilr(tX_i, V = psi_i)
         bilr_i <- wilr_i <- NULL
-        colnames(tilr_i)  <- paste0("ilr", seq_len(ncol(tilr_i)))
+        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", i)
         
       } else if (identical(transform, "alr")) {
         talr_i <- alr(tX_i)
         balr_i <- walr_i <- NULL
-        colnames(talr_i)  <- paste0("alr", seq_len(ncol(talr_i)))
+        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", i)
         
       } else if (identical(transform, "clr")) {
         tclr_i <- clr(tX_i)
         bclr_i <- wclr_i <- NULL
-        colnames(tclr_i)  <- paste0("clr", seq_len(ncol(tclr_i)))
+        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", i)
       }
     }
     
@@ -251,7 +251,7 @@ complr <- function(data,
       # name them for later use
       colnames(bX_i) <- paste0("b", parts_i)
       colnames(wX_i) <- paste0("w", parts_i)
-      colnames(tX_i) <- parts_i
+      colnames(tX_i) <- paste0("t", parts_i)
       
       ## ILR ---------------
       if (identical(transform, "ilr")) {
@@ -287,59 +287,43 @@ complr <- function(data,
       }
     }
     
-    Z_i <-  if (exists("tilr_i"))
-      (tilr_i)
-    else if (exists("talr_i"))
-      (talr_i)
-    else if (exists("tclr_i"))
-      (tclr_i)
+    Z_i <-  if (exists("tilr_i")) (tilr_i)
+    else if (exists("talr_i")) (talr_i)
+    else if (exists("tclr_i")) (tclr_i)
+    else  (NULL)
     
-    bZ_i <- if (exists("bilr_i"))
-      (bilr_i)
-    else if (exists("balr_i"))
-      (balr_i)
-    else if (exists("bclr_i"))
-      (bclr_i)
-    else
-      (NULL)
+    bZ_i <- if (exists("bilr_i")) (bilr_i)
+    else if (exists("balr_i")) (balr_i)
+    else if (exists("bclr_i")) (bclr_i)
+    else (NULL)
     
-    wZ_i <- if (exists("wilr_i"))
-      (wilr_i)
-    else if (exists("walr_i"))
-      (walr_i)
-    else if (exists("wclr_i"))
-      (wclr_i)
-    else
-      (NULL)
+    wZ_i <- if (exists("wilr_i")) (wilr_i)
+    else if (exists("walr_i")) (walr_i)
+    else if (exists("wclr_i")) (wclr_i)
+    else (NULL)
     
     # cbind data output
     dataout_i <- cbind(tX_i, bX_i, wX_i, Z_i, bZ_i, wZ_i)
     
     output[[i]] <- list(
-      X  = tX_i,
-      bX = bX_i,
-      wX = wX_i,
+      X  = if(exists("tX_i")) (tX_i) else (NULL),
+      bX = if(exists("bX_i")) (bX_i) else (NULL),
+      wX = if(exists("wX_i")) (wX_i) else (NULL),
       
-      Z  = Z_i,
-      bZ = bZ_i,
-      wZ = wZ_i,
+      Z  = if(exists("Z_i")) (Z_i) else (NULL),
+      bZ = if(exists("bZ_i")) (bZ_i) else (NULL),
+      wZ = if(exists("wZ_i")) (wZ_i) else (NULL),
       
       dataout = dataout_i,
       parts = parts_i,
       total = total_i,
       sbp = sbp_i,
       psi = psi_i
-      
     )
   }
   
   # PATCH OUTPUT ----------------
-  parts_all <- unlist(lapply(output, function(x)
-    x$parts))
-  data.table::setnames(tmp, parts_all, paste0(parts_all, "_raw"))
-  
-  dataout <- do.call(cbind, lapply(output, function(x)
-    x$dataout))
+  dataout <- do.call(cbind, lapply(output, function(x) x$dataout))
   
   # check any repetitive names between tmp and dataout before cbind
   if (isTRUE(any(colnames(tmp) %in% colnames(dataout)))) {
@@ -353,21 +337,15 @@ complr <- function(data,
       )
     )
   }
-  
-  dataout <- cbind(tmp, dataout)
-  
-  complr_out <- structure(
+  structure(
     list(
-      output = output,
-      datain = as.data.table(tmp),
-      dataout = dataout,
+      output    = output,
+      datain    = as.data.table(tmp),
+      dataout   = as.data.table(cbind(tmp, dataout)),
       transform = transform,
-      idvar = idvar
+      idvar     = idvar
     ),
-    class = "complr"
-  )
-  complr_out
-  
+    class = "complr")
 }
 
 #' Indices from a (dataset of) Multilevel Composition(s) (deprecated.)
