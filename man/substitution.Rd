@@ -12,7 +12,7 @@ substitution(
   summary = TRUE,
   aorg = TRUE,
   at = NULL,
-  parts,
+  parts = 1,
   base,
   weight = c("equal", "proportional"),
   scale = c("response", "linear"),
@@ -101,18 +101,18 @@ present in the \code{\link{brmcoda}} object.
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-  cilr <- complr(data = mcompd, sbp = sbp,
+  x <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                  idvar = "ID", total = 1440)
 
   # model with compositional predictor at between and within-person levels
-  fit1 <- brmcoda(complr = cilr,
-                  formula = Stress ~ bz2_1 + bz2_1 + bz2_1 + bz2_1 +
-                                     wz2_1 + wz2_1 + wz2_1 + wz2_1 + (1 | ID),
+  fit1 <- brmcoda(complr = x,
+                  formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                     wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
                   
   # one to one reallocation at between and within-person levels
-  sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
+  sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = FALSE)
   summary(sub1)
   
   # one to all reallocation at between and within-person levels
@@ -121,8 +121,8 @@ if(requireNamespace("cmdstanr")){
   summary(sub2) 
   
   # model with compositional predictor at aggregate level of variance
-  fit2 <- brmcoda(complr = cilr,
-                  formula = Stress ~ ilr1 + ilr2 + ilr3 + ilr4 + (1 | ID),
+  fit2 <- brmcoda(complr = x,
+                  formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
   sub3 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
 

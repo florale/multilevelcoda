@@ -23,8 +23,8 @@
 #'   
 #'   # model with compositional predictor at between and within-person levels
 #'   m <- brmcoda(complr = cilr,
-#'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'                                    wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -32,7 +32,8 @@
 #'   summary(m_pivot_coord)
 #'   }}
 #' @export
-pivot_coord <- function (object, summary = TRUE, 
+pivot_coord <- function (object, 
+                         summary = TRUE, 
                          method = c("rotate", "refit"),
                          ...) {
   
@@ -70,8 +71,8 @@ pivot_coord <- function (object, summary = TRUE,
 #'                  total = 1440)
 #'   
 #'   m <- brmcoda(complr = cilr,
-#'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'                                    wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -96,32 +97,32 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
   model_fixef <- rownames(fixef(object))
   # model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
-  ilr_vars  <- grep("ilr", model_fixef, value = T)
-  bilr_vars <- grep(".*bilr", model_fixef, value = T)
-  wilr_vars <- grep(".*wilr", model_fixef, value = T)
+  z_vars  <- grep("ilr", model_fixef, value = T)
+  bz_vars <- grep(".*bilr", model_fixef, value = T)
+  wz_vars <- grep(".*wilr", model_fixef, value = T)
   
-  ilr_sbp_0  <- object$complr$logratio
-  bilr_sbp_0 <- object$complr$between_logratio
-  wilr_sbp_0 <- object$complr$within_logratio
+  z_sbp_0  <- object$complr$output[[parts_index]]$logratio
+  bz_sbp_0 <- object$complr$output[[parts_index]]$between_logratio
+  wz_sbp_0 <- object$complr$output[[parts_index]]$within_logratio
   
-  b_ilr_sbp_0  <- b_sbp_0[, colnames(b_sbp_0) %in% ilr_vars]
-  b_bilr_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% bilr_vars]
-  b_wilr_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% wilr_vars]
+  b_z_sbp_0  <- b_sbp_0[, colnames(b_sbp_0) %in% z_vars]
+  b_bz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% bz_vars]
+  b_wz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% wz_vars]
   
   b_sbp_summary_d <- vector("list")
-  for (d in object$complr$parts) {
-    parts_d <- append(d, grep(d, object$complr$parts, value = T, invert = T))
+  for (d in object$complr$output[[parts_index]]$parts) {
+    parts_d <- append(d, grep(d, object$complr$output[[parts_index]]$parts, value = T, invert = T))
     sbp_d   <- build.sbp(parts_d)
-    sbp_d   <- sbp_d[, object$complr$parts]
+    sbp_d   <- sbp_d[, object$complr$output[[parts_index]]$parts]
     
-    clr_d   <- complr(data  = object$complr$data, 
+    clr_d   <- complr(data  = object$complr$datain, 
                       sbp   = sbp_d,
-                      parts = object$complr$parts,
+                      parts = object$complr$output[[parts_index]]$parts,
                       idvar = object$complr$idvar,
-                      total = object$complr$total)
+                      total = object$complr$output[[parts_index]]$total)
     
     R <- crossprod(object$complr$psi, clr_d$psi)
-
+    
     pars <- c("intercept", "between_logratio", "within_logratio", "logratio")
     b_sbp_target_i <- vector("list", length = length(pars))
     names(b_sbp_target_i) <- pars
@@ -131,39 +132,39 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
         b_sbp_target_i[[i]] <- b_sbp_0[, "Intercept"]
       } else {
         
-        ## bilr
+        ## bz
         if (i == 2) {
           if (length(grep("bilr", model_fixef, value = T)) > 0) {
-            b_sbp_target_i[[i]] <- (b_bilr_sbp_0) %*% R
+            b_sbp_target_i[[i]] <- (b_bz_sbp_0) %*% R
           } 
         }
         
-        ## wilr
+        ## wz
         if (i == 3) {
           if (length(grep("wilr", model_fixef, value = T)) > 0 ) {
-            b_sbp_target_i[[i]] <- (b_wilr_sbp_0) %*% R
+            b_sbp_target_i[[i]] <- (b_wz_sbp_0) %*% R
           }
         }
         
-        ## ilr
+        ## z
         if (i == 4) {
           if ((length(grep("ilr", model_fixef, value = T)) > 0) 
               && (length(grep("[b|w]ilr", model_fixef, value = T)) == 0)) {
-            b_sbp_target_i[[i]] <- (b_ilr_sbp_0) %*% R
+            b_sbp_target_i[[i]] <- (b_z_sbp_0) %*% R
           }
         }
       }
     }
-
+    
     # take only non-empty elements (between vs within vs aggregate results)
     b_sbp_target_i <- Filter(Negate(is.null), b_sbp_target_i)
     
     if ("logratio" %in% names(b_sbp_target_i)) {
       level <- "aggregate"
-      varnames <- c(ilr_vars)
+      varnames <- c(z_vars)
     } else {
       level <- c("between", "within")
-      varnames <- c(bilr_vars, wilr_vars)
+      varnames <- c(bz_vars, wz_vars)
     }
     
     # summarise posteriors
@@ -172,7 +173,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
       b_sbp_target_summary <- do.call(rbind, b_sbp_target_summary)
       
       rownames(b_sbp_target_summary) <- c("Intercept", varnames)
-      b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bilr1", "wilr1", "ilr1"), ]
+      b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bz1", "wz1", "z1"), ]
       
       # assemble output table
       b_sbp_target_summary <- cbind.data.frame(`Pivot coordinate` = paste0(d, "_vs_remaining"),
@@ -181,7 +182,7 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
     } else {
       b_sbp_target_summary <- matrix(unlist(b_sbp_target_i), ncol = ndraws(object), byrow = TRUE)
       rownames(b_sbp_target_summary) <- c("Intercept", varnames)
-      b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bilr1", "wilr1", "ilr1"), ]
+      b_sbp_target_summary <- b_sbp_target_summary[rownames(b_sbp_target_summary) %in% c("bz1", "wz1", "z1"), ]
     }
     b_sbp_summary_d[[d]] <- b_sbp_target_summary
   }
@@ -193,14 +194,14 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
     out <- array(unlist(b_sbp_summary_d), 
                  dim = c(length(level),
                          ndraws(object),
-                         length(object$complr$parts))
+                         length(object$complr$output[[parts_index]]$parts))
     )
     # out <- brms::do_call(abind::abind, c(out, along = 3))
     out <- aperm(out, c(2, 1, 3)) 
     
     dimnames(out)[[1]] <- 1:ndraws(object)
     dimnames(out)[[2]] <- level
-    dimnames(out)[[3]] <- object$complr$parts
+    dimnames(out)[[3]] <- object$complr$output[[parts_index]]$parts
   }
   out <- structure(list(output = out, method = "rotate"), class = "pivot_coord")
   out
@@ -221,8 +222,8 @@ pivot_coord_rotate <- function (object, summary = TRUE, ...) {
 #'                  total = 1440)
 #'   
 #'   m <- brmcoda(complr = cilr,
-#'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                    wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'                                    wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -235,16 +236,16 @@ pivot_coord_refit <- function (object, ...) {
   out_d <- vector("list")
   
   # loop through parts
-  for (d in object$complr$parts) {
-    parts_d <- append(d, grep(d, object$complr$parts, value = T, invert = T))
+  for (d in object$complr$output[[parts_index]]$parts) {
+    parts_d <- append(d, grep(d, object$complr$output[[parts_index]]$parts, value = T, invert = T))
     sbp_d   <- build.sbp(parts_d)
-    sbp_d   <- sbp_d[, object$complr$parts]
+    sbp_d   <- sbp_d[, object$complr$output[[parts_index]]$parts]
     
-    clr_d <- complr(data  = object$complr$data, 
+    clr_d <- complr(data  = object$complr$datain, 
                     sbp   = sbp_d,
-                    parts = object$complr$parts,
+                    parts = object$complr$output[[parts_index]]$parts,
                     idvar = object$complr$idvar,
-                    total = object$complr$total)
+                    total = object$complr$output[[parts_index]]$total)
     
     dat_d <-  cbind(clr_d$data,
                     clr_d$between_logratio,

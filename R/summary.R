@@ -107,8 +107,8 @@ print.complr <- function(x, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                  idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -134,8 +134,8 @@ summary.brmcoda <- function(object, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -163,8 +163,8 @@ print.brmcoda <- function(x, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                  idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -184,23 +184,23 @@ summary.pivot_coord <- function(object, digits = 2, ...) {
       
       model_fixef_all <- fixef(out_all_parts[[i]])
       
-      if (length(grep("bilr1", row.names(model_fixef_all), value = T)) > 0) {
-        model_fixef_b <- rbind(model_fixef_all[grep(".*bilr1", rownames(model_fixef_all), value = T), ])
+      if (length(grep("bz1", row.names(model_fixef_all), value = T)) > 0) {
+        model_fixef_b <- rbind(model_fixef_all[grep(".*bz1", rownames(model_fixef_all), value = T), ])
         model_fixef_b <- cbind.data.frame(Level = "between", 
                                           model_fixef_b)
       } else { 
         model_fixef_b <- NULL
       }
-      if (length(grep("wilr1", row.names(model_fixef_all), value = T)) > 0) {
-        model_fixef_w <- rbind(model_fixef_all[grep(".*wilr1", rownames(model_fixef_all), value = T), ])
+      if (length(grep("wz1", row.names(model_fixef_all), value = T)) > 0) {
+        model_fixef_w <- rbind(model_fixef_all[grep(".*wz1", rownames(model_fixef_all), value = T), ])
         model_fixef_w <- cbind.data.frame(Level = "within", 
                                           model_fixef_w)
         
       } else { 
         model_fixef_w <- NULL
       }
-      if ((length(grep("ilr1", row.names(model_fixef_all), value = T)) > 0) && (length(grep("[b|w]ilr1", row.names(model_fixef_all), value = T)) == 0)) {
-        model_fixef_t <- rbind(model_fixef_all[grep(".*ilr1", rownames(model_fixef_all), value = T), ])
+      if ((length(grep("z1", row.names(model_fixef_all), value = T)) > 0) && (length(grep("[b|w]z1", row.names(model_fixef_all), value = T)) == 0)) {
+        model_fixef_t <- rbind(model_fixef_all[grep(".*z1", rownames(model_fixef_all), value = T), ])
         model_fixef_t <- cbind.data.frame(Level = "aggregate", 
                                           model_fixef_t)
       } else { 
@@ -260,8 +260,8 @@ summary.pivot_coord <- function(object, digits = 2, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -355,8 +355,8 @@ summary.substitution <- function(object, delta, to, from,
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   

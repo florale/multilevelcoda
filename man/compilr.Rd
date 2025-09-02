@@ -11,15 +11,15 @@ compilr(...)
 }
 \value{
 A \code{\link{complr}} object with at least the following elements.
-\item{\code{comp}}{ A vector of class \code{acomp} representing one closed composition
+\item{\code{X}}{ A vector of class \code{acomp} representing one closed composition
 or a matrix of class \code{acomp} representing multiple closed  compositions each in one row.}
-\item{\code{between_comp}}{ A vector of class \code{acomp} representing one closed between-person composition
+\item{\code{bX}}{ A vector of class \code{acomp} representing one closed between-person composition
 or a matrix of class \code{acomp} representing multiple closed between-person compositions each in one row.}
-\item{\code{within_comp}}{ A vector of class \code{acomp} representing one closed within-person composition
+\item{\code{wX}}{ A vector of class \code{acomp} representing one closed within-person composition
 or a matrix of class \code{acomp} representing multiple closed within-person compositions each in one row.}
-\item{\code{logratio}}{ Log ratio transform of composition.}
-\item{\code{between_logratio}}{ Log ratio transform of between-person composition.}
-\item{\code{within_logratio}}{ Log ratio transform of within-person composition.}
+\item{\code{Z}}{ Log ratio transform of composition.}
+\item{\code{bZ}}{ Log ratio transform of between-person composition.}
+\item{\code{wZ}}{ Log ratio transform of within-person composition.}
 \item{\code{data}}{ The user's dataset or imputed dataset if the iiut data contains zeros.}
 \item{\code{transform}}{ Type of transform applied on compositional data.}
 \item{\code{parts}}{ Names of compositional variables.}

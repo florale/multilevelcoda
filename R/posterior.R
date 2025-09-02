@@ -41,8 +41,8 @@
 #'                  idvar = "ID", total = 1440)
 #'   
 #'   m1 <- brmcoda(complr = cilr,
-#'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                   wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'                   wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -52,7 +52,7 @@
 #'   
 #'   ## fit a model with compositional outcome
 #'   m2 <- brmcoda(complr = cilr,
-#'                 formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + Female + (1 | ID),
+#'                 formula = mvbind(z1, z2, z3, z4) ~ Stress + Female + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -148,8 +148,8 @@ predict.brmcoda <- function(object,
 #'   
 #'   ## fit a model
 #'   m1 <- brmcoda(complr = cilr,
-#'                 formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                   wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'                   wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -159,7 +159,7 @@ predict.brmcoda <- function(object,
 #'   
 #'   ## fit a model with compositional outcome
 #'   m2 <- brmcoda(complr = cilr,
-#'                 formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + Female + (1 | ID),
+#'                 formula = mvbind(z1, z2, z3, z4) ~ Stress + Female + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'   
@@ -240,8 +240,8 @@ fitted.brmcoda <- function(object,
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -277,8 +277,8 @@ fixef.brmcoda <- function(object, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -313,8 +313,8 @@ vcov.brmcoda <- function(object, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -352,8 +352,8 @@ ranef.brmcoda <- function(object, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -394,8 +394,8 @@ coef.brmcoda <- function(object, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
@@ -427,8 +427,8 @@ VarCorr.brmcoda <- function(x, ...) {
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
 #'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                                idvar = "ID", total = 1440),
-#'   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'   formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
+#'     wz1 + wz2 + wz3 + wz4 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'   
