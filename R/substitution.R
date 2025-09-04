@@ -237,17 +237,17 @@ substitution <- function(object,
   bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
   wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  if (length(grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
+  if (any(paste0(bz_vars, collapse = "|") %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (length(grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
+  if (any(wz_vars %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "within")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if ((length(grep(paste0(z_vars, collapse = "|"), model_fixef, value = T)) > 0) && (length(grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = T)) == 0)) {
+  if (any(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, setdiff(
       grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
@@ -329,8 +329,9 @@ substitution <- function(object,
         delta = delta,
         base = base,
         parts = parts,
-        aorg = aorg,
         summary = summary,
+        aorg = aorg,
+        at = at,
         ref = "grandmean",
         level = "between",
         weight = weight,
@@ -345,8 +346,9 @@ substitution <- function(object,
         delta = delta,
         base = base,
         parts = parts,
-        aorg = aorg,
         summary = summary,
+        aorg = aorg,
+        at = at,
         ref = ref,
         level = "between",
         weight = weight,
@@ -381,8 +383,9 @@ substitution <- function(object,
         delta = delta,
         base = base,
         parts = parts,
-        aorg = aorg,
         summary = summary,
+        aorg = aorg,
+        at = at,
         ref = "grandmean",
         level = "within",
         weight = weight,
@@ -397,8 +400,9 @@ substitution <- function(object,
         delta = delta,
         base = base,
         parts = parts,
-        aorg = aorg,
         summary = summary,
+        aorg = aorg,
+        at = at,
         ref = ref,
         level = "within",
         weight = weight,
@@ -433,8 +437,9 @@ substitution <- function(object,
         delta = delta,
         base = base,
         parts = parts,
-        aorg = aorg,
         summary = summary,
+        aorg = aorg,
+        at = at,
         ref = "grandmean",
         level = "aggregate",
         weight = weight,
@@ -449,8 +454,9 @@ substitution <- function(object,
         delta = delta,
         base = base,
         parts = parts,
-        aorg = aorg,
         summary = summary,
+        aorg = aorg,
+        at = at,
         ref = ref,
         level = "aggregate",
         weight = weight,

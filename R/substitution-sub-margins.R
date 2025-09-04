@@ -69,9 +69,9 @@ sub <- function (object,
     ref <- "users"
   }
   d0 <- as.data.table(d0)
-  
+  # 
   # error if delta out of range
-  x0 <- d0[1, parts, with = FALSE]
+  x0 <- d0[1, paste0("t", parts), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(delta > min(x0)))) {
@@ -99,6 +99,7 @@ sub <- function (object,
     x0 = x0,
     d0 = d0,
     y0 = y0,
+    at = at,
     level = level,
     ref = ref,
     aorg = aorg,
@@ -164,7 +165,7 @@ submargins <- function (object,
                  fill = FALSE)
   
   # error if delta out of range
-  x0 <- d0[, parts, with = FALSE]
+  x0 <- d0[, paste0("t", parts), with = FALSE]
   
   delta <- as.integer(delta)
   if(isTRUE(any(all(delta) > lapply(x0, min)))) {

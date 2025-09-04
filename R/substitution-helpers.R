@@ -117,18 +117,17 @@ build.rg <- function(object,
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   model_fixef_level <- model_fixef_coef <- NULL
-  
-  if (length(grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
+  if (any(paste0(bz_vars, collapse = "|") %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (length(grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T)) > 0) {
+  if (any(wz_vars %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "within")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if ((length(grep(paste0(z_vars, collapse = "|"), model_fixef, value = T)) > 0) && (length(grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = T)) == 0)) {
+  if (any(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, setdiff(
       grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
@@ -196,10 +195,10 @@ build.rg <- function(object,
       covs  <- vars %snin% c(resp, grp, zs)
       
       ## default reference grid
-      drg <- as.data.table(ref_grid(object$model, at = at)@grid)
+      refgrid <- as.data.table(ref_grid(object$model, at = at)@grid)
       
-      ## reference grid (only covariates and outcome) _ FL comment out to prep weighted summary??
-      refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
+      ## reference grid (only covariates and outcome)
+      refgrid <- refgrid[, colnames(refgrid) %nin% c(zs), with = FALSE]
       
       ## to make fitted() happy
       id <- data.table::data.table(1) # to make fitted() happy
@@ -319,12 +318,12 @@ build.rg <- function(object,
             }
           } else {
             # grab any covariates in user's specified reference grid
-            # and fill drg if any is missing
+            # and fill refgrid if any is missing
             refgrid <- as.data.table(expand.grid.df(covgrid,
                                                     refgrid[, -colnames(covgrid), with = FALSE]))
           }
         } else {
-          refgrid <- drg[, covs, with = FALSE]
+          refgrid <- refgrid[, covs, with = FALSE]
         }
         
         if (level == "aggregate") {
@@ -394,10 +393,10 @@ build.rg <- function(object,
     preds <- vars %snin% c(resp)
     covs  <- vars %snin% c(resp, zs)
     
-    drg <- as.data.table(ref_grid(object$model, at = at)@grid)
+    refgrid <- as.data.table(ref_grid(object$model, at = at)@grid)
     
     # reference grid (only covariates and outcome)
-    refgrid <- drg[, colnames(drg) %in% c(covs, resp), with = FALSE]
+    refgrid <- refgrid[, colnames(refgrid) %nin% c(zs), with = FALSE]
     
     d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0)) else (expand.grid.df(z0, x0, refgrid))
   }
@@ -424,6 +423,7 @@ NULL
                       x0,
                       y0,
                       d0,
+                      at,
                       aorg,
                       summary,
                       level,
@@ -536,12 +536,30 @@ NULL
                       hout[[h]] <- delta_y
                     }
                     
-                    if (aorg) { # unadj OR adj averaging over reference grid
-                      posterior_delta_y <- list(Reduce(`+`, hout) / length(hout))
-                    } else { # adj keeping prediction at each level of reference grid
-                      posterior_delta_y <- hout
+                    if (aorg) {
+                      # unadj OR adj averaging over reference grid
+                      weight        <- grid$.wgt. / sum(grid$.wgt.)
+                      weighted_hout <- Map(function(x, w)x * w, hout, weight)
+                      posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
+                      
+                    } else {
+                      # adj keeping prediction at each level of at
+                      grid[, wgt_at := sum(.wgt.), by = names(at)]
+                      at_weight <- grid$wgt_at / sum(grid$wgt_at)
+                      at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
+                      at_levels   <- grid[, names(at), with = FALSE]
+                      grouped_idx <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
+                      
+                      posterior_delta_y <- lapply(grouped_idx, function(idx) {
+                        Reduce(`+`, at_weighted_hout[idx]) / length(idx)
+                      })
+                      
+                      unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
+                      names(posterior_delta_y) <- apply(unique_at_levels, 1, function(x)
+                        paste(paste0(colnames(unique_at_levels), x), collapse = "_"))
                     }
-                    posterior_delta_y <- lapply(posterior_delta_y, function(x) cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
+                    posterior_delta_y <- lapply(posterior_delta_y, function(x)
+                      cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
                     
                     # final results for entire composition
                     list(posterior_delta_y)
@@ -579,6 +597,7 @@ NULL
                       x0,
                       y0,
                       d0,
+                      at,
                       aorg,
                       summary,
                       level,
@@ -692,12 +711,30 @@ NULL
                       hout[[h]] <- delta_y
                     }
                     
-                    if (aorg) { # unadj OR adj averaging over reference grid
-                      posterior_delta_y <- list(Reduce(`+`, hout) / length(hout))
-                    } else { # adj keeping prediction at each level of reference grid
-                      posterior_delta_y <- hout
+                    if (aorg) {
+                      # unadj OR adj averaging over reference grid
+                      weight        <- grid$.wgt. / sum(grid$.wgt.)
+                      weighted_hout <- Map(function(x, w)x * w, hout, weight)
+                      posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
+                      
+                    } else {
+                      # adj keeping prediction at each level of at
+                      grid[, wgt_at := sum(.wgt.), by = names(at)]
+                      at_weight <- grid$wgt_at / sum(grid$wgt_at)
+                      at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
+                      at_levels   <- grid[, names(at), with = FALSE]
+                      grouped_idx <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
+                      
+                      posterior_delta_y <- lapply(grouped_idx, function(idx) {
+                        Reduce(`+`, at_weighted_hout[idx]) / length(idx)
+                      })
+                      
+                      unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
+                      names(posterior_delta_y) <- apply(unique_at_levels, 1, function(x)
+                        paste(paste0(colnames(unique_at_levels), x), collapse = "_"))
                     }
-                    posterior_delta_y <- lapply(posterior_delta_y, function(x) cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
+                    posterior_delta_y <- lapply(posterior_delta_y, function(x)
+                      cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
                     
                     # final results for entire composition
                     list(posterior_delta_y)
@@ -731,6 +768,7 @@ NULL
                      x0,
                      y0,
                      d0,
+                     at,
                      aorg,
                      summary,
                      level,
@@ -753,6 +791,7 @@ NULL
   wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
   
   grid <- d0[, colnames(d0) %nin% c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars, object$complr$idvar), with = FALSE]
+  grid[, at := names(at)]
   
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
@@ -823,7 +862,6 @@ NULL
                     covs <- colnames(d0) %snin% c(z_vars, x_vars)
                     refgrid <- d0[, covs, with = FALSE]
                     
-                    
                     # predictions
                     hout <- vector("list", length = nrow(d0))
                     for (h in seq_len(nrow(d0))) {
@@ -840,26 +878,44 @@ NULL
                       hout[[h]] <- delta_y
                     }
                     
-                    if (aorg) { # unadj OR adj averaging over reference grid
-                      posterior_delta_y <- list(Reduce(`+`, hout) / length(hout))
-                    } else { # adj keeping prediction at each level of reference grid
-                      posterior_delta_y <- hout
+                    if (aorg) {
+                      # unadj OR adj averaging over reference grid
+                      weight        <- grid$.wgt. / sum(grid$.wgt.)
+                      weighted_hout <- Map(function(x, w)x * w, hout, weight)
+                      posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
+                      
+                    } else {
+                      # adj keeping prediction at each level of at
+                      grid[, wgt_at := sum(.wgt.), by = names(at)]
+                      at_weight <- grid$wgt_at / sum(grid$wgt_at)
+                      at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
+                      at_levels   <- grid[, names(at), with = FALSE]
+                      grouped_idx <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
+                      
+                      posterior_delta_y <- lapply(grouped_idx, function(idx) {
+                        Reduce(`+`, at_weighted_hout[idx]) / length(idx)
+                      })
+                      
+                      unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
+                      names(posterior_delta_y) <- apply(unique_at_levels, 1, function(x)
+                        paste(paste0(colnames(unique_at_levels), x), collapse = "_"))
                     }
-                    posterior_delta_y <- lapply(posterior_delta_y, function(x) cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
+                    posterior_delta_y <- lapply(posterior_delta_y, function(x)
+                      cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
                     
                     # final results for entire composition
                     list(posterior_delta_y)
                   }
   
   if(summary) { 
-    iout <- lapply(iout, function(y) {
+    suppressWarnings(iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[,  c("Delta", "From", "To", "Level", "Reference")]
         result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
         result <- rbindlist(lapply(as.data.table(t(result)), describe_posterior, centrality = "mean", ...))
         if(aorg) (cbind(result, dmeta)) else (cbind(result, dmeta, grid[i, ]))
       }, y, seq_along(y)))
-    })
+    }))
     
   } else { 
     iout <- lapply(seq_along(iout), function(i) {
