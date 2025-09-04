@@ -568,20 +568,27 @@ NULL
   if(summary) { 
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = FALSE, summary = TRUE)
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = TRUE, summary = TRUE)
-    iout <- lapply(iout, function(y) {
+    suppressWarnings(iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[,  c("Delta", "From", "To", "Level", "Reference")]
         result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
         result <- rbindlist(lapply(as.data.table(t(result)), describe_posterior, centrality = "mean", ...))
-        if(aorg) (cbind(result, dmeta)) else (cbind(result, dmeta, grid[i, ]))
+        
+        if (aorg)
+          (cbind(result, dmeta))
+        else
+          (cbind(result, dmeta, grid[i, names(at), with = FALSE]))
       }, y, seq_along(y)))
-    })
+    }))
     
-  } else { 
+  } else {
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = FALSE, summary = FALSE)
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = TRUE, summary = FALSE)
     iout <- lapply(seq_along(iout), function(i) {
-      if(aorg) (as.data.table(iout[[i]])) else (list(posterior = iout[[i]], grid = as.data.table(grid)))
+      if (aorg)
+        (as.data.table(iout[[i]]))
+      else
+        (list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE])))
     })
   }
   
@@ -741,18 +748,25 @@ NULL
                   }
   
   if(summary) { 
-    iout <- lapply(iout, function(y) {
+    suppressWarnings(iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[,  c("Delta", "From", "To", "Level", "Reference")]
         result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
         result <- rbindlist(lapply(as.data.table(t(result)), describe_posterior, centrality = "mean", ...))
-        if(aorg) (cbind(result, dmeta)) else (cbind(result, dmeta, grid[i, ]))
+        
+        if (aorg)
+          (cbind(result, dmeta))
+        else
+          (cbind(result, dmeta, grid[i, names(at), with = FALSE]))
       }, y, seq_along(y)))
-    })
+    }))
     
   } else { 
     iout <- lapply(seq_along(iout), function(i) {
-      if(aorg) (as.data.table(iout[[i]])) else (list(posterior = iout[[i]], grid = as.data.table(grid)))
+      if (aorg)
+        (as.data.table(iout[[i]]))
+      else
+        (list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE])))
     })
   }
   
@@ -913,13 +927,20 @@ NULL
         dmeta  <- x[,  c("Delta", "From", "To", "Level", "Reference")]
         result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
         result <- rbindlist(lapply(as.data.table(t(result)), describe_posterior, centrality = "mean", ...))
-        if(aorg) (cbind(result, dmeta)) else (cbind(result, dmeta, grid[i, ]))
+        
+        if (aorg)
+          (cbind(result, dmeta))
+        else
+          (cbind(result, dmeta, grid[i, names(at), with = FALSE]))
       }, y, seq_along(y)))
     }))
     
   } else { 
     iout <- lapply(seq_along(iout), function(i) {
-      if(aorg) (as.data.table(iout[[i]])) else (list(posterior = iout[[i]], grid = as.data.table(grid)))
+      if (aorg)
+        (as.data.table(iout[[i]]))
+      else
+        (list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE])))
     })
   }
   
