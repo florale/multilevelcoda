@@ -84,7 +84,6 @@ present in the <code><a href="brmcoda.html">brmcoda</a></code> object.</p>
 <span>  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grandmean"</span>, <span class="st">"clustermean"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"between"</span>, <span class="st">"within"</span>, <span class="st">"aggregate"</span><span class="op">)</span>,</span>
 <span>  summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  aorg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  at <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parts <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">base</span>,</span>
@@ -126,15 +125,6 @@ Single-level models are default to <code>"aggregate"</code>.</p></dd>
 <dt id="arg-summary">summary<a class="anchor" aria-label="anchor" href="#arg-summary"></a></dt>
 <dd><p>A logical value to obtain summary statistics instead of the raw values. Default is <code>TRUE</code>.
 Currently only support outputing raw values for model using grandmean as reference composition.</p></dd>
-
-
-<dt id="arg-aorg">aorg<a class="anchor" aria-label="anchor" href="#arg-aorg"></a></dt>
-<dd><p>A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
-Should the estimate at each level of the reference grid (<code>FALSE</code>)
-or their average (<code>TRUE</code>) be returned?
-Default is <code>TRUE</code>.
-Only applicable for model with covariates in addition to
-the isometric log-ratio coordinates (i.e., adjusted model).</p></dd>
 
 
 <dt id="arg-at">at<a class="anchor" aria-label="anchor" href="#arg-at"></a></dt>
