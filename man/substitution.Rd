@@ -10,7 +10,6 @@ substitution(
   ref = c("grandmean", "clustermean"),
   level = c("between", "within", "aggregate"),
   summary = TRUE,
-  aorg = TRUE,
   at = NULL,
   parts = 1,
   base,
@@ -39,13 +38,6 @@ Single-level models are default to \code{"aggregate"}.}
 
 \item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 Currently only support outputing raw values for model using grandmean as reference composition.}
-
-\item{aorg}{A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
-Should the estimate at each level of the reference grid (\code{FALSE})
-or their average (\code{TRUE}) be returned?
-Default is \code{TRUE}.
-Only applicable for model with covariates in addition to
-the isometric log-ratio coordinates (i.e., adjusted model).}
 
 \item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
 

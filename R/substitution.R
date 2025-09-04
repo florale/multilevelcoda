@@ -19,12 +19,6 @@
 #' Single-level models are default to \code{"aggregate"}.
 #' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 #' Currently only support outputing raw values for model using grandmean as reference composition.
-#' @param aorg A logical value to obtain (a)verage prediction (o)ver the (r)eference (g)rid.
-#' Should the estimate at each level of the reference grid (\code{FALSE})
-#' or their average (\code{TRUE}) be returned?
-#' Default is \code{TRUE}.
-#' Only applicable for model with covariates in addition to
-#' the isometric log-ratio coordinates (i.e., adjusted model).
 #' @param at An optional named list of levels for the corresponding variables in the reference grid.
 #' @param type A character string to indicate the type of substitution to be made.
 #' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
@@ -99,7 +93,6 @@ substitution <- function(object,
                          ref = c("grandmean", "clustermean"),
                          level = c("between", "within", "aggregate"),
                          summary = TRUE,
-                         aorg = TRUE,
                          at = NULL,
                          parts = 1,
                          base,
@@ -161,11 +154,11 @@ substitution <- function(object,
     ref <- "grandmean"
   }
   
-  # currently not allowed exporting draws for cluster mean as ref
-  if(identical(ref, "clustermean")) {
-    if (isFALSE(summary)) {
-      stop("Currently can't output raw values when 'clustermean' is used as reference composition.")
-    }
+  # default aorg to  TRUE when at is null
+  if (is.null(at)) {
+    aorg <- TRUE
+  } else {
+    aorg <- FALSE
   }
   
   # check parts

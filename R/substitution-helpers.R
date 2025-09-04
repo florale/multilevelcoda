@@ -488,7 +488,9 @@ NULL
                       sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         xsub <- x0 + sub_tmp_j[k,]
-                        kout[[k]] <- setNames(cbind(x0, xsub, sub_tmp_j[k, get(i)]), c(bx_vars, x_vars, "Delta"))
+                        x0_xsub_delta <- cbind(x0, xsub, sub_tmp_j[k, get(i)])
+                        x0_xsub_delta <- setNames(x0_xsub_delta, c(bx_vars, x_vars, "Delta"))
+                        kout[[k]]     <- x0_xsub_delta
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
@@ -548,9 +550,9 @@ NULL
                       at_weight <- grid$wgt_at / sum(grid$wgt_at)
                       at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
                       at_levels   <- grid[, names(at), with = FALSE]
-                      grouped_idx <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
+                      at_id <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
                       
-                      posterior_delta_y <- lapply(grouped_idx, function(idx) {
+                      posterior_delta_y <- lapply(at_id, function(idx) {
                         Reduce(`+`, at_weighted_hout[idx]) / length(idx)
                       })
                       
@@ -669,7 +671,9 @@ NULL
                       sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         xsub <- x0 + sub_tmp_j[k, ]
-                        kout[[k]] <- setNames(cbind(x0, xsub, sub_tmp_j[k, get(i)]), c(bx_vars, x_vars, "Delta"))
+                        x0_xsub_delta <- cbind(x0, xsub, sub_tmp_j[k, get(i)])
+                        x0_xsub_delta <- setNames(x0_xsub_delta, c(bx_vars, x_vars, "Delta"))
+                        kout[[k]]     <- x0_xsub_delta
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
@@ -730,9 +734,9 @@ NULL
                       at_weight <- grid$wgt_at / sum(grid$wgt_at)
                       at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
                       at_levels   <- grid[, names(at), with = FALSE]
-                      grouped_idx <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
+                      at_id <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
                       
-                      posterior_delta_y <- lapply(grouped_idx, function(idx) {
+                      posterior_delta_y <- lapply(at_id, function(idx) {
                         Reduce(`+`, at_weighted_hout[idx]) / length(idx)
                       })
                       
@@ -848,7 +852,9 @@ NULL
                       sub_tmp_j <- base_tmp * delta[j]
                       for (k in seq_len(nrow(sub_tmp_j))) {
                         xsub <- x0 + sub_tmp_j[k,]
-                        kout[[k]] <- setNames(cbind(xsub, sub_tmp_j[k, get(i)]), c(x_vars, "Delta"))
+                        xsub_delta <- cbind(xsub, sub_tmp_j[k, get(i)])
+                        xsub_delta <- setNames(xsub_delta, c(x_vars, "Delta"))
+                        kout[[k]]  <- xsub_delta
                       }
                       jout[[j]] <- do.call(rbind, kout)
                     }
@@ -904,9 +910,9 @@ NULL
                       at_weight <- grid$wgt_at / sum(grid$wgt_at)
                       at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
                       at_levels   <- grid[, names(at), with = FALSE]
-                      grouped_idx <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
+                      at_id <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
                       
-                      posterior_delta_y <- lapply(grouped_idx, function(idx) {
+                      posterior_delta_y <- lapply(at_id, function(idx) {
                         Reduce(`+`, at_weighted_hout[idx]) / length(idx)
                       })
                       
@@ -1020,8 +1026,9 @@ NULL
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
                         
-                        d1 <- setNames(cbind(x0, xsub, sub_tmp_k[, get(i)]), c(bx_vars, x_vars, "Delta"))
-                        d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
+                        x0_xsub_delta <- cbind(x0, xsub, sub_tmp_k[, get(i)])
+                        x0_xsub_delta <- setNames(x0_xsub_delta, c(bx_vars, x_vars, "Delta"))
+                        d1 <- cbind(x0_xsub_delta, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
@@ -1056,12 +1063,11 @@ NULL
                         
                         # posterior means and intervals
                         suppressWarnings(posterior_delta_y <- setDT(describe_posterior(delta_y, centrality = "mean", ...)))
-                        posterior_delta_y <- posterior_delta_y[, .(Mean, CI_low, CI_high)]
                         posterior_delta_y$Delta <- sub_tmp_j[k, get(i)]
                         kout[[k]] <- posterior_delta_y
                       }
                       jout[[j]] <- rbindlist(kout)
-                    }                        
+                    }
                     
                     jout <- rbindlist(jout)
                     jout[, Delta := as.numeric(Delta)]
@@ -1069,9 +1075,6 @@ NULL
                     jout[, To := sub_to_var]
                     jout[, Level := level]
                     jout[, Reference := ref]
-                    
-                    names(jout) <- c("Mean", "CI_low", "CI_high",
-                                     "Delta", "From", "To", "Level", "Reference")
                     
                     # store final results for entire composition
                     jout <- list(jout)
@@ -1153,8 +1156,9 @@ NULL
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
                         
-                        d1 <- setNames(cbind(x0, xsub, sub_tmp_k[, get(i)]), c(bx_vars, x_vars, "Delta"))
-                        d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
+                        x0_xsub_delta <- cbind(x0, xsub, sub_tmp_k[, get(i)])
+                        x0_xsub_delta <- setNames(x0_xsub_delta, c(bx_vars, x_vars, "Delta"))
+                        d1 <- cbind(x0_xsub_delta, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
@@ -1191,7 +1195,6 @@ NULL
                         
                         # describe PD of delta y
                         suppressWarnings(posterior_delta_y <- setDT(describe_posterior(delta_y, centrality = "mean", ...)))
-                        posterior_delta_y <- posterior_delta_y[, .(Mean, CI_low, CI_high)]
                         posterior_delta_y$Delta <- sub_tmp_j[k, get(i)]
                         kout[[k]] <- posterior_delta_y
                       }
@@ -1205,9 +1208,6 @@ NULL
                     jout[, To := sub_to_var]
                     jout[, Level := level]
                     jout[, Reference := ref]
-                    
-                    names(jout) <- c("Mean", "CI_low", "CI_high",
-                                     "Delta", "From", "To", "Level", "Reference")
                     
                     # final results for entire composition
                     jout <- list(jout)
@@ -1289,8 +1289,9 @@ NULL
                         sub_tmp_k <- sub_tmp_k[rep(seq_len(nrow(sub_tmp_k)), nrow(x0)), ]
                         xsub <- x0 + sub_tmp_k
                         
-                        d1 <- setNames(cbind(xsub, sub_tmp_k[, get(i)]), c(x_vars, "Delta"))
-                        d1 <- cbind(d1, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
+                        xsub_delta <- cbind(xsub, sub_tmp_k[, get(i)])
+                        xsub_delta <- setNames(xsub_delta, c(x_vars, "Delta"))
+                        d1 <- cbind(xsub_delta, d0[, colnames(d0) %in% colnames(object$complr$dataout[, -x_vars, with = FALSE]), with = FALSE])
                         
                         # remove impossible reallocation that result in negative values
                         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
@@ -1321,7 +1322,6 @@ NULL
                         
                         # describe PD of delta y
                         suppressWarnings(posterior_delta_y <- setDT(describe_posterior(delta_y, centrality = "mean", ...)))
-                        posterior_delta_y <- posterior_delta_y[, .(Mean, CI_low, CI_high)]
                         posterior_delta_y$Delta <- sub_tmp_j[k, get(i)]
                         kout[[k]] <- posterior_delta_y
                       }
@@ -1334,10 +1334,7 @@ NULL
                     jout[, To := sub_to_var]
                     jout[, Level := level]
                     jout[, Reference := ref]
-                    
-                    names(jout) <- c("Mean", "CI_low", "CI_high",
-                                     "Delta", "From", "To", "Level", "Reference")
-                    
+
                     # store final results for entire composition
                     jout <- list(jout)
                     names(jout) <- i
