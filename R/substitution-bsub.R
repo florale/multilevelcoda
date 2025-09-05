@@ -38,10 +38,10 @@ bsub <- function(object,
                  at = NULL,
                  parts,
                  base,
+                 type = "one-to-one",
                  weight = "equal",
                  scale = c("response", "linear"),
                  cores = NULL,
-                 type = "one-to-one",
                  ...) {
   
   # ref <- "grandmean"

@@ -38,10 +38,10 @@ bsubmargins <- function (object,
                          at = NULL,
                          parts,
                          base,
+                         type = "one-to-one",
                          weight = "proportional",
                          scale = c("response", "linear"),
                          cores = NULL,
-                         type = "one-to-one",
                          ...) {
   
   ref   <- "clustermean"

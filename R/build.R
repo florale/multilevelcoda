@@ -157,17 +157,18 @@ build.rg <- function(object,
   model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
   
   model_fixef_level <- model_fixef_coef <- NULL
-  if (any(paste0(bz_vars, collapse = "|") %in% colnames(object$model$data))) {
+  
+  if (all(bz_vars %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (any(wz_vars %in% colnames(object$model$data))) {
+  if (all(wz_vars %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "within")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (any(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
+  if (all(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, setdiff(
       grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),

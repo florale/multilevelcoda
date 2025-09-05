@@ -20,16 +20,16 @@
 #' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 #' Currently only support outputing raw values for model using grandmean as reference composition.
 #' @param at An optional named list of levels for the corresponding variables in the reference grid.
-#' @param type A character string to indicate the type of substitution to be made.
-#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
-#' If \code{"one-to-one"}, all possible one-to-one reallocations are estimated. 
 #' @param base An optional base substitution. 
 #' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
 #' which can be computed using function \code{\link{build.base}}.
 #' @param parts A optional character string specifying names of compositional parts that should be considered
 #' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
-#' in the \code{complr} object.
+#' in the \code{complr} object. Default to the first composition in the \code{complr} object.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
+#' @param type A character string to indicate the type of substitution to be made.
+#' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+#' If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 #' (e.g., observations across individuals).
@@ -96,10 +96,10 @@ substitution <- function(object,
                          at = NULL,
                          parts = 1,
                          base,
+                         type,
                          weight = c("equal", "proportional"),
                          scale = c("response", "linear"),
                          cores = NULL,
-                         type,
                          ...) {
   
   if (missing(object)) {
@@ -230,17 +230,17 @@ substitution <- function(object,
   bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
   wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
   
-  if (any(paste0(bz_vars, collapse = "|") %in% colnames(object$model$data))) {
+  if (all(bz_vars %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "between")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (any(wz_vars %in% colnames(object$model$data))) {
+  if (all(wz_vars %in% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "within")
     model_fixef_coef  <- append(model_fixef_coef,
                                 grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
   }
-  if (any(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
+  if (all(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
     model_fixef_level <- append(model_fixef_level, "aggregate")
     model_fixef_coef  <- append(model_fixef_coef, setdiff(
       grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),

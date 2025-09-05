@@ -126,9 +126,9 @@ complr <- function(data,
   # loop through list to compute composition and lr
   output <- vector("list", length = length(parts))
   
-  for (i in seq_along(parts)) {
-    parts_i <- parts[[i]]
-    total_i <- total[[i]]
+  for (idx in seq_along(parts)) {
+    parts_i <- parts[[idx]]
+    total_i <- total[[idx]]
     
     if (length(parts) == 1) {
       sbp_i   <- sbp
@@ -142,7 +142,7 @@ complr <- function(data,
           stop("parts and sbp should have the same length.")
         }
       }
-      sbp_i   <- sbp[[i]]
+      sbp_i   <- sbp[[idx]]
     }
     
     # check NAs
@@ -210,6 +210,7 @@ complr <- function(data,
     } else {
       psi_i <- sbp_i <- NULL
     }
+    
     # MAKE COMPOSITION AND LOG RATIO TRANSFORMATIONS ----------------
     if (shape == "wide") {
       # make composition
@@ -221,17 +222,17 @@ complr <- function(data,
       if (identical(transform, "ilr")) {
         tilr_i <- ilr(tX_i, V = psi_i)
         bilr_i <- wilr_i <- NULL
-        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", i)
+        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", idx)
         
       } else if (identical(transform, "alr")) {
         talr_i <- alr(tX_i)
         balr_i <- walr_i <- NULL
-        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", i)
+        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", idx)
         
       } else if (identical(transform, "clr")) {
         tclr_i <- clr(tX_i)
         bclr_i <- wclr_i <- NULL
-        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", i)
+        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", idx)
       }
     }
     
@@ -259,9 +260,9 @@ complr <- function(data,
         bilr_i <- ilr(bX_i, V = psi_i)
         wilr_i <- ilr(wX_i, V = psi_i)
         
-        colnames(bilr_i)  <- paste0("bz", seq_len(ncol(bilr_i)), "_", i)
-        colnames(wilr_i)  <- paste0("wz", seq_len(ncol(wilr_i)), "_", i)
-        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", i)
+        colnames(bilr_i)  <- paste0("bz", seq_len(ncol(bilr_i)), "_", idx)
+        colnames(wilr_i)  <- paste0("wz", seq_len(ncol(wilr_i)), "_", idx)
+        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", idx)
       }
       
       ## ALR ---------------
@@ -270,9 +271,9 @@ complr <- function(data,
         balr_i <- alr(bX_i)
         walr_i <- alr(wX_i)
         
-        colnames(balr_i)  <- paste0("bz", seq_len(ncol(balr_i)), "_", i)
-        colnames(walr_i)  <- paste0("bz", seq_len(ncol(walr_i)), "_", i)
-        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", i)
+        colnames(balr_i)  <- paste0("bz", seq_len(ncol(balr_i)), "_", idx)
+        colnames(walr_i)  <- paste0("bz", seq_len(ncol(walr_i)), "_", idx)
+        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", idx)
       }
       
       ## CLR ---------------
@@ -281,9 +282,9 @@ complr <- function(data,
         bclr_i <- clr(bX_i)
         wclr_i <- clr(wX_i)
         
-        colnames(bclr_i)  <- paste0("bz", seq_len(ncol(bclr_i)), "_", i)
-        colnames(wclr_i)  <- paste0("bz", seq_len(ncol(wclr_i)), "_", i)
-        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", i)
+        colnames(bclr_i)  <- paste0("bz", seq_len(ncol(bclr_i)), "_", idx)
+        colnames(wclr_i)  <- paste0("bz", seq_len(ncol(wclr_i)), "_", idx)
+        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", idx)
       }
     }
     
@@ -305,7 +306,7 @@ complr <- function(data,
     # cbind data output
     dataout_i <- cbind(tX_i, bX_i, wX_i, Z_i, bZ_i, wZ_i)
     
-    output[[i]] <- list(
+    output[[idx]] <- list(
       X  = if(exists("tX_i")) (tX_i) else (NULL),
       bX = if(exists("bX_i")) (bX_i) else (NULL),
       wX = if(exists("wX_i")) (wX_i) else (NULL),

@@ -20,17 +20,13 @@ Single level models are default to \code{"grandmean"}.}
 
 \item{parts}{A optional character string specifying names of compositional parts that should be considered
 in the substitution analysis. This should correspond to a single set of names of compositional parts specified
-in the \code{complr} object.}
+in the \code{complr} object. Default to the first composition in the \code{complr} object.}
 
 \item{level}{A character string or vector.
 Should the estimate of multilevel models focus on the \code{"between"} and/or \code{"within"} or \code{"aggregate"} variance?
 Single-level models are default to \code{"aggregate"}.}
 
-\item{weight}{A character value specifying the weight to use in calculation of the reference composition.
-If \code{"equal"}, give equal weight to units (e.g., individuals).
-If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
-(e.g., observations across individuals).
-Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
+\item{weight}{A character value specifying the weight to use in calculation of the reference composition.}
 
 \item{fill}{Logical value only relevant when \code{ref} is an user's specified reference grid
 in which information about some, but not all covariates is provided

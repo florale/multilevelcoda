@@ -13,10 +13,10 @@ submargins(
   at = NULL,
   parts,
   base,
+  type = "one-to-one",
   weight = "proportional",
   scale = c("response", "linear"),
   cores = NULL,
-  type = "one-to-one",
   ...
 )
 }
@@ -43,17 +43,21 @@ Currently only support outputing raw values for model using grandmean as referen
 
 \item{parts}{A optional character string specifying names of compositional parts that should be considered
 in the substitution analysis. This should correspond to a single set of names of compositional parts specified
-in the \code{complr} object.}
+in the \code{complr} object. Default to the first composition in the \code{complr} object.}
 
 \item{base}{An optional base substitution.
 Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
 which can be computed using function \code{\link{build.base}}.}
 
-\item{weight}{A character value specifying the weight to use in calculation of the reference composition.
+\item{type}{A character string to indicate the type of substitution to be made.
+If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
+If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
 If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 (e.g., observations across individuals).
 Default to \code{"equal"} for \code{ref = "grandmean"} and \code{"proportional"} for \code{ref = "clustermean"}.}
+
+\item{weight}{A character value specifying the weight to use in calculation of the reference composition.}
 
 \item{scale}{Either \code{"response"} or \code{"linear"}.
 If \code{"response"}, results are returned on the scale of the response variable.
@@ -65,10 +69,6 @@ we recommend setting the \code{mc.cores} option
 to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
 For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 Default to \code{"one-to-one"}.}
-
-\item{type}{A character string to indicate the type of substitution to be made.
-If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
-If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.}
 
 \item{...}{currently ignored.}
 }
