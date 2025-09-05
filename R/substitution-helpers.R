@@ -39,10 +39,8 @@ create_substitution <-
            weight,
            parts,
            aorg) {
-    stopifnot(is.list(between_simple_sub) ||
-                is.null(between_simple_sub))
-    stopifnot(is.list(within_simple_sub) ||
-                is.null(within_simple_sub))
+    stopifnot(is.list(between_simple_sub) || is.null(between_simple_sub))
+    stopifnot(is.list(within_simple_sub) || is.null(within_simple_sub))
     stopifnot(is.list(simple_sub) || is.null(simple_sub))
     stopifnot(is.list(between_avg_sub) || is.null(between_avg_sub))
     stopifnot(is.list(within_avg_sub) || is.null(within_avg_sub))
@@ -126,16 +124,19 @@ NULL
     else
       NA]
   
+  # setup parallel processing
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
     plan(sequential)
   }
+  
   oopts <- options(future.globals.maxSize = +Inf,
                    future.globals.onReference = NULL)
   on.exit(options(oopts))
   
+  # substitution loop
   iout <- foreach(
     i = colnames(base),
     .combine = c,
@@ -223,29 +224,27 @@ NULL
     if (aorg) {
       # unadj OR adj averaging over reference grid
       weight        <- grid$.wgt. / sum(grid$.wgt.)
-      weighted_hout <- Map(function(x, w)
-        x * w, hout, weight)
+      
+      weighted_hout <- Map(function(x, w) x * w, hout, weight)
       posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
       
     } else {
       # adj keeping prediction at each level of at
       grid[, wgt_at := sum(.wgt.), by = names(at)]
       at_weight <- grid$wgt_at / sum(grid$wgt_at)
-      at_weighted_hout <- Map(function(x, w)
-        x * w, hout, at_weight)
       at_levels <- grid[, names(at), with = FALSE]
       at_id <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
       
+      at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
       posterior_delta_y <- lapply(at_id, function(idx) {
         Reduce(`+`, at_weighted_hout[idx]) / length(idx)
       })
       
       unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
       names(posterior_delta_y) <- apply(unique_at_levels, 1, function(x)
-        paste(paste0(colnames(
-          unique_at_levels
-        ), x), collapse = "_"))
+        paste(paste0(colnames(unique_at_levels), x), collapse = "_"))
     }
+    
     posterior_delta_y <- lapply(posterior_delta_y, function(x)
       cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
     
@@ -267,7 +266,6 @@ NULL
           centrality = "mean",
           ...
         ))
-        
         if (aorg)
           (cbind(result, dmeta))
         else
@@ -335,16 +333,19 @@ NULL
     else
       NA]
   
+  # setup parallel processing
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
     plan(sequential)
   }
+  
   oopts <- options(future.globals.maxSize = +Inf,
                    future.globals.onReference = NULL)
   on.exit(options(oopts))
   
+  # substitution loop
   iout <- foreach(
     i = colnames(base),
     .combine = c,
@@ -433,29 +434,27 @@ NULL
     if (aorg) {
       # unadj OR adj averaging over reference grid
       weight        <- grid$.wgt. / sum(grid$.wgt.)
-      weighted_hout <- Map(function(x, w)
-        x * w, hout, weight)
+      
+      weighted_hout <- Map(function(x, w) x * w, hout, weight)
       posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
       
     } else {
       # adj keeping prediction at each level of at
       grid[, wgt_at := sum(.wgt.), by = names(at)]
       at_weight <- grid$wgt_at / sum(grid$wgt_at)
-      at_weighted_hout <- Map(function(x, w)
-        x * w, hout, at_weight)
       at_levels <- grid[, names(at), with = FALSE]
       at_id <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
       
+      at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
       posterior_delta_y <- lapply(at_id, function(idx) {
         Reduce(`+`, at_weighted_hout[idx]) / length(idx)
       })
       
       unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
       names(posterior_delta_y) <- apply(unique_at_levels, 1, function(x)
-        paste(paste0(colnames(
-          unique_at_levels
-        ), x), collapse = "_"))
+        paste(paste0(colnames(unique_at_levels), x), collapse = "_"))
     }
+    
     posterior_delta_y <- lapply(posterior_delta_y, function(x)
       cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
     
@@ -474,7 +473,6 @@ NULL
           centrality = "mean",
           ...
         ))
-        
         if (aorg)
           (cbind(result, dmeta))
         else
@@ -540,16 +538,19 @@ NULL
     else
       NA]
   
+  # setup parallel processing
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
     plan(sequential)
   }
+  
   oopts <- options(future.globals.maxSize = +Inf,
                    future.globals.onReference = NULL)
   on.exit(options(oopts))
   
+  # substitution loop
   iout <- foreach(
     i = colnames(base),
     .combine = c,
@@ -632,29 +633,27 @@ NULL
     if (aorg) {
       # unadj OR adj averaging over reference grid
       weight        <- grid$.wgt. / sum(grid$.wgt.)
-      weighted_hout <- Map(function(x, w)
-        x * w, hout, weight)
+      
+      weighted_hout <- Map(function(x, w) x * w, hout, weight)
       posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
       
     } else {
       # adj keeping prediction at each level of at
       grid[, wgt_at := sum(.wgt.), by = names(at)]
       at_weight <- grid$wgt_at / sum(grid$wgt_at)
-      at_weighted_hout <- Map(function(x, w)
-        x * w, hout, at_weight)
       at_levels <- grid[, names(at), with = FALSE]
       at_id <- at_levels[, idx := .I][, .(idx_list = list(idx)), by = names(at)]$idx_list
       
+      at_weighted_hout <- Map(function(x, w) x * w, hout, at_weight)
       posterior_delta_y <- lapply(at_id, function(idx) {
         Reduce(`+`, at_weighted_hout[idx]) / length(idx)
       })
       
       unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
       names(posterior_delta_y) <- apply(unique_at_levels, 1, function(x)
-        paste(paste0(colnames(
-          unique_at_levels
-        ), x), collapse = "_"))
+        paste(paste0(colnames(unique_at_levels), x), collapse = "_"))
     }
+    
     posterior_delta_y <- lapply(posterior_delta_y, function(x)
       cbind(dsub[, .(Delta, From, To, Level, Reference)], t(x)))
     
@@ -673,7 +672,6 @@ NULL
           centrality = "mean",
           ...
         ))
-        
         if (aorg)
           (cbind(result, dmeta))
         else
@@ -727,16 +725,19 @@ NULL
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
+  # setup parallel processing
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
     plan(sequential)
   }
+  
   oopts <- options(future.globals.maxSize = +Inf,
                    future.globals.onReference = NULL)
   on.exit(options(oopts))
   
+  # substitution loop
   iout <- foreach(
     i = colnames(base),
     .combine = c,
@@ -881,16 +882,19 @@ NULL
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
+  # setup parallel processing
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
     plan(sequential)
   }
+  
   oopts <- options(future.globals.maxSize = +Inf,
                    future.globals.onReference = NULL)
   on.exit(options(oopts))
   
+  # substitution loop
   iout <- foreach(
     i = colnames(base),
     .combine = c,
@@ -1036,16 +1040,19 @@ NULL
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
+  # setup parallel processing
   if (isFALSE(is.null(cores))) {
     oplan <- plan(multisession, workers = cores)
     on.exit(plan(oplan))
   } else {
     plan(sequential)
   }
+  
   oopts <- options(future.globals.maxSize = +Inf,
                    future.globals.onReference = NULL)
   on.exit(options(oopts))
   
+  # substitution loop
   iout <- foreach(
     i = colnames(base),
     .combine = c,
