@@ -104,7 +104,7 @@ if(requireNamespace("cmdstanr")){
                   chain = 1, iter = 500, backend = "cmdstanr")
                   
   # one to one reallocation at between and within-person levels
-  sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
+  sub1 <- substitution(object = fit1, delta = 5, level = c("between"), ref = "clustermean")
   summary(sub1)
   
   # one to all reallocation at between and within-person levels

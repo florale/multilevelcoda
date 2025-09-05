@@ -72,7 +72,7 @@
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"), ref = "clustermean")
 #'   summary(sub1)
 #'   
 #'   # one to all reallocation at between and within-person levels
@@ -189,7 +189,7 @@ substitution <- function(object,
     }
   }
   
-  ## get the index of which index elements of object$complr$output does the parts correspond to - check w JW
+  ## get the index of which index elements of object$complr$output does the parts correspond to
   idx <- which(vapply(lapply(object$complr$output, 
                              function(x) x$parts), 
                       function(p) identical(sort(parts), sort(p)), logical(1)))
