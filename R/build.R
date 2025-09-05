@@ -104,3 +104,340 @@ build.sbp <- function(parts) {
   base_sbp
 }
 
+#' Reference Grid for \code{substitution} model.
+#'
+#' Build a dataset for \code{fitted.brmcoda} used in \code{substitution} model
+#'
+#' @param object A fitted \code{\link{brmcoda}} object.
+#' @param fill Logical value only relevant when \code{ref} is an user's specified reference grid
+#' in which information about some, but not all covariates is provided
+#' (e.g., models including age and sex as covariate but only age was provided in the reference grid).
+#' If \code{TRUE}, the unspecified covariates are filled with the default reference grid.
+#' If \code{FALSE}, users will be asked to provide a full reference grid.
+#' Currently only support the default to \code{FALSE}.
+#' @inheritParams substitution
+#'
+#' @importFrom utils head
+#' @importFrom data.table as.data.table copy :=
+#' @importFrom compositions acomp ilr clo mean.acomp
+#' @importFrom emmeans ref_grid
+#' @importFrom extraoperators %snin% %sin%
+#'
+#' @return A reference grid consisting of a combination of covariates in \code{brmcoda}
+#'
+#' @export
+build.rg <- function(object,
+                     ref,
+                     at,
+                     parts,
+                     level,
+                     weight,
+                     fill = FALSE) {
+  
+  covgrid <- NULL
+  
+  ## get the index of which index elements of object$complr$output do the parts correspond to
+  idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
+  
+  # grab logratio and composition names
+  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  
+  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  
+  ## NOTES
+  ## ignore weight for clustermean
+  ## equal weight is default for grandmean
+  
+  # what type of model is being estimated
+  model_fixef <- rownames(fixef(object))
+  model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
+  
+  model_fixef_level <- model_fixef_coef <- NULL
+  if (any(paste0(bz_vars, collapse = "|") %in% colnames(object$model$data))) {
+    model_fixef_level <- append(model_fixef_level, "between")
+    model_fixef_coef  <- append(model_fixef_coef,
+                                grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
+  }
+  if (any(wz_vars %in% colnames(object$model$data))) {
+    model_fixef_level <- append(model_fixef_level, "within")
+    model_fixef_coef  <- append(model_fixef_coef,
+                                grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
+  }
+  if (any(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
+    model_fixef_level <- append(model_fixef_level, "aggregate")
+    model_fixef_coef  <- append(model_fixef_coef, setdiff(
+      grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
+      grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
+    ))
+  }
+  
+  # single level or multilevel
+  if (length(model_ranef) > 0) {
+    model_ranef_level <- "multilevel"
+    model_ranef_coef  <- model_ranef
+  } else {
+    model_ranef_level <- "single"
+    model_ranef_coef  <- NULL
+  }
+  
+  # d0 and x0 for multilevel level model
+  if (identical(model_ranef_level, "multilevel")) {
+    
+    # for clustermean
+    if ("clustermean" %in% ref) {
+      weight <- NULL # ignore weight
+      
+      ## aggregate
+      if ("aggregate" %in% level) {
+        d0 <- object$complr$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+        x0 <- acomp(d0[, x_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+        
+        z0 <- ilr(x0, V = object$complr$output[[idx]]$psi)
+        z0 <- as.data.table(z0)
+        
+        colnames(z0) <- z_vars
+        colnames(x0) <- x_vars
+        
+        d0 <- cbind(z0, x0, d0[, -colnames(x0), with = FALSE])
+      }
+      
+      ## between and within
+      if (any(c("between", "within") %in% level)) {
+        d0   <- object$complr$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+        bx0  <- acomp(d0[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+        
+        bz0 <- ilr(bx0, V = object$complr$output[[idx]]$psi)
+        bz0 <- as.data.table(bz0)
+        
+        wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
+        wz0 <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
+        
+        colnames(bz0) <- bz_vars
+        colnames(wz0) <- wz_vars
+        colnames(bx0) <- bx_vars
+        colnames(wx0) <- wx_vars
+        
+        d0 <- cbind(bz0, wz0, bx0, wx0, d0[, colnames(d0) %nin% c(bz_vars, wz_vars, bx_vars, wx_vars), with = FALSE])
+      }
+    } else {
+      ## assemble reference grid
+      ## get var names
+      zs <- c(bz_vars, wz_vars, z_vars)
+      
+      vars  <- get_variables(object)
+      resp  <- object$model$formula$formula[[2]]
+      grp   <- object$model$ranef$group
+      preds <- vars %snin% c(resp, grp)
+      covs  <- vars %snin% c(resp, grp, zs)
+      
+      ## default reference grid
+      refgrid <- as.data.table(ref_grid(object$model, at = at)@grid)
+      
+      ## reference grid (only covariates and outcome)
+      refgrid <- refgrid[, colnames(refgrid) %nin% c(zs), with = FALSE]
+      
+      ## to make fitted() happy
+      id <- data.table::data.table(1) # to make fitted() happy
+      colnames(id) <- object$complr$idvar
+      
+      # grandmean
+      if ("grandmean" %in% ref) {
+        
+        # aggregate
+        if ("aggregate" %in% level) {
+          if (weight == "proportional") {
+            x0 <- mean.acomp(object$complr$output[[idx]]$X, robust = TRUE)
+            
+          } else {
+            x0 <- object$complr$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+            x0 <- acomp(x0[, x_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+            x0 <- mean.acomp(x0, robust = TRUE)
+          }
+          
+          x0 <- acomp(x0, total = object$complr$output[[idx]]$total)
+          x0 <- as.data.table(t(x0))
+          
+          z0 <- ilr(x0, V = object$complr$output[[idx]]$psi)
+          z0 <- as.data.table(t(z0))
+          
+          colnames(z0) <- z_vars
+          colnames(x0) <- x_vars
+          
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
+        }
+        
+        # between and/or within
+        if (any(c("between", "within") %in% level)) {
+          if (weight == "proportional") {
+            bx0 <- mean.acomp(object$complr$output[[idx]]$bX, robust = TRUE)
+            
+          } else {
+            bx0 <- object$complr$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+            bx0 <- acomp(bx0[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+            bx0 <- mean.acomp(bx0, robust = TRUE)
+          }
+          
+          bx0 <- acomp(bx0, total = object$complr$output[[idx]]$total)
+          bx0 <- as.data.table(t(bx0))
+          
+          bz0 <- ilr(bx0, V = object$complr$output[[idx]]$psi)
+          bz0 <- as.data.table(t(bz0))
+          
+          wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
+          wz0 <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
+          
+          colnames(bz0) <- bz_vars
+          colnames(wz0) <- wz_vars
+          colnames(bx0) <- bx_vars
+          colnames(wx0) <- wx_vars
+          
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
+        }
+      }
+      
+      # user specified
+      if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
+        weight <- NULL
+        
+        if (isFALSE(object$complr$output[[idx]]$parts %in% colnames(ref))) {  # get user's composition
+          stop(
+            sprintf(
+              "The reference grid should include all compositional components but (%s) are missing.",
+              paste0(object$complr$output[[idx]]$parts %nin% colnames(ref), collapse = ", ")
+            ))
+        } else {
+          xU <- ref[, object$complr$output[[idx]]$parts, with = FALSE]
+          xU <- acomp(xU, total = object$complr$output[[idx]]$total)
+          xU <- as.data.table(t(xU))
+        }
+        
+        # sanity checks
+        if (nrow(ref) > 1) {
+          stop("Only one reference composition is allowed at a time.")
+        }
+        if(isFALSE(sum(xU) == object$complr$output[[idx]]$total)) {
+          stop(sprintf(
+            "The total amount of the reference composition (%s) should be the same as the composition (%s).",
+            sum(xU),
+            object$complr$output[[idx]]$total
+          ))
+        }
+        if (isTRUE((any(xU > lapply(object$complr$dataout[, object$complr$output[[idx]]$parts, with = FALSE], max)) |
+                    any(xU < lapply(object$complr$dataout[, object$complr$output[[idx]]$parts, with = FALSE], min))))) {
+          stop(paste(
+            sprintf(
+              "composition should be numeric or interger values that are between (%s) and (%s)",
+              paste0(round(apply(object$complr$dataout[, object$complr$output[[idx]]$parts, with = FALSE], 2, min)), collapse = ", "),
+              paste0(round(apply(object$complr$dataout[, object$complr$output[[idx]]$parts, with = FALSE], 2, max)), collapse = ", ")),
+            "\n",
+            " for",
+            paste0(object$complr$output[[idx]]$parts, collapse = ", "),
+            "respectively"
+          ))
+        }
+        
+        # user's specified reference grid - edit to allow for new var names
+        ## any covariates left in the ref
+        if (ncol(ref) > ncol(xU)) {
+          covgrid <- ref[, -object$complr$output[[idx]]$parts, with = FALSE]
+          
+          if (isFALSE(fill)) {
+            if (isFALSE(identical(colnames(covgrid), covs))) {
+              # ensure all covs are provided
+              stop(paste(
+                "'ref' should contain information about",
+                "  the covariates in 'brmcoda' model to estimate substitution",
+                "  except the logratio variables nor any column names starting with 'z', 'bz', or 'wz',",
+                "  as these variables will be computed in substitution analysis.",
+                "  Please provide a different reference grid.",
+                sep = "\n"))
+            }
+          } else {
+            # grab any covariates in user's specified reference grid
+            # and fill refgrid if any is missing
+            refgrid <- as.data.table(expand.grid.df(covgrid, refgrid[, -colnames(covgrid), with = FALSE]))
+          }
+        } else {
+          refgrid <- refgrid[, covs, with = FALSE]
+        }
+        
+        if (level == "aggregate") {
+          x0 <- xU
+          
+          z0 <- ilr(x0, V = object$complr$output[[idx]]$psi)
+          z0 <- as.data.table(t(z0))
+          
+          colnames(z0) <- z_vars
+          colnames(x0) <- x_vars
+          
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
+          
+        }
+        if (level %in% c("between", "within")) {
+          x0 <- object$complr$dataout[, head(.SD, 1), by = eval(object$complr$idvar)]
+          x0 <- acomp(x0[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+          x0 <- mean.acomp(x0, robust = TRUE)
+          
+          # assemble d0
+          # bz0 is between-person ilr of the ref comp (doesn't have to be compositional mean)
+          bx0 <- xU
+          bz0 <- ilr(bx0, V = object$complr$output[[idx]]$psi)
+          bz0 <- as.data.table(t(bz0))
+          
+          # wx0 and wz0 are the difference between the actual compositional mean of the dataset and bilr
+          # is 0 if ref comp is compositional mean
+          # but is different if not
+          wx0 <- bx0 - x0
+          wz0 <- as.data.table(t(ilr(wx0, V = object$complr$output[[idx]]$psi)))
+          
+          id <- data.table::data.table(1) # to make fitted() happy
+          
+          colnames(bz0) <- bz_vars
+          colnames(wz0) <- wz_vars
+          colnames(bx0) <- bx_vars
+          colnames(wx0) <- wx_vars
+          colnames(id)  <- object$complr$idvar
+          
+          d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
+        }
+      }
+    }
+  }
+  
+  ## d0 and x0 for single level model
+  if (model_ranef_level == "single") {
+    
+    x0 <- object$complr$output[[idx]]$X
+    x0 <- mean.acomp(x0, robust = TRUE)
+    x0 <- acomp(x0, total = object$complr$output[[idx]]$total)
+    x0 <- as.data.table(t(x0))
+    
+    z0 <- ilr(x0, V = object$complr$output[[idx]]$psi)
+    z0 <- as.data.table(t(z0))
+    
+    colnames(z0) <- z_vars
+    colnames(x0) <- x_vars
+    
+    # assemble reference grid
+    # get var names
+    zs <- c(z_vars, bz_vars, wz_vars)
+    
+    vars  <- get_variables(object)
+    resp  <- object$model$formula$formula[[2]]
+    # grp   <- object$model$ranef$group
+    preds <- vars %snin% c(resp)
+    covs  <- vars %snin% c(resp, zs)
+    
+    refgrid <- as.data.table(ref_grid(object$model, at = at)@grid)
+    
+    # reference grid (only covariates and outcome)
+    refgrid <- refgrid[, colnames(refgrid) %nin% c(zs), with = FALSE]
+    
+    d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0)) else (expand.grid.df(z0, x0, refgrid))
+  }
+  as.data.table(d0)
+}
