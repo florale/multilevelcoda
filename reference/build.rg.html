@@ -93,7 +93,7 @@ Single level models are default to <code>"grandmean"</code>.</p></dd>
 <dt id="arg-parts">parts<a class="anchor" aria-label="anchor" href="#arg-parts"></a></dt>
 <dd><p>A optional character string specifying names of compositional parts that should be considered
 in the substitution analysis. This should correspond to a single set of names of compositional parts specified
-in the <code>complr</code> object.</p></dd>
+in the <code>complr</code> object. Default to the first composition in the <code>complr</code> object.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
@@ -103,11 +103,7 @@ Single-level models are default to <code>"aggregate"</code>.</p></dd>
 
 
 <dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
-<dd><p>A character value specifying the weight to use in calculation of the reference composition.
-If <code>"equal"</code>, give equal weight to units (e.g., individuals).
-If <code>"proportional"</code>, weights in proportion to the frequencies of units being averaged
-(e.g., observations across individuals).
-Default to <code>"equal"</code> for <code>ref = "grandmean"</code> and <code>"proportional"</code> for <code>ref = "clustermean"</code>.</p></dd>
+<dd><p>A character value specifying the weight to use in calculation of the reference composition.</p></dd>
 
 
 <dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>

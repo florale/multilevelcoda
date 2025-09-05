@@ -94,7 +94,7 @@ averaged across draws should be very similar.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'brmcoda'</span></span>
-<span><span class="fu">fitted</span><span class="op">(</span><span class="va">object</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"response"</span><span class="op">)</span>, summary <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">fitted</span><span class="op">(</span><span class="va">object</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"response"</span><span class="op">)</span>, parts <span class="op">=</span> <span class="fl">1</span>, summary <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -114,9 +114,11 @@ If <code>"response"</code>, results are returned on the compositional scale
 of the response variable.</p></dd>
 
 
-<dt id="arg-summary">summary<a class="anchor" aria-label="anchor" href="#arg-summary"></a></dt>
-<dd><p>Should summary statistics be returned
-instead of the raw values? Default is <code>TRUE</code>.</p></dd>
+<dt id="arg-parts">parts<a class="anchor" aria-label="anchor" href="#arg-parts"></a></dt>
+<dd><p>Only for models with compositional response
+A optional character string specifying names of compositional parts that make up the response in <code>brmcoda</code> model.
+This should correspond to a single set of names of compositional parts specified
+in the <code>complr</code> object. Default to the first composition in the <code>complr</code> object.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -157,30 +159,29 @@ that control additional aspects of prediction.</p></dd>
 <span class="r-in"><span>  <span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                 parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 idvar <span class="op">=</span> <span class="st">"ID"</span>, total <span class="op">=</span> <span class="fl">1440</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## fit a model</span></span></span>
 <span class="r-in"><span>  <span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span></span>
-<span class="r-in"><span>                formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bz1</span> <span class="op">+</span> <span class="va">bz2</span> <span class="op">+</span> <span class="va">bz3</span> <span class="op">+</span> <span class="va">bz4</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                  <span class="va">wz1</span> <span class="op">+</span> <span class="va">wz2</span> <span class="op">+</span> <span class="va">wz3</span> <span class="op">+</span> <span class="va">wz4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bz1_1</span> <span class="op">+</span> <span class="va">bz2_1</span> <span class="op">+</span> <span class="va">bz3_1</span> <span class="op">+</span> <span class="va">bz4_1</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>                                   <span class="va">wz1_1</span> <span class="op">+</span> <span class="va">wz2_1</span> <span class="op">+</span> <span class="va">wz3_1</span> <span class="op">+</span> <span class="va">wz4_1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
 <span class="r-in"><span>                backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## compute expected predictions</span></span></span>
 <span class="r-in"><span>  <span class="va">epred</span> <span class="op">&lt;-</span> <span class="fu">fitted</span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">epred</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## fit a model with compositional outcome</span></span></span>
 <span class="r-in"><span>  <span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>,</span></span>
-<span class="r-in"><span>                formula <span class="op">=</span> <span class="fu">mvbind</span><span class="op">(</span><span class="va">z1</span>, <span class="va">z2</span>, <span class="va">z3</span>, <span class="va">z4</span><span class="op">)</span> <span class="op">~</span> <span class="va">Stress</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                formula <span class="op">=</span> <span class="fu">mvbind</span><span class="op">(</span><span class="va">z1_1</span>, <span class="va">z2_1</span>, <span class="va">z3_1</span>, <span class="va">z4_1</span><span class="op">)</span> <span class="op">~</span> <span class="va">Stress</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
 <span class="r-in"><span>                backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## expected predictions on compositional scale</span></span></span>
 <span class="r-in"><span>  <span class="va">epredcomp</span> <span class="op">&lt;-</span> <span class="fu">fitted</span><span class="op">(</span><span class="va">m2</span>, scale <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">epredcomp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> The following variables can neither be found in 'data' nor in 'data2':</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 'bz1', 'bz2', 'bz3', 'bz4', 'wz1', 'wz2', 'wz3', 'wz4'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
