@@ -77,26 +77,6 @@ summary.complr <- function(object, ...) {
   class = "summary.complr")
 }
 
-#' Summary for a \code{complr} object
-#'
-#' @param x An object of class \code{summary.complr}.
-#' @param ... Other arguments passed to \code{\link{summary.complr}}.
-#'
-#' @seealso \code{\link{summary.complr}}
-#'
-#' @method print summary.complr
-#'
-#' @examples
-#'
-#' cilr <- complr(data = mcompd, sbp = sbp,
-#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                 idvar = "ID")
-#' print(cilr)
-#' @export
-print.summary.complr <- function(x, ...) {
-  x
-}
-
 #' Print a Summary for a \code{complr} object
 #'
 #' @param x An object of class \code{complr}.
