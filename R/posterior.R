@@ -74,46 +74,9 @@ predict.brmcoda <- function(object,
                             parts = 1,
                             ...) {
   if (inherits(object$model$formula, "mvbrmsformula")) {
-    # check parts
-    if (is.numeric(parts)) {
-      if (length(parts) > 1) {
-        stop(
-          " 'parts' should be a single numeric value indicating which set of compositional parts to use."
-        )
-      }
-      if (parts < 1 || parts > length(object$complr$output)) {
-        stop(
-          sprintf(
-            " 'parts' should be a single numeric value between 1 and %s, corresponding to the number of sets of compositional parts in the 'complr' object.",
-            length(object$complr$output)
-          )
-        )
-      }
-      parts <- object$complr$output[[parts]]$parts
-      
-    } else {
-      if (isFALSE(inherits(parts, "character"))) {
-        stop(" 'parts' should be a character vector of compositional parts.")
-      }
-      ## parts should be identical with either one of the parts presented in output of complr
-      if (isFALSE((any(
-        vapply(lapply(object$complr$output, function(x)
-          x$parts), function(p)
-            identical(sort(parts), sort(p)), logical(1))
-      )))) {
-        stop(
-          sprintf(
-            "The specified 'parts' (%s) are not found in the complr object.",
-            "  It should corespond to one set of compositional parts, either one of the following:",
-            "%s",
-            paste(parts, collapse = ", "),
-            invisible(lapply(object$complr$output, function(x)
-              cat(paste(x$parts, collapse = ", "), "\n"))),
-            sep = "\n"
-          )
-        )
-      }
-    }
+    
+    # get parts
+    parts <- get_parts(object$complr, parts)
     
     ## get the index of which index elements of object$complr$output does the parts correspond to
     idx <- which(vapply(lapply(object$complr$output, function(x)
@@ -235,46 +198,9 @@ fitted.brmcoda <- function(object,
                            ...) {
   
   if (inherits(object$model$formula, "mvbrmsformula")) {
-    # check parts
-    if (is.numeric(parts)) {
-      if (length(parts) > 1) {
-        stop(
-          " 'parts' should be a single numeric value indicating which set of compositional parts to use."
-        )
-      }
-      if (parts < 1 || parts > length(object$complr$output)) {
-        stop(
-          sprintf(
-            " 'parts' should be a single numeric value between 1 and %s, corresponding to the number of sets of compositional parts in the 'complr' object.",
-            length(object$complr$output)
-          )
-        )
-      }
-      parts <- object$complr$output[[parts]]$parts
-      
-    } else {
-      if (isFALSE(inherits(parts, "character"))) {
-        stop(" 'parts' should be a character vector of compositional parts.")
-      }
-      ## parts should be identical with either one of the parts presented in output of complr
-      if (isFALSE((any(
-        vapply(lapply(object$complr$output, function(x)
-          x$parts), function(p)
-            identical(sort(parts), sort(p)), logical(1))
-      )))) {
-        stop(
-          sprintf(
-            "The specified 'parts' (%s) are not found in the complr object.",
-            "  It should corespond to one set of compositional parts, either one of the following:",
-            "%s",
-            paste(parts, collapse = ", "),
-            invisible(lapply(object$complr$output, function(x)
-              cat(paste(x$parts, collapse = ", "), "\n"))),
-            sep = "\n"
-          )
-        )
-      }
-    }
+    
+    # get parts
+    parts <- get_parts(object$complr, parts)
     
     ## get the index of which index elements of object$complr$output does the parts correspond to
     idx <- which(vapply(lapply(object$complr$output, function(x)

@@ -16,7 +16,7 @@
 #' @param total A numeric value of the total amount to which the compositions should be closed.
 #' For multiple compositions, a list of numeric values.
 #' Default is \code{1}.
-#' @param idvar Only for multilevel data, a character string specifying the name of the variable containing IDs.
+#' @param idvar Only for multilevel data, a character string specifying the name of the variable containing participants IDs.
 #'
 #' @details
 #' The \emph{ilr}-transform maps the D-part compositional data from the simplex into non-overlapping

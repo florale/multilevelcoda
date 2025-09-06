@@ -20,12 +20,13 @@ is.complr <- function(x) {
 #' @method mean complr
 #'
 #' @examples
-#' cilr <- complr(data = mcompd, sbp = sbp,
+#' x <- complr(data = mcompd, sbp = sbp,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID")
-#' mean(cilr)
+#' mean(x)
 #' @export
 mean.complr <- function(x, weight = c("equal", "proportional"), ...) {
+  browser()
   stats <- .get.complr(object = x, weight = weight)
   
   mean_comp <- do.call(rbind, lapply(stats[c("X", "bX", "wX")], "[[", "mean"))
@@ -100,4 +101,50 @@ get_variables.complr <- function(object) {
   colnames(out) <- c(paste0("composition_", seq_along(object$out)))
   
   out
+}
+
+#' Extract parts of interest  from a \code{complr} object.
+#' @param object A \code{complr} object
+#' @param parts A optional character string specifying names of compositional parts that should be considered
+#' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+#' in the \code{complr} object. Default to the first composition in the \code{complr} object.
+#' 
+#' @internal
+get_parts <- function(object, parts = 1) {
+  
+  if (isFALSE(inherits(object, "complr"))) {
+    stop(sprintf(
+      "Can't handle an object of class (%s)
+  It should be a 'complr' object
+  See ?complr for details.",
+      class(object)))
+  }
+  
+  if (is.numeric(parts)) {
+    if (length(parts) > 1) {
+      stop(" 'parts' should be a single numeric value indicating which set of compositional parts to use.")
+    }
+    if (parts < 1 || parts > length(object$output)) {
+      stop(sprintf(
+        " 'parts' should be a single numeric value between 1 and %s, corresponding to the number of sets of compositional parts in the 'complr' object.",
+        length(object$output)))
+    }
+    parts <- object$output[[parts]]$parts
+    
+  } else {
+    if (isFALSE(inherits(parts, "character"))) {
+      stop(" 'parts' should be a character vector of compositional parts.")
+    }
+    ## parts should be identical with either one of the parts presented in output of complr
+    if (isFALSE((any(vapply(lapply(object$output, function(x) x$parts), function(p) identical(sort(parts), sort(p)), logical(1)))))) {
+      stop(sprintf(
+        "The specified 'parts' (%s) are not found in the complr object.",
+        "  It should corespond to one set of compositional parts, either one of the following:",
+        "%s",
+        paste(parts, collapse = ", "),
+        invisible(lapply(object$output, function(x) cat(paste(x$parts, collapse = ", "), "\n"))),
+        sep = "\n"))
+    }
+  }
+  parts
 }

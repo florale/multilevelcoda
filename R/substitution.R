@@ -68,11 +68,12 @@
 #'   # model with compositional predictor at between and within-person levels
 #'   fit1 <- brmcoda(complr = x,
 #'                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
-#'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
+#'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 + 
+#'                                      Female + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'                   
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"), ref = "clustermean")
+#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
 #'   summary(sub1)
 #'   
 #'   # one to all reallocation at between and within-person levels
@@ -80,7 +81,7 @@
 #'                        type = "one-to-all")
 #'   summary(sub2) 
 #'   
-#'   # model with compositional predictor at aggregate level of variance
+#'   # model with compositional predictor at aggregate level
 #'   fit2 <- brmcoda(complr = x,
 #'                   formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
@@ -106,7 +107,7 @@ substitution <- function(object,
     stop(paste(
       "'object' is a required argument and cannot be missing;",
       "  it should be an object of class 'brmcoda'.",
-      "  See ?bsub for details.",
+      "  See ?substitution for details.",
       sep = "\n"))
   }
   
@@ -114,7 +115,7 @@ substitution <- function(object,
     stop(sprintf(
       "Can't handle an object of class (%s)
   It should be a fitted 'brmcoda' object
-  See ?bsub for details.",
+  See ?substitution for details.",
       class(object)))
   }
   
@@ -161,33 +162,8 @@ substitution <- function(object,
     aorg <- FALSE
   }
   
-  # check parts
-  if (is.numeric(parts)) {
-    if (length(parts) > 1) {
-      stop(" 'parts' should be a single numeric value indicating which set of compositional parts to use.")
-    }
-    if (parts < 1 || parts > length(object$complr$output)) {
-      stop(sprintf(
-        " 'parts' should be a single numeric value between 1 and %s, corresponding to the number of sets of compositional parts in the 'complr' object.",
-        length(object$complr$output)))
-    }
-    parts <- object$complr$output[[parts]]$parts
-    
-  } else {
-    if (isFALSE(inherits(parts, "character"))) {
-      stop(" 'parts' should be a character vector of compositional parts.")
-    }
-    ## parts should be identical with either one of the parts presented in output of complr
-    if (isFALSE((any(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(sort(parts), sort(p)), logical(1)))))) {
-      stop(sprintf(
-        "The specified 'parts' (%s) are not found in the complr object.",
-        "  It should corespond to one set of compositional parts, either one of the following:",
-        "%s",
-        paste(parts, collapse = ", "),
-        invisible(lapply(object$complr$output, function(x) cat(paste(x$parts, collapse = ", "), "\n"))),
-        sep = "\n"))
-    }
-  }
+  # get parts
+  parts <- get_parts(object$complr, parts)
   
   ## get the index of which index elements of object$complr$output does the parts correspond to
   idx <- which(vapply(lapply(object$complr$output, 
