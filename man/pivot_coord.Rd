@@ -26,30 +26,33 @@ Default is \code{"rotate"}.}
 in the substitution analysis. This should correspond to a single set of names of compositional parts specified
 in the \code{complr} object. Default to the first composition in the \code{complr} object.}
 
-\item{...}{currently ignored.}
+\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
-A list of \code{\link{brmcoda}} for each pivot balance coordinate.
+A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+effect of increasing one compositional part relative to the remaining compositional parts.
 }
 \description{
-Estimate pivot balance coordinates
+This function estimates pivot balance coordinates for each compositional part by
+either \code{"rotate"} the sequential binary partition using the same \code{brmcoda} object
+or \code{"refit"} the \code{brmcoda} object.
 }
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-  cilr <- complr(data = mcompd, sbp = sbp,
+  x <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID",
                  total = 1440)
   
   # inspects ILRs before passing to brmcoda
-  names(cilr$between_logratio)
-  names(cilr$within_logratio)
-  names(cilr$logratio)
+  names(x$between_logratio)
+  names(x$within_logratio)
+  names(x$logratio)
   
   # model with compositional predictor at between and within-person levels
-  m <- brmcoda(complr = cilr,
-                formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
-                                   wz1 + wz2 + wz3 + wz4 + (1 | ID),
+  m <- brmcoda(complr = x,
+                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                   wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
   

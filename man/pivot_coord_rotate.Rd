@@ -4,31 +4,38 @@
 \alias{pivot_coord_rotate}
 \title{Estimate pivot balance coordinates by rotating sequential binary partition.}
 \usage{
-pivot_coord_rotate(object, summary = TRUE, ...)
+pivot_coord_rotate(object, summary = TRUE, parts = 1, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
 \item{summary}{Should summary statistics be returned instead of the raw values? Default is \code{TRUE}.}
 
-\item{...}{currently ignored.}
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object. Default to the first composition in the \code{complr} object.}
+
+\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
-A list of \code{\link{brmcoda}} for each pivot balance coordinate.
+A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+effect of increasing one compositional part relative to the remaining compositional parts.
 }
 \description{
-Estimate pivot balance coordinates by rotating sequential binary partition.
+This function is an alias of \code{\link{pivot_coord}} to estimates the
+pivot balance coordinates by \code{"rotate"} the sequential binary partition on the
+same \code{brmcoda} object.
 }
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-  cilr <- complr(data = mcompd, sbp = sbp,
+  x <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID",
                  total = 1440)
   
-  m <- brmcoda(complr = cilr,
-                formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
-                                   wz1 + wz2 + wz3 + wz4 + (1 | ID),
+  m <- brmcoda(complr = x,
+                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                   wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
   
@@ -38,4 +45,7 @@ if(requireNamespace("cmdstanr")){
   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
   posterior::summarise_draws(posterior::as_draws_array(m_pivot_coord_raw$output))
   }}
+}
+\seealso{
+\code{\link{pivot_coord}}
 }

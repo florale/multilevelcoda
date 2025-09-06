@@ -4,33 +4,42 @@
 \alias{pivot_coord_refit}
 \title{Estimate pivot balance coordinates by refitting model.}
 \usage{
-pivot_coord_refit(object, ...)
+pivot_coord_refit(object, parts = 1, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
 
-\item{...}{Further arguments passed to \code{\link[brms:brm]{brm}}.}
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object. Default to the first composition in the \code{complr} object.}
+
+\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
-A list of \code{\link{brmcoda}} for each pivot balance coordinate.
+A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+effect of increasing one compositional part relative to the remaining compositional parts.
 }
 \description{
-Estimate pivot balance coordinates by refitting model.
+This function is an alias of \code{\link{pivot_coord}} to estimates the
+pivot balance coordinates by \code{"refit"} the \code{brmcoda} object.
 }
 \examples{
 \donttest{
 if(requireNamespace("cmdstanr")){
-  cilr <- complr(data = mcompd, sbp = sbp,
+  x <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID",
                  total = 1440)
   
-  m <- brmcoda(complr = cilr,
-                formula = Stress ~ bz1 + bz2 + bz3 + bz4 +
-                                   wz1 + wz2 + wz3 + wz4 + (1 | ID),
+  m <- brmcoda(complr = x,
+                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                   wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
   
   m_pivot_coord_refit <- pivot_coord_refit(m)
   summary(m_pivot_coord_refit)
   }}
+}
+\seealso{
+\code{\link{pivot_coord}}
 }
