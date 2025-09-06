@@ -90,11 +90,87 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
-<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
+<span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in get(object$idvar):</span> object 'ID' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Composition and Logratio Variables</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> =============================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Number of observations: 3540</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Number of groups (IDs): 266</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Transformed variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Composition geometry: acomp, logratio ransformation: ilr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                     Composition 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> composition         tTST, tWAKE, tMVPA, tLPA, tSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> between_composition bTST, bWAKE, bMVPA, bLPA, bSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> within_composition  wTST, wWAKE, wMVPA, wLPA, wSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> logratio                   z1_1, z2_1, z3_1, z4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> between_logratio       bz1_1, bz2_1, bz3_1, bz4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> within_logratio        wz1_1, wz2_1, wz3_1, wz4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> total                                           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $meta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $meta$nobs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3540</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $meta$ngrps</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 266</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $meta$idvar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ID"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $meta$transform_type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ilr"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform$total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform$total[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform$psi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform$psi[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]       [,3]       [,4]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TST   0.5477226  0.7071068  0.0000000  0.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WAKE  0.5477226 -0.7071068  0.0000000  0.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> MVPA -0.3651484  0.0000000  0.8164966  0.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> LPA  -0.3651484  0.0000000 -0.4082483  0.7071068</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SB   -0.3651484  0.0000000 -0.4082483 -0.7071068</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform$sbp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $transform$sbp[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      TST WAKE MVPA LPA SB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   1    1   -1  -1 -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]   1   -1    0   0  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]   0    0    1  -1 -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]   0    0    0   1 -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $geometry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $geometry$composition_geometry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acomp"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $geometry$logratio_class</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "rmult"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $output</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                     Composition 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> composition         tTST, tWAKE, tMVPA, tLPA, tSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> between_composition bTST, bWAKE, bMVPA, bLPA, bSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> within_composition  wTST, wWAKE, wMVPA, wLPA, wSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> logratio                   z1_1, z2_1, z3_1, z4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> between_logratio       bz1_1, bz2_1, bz3_1, bz4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> within_logratio        wz1_1, wz2_1, wz3_1, wz4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> total                                           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "summary.complr"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

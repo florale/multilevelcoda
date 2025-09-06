@@ -67,7 +67,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'complr'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"equal"</span>, <span class="st">"proportional"</span><span class="op">)</span>, parts <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -86,6 +86,12 @@ If <code>"proportional"</code>, weights in proportion to the frequencies of unit
 Default is <code>equal</code>.</p></dd>
 
 
+<dt id="arg-parts">parts<a class="anchor" aria-label="anchor" href="#arg-parts"></a></dt>
+<dd><p>A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the <code>complr</code> object. Default to the first composition in the <code>complr</code> object.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>generic argument, not in use.</p></dd>
 
@@ -93,11 +99,34 @@ Default is <code>equal</code>.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cilr</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cilr</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in get(object$idvar):</span> object 'ID' not found</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $X</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        tTST      tWAKE      tMVPA      tLPA       tSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.3256777 0.03941706 0.08364547 0.3785304 0.1727294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $bX</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        bTST     bWAKE      bMVPA     bLPA      bSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.3109103 0.0421985 0.09859328 0.381646 0.166652</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $wX</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        wTST     wWAKE     wMVPA      wLPA       wSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.2145624 0.1963879 0.1741218 0.2065891 0.2083389</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Z</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         z1_1     z2_1       z3_1      z4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -0.4576479 1.483347 -0.9106453 0.6050295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $bZ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        bz1_1    bz2_1      bz3_1     bz4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -0.5212779 1.416779 -0.7802634 0.5796594</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $wZ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        wz1_1      wz2_1      wz3_1      wz4_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.06363004 0.06656791 -0.1303819 0.02537004</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
