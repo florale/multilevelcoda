@@ -27,5 +27,5 @@ x1 <- complr(data = mcompd, sbp = sbp,
 summary(x1)
 x2 <- complr(data = mcompd, sbp = sbp,
                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
-summary(x2)
+s <-summary(x2)
 }

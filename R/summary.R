@@ -26,7 +26,10 @@ summary.complr <- function(object, ...) {
   transform_type <- object$transform
   idvar <- object$idvar
   nobs  <- nrow(object$dataout)
-  ngrps <- if (!is.null(object$idvar))length(unique(object$dataout[[object$idvar]])) else nrow(object$dataout)
+  ngrps <- if (!is.null(object$idvar))
+    length(unique(object$dataout[[object$idvar]]))
+  else
+    nrow(object$dataout)
   
   # meta data specific to composition
   psi = lapply(object$output, `[[`, "psi")
@@ -85,13 +88,13 @@ summary.complr <- function(object, ...) {
 #'
 #' @examples
 #'
-#' x <- complr(data = mcompd, sbp = sbp,
+#' cilr <- complr(data = mcompd, sbp = sbp,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID")
-#' print(x)
+#' print(cilr)
 #' @export
 print.summary.complr <- function(x, ...) {
-  summary(x, ...)
+  x
 }
 
 #' Print a Summary for a \code{complr} object
@@ -103,10 +106,10 @@ print.summary.complr <- function(x, ...) {
 #'
 #' @examples
 #'
-#' x <- complr(data = mcompd, sbp = sbp,
+#' cilr <- complr(data = mcompd, sbp = sbp,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID")
-#' print(x)
+#' print(cilr)
 #' @export
 print.complr <- function(x, ...) {
   summary(x, ...)

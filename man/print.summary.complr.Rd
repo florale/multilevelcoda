@@ -16,10 +16,10 @@ Summary for a \code{complr} object
 }
 \examples{
 
-x <- complr(data = mcompd, sbp = sbp,
+cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")
-print(x)
+print(cilr)
 }
 \seealso{
 \code{\link{summary.complr}}
