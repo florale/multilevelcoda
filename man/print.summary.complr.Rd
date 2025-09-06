@@ -16,8 +16,8 @@ Summary for a \code{complr} object
 }
 \examples{
 
-cilr <- complr(data = mcompd, sbp = sbp, 
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
+cilr <- complr(data = mcompd, sbp = sbp,
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")
 print(cilr)
 }

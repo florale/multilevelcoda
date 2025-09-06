@@ -15,6 +15,9 @@ is.complr <- function(x) {
 #' If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
 #' (e.g., observations across individuals)
 #' Default is \code{equal}.
+#' @param parts A optional character string specifying names of compositional parts that should be considered
+#' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+#' in the \code{complr} object. Default to the first composition in the \code{complr} object.
 #' @param ... generic argument, not in use.
 #'
 #' @method mean complr
@@ -25,16 +28,58 @@ is.complr <- function(x) {
 #'                 idvar = "ID")
 #' mean(x)
 #' @export
-mean.complr <- function(x, weight = c("equal", "proportional"), ...) {
-  browser()
-  stats <- .get.complr(object = x, weight = weight)
+mean.complr <- function(x, weight = c("equal", "proportional"), parts = 1, ...) {
   
-  mean_comp <- do.call(rbind, lapply(stats[c("X", "bX", "wX")], "[[", "mean"))
-  mean_lr   <- do.call(rbind, lapply(stats[c("Z", "bZ", "wZ")], function(x)
-    x["Mean", ]))
+  parts <- get_parts(object = x, parts = parts)
+  idx   <- which(vapply(lapply(x$output, 
+                               function(x) x$parts), 
+                        function(p) identical(sort(parts), sort(p)), logical(1)))
+  X  <- x$output[[idx]]$X
+  bX <- x$output[[idx]]$bX
+  wX <- x$output[[idx]]$wX
+  Z  <- x$output[[idx]]$Z
+  bZ <- x$output[[idx]]$bZ
+  wZ <- x$output[[idx]]$wZ
   
-  out <- list(mean_comp = mean_comp, mean_lr = mean_lr)
-  out
+  if (identical(weight, "proportional") | is.null(x$idvar)) {
+    out <- list(
+      if(!is.null(X)) (summary(X, robust = TRUE)) else (NULL),
+      if(!is.null(bX)) (summary(bX, robust = TRUE)) else (NULL),
+      if(!is.null(wX)) (summary(wX, robust = TRUE)) else (NULL),
+      if(!is.null(Z)) (data.frame(summary(Z))) else (NULL),
+      if(!is.null(bZ)) (data.frame(summary(bZ))) else (NULL),
+      if(!is.null(wZ)) (data.frame(summary(wZ))) else (NULL)
+    )
+  } else {
+    data <- cbind(x$dataout[, x$idvar, with = FALSE], data.frame(X, bX, wX, Z, bZ, wZ))
+    
+    out <- list(
+      summary(acomp(data[!duplicated(get(x$idvar)), colnames(X), with = FALSE]), robust = TRUE),
+      summary(acomp(data[!duplicated(get(x$idvar)), colnames(bX), with = FALSE]), robust = TRUE),
+      summary(acomp(data[!duplicated(get(x$idvar)), colnames(wX), with = FALSE]), robust = TRUE),
+      
+      summary(rmult(data[!duplicated(get(x$idvar)), colnames(Z), with = FALSE])),
+      summary(rmult(data[!duplicated(get(x$idvar)), colnames(bZ), with = FALSE])),
+      summary(rmult(data[!duplicated(get(x$idvar)), colnames(wZ), with = FALSE]))
+    )
+  }
+  names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
+  
+  out <- list(X  = out$X$mean, 
+              bX = out$bX$mean,
+              wX = out$wX$mean,
+              Z  = out$Z["Mean", ],
+              bZ = out$bZ["Mean", ],
+              wZ = out$wZ["Mean", ]
+  )
+  
+  print(lapply(out, function(x) {
+    df <- as.data.frame(t(x))
+    rownames(df) <- NULL
+    df
+  }))
+  
+  invisible(out)
 }
 
 #' Variance of compositions presented in a \code{complr} object.
@@ -45,11 +90,55 @@ mean.complr <- function(x, weight = c("equal", "proportional"), ...) {
 #'
 #' @method var complr
 #' @export
-var.complr <- function(x, weight = c("equal", "proportional"), ...) {
-  stats <- .get.complr(object = x, weight = weight)
+var.complr <- function(x, weight = c("equal", "proportional"), parts = 1, ...) {
   
-  out <- lapply(stats[c("X", "bX", "wX")], "[[", "variation")
-  out
+  parts <- get_parts(object = x, parts = parts)
+  idx   <- which(vapply(lapply(x$output, 
+                               function(x) x$parts), 
+                        function(p) identical(sort(parts), sort(p)), logical(1)))
+  X  <- x$output[[idx]]$X
+  bX <- x$output[[idx]]$bX
+  wX <- x$output[[idx]]$wX
+  Z  <- x$output[[idx]]$Z
+  bZ <- x$output[[idx]]$bZ
+  wZ <- x$output[[idx]]$wZ
+  
+  if (identical(weight, "proportional") | is.null(x$idvar)) {
+    out <- list(
+      if(!is.null(X)) (summary(X, robust = TRUE)) else (NULL),
+      if(!is.null(bX)) (summary(bX, robust = TRUE)) else (NULL),
+      if(!is.null(wX)) (summary(wX, robust = TRUE)) else (NULL),
+      if(!is.null(Z)) (data.frame(summary(Z))) else (NULL),
+      if(!is.null(bZ)) (data.frame(summary(bZ))) else (NULL),
+      if(!is.null(wZ)) (data.frame(summary(wZ))) else (NULL)
+    )
+  } else {
+    data <- cbind(x$dataout[, x$idvar, with = FALSE], data.frame(X, bX, wX, Z, bZ, wZ))
+    
+    out <- list(
+      summary(acomp(data[!duplicated(get(x$idvar)), colnames(X), with = FALSE]), robust = TRUE),
+      summary(acomp(data[!duplicated(get(x$idvar)), colnames(bX), with = FALSE]), robust = TRUE),
+      summary(acomp(data[!duplicated(get(x$idvar)), colnames(wX), with = FALSE]), robust = TRUE),
+      
+      summary(rmult(data[!duplicated(get(x$idvar)), colnames(Z), with = FALSE])),
+      summary(rmult(data[!duplicated(get(x$idvar)), colnames(bZ), with = FALSE])),
+      summary(rmult(data[!duplicated(get(x$idvar)), colnames(wZ), with = FALSE]))
+    )
+  }
+  names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
+  
+  out <- list(X  = out$X$variation, 
+              bX = out$bX$variation,
+              wX = out$wX$variation
+  )
+  
+  print(lapply(out, function(x) {
+    df <- as.data.frame(t(x))
+    rownames(df) <- NULL
+    df
+  }))
+  
+  invisible(out)
 }
 
 #' Extract Compositional Data from \code{complr} object.
@@ -63,10 +152,10 @@ var.complr <- function(x, weight = c("equal", "proportional"), ...) {
 #'
 #' @export
 as.data.frame.complr <- function(x,
-                                 row.names = NULL,
-                                 optional = TRUE,
                                  ...) {
-  as.data.frame(do.call(cbind, x[c("X", "bX", "wX", "Z", "bZ", "wZ")]))
+  do.call(cbind, lapply(x$output, function(y) {
+    data.frame(y$X, y$bX, y$wX, y$Z, y$bZ, y$wZ)
+  }))
 }
 
 #' @rdname as.data.frame.complr
@@ -103,13 +192,17 @@ get_variables.complr <- function(object) {
   out
 }
 
-#' Extract parts of interest  from a \code{complr} object.
+#' Extract names parts  from a \code{complr} object.
+#' 
+#' Internal function used to validate and extract the names of compositional parts.
+#' 
 #' @param object A \code{complr} object
 #' @param parts A optional character string specifying names of compositional parts that should be considered
 #' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
 #' in the \code{complr} object. Default to the first composition in the \code{complr} object.
 #' 
-#' @internal
+#' @keywords internal
+#' @noRd
 get_parts <- function(object, parts = 1) {
   
   if (isFALSE(inherits(object, "complr"))) {

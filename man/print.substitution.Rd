@@ -25,7 +25,7 @@ if(requireNamespace("cmdstanr")){
     wz1 + wz2 + wz3 + wz4 + (1 | ID),
   chain = 1, iter = 500,
   backend = "cmdstanr")
-  
+
   subm <- substitution(object = m, delta = 5)
   print(subm)
 }}

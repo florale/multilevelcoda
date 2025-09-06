@@ -22,7 +22,7 @@ For multiple compositions, a list of sbps can be supplied.}
 For multiple compositions, a list of numeric values.
 Default is \code{1}.}
 
-\item{idvar}{Only for multilevel data, a character string specifying the name of the variable containing IDs.}
+\item{idvar}{Only for multilevel data, a character string specifying the name of the variable containing participants IDs.}
 
 \item{transform}{A character value naming a log ratio transformation to be applied on compositional data.
 Can be either \code{"ilr"} (isometric logratio), \code{"alr"} (additive logratio), or \code{"clr"} (centered logratio).

@@ -4,7 +4,7 @@
 \alias{mean.complr}
 \title{Mean amounts and mean compositions presented in a \code{complr} object.}
 \usage{
-\method{mean}{complr}(x, weight = c("equal", "proportional"), ...)
+\method{mean}{complr}(x, weight = c("equal", "proportional"), parts = 1, ...)
 }
 \arguments{
 \item{x}{An object of class \code{complr}.}
@@ -15,14 +15,18 @@ If \code{"proportional"}, weights in proportion to the frequencies of units bein
 (e.g., observations across individuals)
 Default is \code{equal}.}
 
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object. Default to the first composition in the \code{complr} object.}
+
 \item{...}{generic argument, not in use.}
 }
 \description{
 Mean amounts and mean compositions presented in a \code{complr} object.
 }
 \examples{
-cilr <- complr(data = mcompd, sbp = sbp,
+x <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")
-mean(cilr)
+mean(x)
 }

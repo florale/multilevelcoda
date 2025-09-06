@@ -4,7 +4,13 @@
 \alias{pivot_coord}
 \title{Estimate pivot balance coordinates}
 \usage{
-pivot_coord(object, summary = TRUE, method = c("rotate", "refit"), ...)
+pivot_coord(
+  object,
+  summary = TRUE,
+  method = c("rotate", "refit"),
+  parts = 1,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
@@ -15,6 +21,10 @@ pivot_coord(object, summary = TRUE, method = c("rotate", "refit"), ...)
 Should the pivot balance coordinates be estimated by \code{"rotate"} the sequential binary partition
 using the same \code{brmcoda} object or \code{"refit"} the \code{brmcoda} object?
 Default is \code{"rotate"}.}
+
+\item{parts}{A optional character string specifying names of compositional parts that should be considered
+in the substitution analysis. This should correspond to a single set of names of compositional parts specified
+in the \code{complr} object. Default to the first composition in the \code{complr} object.}
 
 \item{...}{currently ignored.}
 }
