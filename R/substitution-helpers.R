@@ -70,7 +70,7 @@ create_substitution <-
 #' Helper functions used only internally to estimate substitution model
 #' @importFrom data.table as.data.table data.table copy := setDT rbindlist .SD
 #' @importFrom compositions acomp ilr clo mean.acomp
-#' @importFrom bayestestR describe_posterior
+#' @importFrom brms posterior_summary
 #' @importFrom extraoperators %snin% %sin%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doFuture %dofuture%
@@ -255,32 +255,26 @@ NULL
   if (summary) {
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = FALSE, summary = TRUE)
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = TRUE, summary = TRUE)
-    suppressWarnings(iout <- lapply(iout, function(y) {
+    iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
-        browser()
         dmeta  <- x[, c("Delta", "From", "To", "Level", "Reference")]
-        result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
-        result <- rbindlist(lapply(
-          as.data.table(t(result)),
-          describe_posterior,
-          centrality = "mean",
-          ...
-        ))
+        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
         if (aorg)
-          (cbind(result, dmeta))
+          cbind(t(result), dmeta)
         else
-          (cbind(result, dmeta, grid[i, names(at), with = FALSE]))
+          cbind(t(result), dmeta, grid[i, names(at), with = FALSE])
       }, y, seq_along(y)))
-    }))
+    })
     
   } else {
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = FALSE, summary = FALSE)
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = TRUE, summary = FALSE)
     iout <- lapply(seq_along(iout), function(i) {
       if (aorg)
-        (as.data.table(iout[[i]]))
+        as.data.table(iout[[i]])
       else
-        (list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE])))
+        list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE]))
     })
   }
   
@@ -463,29 +457,24 @@ NULL
   }
   
   if (summary) {
-    suppressWarnings(iout <- lapply(iout, function(y) {
+    iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[, c("Delta", "From", "To", "Level", "Reference")]
-        result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
-        result <- rbindlist(lapply(
-          as.data.table(t(result)),
-          describe_posterior,
-          centrality = "mean",
-          ...
-        ))
+        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
         if (aorg)
-          (cbind(result, dmeta))
+          cbind(t(result), dmeta)
         else
-          (cbind(result, dmeta, grid[i, names(at), with = FALSE]))
+          cbind(t(result), dmeta, grid[i, names(at), with = FALSE])
       }, y, seq_along(y)))
-    }))
+    })
     
   } else {
     iout <- lapply(seq_along(iout), function(i) {
       if (aorg)
-        (as.data.table(iout[[i]]))
+        as.data.table(iout[[i]])
       else
-        (list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE])))
+        list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE]))
     })
   }
   
@@ -662,29 +651,24 @@ NULL
   }
   
   if (summary) {
-    suppressWarnings(iout <- lapply(iout, function(y) {
+    iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[, c("Delta", "From", "To", "Level", "Reference")]
-        result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
-        result <- rbindlist(lapply(
-          as.data.table(t(result)),
-          describe_posterior,
-          centrality = "mean",
-          ...
-        ))
+        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
         if (aorg)
-          (cbind(result, dmeta))
+          cbind(t(result), dmeta)
         else
-          (cbind(result, dmeta, grid[i, names(at), with = FALSE]))
+          cbind(t(result), dmeta, grid[i, names(at), with = FALSE])
       }, y, seq_along(y)))
-    }))
+    })
     
   } else {
     iout <- lapply(seq_along(iout), function(i) {
       if (aorg)
-        (as.data.table(iout[[i]]))
+        as.data.table(iout[[i]])
       else
-        (list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE])))
+        list(posterior = iout[[i]], grid = as.data.table(grid[i, names(at), with = FALSE]))
     })
   }
   
@@ -829,19 +813,14 @@ NULL
     unique(x$To), character(1)), levels = parts))
   
   if (summary) {
-    suppressWarnings(iout <- lapply(iout, function(y) {
+    iout <- lapply(iout, function(y) {
       rbindlist(lapply(y, function(x) {
         dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
-        result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
-        result <- rbindlist(lapply(
-          as.data.table(t(result)),
-          describe_posterior,
-          centrality = "mean",
-          ...
-        ))
-        cbind(result, dmeta)
+        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        cbind(t(result), dmeta)
       }))
-    }))
+    })
   } else {
     iout <- lapply(iout, function(x)
       rbindlist(lapply(x, as.data.table)))
@@ -987,19 +966,14 @@ NULL
     unique(x$To), character(1)), levels = parts))
   
   if (summary) {
-    suppressWarnings(iout <- lapply(iout, function(y) {
+    iout <- lapply(iout, function(y) {
       rbindlist(lapply(y, function(x) {
         dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
-        result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
-        result <- rbindlist(lapply(
-          as.data.table(t(result)),
-          describe_posterior,
-          centrality = "mean",
-          ...
-        ))
-        cbind(result, dmeta)
+        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        cbind(t(result), dmeta)
       }))
-    }))
+    })
   } else {
     iout <- lapply(iout, function(x)
       rbindlist(lapply(x, as.data.table)))
@@ -1139,19 +1113,14 @@ NULL
     unique(x$To), character(1)), levels = parts))
   
   if (summary) {
-    suppressWarnings(iout <- lapply(iout, function(y) {
+    iout <- lapply(iout, function(y) {
       rbindlist(lapply(y, function(x) {
         dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
-        result <- x[, -c("Delta", "From", "To", "Level", "Reference")]
-        result <- rbindlist(lapply(
-          as.data.table(t(result)),
-          describe_posterior,
-          centrality = "mean",
-          ...
-        ))
-        cbind(result, dmeta)
+        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        cbind(t(result), dmeta)
       }))
-    }))
+    })
   } else {
     iout <- lapply(iout, function(x)
       rbindlist(lapply(x, as.data.table)))

@@ -70,7 +70,7 @@ to be as many processors as the hardware and RAM allow (up to the number of comp
 For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 Default to \code{"one-to-one"}.}
 
-\item{...}{currently ignored.}
+\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
 A list containing the results of multilevel compositional substitution model.

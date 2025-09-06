@@ -43,7 +43,7 @@
 #' to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
 #' For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 #' Default to \code{"one-to-one"}.
-#' @param ... currently ignored.
+#' @param ... Further arguments passed to \code{\link{posterior_summary}}.
 #'
 #' @return A list containing the results of multilevel compositional substitution model.
 #' The first six lists contain the results of the substitution estimation for a compositional part.

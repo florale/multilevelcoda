@@ -1,6 +1,6 @@
 #' Simple Substitution
 #' 
-#' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
+#' This function is an alias of \code{\link{substitution}} to estimates the difference in an outcome
 #' when compositional parts are substituted for specific unit(s) 
 #' using a aggregate reference composition 
 #' (e.g., compositional mean at sample level, not seperated by between- and within effects).
@@ -113,7 +113,7 @@ sub <- function (object,
 
 #' Average Substitution
 #'
-#' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
+#' This function is an alias of \code{\link{substitution}} to estimates the difference in an outcome
 #' when compositional parts are substituted for specific unit(s)
 #' using cluster mean (e.g., compositional mean at individual level) as reference composition. 
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.

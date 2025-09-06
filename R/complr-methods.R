@@ -28,7 +28,10 @@ is.complr <- function(x) {
 #'                 idvar = "ID")
 #' mean(x)
 #' @export
-mean.complr <- function(x, weight = c("equal", "proportional"), parts = 1, ...) {
+mean.complr <- function(x,
+                        weight = c("equal", "proportional"),
+                        parts = 1,
+                        ...) {
   
   parts <- get_parts(object = x, parts = parts)
   idx   <- which(vapply(lapply(x$output, 
@@ -90,7 +93,10 @@ mean.complr <- function(x, weight = c("equal", "proportional"), parts = 1, ...) 
 #'
 #' @method var complr
 #' @export
-var.complr <- function(x, weight = c("equal", "proportional"), parts = 1, ...) {
+var.complr <- function(x,
+                       weight = c("equal", "proportional"),
+                       parts = 1,
+                       ...) {
   
   parts <- get_parts(object = x, parts = parts)
   idx   <- which(vapply(lapply(x$output, 

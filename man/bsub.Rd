@@ -71,7 +71,7 @@ to be as many processors as the hardware and RAM allow (up to the number of comp
 For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 Default to \code{"one-to-one"}.}
 
-\item{...}{currently ignored.}
+\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
 A list containing the results of multilevel compositional substitution model.
@@ -85,7 +85,7 @@ The first six lists contain the results of the substitution estimation for a com
 \item{\code{Reference}}{ Either \code{grandmean}, \code{clustermean}, or \code{users}.}
 }
 \description{
-This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
+This function is an alias of \code{\link{substitution}} to estimates the difference in an outcome
 when compositional parts are substituted for specific unit(s) at \emph{between} level
 using a single reference composition (e.g., compositional mean at sample level).
 It is recommended that users run substitution model using the \code{\link{substitution}} function.

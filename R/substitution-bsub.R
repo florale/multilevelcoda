@@ -1,6 +1,6 @@
 #' Between-person Simple Substitution
 #' 
-#' This function is an alias of \code{\link{substitution}} to estimates the the difference in an outcome
+#' This function is an alias of \code{\link{substitution}} to estimates the difference in an outcome
 #' when compositional parts are substituted for specific unit(s) at \emph{between} level
 #' using a single reference composition (e.g., compositional mean at sample level).
 #' It is recommended that users run substitution model using the \code{\link{substitution}} function.
