@@ -104,69 +104,78 @@ pivot_coord_rotate <- function (object,
       identical(sort(parts), sort(p)), logical(1)))
   
   
-  b_sbp_0 <- fixef(object,
-                   summary = FALSE,
-                   ...
+  b_sbp0 <- fixef(object,
+                  summary = FALSE,
+                  ...
   )
   # grab the correct logratio names
   z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
   bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
   wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  b_z_sbp_0  <- b_sbp_0[, colnames(b_sbp_0) %in% z_vars]
-  b_bz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% bz_vars]
-  b_wz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% wz_vars]
+  b_z_sbp0  <- b_sbp0[, colnames(b_sbp0) %in% z_vars]
+  b_bz_sbp0 <- b_sbp0[, colnames(b_sbp0) %in% bz_vars]
+  b_wz_sbp0 <- b_sbp0[, colnames(b_sbp0) %in% wz_vars]
   
   out <- vector("list")
-  for (target in parts) {
+  for (d in parts) {
     
     # new complr object with rotated sbp
-    parts_target <- append(target, grep(target, parts, value = T, invert = T))
-    sbp_target   <- build.sbp(parts_target)
-    sbp_rotate   <- sbp_target[, parts]
+    partsd <- append(d, grep(d, parts, value = T, invert = T))
+    sbpd   <- build.sbp(partsd)
     
-    clr_target   <- complr(
+    # rotate sbp but keep parts the same so first part is the part of interest when rotated
+    sbp_rotate <- lapply(object$complr$output, function(x) x$sbp)
+    sbp_rotate[[idx]] <- sbpd[, parts]
+    
+    parts_rotate <- lapply(object$complr$output, function(x) x$parts)
+    parts_rotate[[idx]] <- parts
+    
+    total_rotate <- lapply(object$complr$output, function(x) x$total)
+    total_rotate[[idx]] <- object$complr$output[[idx]]$total
+    
+    clrd   <- complr(
       data  = object$complr$datain,
       sbp   = sbp_rotate,
-      parts = parts,
-      idvar = if(!is.null(object$complr$idvar)) object$complr$idvar else NULL,
-      total = object$complr$output[[idx]]$total
+      parts = parts_rotate,
+      total = total_rotate,
+      idvar = if(!is.null(object$complr$idvar)) object$complr$idvar else NULL
     )
     
     # rotation matrix
-    R <- crossprod(object$complr$output[[idx]]$psi, clr_target$output[[1]]$psi)
+    R <- crossprod(object$complr$output[[idx]]$psi, clrd$output[[idx]]$psi)
     
     # multiply posterior samples with rotation matrix
-    b_sbp_target <- list(
-      b_a_sbp_target  = b_sbp_0[, "Intercept"],
-      b_bz_sbp_target = if (!is.null(colnames(b_bz_sbp_0)) && all(colnames(b_bz_sbp_0) %in% colnames(b_sbp_0))) as.matrix(b_bz_sbp_0) %*% R else NULL,
-      b_wz_sbp_target = if (!is.null(colnames(b_wz_sbp_0)) && all(colnames(b_wz_sbp_0) %in% colnames(b_sbp_0))) as.matrix(b_wz_sbp_0) %*% R else NULL,
-      b_z_sbp_target  = if (!is.null(colnames(b_z_sbp_0))  && all(colnames(b_z_sbp_0)  %in% colnames(b_sbp_0))) as.matrix(b_z_sbp_0) %*% R else NULL
+    b_sbpd <- list(
+      b_a_sbpd  = b_sbp0[, "Intercept"],
+      b_bz_sbpd = if (!is.null(colnames(b_bz_sbp0)) && all(colnames(b_bz_sbp0) %in% colnames(b_sbp0))) as.matrix(b_bz_sbp0) %*% R else NULL,
+      b_wz_sbpd = if (!is.null(colnames(b_wz_sbp0)) && all(colnames(b_wz_sbp0) %in% colnames(b_sbp0))) as.matrix(b_wz_sbp0) %*% R else NULL,
+      b_z_sbpd  = if (!is.null(colnames(b_z_sbp0))  && all(colnames(b_z_sbp0)  %in% colnames(b_sbp0))) as.matrix(b_z_sbp0) %*% R else NULL
     )
     
     # take only non-empty elements (between vs within vs aggregate results)
-    b_sbp_target <- Filter(Negate(is.null), b_sbp_target)
+    b_sbpd <- Filter(Negate(is.null), b_sbpd)
     
     # name new variables the same as in the original model
-    b_sbp_target <- lapply(names(b_sbp_target), function(n) {
-      d <- as.matrix(b_sbp_target[[n]])
-      if (n == "b_a_sbp_target")  colnames(d) <- "Intercept"
-      if (n == "b_bz_sbp_target") colnames(d) <- colnames(b_bz_sbp_0)
-      if (n == "b_wz_sbp_target") colnames(d) <- colnames(b_wz_sbp_0)
-      if (n == "b_z_sbp_target")  colnames(d) <- colnames(b_z_sbp_0)
+    b_sbpd <- lapply(names(b_sbpd), function(n) {
+      d <- as.matrix(b_sbpd[[n]])
+      if (n == "b_a_sbpd")  colnames(d) <- "Intercept"
+      if (n == "b_bz_sbpd") colnames(d) <- colnames(b_bz_sbp0)
+      if (n == "b_wz_sbpd") colnames(d) <- colnames(b_wz_sbp0)
+      if (n == "b_z_sbpd")  colnames(d) <- colnames(b_z_sbp0)
       d
     })
-    b_sbp_target <- do.call(cbind, b_sbp_target)
-
+    b_sbpd <- do.call(cbind, b_sbpd)
+    
     # summarise posteriors
     if (summary) {
-      b_sbp_target_summary <- apply(b_sbp_target, 2, posterior_summary, ...)
-      b_sbp_target_summary <- b_sbp_target_summary[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
-      dimnames(b_sbp_target_summary) <- list(c("Estimate", "Est.Error", "CI_low", "CI_high"), grep("z1", colnames(b_sbp_target), value = TRUE))
+      b_sbpd_summary <- apply(b_sbpd, 2, posterior_summary, ...)
+      b_sbpd_summary <- b_sbpd_summary[, grep("z1", colnames(b_sbpd), value = T), drop = FALSE]
+      dimnames(b_sbpd_summary) <- list(c("Estimate", "Est.Error", "CI_low", "CI_high"), grep("z1", colnames(b_sbpd), value = TRUE))
     } else {
-      b_sbp_target_summary <- b_sbp_target[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
+      b_sbpd_summary <- b_sbpd[, grep("z1", colnames(b_sbpd), value = T), drop = FALSE]
     }
-    out[[target]] <- b_sbp_target_summary
+    out[[d]] <- b_sbpd_summary
   }
   names(out) <- parts
   structure(list(output = out, method = "rotate", summary = summary), class = "pivot_coord")
@@ -217,49 +226,56 @@ pivot_coord_refit <- function (object,
     x$parts), function(p)
       identical(sort(parts), sort(p)), logical(1)))
   
-  b_sbp_0 <- fixef(object,
-                   summary = FALSE,
-                   ...
+  b_sbp0 <- fixef(object,
+                  summary = FALSE,
+                  ...
   )
   # grab the correct logratio names
   z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
   bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
   wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  b_z_sbp_0  <- b_sbp_0[, colnames(b_sbp_0) %in% z_vars]
-  b_bz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% bz_vars]
-  b_wz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% wz_vars]
+  b_z_sbp0  <- b_sbp0[, colnames(b_sbp0) %in% z_vars]
+  b_bz_sbp0 <- b_sbp0[, colnames(b_sbp0) %in% bz_vars]
+  b_wz_sbp0 <- b_sbp0[, colnames(b_sbp0) %in% wz_vars]
   
   out <- vector("list")
-  for (target in parts) {
-    parts_target <- append(target, grep(target, parts, value = T, invert = T))
-    sbp_target   <- build.sbp(parts_target)
-    # sbp_target   <- sbp_target[, parts]
+  for (d in parts) {
+    partsd <- append(d, grep(d, parts, value = T, invert = T))
     
-    clr_target   <- complr(
+    # swap first element in composition to make new sbp
+    sbp_refit <- lapply(object$complr$output, function(x) x$sbp)
+    sbp_refit[[idx]] <- build.sbp(partsd)
+    
+    parts_refit <- lapply(object$complr$output, function(x) x$parts)
+    parts_refit[[idx]] <- partsd
+    
+    total_refit <- lapply(object$complr$output, function(x) x$total)
+    total_refit[[idx]] <- object$complr$output[[idx]]$total
+    
+    clrd   <- complr(
       data  = object$complr$datain,
-      sbp   = sbp_target,
-      parts = parts_target,
-      idvar = if(!is.null(object$complr$idvar)) (object$complr$idvar) else NULL,
-      total = object$complr$output[[idx]]$total
+      sbp   = sbp_refit,
+      parts = parts_refit,
+      total = total_refit,
+      idvar = if(!is.null(object$complr$idvar)) object$complr$idvar else NULL
     )
-    new_data <- cbind(clr_target$dataout, object$complr$dataout[, colnames(object$complr$dataout) %nin% colnames(clr_target$dataout), with = FALSE])
     
-    brmcoda_target <- update(object$model, newdata = new_data, ...)
+    brmcodad <- update(object$model, newdata = clrd$dataout, ...)
     
-    b_sbp_target <- fixef(brmcoda_target,
-                          summary = FALSE,
-                          ...)
+    b_sbpd <- fixef(brmcodad,
+                    summary = FALSE,
+                    ...)
     
     # summarise posteriors
     if (summary) {
-      b_sbp_target_summary <- apply(b_sbp_target, 2, posterior_summary, ...)
-      b_sbp_target_summary <- b_sbp_target_summary[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
-      dimnames(b_sbp_target_summary) <- list(c("Estimate", "Est.Error", "CI_low", "CI_high"), grep("z1", colnames(b_sbp_target), value = TRUE))
+      b_sbpd_summary <- apply(b_sbpd, 2, posterior_summary, ...)
+      b_sbpd_summary <- b_sbpd_summary[, grep("z1", colnames(b_sbpd), value = T), drop = FALSE]
+      dimnames(b_sbpd_summary) <- list(c("Estimate", "Est.Error", "CI_low", "CI_high"), grep("z1", colnames(b_sbpd), value = TRUE))
     } else {
-      b_sbp_target_summary <- b_sbp_target[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
+      b_sbpd_summary <- b_sbpd[, grep("z1", colnames(b_sbpd), value = T), drop = FALSE]
     }
-    out[[target]] <- b_sbp_target_summary
+    out[[d]] <- b_sbpd_summary
   }
   names(out) <- parts
   structure(list(output = out, method = "refit", summary = summary), class = "pivot_coord")

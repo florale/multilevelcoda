@@ -40,11 +40,11 @@
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
 #'   ## fit a model
-#'   cilr <- complr(data = mcompd, sbp = sbp,
+#'   x <- complr(data = mcompd, sbp = sbp,
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                  idvar = "ID", total = 1440)
 #'
-#'   m1 <- brmcoda(complr = cilr,
+#'   m1 <- brmcoda(complr = x,
 #'                 formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
 #'                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'                 chain = 1, iter = 500,
@@ -55,8 +55,8 @@
 #'   head(pred)
 #'
 #'   ## fit a model with compositional outcome
-#'   m2 <- brmcoda(complr = cilr,
-#'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + Female + (1 | ID),
+#'   m2 <- brmcoda(complr = x,
+#'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~bz1_1 + bz2_1 + bz3_1 + bz4_1 + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'
@@ -73,57 +73,55 @@ predict.brmcoda <- function(object,
                             scale = c("linear", "response"),
                             parts = 1,
                             ...) {
+  
   if (inherits(object$model$formula, "mvbrmsformula")) {
+    # get brmcoda variables
+    brmcoda_vars <- get_variables(object)
+    complr_vars  <- get_variables(object$complr)
     
-    # get parts
-    parts <- get_parts(object$complr, parts)
+    # check which composition is identical used in model estimation
+    idx <- which(
+      vapply(complr_vars, function(elem) {
+        any(sapply(c("Z", "bZ", "wZ"), function(sub) {
+          identical(sort(elem[[sub]]), sort(brmcoda_vars$y))
+        }))
+      }, logical(1))
+    )
     
-    ## get the index of which index elements of object$complr$output does the parts correspond to
-    idx <- which(vapply(lapply(object$complr$output, function(x)
-      x$parts), function(p)
-        identical(sort(parts), sort(p)), logical(1)))
-    
-    # grab the correct logratio names
-    z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
-    bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
-    wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
-    
-    ## remove _ to match brms variable names
-    z_resp  <- gsub("_*", "", z_vars)
-    bz_resp <- gsub("_*", "", bz_vars)
-    wz_resp <- gsub("_*", "", wz_vars)
-    
-    # which response was estimated
-    if (all(bz_resp %in% object$model$formula$responses)) {
-      resp_level <- "between"
+    # check which type of response
+    if (identical(brmcoda_vars$y, complr_vars[[idx]]$bZ)) {
+      model_resp_level <- "between"
+      total <- object$complr$output[[idx]]$total
     }
-    if (all(wz_resp %in% object$model$formula$responses)) {
-      resp_level <- "within"
+    if (identical(brmcoda_vars$y, complr_vars[[idx]]$wZ)) {
+      model_resp_level <- "within"
+      total <- 1
     }
-    if (all(z_resp %in% object$model$formula$responses) && (all(c(bz_resp, wz_resp) %nin% object$model$formula$responses))) {
-      resp_level <- "aggregate"
+    if (identical(brmcoda_vars$y, complr_vars[[idx]]$Z)) {
+      model_resp_level <- "aggregate"
+      total <- object$complr$output[[idx]]$total
     }
-    if (!exists("resp_level")) {
+    if (!exists("model_resp_level")) {
       stop(
-        "The specified 'parts' should correspond to the compositional parts that make up the logratio response in the brmcoda model."
+        "The response variables in the brmcoda model do not correspond to any of the compositional parts in the complr object."
       )
     }
     
     # predict
-    if (identical(scale, "linear")) {
-      out <- predict(object$model, ...)
-    }
     if (identical(scale, "response")) {
       out <- predict(object$model, scale = "response", ...)
       
       # back transform
       out <- lapply(asplit(out, 1), function(x) {
         x <- ilrInv(x, V = object$complr$output[[idx]]$psi)
-        as.data.table(clo(x, total = object$complr$output[[idx]]$total))
+        as.data.table(clo(x, total = total))
       })
       out <- brms::do_call(abind::abind, c(out, along = 3))
       out <- aperm(out, c(3, 1, 2)) #draw-row-col
+    } else {
+      out <- predict(object$model, ...)
     }
+    
   } else {
     out <- predict(object$model, ...)
   }
@@ -165,12 +163,12 @@ predict.brmcoda <- function(object,
 #' ## fit a model
 #' if(requireNamespace("cmdstanr")){
 #'   ## compute composition and ilr coordinates
-#'   cilr <- complr(data = mcompd, sbp = sbp,
+#'   x <- complr(data = mcompd, sbp = sbp,
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                  idvar = "ID", total = 1440)
 #'
 #'   ## fit a model
-#'   m1 <- brmcoda(complr = cilr,
+#'   m1 <- brmcoda(complr = x,
 #'                 formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
 #'                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'                 chain = 1, iter = 500,
@@ -181,7 +179,7 @@ predict.brmcoda <- function(object,
 #'   head(epred)
 #'
 #'   ## fit a model with compositional outcome
-#'   m2 <- brmcoda(complr = cilr,
+#'   m2 <- brmcoda(complr = x,
 #'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + Female + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
@@ -198,52 +196,46 @@ fitted.brmcoda <- function(object,
                            ...) {
   
   if (inherits(object$model$formula, "mvbrmsformula")) {
+    # get brmcoda variables
+    brmcoda_vars <- get_variables(object)
+    complr_vars  <- get_variables(object$complr)
     
-    # get parts
-    parts <- get_parts(object$complr, parts)
+    # check which composition is identical used in model estimation
+    idx <- which(
+      vapply(complr_vars, function(elem) {
+        any(sapply(c("Z", "bZ", "wZ"), function(sub) {
+          identical(sort(elem[[sub]]), sort(brmcoda_vars$y))
+        }))
+      }, logical(1))
+    )
     
-    ## get the index of which index elements of object$complr$output does the parts correspond to
-    idx <- which(vapply(lapply(object$complr$output, function(x)
-      x$parts), function(p)
-        identical(sort(parts), sort(p)), logical(1)))
-    
-    # grab the correct logratio names
-    z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
-    bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
-    wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
-    
-    ## remove _ to match brms variable names
-    z_resp  <- gsub("_*", "", z_vars)
-    bz_resp <- gsub("_*", "", bz_vars)
-    wz_resp <- gsub("_*", "", wz_vars)
-    
-    # which response was estimated
-    if (all(bz_resp %in% object$model$formula$responses)) {
-      resp_level <- "between"
+    # check which type of response
+    if (identical(brmcoda_vars$y, complr_vars[[idx]]$bZ)) {
+      model_resp_level <- "between"
+      total <- object$complr$output[[idx]]$total
     }
-    if (all(wz_resp %in% object$model$formula$responses)) {
-      resp_level <- "within"
+    if (identical(brmcoda_vars$y, complr_vars[[idx]]$wZ)) {
+      model_resp_level <- "within"
+      total <- 1
     }
-    if (all(z_resp %in% object$model$formula$responses) && (all(c(bz_resp, wz_resp) %nin% object$model$formula$responses))) {
-      resp_level <- "aggregate"
+    if (identical(brmcoda_vars$y, complr_vars[[idx]]$Z)) {
+      model_resp_level <- "aggregate"
+      total <- object$complr$output[[idx]]$total
     }
-    if (!exists("resp_level")) {
+    if (!exists("model_resp_level")) {
       stop(
-        "The specified 'parts' should correspond to the compositional parts that make up the logratio response in the brmcoda model."
+        "The response variables in the brmcoda model do not correspond to any of the compositional parts in the complr object."
       )
     }
     
     # predict
-    if (identical(scale, "linear")) {
-      out <- fitted(object$model, ...)
-    }
     if (identical(scale, "response")) {
       out <- fitted(object$model, scale = "response", summary = FALSE, ...)
       
       # back transform
       out <- lapply(asplit(out, 1), function(x) {
         x <- ilrInv(x, V = object$complr$output[[idx]]$psi)
-        as.data.table(clo(x, total = object$complr$output[[idx]]$total))
+        as.data.table(clo(x, total = total))
       })
       out <- brms::do_call(abind::abind, c(out, along = 3))
       out <- aperm(out, c(3, 1, 2)) #draw-row-col
@@ -253,6 +245,8 @@ fitted.brmcoda <- function(object,
         out <- posterior_summary(out)
         dimnames(out)[[3]] <- object$complr$output[[idx]]$parts
       }
+    } else {
+      out <- fitted(object$model, summary = summary, ...)
     }
     
   } else {

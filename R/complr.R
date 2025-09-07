@@ -53,6 +53,7 @@
 #'
 #' @importFrom compositions ilr alr clr acomp gsi.buildilrBase
 #' @importFrom data.table copy as.data.table :=
+#' @importFrom extraoperators %nin%
 #'
 #' @examples
 #' x1 <- complr(data = mcompd,
@@ -131,7 +132,7 @@ complr <- function(data,
     total_i <- total[[idx]]
     
     if (length(parts) == 1) {
-      sbp_i   <- sbp
+      sbp_i   <- if (is.list(sbp)) sbp[[1]] else sbp
     }
     else {
       if (length(parts) != length(total)) {

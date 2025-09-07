@@ -20,7 +20,7 @@
 #' @param summary A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 #' Currently only support outputing raw values for model using grandmean as reference composition.
 #' @param at An optional named list of levels for the corresponding variables in the reference grid.
-#' @param base An optional base substitution. 
+#' @param base An optional base substitution.
 #' Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
 #' which can be computed using function \code{\link{build.base}}.
 #' @param parts A optional character string specifying names of compositional parts that should be considered
@@ -68,19 +68,19 @@
 #'   # model with compositional predictor at between and within-person levels
 #'   fit1 <- brmcoda(complr = x,
 #'                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
-#'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 + 
+#'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 +
 #'                                      Female + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
-#'                   
+#'
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
+#'   sub1 <- substitution(object = m, delta = 5, level = c("between"))
 #'   summary(sub1)
-#'   
+#'
 #'   # one to all reallocation at between and within-person levels
-#'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
+#'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"),
 #'                        type = "one-to-all")
-#'   summary(sub2) 
-#'   
+#'   summary(sub2)
+#'
 #'   # model with compositional predictor at aggregate level
 #'   fit2 <- brmcoda(complr = x,
 #'                   formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
@@ -102,43 +102,53 @@ substitution <- function(object,
                          scale = c("response", "linear"),
                          cores = NULL,
                          ...) {
-  
   if (missing(object)) {
-    stop(paste(
-      "'object' is a required argument and cannot be missing;",
-      "  it should be an object of class 'brmcoda'.",
-      "  See ?substitution for details.",
-      sep = "\n"))
-  }
-  
-  if (isFALSE(inherits(object, "brmcoda"))) {
-    stop(sprintf(
-      "Can't handle an object of class (%s)
-  It should be a fitted 'brmcoda' object
-  See ?substitution for details.",
-      class(object)))
-  }
-  
-  if (isFALSE(identical(object$complr$transform, "ilr"))) {
-    stop(sprintf(
-      "Can't handle an object of class (%s) in 'substitution',
-      'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
-      object$complr$transform)
+    stop(
+      paste(
+        "'object' is a required argument and cannot be missing;",
+        "  it should be an object of class 'brmcoda'.",
+        "  See ?substitution for details.",
+        sep = "\n"
+      )
     )
   }
   
-  if(isFALSE(missing(delta))) {
+  if (isFALSE(inherits(object, "brmcoda"))) {
+    stop(
+      sprintf(
+        "Can't handle an object of class (%s)
+  It should be a fitted 'brmcoda' object
+  See ?substitution for details.",
+        class(object)
+      )
+    )
+  }
+  
+  if (isFALSE(identical(object$complr$transform, "ilr"))) {
+    stop(
+      sprintf(
+        "Can't handle an object of class (%s) in 'substitution',
+      'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
+        object$complr$transform
+      )
+    )
+  }
+  
+  if (isFALSE(missing(delta))) {
     if (isFALSE(is.integer(delta))) {
       if (isFALSE(delta > 0)) {
         stop(" 'delta' should be an positive integer value.")
       }
     }
-  } else if (missing(delta)){
-    stop(paste(
-      "'delta' is a required argument and cannot be missing;",
-      "  it should be interger, numeric positive value or vector",
-      "  to specify the change in units across compositional parts",
-      sep = "\n"))
+  } else if (missing(delta)) {
+    stop(
+      paste(
+        "'delta' is a required argument and cannot be missing;",
+        "  it should be interger, numeric positive value or vector",
+        "  to specify the change in units across compositional parts",
+        sep = "\n"
+      )
+    )
   }
   
   # set default weight to be equal
@@ -165,10 +175,13 @@ substitution <- function(object,
   # get parts
   parts <- get_parts(object$complr, parts)
   
-  ## get the index of which index elements of object$complr$output does the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, 
-                             function(x) x$parts), 
-                      function(p) identical(sort(parts), sort(p)), logical(1)))
+  # get the index of which index elements of object$complr$output does the parts correspond to
+  idx <- which(vapply(lapply(object$complr$output, function(x)
+    x$parts), function(p)
+      identical(sort(parts), sort(p)), logical(1)))
+  
+  # get brmcoda variables
+  brmcoda_vars <- get_variables(object)
   
   # type - check with JW what would be the best way to detect onetoone vs onetoall
   if (missing(type)) {
@@ -188,73 +201,41 @@ substitution <- function(object,
       base <- build.base(parts = object$complr$output[[idx]]$parts)
       names(base) <- object$complr$output[[idx]]$parts
       type <- "one-to-one"
-    } else if (inherits(type, "character") && identical(type, "one-to-all")) {
-      base <- build.base(parts = object$complr$output[[idx]]$parts, type = "one-to-all")
+    } else if (inherits(type, "character") &&
+               identical(type, "one-to-all")) {
+      base <- build.base(parts = object$complr$output[[idx]]$parts,
+                         type = "one-to-all")
       names(base) <- object$complr$output[[idx]]$parts
       type <- "one-to-all"
     }
   }
   
-  # what type of model is being estimated
-  model_fixef <- rownames(fixef(object))
-  model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
-  
-  model_fixef_level <- model_fixef_coef <- NULL
-  
-  # grab the correct logratio names
-  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
-  
-  if (all(bz_vars %in% colnames(object$model$data))) {
-    model_fixef_level <- append(model_fixef_level, "between")
-    model_fixef_coef  <- append(model_fixef_coef,
-                                grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
-  }
-  if (all(wz_vars %in% colnames(object$model$data))) {
-    model_fixef_level <- append(model_fixef_level, "within")
-    model_fixef_coef  <- append(model_fixef_coef,
-                                grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
-  }
-  if (all(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
-    model_fixef_level <- append(model_fixef_level, "aggregate")
-    model_fixef_coef  <- append(model_fixef_coef, setdiff(
-      grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
-      grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
-    ))
-  }
-  z_vars <- bz_vars <- wz_vars <- NULL
-  
-  # single level or multilevel
-  if (length(model_ranef) > 0) {
-    model_ranef_level <- "multilevel"
-    model_ranef_coef <- model_ranef
-  } else {
-    model_ranef_level <- "single"
-    model_ranef_coef <- NULL
+  if (is.null(brmcoda_vars$fixef_level)) {
+    stop("No fixed effects of composition in the model to perform substitution analysis.")
   }
   
-  # ensure sub args make sense
   ## only grandmean and aggregate for single level model
-  if ("aggregate" %in% model_fixef_level) {
-    if (model_ranef_level == "single") {
+  if ("aggregate" %in% brmcoda_vars$fixef_level) {
+    if (brmcoda_vars$ranef_level == "single") {
       if ("clustermean" %in% ref) {
         warning("Can only use grandmean for single level model.")
       }
-      level <- "aggregate"
-      ref <- "grandmean"
+      level  <- "aggregate"
+      ref    <- "grandmean"
       weight <- "equal"
     } else {
-      level <- "aggregate"
-      ref <- ref
+      level  <- "aggregate"
+      ref    <- ref
     }
   }
   
   ## no between or within for single level model
-  if (any(c("between", "within") %in% model_fixef_level)) {
-    if (model_ranef_level == "single") {
-      stop(" 'between' and 'within' substitution analysis cannot be computed on a single level model")
-    } else if (model_ranef_level == "multilevel") {
+  if (any(c("between", "within") %in% brmcoda_vars$fixef_level)) {
+    if (brmcoda_vars$ranef_level == "single") {
+      stop(
+        " between and within substitution analysis cannot be computed on a single level model"
+      )
+    } else if (brmcoda_vars$ranef_level == "multilevel") {
       level <- level
       ref <- ref
     }
@@ -267,25 +248,62 @@ substitution <- function(object,
   
   ## level args match with coefs in object
   if (any(c("between", "within") %in% level)) {
-    if (isFALSE(any(c("between", "within") %in% model_fixef_level))) {
-      stop(sprintf(
-        "'between' and 'within' substitution analysis cannot be computed
+    if (isFALSE(any(c("between", "within") %in% brmcoda_vars$fixef_level))) {
+      stop(
+        sprintf(
+          "between and within substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-        model_fixef_level,
-        model_fixef_level
-      ))
+          brmcoda_vars$fixef_level,
+          brmcoda_vars$fixef_level
+        )
+      )
+    }
+    if ("between" %in% level &&
+        isFALSE(all(names(object$complr$output[[idx]]$bZ %in% brmcoda_vars$x)))) {
+      stop(
+        sprintf(
+          "brmcoda model %s should include a complete set of between and within ilr predictors %s",
+          "for substitution analysis at between level to be performed",
+          brmcoda_vars$x,
+          names(object$complr$output[[idx]]$bZ)
+        )
+      )
+    }
+    
+    if ("within" %in% level &&
+        isFALSE(all(names(object$complr$output[[idx]]$wZ %in% brmcoda_vars$x)))) {
+      stop(
+        sprintf(
+          "brmcoda model %s should include a complete set of between and within ilr predictors %s",
+          "for substitution analysis at within level to be performed",
+          brmcoda_vars$x,
+          names(object$complr$output[[idx]]$wZ)
+        )
+      )
     }
   }
   if ("aggregate" %in% level) {
-    if (isFALSE("aggregate" %in% model_fixef_level)) {
-      stop(sprintf(
-        "'aggregate' substitution analysis cannot be computed
+    if (isFALSE("aggregate" %in% brmcoda_vars$fixef_level)) {
+      stop(
+        sprintf(
+          "'aggregate' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-        model_fixef_level,
-        model_fixef_level
-      ))
+          brmcoda_vars$fixef_level,
+          brmcoda_vars$fixef_level
+        )
+      )
+    }
+    if (isFALSE(all(names(object$complr$output[[idx]]$Z) %in% brmcoda_vars$x))) {
+      stop(
+        sprintf(
+          "brmcoda model %s should include a complete set of aggregate ilr predictors %s",
+          "for substitution analysis at aggregate level to be performed",
+          brmcoda_vars$x,
+          names(object$complr$output[[idx]]$Z)
+        )
+      )
     }
   }
   
@@ -307,7 +325,8 @@ substitution <- function(object,
         scale = scale,
         type = type,
         cores = cores,
-        ...)
+        ...
+      )
     }
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       bout <- bsub(
@@ -324,7 +343,8 @@ substitution <- function(object,
         scale = scale,
         type = type,
         cores = cores,
-        ...)
+        ...
+      )
     }
     if ("clustermean" %in% ref) {
       bmout <-
@@ -340,7 +360,8 @@ substitution <- function(object,
           scale = scale,
           type = type,
           cores = cores,
-          ...)
+          ...
+        )
     }
   }
   
@@ -361,7 +382,8 @@ substitution <- function(object,
         scale = scale,
         type = type,
         cores = cores,
-        ...)
+        ...
+      )
     }
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       wout <- wsub(
@@ -378,7 +400,8 @@ substitution <- function(object,
         scale = scale,
         type = type,
         cores = cores,
-        ...)
+        ...
+      )
     }
     if ("clustermean" %in% ref) {
       wmout <-
@@ -394,7 +417,8 @@ substitution <- function(object,
           scale = scale,
           type = type,
           cores = cores,
-          ...)
+          ...
+        )
     }
   }
   
@@ -415,7 +439,8 @@ substitution <- function(object,
         scale = scale,
         type = type,
         cores = cores,
-        ...)
+        ...
+      )
     }
     else if (inherits(ref, c("data.table", "data.frame", "matrix"))) {
       tout <- sub(
@@ -432,7 +457,8 @@ substitution <- function(object,
         scale = scale,
         type = type,
         cores = cores,
-        ...)
+        ...
+      )
     }
     if ("clustermean" %in% ref) {
       tmout <-
@@ -448,28 +474,31 @@ substitution <- function(object,
           scale = scale,
           type = type,
           cores = cores,
-          ...)
+          ...
+        )
     }
   }
   
   # out
   structure(
     list(
-      between_simple_sub = if(exists("bout")) (bout) else (NULL),
-      within_simple_sub = if(exists("wout")) (wout) else (NULL),
-      simple_sub = if(exists("tout")) (tout) else (NULL),
-      between_avg_sub = if(exists("bmout")) (bmout) else (NULL),
-      within_avg_sub = if(exists("wmout")) (wmout) else (NULL),
-      avg_sub = if(exists("tmout")) (tmout) else (NULL),
+      between_simple_sub = if (exists("bout")) bout  else NULL,
+      within_simple_sub = if (exists("wout")) wout else NULL,
+      simple_sub = if (exists("tout")) tout else NULL,
+      between_avg_sub = if (exists("bmout")) bmout else NULL,
+      within_avg_sub = if (exists("wmout")) wmout else NULL,
+      avg_sub = if (exists("tmout")) tmout else NULL,
       brmsformula = object$model$formula,
       delta = delta,
       ref = ref,
       level = level,
       weight = weight,
       parts = parts,
-      aorg = aorg,
+      at = at,
       summary = summary,
-      type = if(exists("type")) (type) else (NULL)),
-    class = "substitution")
+      type = if (exists("type")) (type) else (NULL)
+    ),
+    class = "substitution"
+  )
   
 }

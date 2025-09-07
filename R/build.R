@@ -140,53 +140,23 @@ build.rg <- function(object,
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[[paste0("composition_", idx)]]$Z
+  bz_vars <- get_variables(object$complr)[[paste0("composition_", idx)]]$bZ
+  wz_vars <- get_variables(object$complr)[[paste0("composition_", idx)]]$wZ
   
-  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[[paste0("composition_", idx)]]$X
+  bx_vars <- get_variables(object$complr)[[paste0("composition_", idx)]]$bX
+  wx_vars <- get_variables(object$complr)[[paste0("composition_", idx)]]$wX
   
   ## NOTES
   ## ignore weight for clustermean
   ## equal weight is default for grandmean
   
   # what type of model is being estimated
-  model_fixef <- rownames(fixef(object))
-  model_ranef <- if(dim(object$model$ranef)[1] > 0) (names(ranef(object))) else (NULL)
-  
-  model_fixef_level <- model_fixef_coef <- NULL
-  
-  if (all(bz_vars %in% colnames(object$model$data))) {
-    model_fixef_level <- append(model_fixef_level, "between")
-    model_fixef_coef  <- append(model_fixef_coef,
-                                grep(paste0(bz_vars, collapse = "|"), model_fixef, value = T))
-  }
-  if (all(wz_vars %in% colnames(object$model$data))) {
-    model_fixef_level <- append(model_fixef_level, "within")
-    model_fixef_coef  <- append(model_fixef_coef,
-                                grep(paste0(wz_vars, collapse = "|"), model_fixef, value = T))
-  }
-  if (all(z_vars %in% colnames(object$model$data)) && (all(c(bz_vars, wz_vars)) %nin% colnames(object$model$data))) {
-    model_fixef_level <- append(model_fixef_level, "aggregate")
-    model_fixef_coef  <- append(model_fixef_coef, setdiff(
-      grep(paste0(z_vars, collapse = "|"), model_fixef, value = TRUE),
-      grep(paste0(c(bz_vars, wz_vars), collapse = "|"), model_fixef, value = TRUE)
-    ))
-  }
-  
-  # single level or multilevel
-  if (length(model_ranef) > 0) {
-    model_ranef_level <- "multilevel"
-    model_ranef_coef  <- model_ranef
-  } else {
-    model_ranef_level <- "single"
-    model_ranef_coef  <- NULL
-  }
+  brmcoda_vars <- get_variables(object)
   
   # d0 and x0 for multilevel level model
-  if (identical(model_ranef_level, "multilevel")) {
+  if (identical(brmcoda_vars$ranef_level, "multilevel")) {
     
     # for clustermean
     if ("clustermean" %in% ref) {
@@ -229,11 +199,10 @@ build.rg <- function(object,
       ## get var names
       zs <- c(bz_vars, wz_vars, z_vars)
       
-      vars  <- get_variables(object)
-      resp  <- object$model$formula$formula[[2]]
-      grp   <- object$model$ranef$group
-      preds <- vars %snin% c(resp, grp)
-      covs  <- vars %snin% c(resp, grp, zs)
+      resp  <- brmcoda_vars$y
+      grp   <- object$complr$idvar
+      preds <- brmcoda_vars$x %sin% c(z_vars, bz_vars, wz_vars)
+      covs  <- brmcoda_vars$x %snin% c(resp, grp, preds)
       
       ## default reference grid
       refgrid <- as.data.table(ref_grid(object$model, at = at)@grid)
@@ -410,7 +379,7 @@ build.rg <- function(object,
   }
   
   ## d0 and x0 for single level model
-  if (model_ranef_level == "single") {
+  if (brmcoda_vars$ranef_level == "single") {
     
     x0 <- object$complr$output[[idx]]$X
     x0 <- mean.acomp(x0, robust = TRUE)
@@ -427,11 +396,9 @@ build.rg <- function(object,
     # get var names
     zs <- c(z_vars, bz_vars, wz_vars)
     
-    vars  <- get_variables(object)
-    resp  <- object$model$formula$formula[[2]]
-    # grp   <- object$model$ranef$group
-    preds <- vars %snin% c(resp)
-    covs  <- vars %snin% c(resp, zs)
+    resp  <- brmcoda_vars$y
+    preds <- z_vars
+    covs  <- brmcoda_vars$x %snin% c(resp, zs)
     
     refgrid <- as.data.table(ref_grid(object$model, at = at)@grid)
     
@@ -440,5 +407,12 @@ build.rg <- function(object,
     
     d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0)) else (expand.grid.df(z0, x0, refgrid))
   }
+  
+  ## drop rep.measure if not null
+  if ("rep.meas" %in% colnames(d0)) {
+    d0$rep.meas <- NULL
+    d0 <- unique(d0)
+  }
+  
   as.data.table(d0)
 }

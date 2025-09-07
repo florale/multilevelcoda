@@ -176,20 +176,16 @@ get_variables = function(object) UseMethod("get_variables")
 #' @rdname get_variables
 #' @export
 get_variables.complr <- function(object) {
-  
   out <- lapply(object$output, function(x) {
-    list(names(x$X),
-         names(x$bX),
-         names(x$wX),
-         names(x$Z),
-         names(x$bZ),
-         names(x$wZ))
+    list(X = names(x$X),
+         bX = names(x$bX),
+         wX = names(x$wX),
+         Z = names(x$Z),
+         bZ = names(x$bZ),
+         wZ =names(x$wZ))
   })
-  
-  out <- as.data.frame(do.call(cbind, out))
-  rownames(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
-  colnames(out) <- c(paste0("composition_", seq_along(object$out)))
-
+  names(out) <- paste0("composition_", seq_along(out))
+  # print(as.data.frame(do.call(cbind, out)))
   out
 }
 
