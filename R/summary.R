@@ -60,7 +60,7 @@ summary.complr <- function(object, ...) {
   print(output_data, row.names = TRUE)
   
   # save output
-  structure(list(
+  out <- structure(list(
     meta = list(
       nobs = nobs,
       ngrps = ngrps,
@@ -75,6 +75,7 @@ summary.complr <- function(object, ...) {
     output = output_data
   ),
   class = "summary.complr")
+  invisible(out)
 }
 
 #' Print a Summary for a \code{complr} object
@@ -162,73 +163,33 @@ print.brmcoda <- function(x, ...) {
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
 #'   m <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
-#'                                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-#'                                  idvar = "ID", total = 1440),
+#'                                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                                idvar = "ID", total = 1440),
 #'   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
 #'                      wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'   chain = 1, iter = 500,
 #'   backend = "cmdstanr")
 #'
-#'   m_pb <- pivot_coord(m)
-#'   summary(m_pb)
+#'   m_pc <- pivot_coord(m, method = "refit")
+#'   summary(m_pc)
 #' }}
 #' @export
 summary.pivot_coord <- function(object, digits = 2, ...) {
-  if (object$method == "refit") {
-    out_all_parts <- lapply(object$output, `[[`, 2)
-    fixef_all_parts <- vector("list")
-    
-    for (i in seq_along(out_all_parts)) {
-      part <- names(out_all_parts)[i]
-      
-      model_fixef_all <- fixef(out_all_parts[[i]])
-      
-      if (length(grep("bz1", row.names(model_fixef_all), value = T)) > 0) {
-        model_fixef_b <- rbind(model_fixef_all[grep(".*bz1", rownames(model_fixef_all), value = T), ])
-        model_fixef_b <- cbind.data.frame(Level = "between", model_fixef_b)
-      } else {
-        model_fixef_b <- NULL
-      }
-      if (length(grep("wz1", row.names(model_fixef_all), value = T)) > 0) {
-        model_fixef_w <- rbind(model_fixef_all[grep(".*wz1", rownames(model_fixef_all), value = T), ])
-        model_fixef_w <- cbind.data.frame(Level = "within", model_fixef_w)
-        
-      } else {
-        model_fixef_w <- NULL
-      }
-      if ((length(grep(
-        "z1", row.names(model_fixef_all), value = T
-      )) > 0) &&
-      (length(grep(
-        "[b|w]z1", row.names(model_fixef_all), value = T
-      )) == 0)) {
-        model_fixef_t <- rbind(model_fixef_all[grep(".*z1", rownames(model_fixef_all), value = T), ])
-        model_fixef_t <- cbind.data.frame(Level = "aggregate", model_fixef_t)
-      } else {
-        model_fixef_t <- NULL
-      }
-      
-      fixef_part <- cbind(
-        `Pivot coordinate` = paste0(part, "_vs_remaining"),
-        rbind(model_fixef_b, model_fixef_w, model_fixef_t)
-      )
-      fixef_all_parts[[i]] <- fixef_part
-    }
-    
-    out <- as.data.table(do.call(rbind, fixef_all_parts))
-  } else {
-    out <- object$output
+  
+  if (isFALSE(object$summary)) {
+    stop("The 'summary' method is currently not available for draws.")
   }
   
   if (isFALSE(digits == "asis")) {
-    # out[, 1:3] <- round(out[, 1:3], digits)
-    out[] <- lapply(out, function(X)
+    # object$output[, 1:3] <- round(object$output[, 1:3], digits)
+    lapply(object$output, function(X)
       if (is.numeric(X))
         round(X, digits)
       else
         X)
+  } else {
+    object$output
   }
-  out
 }
 
 #' Create a Summary of a Substitution Model represented by a \code{substitution} object
@@ -287,13 +248,13 @@ summary.substitution <- function(object,
     stop("The 'summary' method is currently not available for substitution draws.")
   }
   
-  if (isTRUE(missing(delta))) {
+  if (missing(delta)) {
     delta <- object$delta
   } else {
     delta <- as.integer(delta)
   }
   
-  if (isTRUE(missing(ref))) {
+  if (missing(ref)) {
     ref <- object$ref
   } else {
     if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
@@ -303,7 +264,8 @@ summary.substitution <- function(object,
     }
     ref <- as.character(ref)
   }
-  if (isTRUE(missing(level))) {
+  
+  if (missing(level)) {
     level <- object$level
   } else {
     if (isFALSE(any(c("between", "within", "aggregate") %in% level))) {
@@ -314,7 +276,7 @@ summary.substitution <- function(object,
     level <- as.character(level)
   }
   
-  if (isTRUE(missing(to))) {
+  if (missing(to)) {
     to <- object$parts
   } else {
     if (isFALSE(any(object$parts %in% to))) {
@@ -324,7 +286,8 @@ summary.substitution <- function(object,
     }
     to <- as.character(to)
   }
-  if (isTRUE(missing(from))) {
+  
+  if (missing(from)) {
     from <- object$parts
   } else {
     if (isFALSE(any(object$parts %in% from))) {
@@ -335,25 +298,21 @@ summary.substitution <- function(object,
     from <- as.character(from)
   }
   
-  out <- lapply(object[c(
+  # combine all results
+  out <- rbindlist(lapply(object[c(
     "between_simple_sub",
     "within_simple_sub",
     "simple_sub",
     "between_avg_sub",
     "within_avg_sub",
     "avg_sub"
-  )], rbindlist)
-  out <- rbindlist(out, use.names = TRUE)
+  )], rbindlist), use.names = TRUE)
   
   if (object$type == "one-to-all") {
-    out <- out[abs(Delta) %in% delta &
-                 Level %in% level &
-                 Reference %in% ref & (To %in% to | From %in% to)]
+    out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
     out[, Delta := abs(Delta)]
   } else {
-    out <- out[Delta %in% delta &
-                 Level %in% level &
-                 Reference %in% ref & To %in% to & From %in% from]
+    out <- out[Delta %in% delta & Level %in% level & Reference %in% ref & To %in% to & From %in% from]
   }
   
   if (isTRUE(dim(out)[1] == 0)) {
@@ -361,7 +320,6 @@ summary.substitution <- function(object,
       "An empty data.table returned. Please check that the arguments match with your substitution object."
     )
   }
-  
   if (isFALSE(digits == "asis")) {
     # out[, 1:3] <- round(out[, 1:3], digits)
     out[] <- lapply(out, function(X)
@@ -370,8 +328,8 @@ summary.substitution <- function(object,
       else
         X)
   }
-  
-  out
+  print(out, row.names = FALSE)
+  invisible(out)
 }
 
 #' Print a Summary for a \code{substitution} object

@@ -18,7 +18,7 @@ in the \code{complr} object. Default to the first composition in the \code{compl
 \item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
-A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+Estimated pivot balance coordinates representing the
 effect of increasing one compositional part relative to the remaining compositional parts.
 }
 \description{
@@ -43,7 +43,7 @@ if(requireNamespace("cmdstanr")){
   summary(m_pivot_coord_rotate)
   
   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
-  posterior::summarise_draws(posterior::as_draws_array(m_pivot_coord_raw$output))
+  lapply(m_pivot_coord_raw$output, posterior_summary)
   }}
 }
 \seealso{

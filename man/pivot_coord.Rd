@@ -29,7 +29,7 @@ in the \code{complr} object. Default to the first composition in the \code{compl
 \item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
-A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+Estimated pivot balance coordinates representing the
 effect of increasing one compositional part relative to the remaining compositional parts.
 }
 \description{

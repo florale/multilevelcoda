@@ -4,10 +4,12 @@
 \alias{pivot_coord_refit}
 \title{Estimate pivot balance coordinates by refitting model.}
 \usage{
-pivot_coord_refit(object, parts = 1, ...)
+pivot_coord_refit(object, summary = TRUE, parts = 1, ...)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
+
+\item{summary}{Should summary statistics be returned instead of the raw values? Default is \code{TRUE}.}
 
 \item{parts}{A optional character string specifying names of compositional parts that should be considered
 in the substitution analysis. This should correspond to a single set of names of compositional parts specified
@@ -16,7 +18,7 @@ in the \code{complr} object. Default to the first composition in the \code{compl
 \item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
 }
 \value{
-A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+Estimated pivot balance coordinates representing the
 effect of increasing one compositional part relative to the remaining compositional parts.
 }
 \description{
@@ -38,6 +40,10 @@ if(requireNamespace("cmdstanr")){
   
   m_pivot_coord_refit <- pivot_coord_refit(m)
   summary(m_pivot_coord_refit)
+  
+  m_pivot_coord_raw <-  pivot_coord_refit(m, summary = FALSE)
+  lapply(m_pivot_coord_raw$output, posterior_summary)
+  
   }}
 }
 \seealso{

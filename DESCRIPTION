@@ -49,7 +49,6 @@ Imports:
     loo,
     bayesplot,
     emmeans,
-    posterior,
     plotly,
     hrbrthemes,
     htmltools,

@@ -15,7 +15,7 @@
 #' @param summary Should summary statistics be returned instead of the raw values? Default is \code{TRUE}.
 #' @param ... Further arguments passed to \code{\link{posterior_summary}}.
 #' 
-#' @return A list of \code{\link{brmcoda}} output for pivot balance coordinates representing the
+#' @return Estimated pivot balance coordinates representing the
 #' effect of increasing one compositional part relative to the remaining compositional parts.
 #' 
 #' @examples
@@ -71,8 +71,6 @@ pivot_coord <- function (object,
 #' 
 #' @inherit pivot_coord return
 #' 
-#' @importFrom posterior summarise_draws as_draws_array
-#' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){
@@ -90,7 +88,7 @@ pivot_coord <- function (object,
 #'   summary(m_pivot_coord_rotate)
 #'   
 #'   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
-#'   posterior::summarise_draws(posterior::as_draws_array(m_pivot_coord_raw$output))
+#'   lapply(m_pivot_coord_raw$output, posterior_summary)
 #'   }}
 #' @export
 pivot_coord_rotate <- function (object,
@@ -111,9 +109,9 @@ pivot_coord_rotate <- function (object,
                    ...
   )
   # grab the correct logratio names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
   b_z_sbp_0  <- b_sbp_0[, colnames(b_sbp_0) %in% z_vars]
   b_bz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% bz_vars]
@@ -123,13 +121,15 @@ pivot_coord_rotate <- function (object,
   for (target in parts) {
     
     # new complr object with rotated sbp
-    parts_target <- append(target, grep(target, object$complr$output[[idx]]$parts, value = T, invert = T))
+    parts_target <- append(target, grep(target, parts, value = T, invert = T))
     sbp_target   <- build.sbp(parts_target)
+    sbp_rotate   <- sbp_target[, parts]
+    
     clr_target   <- complr(
       data  = object$complr$datain,
-      sbp   = sbp_target,
-      parts = parts_target,
-      idvar = object$complr$idvar,
+      sbp   = sbp_rotate,
+      parts = parts,
+      idvar = if(!is.null(object$complr$idvar)) object$complr$idvar else NULL,
       total = object$complr$output[[idx]]$total
     )
     
@@ -157,20 +157,19 @@ pivot_coord_rotate <- function (object,
       d
     })
     b_sbp_target <- do.call(cbind, b_sbp_target)
-    
+
     # summarise posteriors
     if (summary) {
       b_sbp_target_summary <- apply(b_sbp_target, 2, posterior_summary, ...)
-      b_sbp_target_summary <- b_sbp_target_summary[, colnames(b_sbp_target_summary) %in% c("Intercept", bz_vars[[1]], wz_vars[[1]], z_vars[[1]]), drop = FALSE]
-      row.names(b_sbp_target_summary) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
-      
+      b_sbp_target_summary <- b_sbp_target_summary[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
+      dimnames(b_sbp_target_summary) <- list(c("Estimate", "Est.Error", "CI_low", "CI_high"), grep("z1", colnames(b_sbp_target), value = TRUE))
     } else {
-      b_sbp_target_summary <- b_sbp_target[, colnames(b_sbp_target) %in% c("Intercept", bz_vars[[1]], wz_vars[[1]], z_vars[[1]]), drop = FALSE]
+      b_sbp_target_summary <- b_sbp_target[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
     }
     out[[target]] <- b_sbp_target_summary
   }
   names(out) <- parts
-  structure(list(output = out, method = "rotate"), class = "pivot_coord")
+  structure(list(output = out, method = "rotate", summary = summary), class = "pivot_coord")
 }
 
 #' Estimate pivot balance coordinates by refitting model.
@@ -199,9 +198,16 @@ pivot_coord_rotate <- function (object,
 #'   
 #'   m_pivot_coord_refit <- pivot_coord_refit(m)
 #'   summary(m_pivot_coord_refit)
+#'   
+#'   m_pivot_coord_raw <-  pivot_coord_refit(m, summary = FALSE)
+#'   lapply(m_pivot_coord_raw$output, posterior_summary)
+#'   
 #'   }}
 #' @export
-pivot_coord_refit <- function (object, parts = 1, ...) {
+pivot_coord_refit <- function (object,
+                               summary = TRUE,
+                               parts = 1,
+                               ...) {
   
   # get parts
   parts <- get_parts(object$complr, parts)
@@ -211,15 +217,14 @@ pivot_coord_refit <- function (object, parts = 1, ...) {
     x$parts), function(p)
       identical(sort(parts), sort(p)), logical(1)))
   
-  
   b_sbp_0 <- fixef(object,
                    summary = FALSE,
                    ...
   )
   # grab the correct logratio names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
   b_z_sbp_0  <- b_sbp_0[, colnames(b_sbp_0) %in% z_vars]
   b_bz_sbp_0 <- b_sbp_0[, colnames(b_sbp_0) %in% bz_vars]
@@ -227,20 +232,36 @@ pivot_coord_refit <- function (object, parts = 1, ...) {
   
   out <- vector("list")
   for (target in parts) {
-    parts_target <- append(target, grep(target, object$complr$output[[idx]]$parts, value = T, invert = T))
+    parts_target <- append(target, grep(target, parts, value = T, invert = T))
     sbp_target   <- build.sbp(parts_target)
+    # sbp_target   <- sbp_target[, parts]
+    
     clr_target   <- complr(
       data  = object$complr$datain,
       sbp   = sbp_target,
       parts = parts_target,
-      idvar = object$complr$idvar,
+      idvar = if(!is.null(object$complr$idvar)) (object$complr$idvar) else NULL,
       total = object$complr$output[[idx]]$total
     )
-    new_data <- cbind(clr_target$dataout, object$model$dataout[, setdiff(colnames(object$model$dataout), colnames(clr_target$dataout)), drop = FALSE])
-    brmcoda_target    <- update(object$model, newdata = new_data, ...)
-    out[[target]] <- structure(list(complr = clr_target, model  = brmcoda_target), class = "brmcoda")
+    new_data <- cbind(clr_target$dataout, object$complr$dataout[, colnames(object$complr$dataout) %nin% colnames(clr_target$dataout), with = FALSE])
+    
+    brmcoda_target <- update(object$model, newdata = new_data, ...)
+    
+    b_sbp_target <- fixef(brmcoda_target,
+                          summary = FALSE,
+                          ...)
+    
+    # summarise posteriors
+    if (summary) {
+      b_sbp_target_summary <- apply(b_sbp_target, 2, posterior_summary, ...)
+      b_sbp_target_summary <- b_sbp_target_summary[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
+      dimnames(b_sbp_target_summary) <- list(c("Estimate", "Est.Error", "CI_low", "CI_high"), grep("z1", colnames(b_sbp_target), value = TRUE))
+    } else {
+      b_sbp_target_summary <- b_sbp_target[, grep("z1", colnames(b_sbp_target), value = T), drop = FALSE]
+    }
+    out[[target]] <- b_sbp_target_summary
   }
   names(out) <- parts
-  structure(list(output = out, method = "refit"), class = "pivot_coord")
+  structure(list(output = out, method = "refit", summary = summary), class = "pivot_coord")
 }
 
