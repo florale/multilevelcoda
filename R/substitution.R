@@ -27,7 +27,7 @@
 #' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
 #' in the \code{complr} object. Default to the first composition in the \code{complr} object.
 #' @param weight A character value specifying the weight to use in calculation of the reference composition.
-#' @param type A character string to indicate the type of substitution to be made.
+#' @param type A character string to indicate the type of substitution.
 #' If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 #' If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.
 #' If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -66,7 +66,7 @@
 #'                  idvar = "ID", total = 1440)
 #'
 #'   # model with compositional predictor at between and within-person levels
-#'   fit1 <- brmcoda(complr = x,
+#'   m <- brmcoda(complr = x,
 #'                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
 #'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 +
 #'                                      Female + (1 | ID),
@@ -348,7 +348,7 @@ substitution <- function(object,
     }
     if ("clustermean" %in% ref) {
       bmout <-
-        bsubmargins(
+        bsubmargin(
           object = object,
           delta = delta,
           base = base,
@@ -405,7 +405,7 @@ substitution <- function(object,
     }
     if ("clustermean" %in% ref) {
       wmout <-
-        wsubmargins(
+        wsubmargin(
           object = object,
           delta = delta,
           base = base,
@@ -462,7 +462,7 @@ substitution <- function(object,
     }
     if ("clustermean" %in% ref) {
       tmout <-
-        submargins(
+        submargin(
           object = object,
           delta = delta,
           base = base,

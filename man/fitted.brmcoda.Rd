@@ -62,12 +62,12 @@ averaged across draws should be very similar.
 ## fit a model
 if(requireNamespace("cmdstanr")){
   ## compute composition and ilr coordinates
-  cilr <- complr(data = mcompd, sbp = sbp,
+  x <- complr(data = mcompd, sbp = sbp,
                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                  idvar = "ID", total = 1440)
 
   ## fit a model
-  m1 <- brmcoda(complr = cilr,
+  m1 <- brmcoda(complr = x,
                 formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
                 chain = 1, iter = 500,
@@ -78,7 +78,7 @@ if(requireNamespace("cmdstanr")){
   head(epred)
 
   ## fit a model with compositional outcome
-  m2 <- brmcoda(complr = cilr,
+  m2 <- brmcoda(complr = x,
                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + Female + (1 | ID),
                 chain = 1, iter = 500,
                 backend = "cmdstanr")

@@ -49,7 +49,7 @@ in the \code{complr} object. Default to the first composition in the \code{compl
 Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
 which can be computed using function \code{\link{build.base}}.}
 
-\item{type}{A character string to indicate the type of substitution to be made.
+\item{type}{A character string to indicate the type of substitution.
 If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
@@ -98,21 +98,21 @@ if(requireNamespace("cmdstanr")){
                  idvar = "ID", total = 1440)
 
   # model with compositional predictor at between and within-person levels
-  fit1 <- brmcoda(complr = x,
+  m <- brmcoda(complr = x,
                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
-                                     wz1_1 + wz2_1 + wz3_1 + wz4_1 + 
+                                     wz1_1 + wz2_1 + wz3_1 + wz4_1 +
                                      Female + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
-                  
+
   # one to one reallocation at between and within-person levels
-  sub1 <- substitution(object = fit1, delta = 5, level = c("between"))
+  sub1 <- substitution(object = m, delta = 5, level = c("between"))
   summary(sub1)
-  
+
   # one to all reallocation at between and within-person levels
-  sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"), 
+  sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"),
                        type = "one-to-all")
-  summary(sub2) 
-  
+  summary(sub2)
+
   # model with compositional predictor at aggregate level
   fit2 <- brmcoda(complr = x,
                   formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),

@@ -11,12 +11,14 @@ create_substitution(
   between_avg_sub,
   within_avg_sub,
   avg_sub,
+  brmsformula,
   delta,
   ref,
   level,
-  weight,
   parts,
-  aorg
+  weight,
+  at,
+  type
 )
 }
 \arguments{
@@ -26,11 +28,13 @@ create_substitution(
 
 \item{simple_sub}{A list of results from \code{sub} or \code{NULL}}
 
-\item{between_avg_sub}{A list of results from \code{bsubmargins} or \code{NULL}}
+\item{between_avg_sub}{A list of results from \code{bsubmargin} or \code{NULL}}
 
-\item{within_avg_sub}{A list of results from \code{wsubmargins} or \code{NULL}}
+\item{within_avg_sub}{A list of results from \code{wsubmargin} or \code{NULL}}
 
-\item{avg_sub}{A list of results from \code{submargins} or \code{NULL}}
+\item{avg_sub}{A list of results from \code{submargin} or \code{NULL}}
+
+\item{brmsformula}{A \code{brmsformula} object}
 
 \item{delta}{A numeric vector of the amount of substitution}
 
@@ -38,11 +42,13 @@ create_substitution(
 
 \item{level}{A character value specifying the level of substitution}
 
-\item{weight}{The weight to use in calculation of the reference composition}
-
 \item{parts}{The parts of the composition}
 
-\item{aorg}{A logical value specifying whether to summarize the results (average over the reference grid)}
+\item{weight}{The weight to use in calculation of the reference composition}
+
+\item{at}{An named list of levels for the corresponding variables in the reference grid or \code{NULL}}
+
+\item{type}{A character value specifying the type of substitution.}
 }
 \value{
 An object of class \code{substitution}

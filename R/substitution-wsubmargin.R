@@ -28,10 +28,10 @@
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'                      
-#' subm <- wsubmargins(object = m, base = psub, delta = 5)
+#' subm <- wsubmargin(object = m, base = psub, delta = 5)
 #' }}
 #' @export
-wsubmargins <- function (object,
+wsubmargin <- function (object,
                          delta,
                          ref = "clustermean",
                          level = "within",
@@ -78,7 +78,7 @@ wsubmargins <- function (object,
   
   # ywmargins ---------------------------------
   # substitution model
-  out <- .get.wsubmargins(
+  out <- .get.wsubmargin(
     object = object,
     base = base,
     delta = delta,

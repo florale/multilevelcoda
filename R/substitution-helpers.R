@@ -10,66 +10,66 @@ is.substitution <- function(x) {
 #' Constructor function for \code{substitution} class.
 #'
 #' @param between_simple_sub A list of results from \code{bsub} or \code{NULL}
-#' @param between_avg_sub A list of results from \code{bsubmargins} or \code{NULL}
+#' @param between_avg_sub A list of results from \code{bsubmargin} or \code{NULL}
 #' @param within_simple_sub A list of results from \code{wsub} or \code{NULL}
-#' @param within_avg_sub A list of results from \code{wsubmargins} or \code{NULL}
+#' @param within_avg_sub A list of results from \code{wsubmargin} or \code{NULL}
 #' @param simple_sub A list of results from \code{sub} or \code{NULL}
-#' @param avg_sub A list of results from \code{submargins} or \code{NULL}
+#' @param avg_sub A list of results from \code{submargin} or \code{NULL}
+#' @param brmsformula A \code{brmsformula} object
 #' @param delta A numeric vector of the amount of substitution
 #' @param ref A character value specifying the reference grid
 #' @param level A character value specifying the level of substitution
-#' @param weight The weight to use in calculation of the reference composition
 #' @param parts The parts of the composition
-#' @param aorg A logical value specifying whether to summarize the results (average over the reference grid)
+#' @param weight The weight to use in calculation of the reference composition
+#' @param at An named list of levels for the corresponding variables in the reference grid or \code{NULL}
+#' @param type A character value specifying the type of substitution.
 #'
 #' @seealso \code{\link{substitution}}
 #'
 #' @return An object of class \code{substitution}
 #'
-create_substitution <-
-  function(between_simple_sub,
-           within_simple_sub,
-           simple_sub,
-           between_avg_sub,
-           within_avg_sub,
-           avg_sub,
-           brmsformula,
-           delta,
-           ref,
-           level,
-           parts,
-           weight,
-           at,
-           type) {
-    stopifnot(is.list(between_simple_sub) ||
-                is.null(between_simple_sub))
-    stopifnot(is.list(within_simple_sub) ||
-                is.null(within_simple_sub))
-    stopifnot(is.list(simple_sub) || is.null(simple_sub))
-    stopifnot(is.list(between_avg_sub) || is.null(between_avg_sub))
-    stopifnot(is.list(within_avg_sub) || is.null(within_avg_sub))
-    stopifnot(is.list(avg_sub) || is.null(avg_sub))
-    
-    structure(
-      list(
-        between_simple_sub = between_simple_sub,
-        within_simple_sub = within_simple_sub,
-        simple_sub = simple_sub,
-        between_avg_sub = between_avg_sub,
-        within_avg_sub = within_avg_sub,
-        avg_sub = avg_sub,
-        brmsformula = object$model$formula,
-        delta = delta,
-        ref = ref,
-        level = level,
-        parts = parts,
-        weight = weight,
-        at = at,
-        type = type
-      ),
-      class = "substitution"
-    )
-  }
+create_substitution <- function(between_simple_sub,
+                                within_simple_sub,
+                                simple_sub,
+                                between_avg_sub,
+                                within_avg_sub,
+                                avg_sub,
+                                brmsformula,
+                                delta,
+                                ref,
+                                level,
+                                parts,
+                                weight,
+                                at,
+                                type) {
+  
+  stopifnot(is.list(between_simple_sub) || is.null(between_simple_sub))
+  stopifnot(is.list(within_simple_sub) || is.null(within_simple_sub))
+  stopifnot(is.list(simple_sub) || is.null(simple_sub))
+  stopifnot(is.list(between_avg_sub) || is.null(between_avg_sub))
+  stopifnot(is.list(within_avg_sub) || is.null(within_avg_sub))
+  stopifnot(is.list(avg_sub) || is.null(avg_sub))
+  
+  structure(
+    list(
+      between_simple_sub = between_simple_sub,
+      within_simple_sub = within_simple_sub,
+      simple_sub = simple_sub,
+      between_avg_sub = between_avg_sub,
+      within_avg_sub = within_avg_sub,
+      avg_sub = avg_sub,
+      brmsformula = object$model$formula,
+      delta = delta,
+      ref = ref,
+      level = level,
+      parts = parts,
+      weight = weight,
+      at = at,
+      type = type
+    ),
+    class = "substitution"
+  )
+}
 
 #' Helper functions used only internally to estimate substitution model
 #' @importFrom data.table as.data.table data.table copy := setDT rbindlist .SD
@@ -1200,20 +1200,20 @@ NULL
 }
 
 # Clustermean Average Substitution
-.get.submargins <- function(object,
-                            delta,
-                            base,
-                            parts,
-                            x0,
-                            y0,
-                            d0,
-                            summary,
-                            level,
-                            ref,
-                            scale,
-                            type,
-                            cores,
-                            ...) {
+.get.submargin <- function(object,
+                           delta,
+                           base,
+                           parts,
+                           x0,
+                           y0,
+                           d0,
+                           summary,
+                           level,
+                           ref,
+                           scale,
+                           type,
+                           cores,
+                           ...) {
   brmcoda_vars <- get_variables(object)
   complr_vars  <- get_variables(object$complr)
   

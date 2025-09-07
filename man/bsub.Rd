@@ -50,7 +50,7 @@ in the \code{complr} object. Default to the first composition in the \code{compl
 Can be a \code{data.frame} or \code{data.table} of the base possible substitution of compositional parts,
 which can be computed using function \code{\link{build.base}}.}
 
-\item{type}{A character string to indicate the type of substitution to be made.
+\item{type}{A character string to indicate the type of substitution.
 If \code{"one-to-all"}, all possible one-to-remaining reallocations are estimated.
 If \code{"one-to-one"}, all possible one-to-one reallocations are estimated.
 If \code{"equal"}, give equal weight to units (e.g., individuals).
