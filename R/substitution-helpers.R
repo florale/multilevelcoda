@@ -102,13 +102,13 @@ NULL
       identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
@@ -175,9 +175,9 @@ NULL
         x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
         kout[[k]]     <- x0_xsub_delta_k
       }
-      jout[[j]] <- do.call(rbind, kout)
+      jout[[j]] <- rbindlist(kout)
     }
-    d1 <- setDT(do.call(rbind, jout))
+    d1 <- rbindlist(jout)
     
     # useful information for the final results
     d1[, From := rep(sub_from_var, length.out = nrow(d1))]
@@ -223,8 +223,8 @@ NULL
     
     if (aorg) {
       # unadj OR adj averaging over reference grid
-      weight        <- grid$.wgt. / sum(grid$.wgt.)
-      
+      weight <- grid$.wgt. / sum(grid$.wgt.)
+
       weighted_hout <- Map(function(x, w) x * w, hout, weight)
       posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
       
@@ -253,13 +253,13 @@ NULL
   }
   
   if (summary) {
-    ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = FALSE, summary = TRUE)
+    ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), at = list(Female = c(0,1)), summary = TRUE)
     ## sub1 <- substitution(object = fit1, delta = 5, level = c("between"), aorg = TRUE, summary = TRUE)
     iout <- lapply(iout, function(y) {
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[, c("Delta", "From", "To", "Level", "Reference")]
         result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
-        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         if (aorg)
           cbind(t(result), dmeta)
         else
@@ -305,13 +305,13 @@ NULL
       identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
@@ -376,11 +376,11 @@ NULL
         xsub <- x0 + sub_delta_j[k, ]
         x0_xsub_delta_k <- cbind(x0, xsub, sub_delta_j[k, get(i)])
         x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
-        kout[[k]]     <- x0_xsub_delta_k
+        kout[[k]]       <- x0_xsub_delta_k
       }
-      jout[[j]] <- do.call(rbind, kout)
+      jout[[j]] <- rbindlist(kout)
     }
-    d1 <- setDT(do.call(rbind, jout))
+    d1 <- rbindlist(jout)
     
     # useful information for the final results
     d1[, From := rep(sub_from_var, length.out = nrow(d1))]
@@ -427,7 +427,7 @@ NULL
     
     if (aorg) {
       # unadj OR adj averaging over reference grid
-      weight        <- grid$.wgt. / sum(grid$.wgt.)
+      weight <- grid$.wgt. / sum(grid$.wgt.)
       
       weighted_hout <- Map(function(x, w) x * w, hout, weight)
       posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
@@ -461,7 +461,7 @@ NULL
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[, c("Delta", "From", "To", "Level", "Reference")]
         result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
-        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         if (aorg)
           cbind(t(result), dmeta)
         else
@@ -505,13 +505,13 @@ NULL
       identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
@@ -578,9 +578,9 @@ NULL
         xsub_delta_k <- setNames(xsub_delta_k, c(sx_vars, "Delta"))
         kout[[k]]  <- xsub_delta_k
       }
-      jout[[j]] <- do.call(rbind, kout)
+      jout[[j]] <- rbindlist(kout)
     }
-    d1 <- setDT(do.call(rbind, jout))
+    d1 <- rbindlist(jout)
     
     # useful information for the final results
     d1[, From := rep(sub_from_var, length.out = nrow(d1))]
@@ -621,7 +621,7 @@ NULL
     
     if (aorg) {
       # unadj OR adj averaging over reference grid
-      weight        <- grid$.wgt. / sum(grid$.wgt.)
+      weight <- grid$.wgt. / sum(grid$.wgt.)
       
       weighted_hout <- Map(function(x, w) x * w, hout, weight)
       posterior_delta_y <- list(Reduce(`+`, weighted_hout) / length(weighted_hout))
@@ -655,7 +655,7 @@ NULL
       do.call(rbind, Map(function(x, i) {
         dmeta  <- x[, c("Delta", "From", "To", "Level", "Reference")]
         result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
-        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         if (aorg)
           cbind(t(result), dmeta)
         else
@@ -697,13 +697,13 @@ NULL
       identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
   
@@ -817,7 +817,7 @@ NULL
       rbindlist(lapply(y, function(x) {
         dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
         result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
-        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
       }))
     })
@@ -851,13 +851,13 @@ NULL
       identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
@@ -970,7 +970,7 @@ NULL
       rbindlist(lapply(y, function(x) {
         dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
         result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
-        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
       }))
     })
@@ -1004,13 +1004,13 @@ NULL
       identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
@@ -1117,7 +1117,7 @@ NULL
       rbindlist(lapply(y, function(x) {
         dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
         result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
-        row.names(result) <- c("Estimate", "Est.Error", "Q2.5", "Q97.5")
+        row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
       }))
     })

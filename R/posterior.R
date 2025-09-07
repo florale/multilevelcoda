@@ -84,12 +84,12 @@ predict.brmcoda <- function(object,
         identical(sort(parts), sort(p)), logical(1)))
     
     # grab the correct logratio names
-    z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-    bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-    wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+    z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+    bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+    wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
     
     ## remove _ to match brms variable names
-    z_resp <- gsub("_*", "", z_vars)
+    z_resp  <- gsub("_*", "", z_vars)
     bz_resp <- gsub("_*", "", bz_vars)
     wz_resp <- gsub("_*", "", wz_vars)
     
@@ -208,9 +208,9 @@ fitted.brmcoda <- function(object,
         identical(sort(parts), sort(p)), logical(1)))
     
     # grab the correct logratio names
-    z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-    bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-    wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+    z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+    bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+    wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
     
     ## remove _ to match brms variable names
     z_resp  <- gsub("_*", "", z_vars)

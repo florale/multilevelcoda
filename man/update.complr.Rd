@@ -36,12 +36,12 @@ or a matrix of class \code{acomp} representing multiple closed within-person com
 This method allows for updating an existing \code{\link{complr}} object.
 }
 \examples{
-cilr <- complr(data = mcompd, sbp = sbp, 
+x <- complr(data = mcompd, sbp = sbp, 
                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID")
 
 # update with new data
 newdat <- mcompd[ID != 1] # excluding ID 1
-cilr1 <- update(object = cilr, newdata = newdat)
+cilr1 <- update(object = x, newdata = newdat)
 }
 \seealso{
 \code{\link{complr}}

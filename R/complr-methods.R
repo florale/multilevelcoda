@@ -46,24 +46,25 @@ mean.complr <- function(x,
   
   if (identical(weight, "proportional") | is.null(x$idvar)) {
     out <- list(
-      if(!is.null(X)) (summary(X, robust = TRUE)) else (NULL),
+      if(!is.null(X))  (summary(X, robust = TRUE)) else (NULL),
       if(!is.null(bX)) (summary(bX, robust = TRUE)) else (NULL),
       if(!is.null(wX)) (summary(wX, robust = TRUE)) else (NULL),
-      if(!is.null(Z)) (data.frame(summary(Z))) else (NULL),
+      if(!is.null(Z))  (data.frame(summary(Z))) else (NULL),
       if(!is.null(bZ)) (data.frame(summary(bZ))) else (NULL),
       if(!is.null(wZ)) (data.frame(summary(wZ))) else (NULL)
     )
   } else {
     data <- cbind(x$dataout[, x$idvar, with = FALSE], data.frame(X, bX, wX, Z, bZ, wZ))
-    
-    out <- list(
-      summary(acomp(data[!duplicated(get(x$idvar)), colnames(X), with = FALSE]), robust = TRUE),
-      summary(acomp(data[!duplicated(get(x$idvar)), colnames(bX), with = FALSE]), robust = TRUE),
-      summary(acomp(data[!duplicated(get(x$idvar)), colnames(wX), with = FALSE]), robust = TRUE),
+    out  <- list(
+      # average X by ID in data
+      summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(X)][, colnames(X), with = FALSE]), robust = TRUE),
+      summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(bX)][, colnames(bX), with = FALSE]), robust = TRUE),
+      summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(wX)][, colnames(wX), with = FALSE]), robust = TRUE),
       
-      summary(rmult(data[!duplicated(get(x$idvar)), colnames(Z), with = FALSE])),
-      summary(rmult(data[!duplicated(get(x$idvar)), colnames(bZ), with = FALSE])),
-      summary(rmult(data[!duplicated(get(x$idvar)), colnames(wZ), with = FALSE]))
+      # average Z by ID in data
+      summary(rmult(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(Z)][, colnames(Z), with = FALSE])),
+      summary(rmult(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(bZ)][, colnames(bZ), with = FALSE])),
+      summary(rmult(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(wZ)][, colnames(wZ), with = FALSE]))
     )
   }
   names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
@@ -75,12 +76,9 @@ mean.complr <- function(x,
               bZ = out$bZ["Mean", ],
               wZ = out$wZ["Mean", ]
   )
-  
   print(lapply(out, function(x) {
-    df <- as.data.frame(t(x))
-    rownames(df) <- NULL
-    df
-  }))
+    as.data.frame(t(x))
+  }), row.names = FALSE)
   
   invisible(out)
 }
@@ -119,16 +117,16 @@ var.complr <- function(x,
       if(!is.null(wZ)) (data.frame(summary(wZ))) else (NULL)
     )
   } else {
-    data <- cbind(x$dataout[, x$idvar, with = FALSE], data.frame(X, bX, wX, Z, bZ, wZ))
-    
-    out <- list(
-      summary(acomp(data[!duplicated(get(x$idvar)), colnames(X), with = FALSE]), robust = TRUE),
-      summary(acomp(data[!duplicated(get(x$idvar)), colnames(bX), with = FALSE]), robust = TRUE),
-      summary(acomp(data[!duplicated(get(x$idvar)), colnames(wX), with = FALSE]), robust = TRUE),
+    out  <- list(
+      # average X by ID in data
+      summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(X)][, colnames(X), with = FALSE]), robust = TRUE),
+      summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(bX)][, colnames(bX), with = FALSE]), robust = TRUE),
+      summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(wX)][, colnames(wX), with = FALSE]), robust = TRUE),
       
-      summary(rmult(data[!duplicated(get(x$idvar)), colnames(Z), with = FALSE])),
-      summary(rmult(data[!duplicated(get(x$idvar)), colnames(bZ), with = FALSE])),
-      summary(rmult(data[!duplicated(get(x$idvar)), colnames(wZ), with = FALSE]))
+      # average Z by ID in data
+      summary(rmult(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(Z)][, colnames(Z), with = FALSE])),
+      summary(rmult(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(bZ)][, colnames(bZ), with = FALSE])),
+      summary(rmult(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(wZ)][, colnames(wZ), with = FALSE]))
     )
   }
   names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
@@ -137,12 +135,9 @@ var.complr <- function(x,
               bX = out$bX$variation,
               wX = out$wX$variation
   )
-  
   print(lapply(out, function(x) {
-    df <- as.data.frame(t(x))
-    rownames(df) <- NULL
-    df
-  }))
+    as.data.frame(t(x))
+  }), row.names = FALSE)
   
   invisible(out)
 }
@@ -192,9 +187,9 @@ get_variables.complr <- function(object) {
   })
   
   out <- as.data.frame(do.call(cbind, out))
-  rownames(out) <- c("composition", "between_composition", "within_composition", "logratio", "between_logratio", "within_logratio")
+  rownames(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
   colnames(out) <- c(paste0("composition_", seq_along(object$out)))
-  
+
   out
 }
 

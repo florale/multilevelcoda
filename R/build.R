@@ -140,13 +140,13 @@ build.rg <- function(object,
   idx <- which(vapply(lapply(object$complr$output, function(x) x$parts), function(p) identical(parts, p), logical(1)))
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[["logratio", paste0("composition_", idx)]]
-  bz_vars <- get_variables(object$complr)[["between_logratio", paste0("composition_", idx)]]
-  wz_vars <- get_variables(object$complr)[["within_logratio", paste0("composition_", idx)]]
+  z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
+  bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
+  wz_vars <- get_variables(object$complr)[["wZ", paste0("composition_", idx)]]
   
-  x_vars  <- get_variables(object$complr)[["composition", paste0("composition_", idx)]]
-  bx_vars <- get_variables(object$complr)[["between_composition", paste0("composition_", idx)]]
-  wx_vars <- get_variables(object$complr)[["within_composition", paste0("composition_", idx)]]
+  x_vars  <- get_variables(object$complr)[["X", paste0("composition_", idx)]]
+  bx_vars <- get_variables(object$complr)[["bX", paste0("composition_", idx)]]
+  wx_vars <- get_variables(object$complr)[["wX", paste0("composition_", idx)]]
   
   ## NOTES
   ## ignore weight for clustermean

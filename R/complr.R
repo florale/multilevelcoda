@@ -240,11 +240,12 @@ complr <- function(data,
       # make composition
       # combined
       tX_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
+      
       # between-person
       for (v in parts_i) {
-        tmp[, (v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
+        tmp[, paste0("b", v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
       }
-      bX_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
+      bX_i <- acomp(tmp[, colnames(tmp) %in% paste0("b", parts_i), with = FALSE], total = total_i)
       
       # within-person
       wX_i <- tX_i - bX_i
@@ -291,29 +292,29 @@ complr <- function(data,
     Z_i <-  if (exists("tilr_i")) (tilr_i)
     else if (exists("talr_i")) (talr_i)
     else if (exists("tclr_i")) (tclr_i)
-    else  (NULL)
+    else  NULL
     
     bZ_i <- if (exists("bilr_i")) (bilr_i)
     else if (exists("balr_i")) (balr_i)
     else if (exists("bclr_i")) (bclr_i)
-    else (NULL)
+    else NULL
     
     wZ_i <- if (exists("wilr_i")) (wilr_i)
     else if (exists("walr_i")) (walr_i)
     else if (exists("wclr_i")) (wclr_i)
-    else (NULL)
+    else NULL
     
     # cbind data output
     dataout_i <- cbind(tX_i, bX_i, wX_i, Z_i, bZ_i, wZ_i)
     
     output[[idx]] <- list(
-      X  = if(exists("tX_i")) (tX_i) else (NULL),
-      bX = if(exists("bX_i")) (bX_i) else (NULL),
-      wX = if(exists("wX_i")) (wX_i) else (NULL),
+      X  = if(exists("tX_i")) (tX_i) else NULL,
+      bX = if(exists("bX_i")) (bX_i) else NULL,
+      wX = if(exists("wX_i")) (wX_i) else NULL,
       
-      Z  = if(exists("Z_i")) (Z_i) else (NULL),
-      bZ = if(exists("bZ_i")) (bZ_i) else (NULL),
-      wZ = if(exists("wZ_i")) (wZ_i) else (NULL),
+      Z  = if(exists("Z_i")) (Z_i) else NULL,
+      bZ = if(exists("bZ_i")) (bZ_i) else NULL,
+      wZ = if(exists("wZ_i")) (wZ_i) else NULL,
       
       dataout = dataout_i,
       parts = parts_i,
@@ -327,13 +328,13 @@ complr <- function(data,
   dataout <- do.call(cbind, lapply(output, function(x) x$dataout))
   
   # check any repetitive names between tmp and dataout before cbind
-  if (isTRUE(any(colnames(tmp) %in% colnames(dataout)))) {
+  if (isTRUE(any(colnames(data) %in% colnames(dataout)))) {
     stop(
       sprintf(
         "'data' cannot have any column names the same with logratio variables",
         "  Please ensure that the names of the columns in 'data' are not any of the following:",
         "  %s",
-        paste(colnames(tmp)[colnames(tmp) %in% colnames(dataout)], collapse = ", "),
+        paste(colnames(data)[colnames(data) %in% colnames(dataout)], collapse = ", "),
         sep = "\n"
       )
     )
@@ -341,8 +342,8 @@ complr <- function(data,
   structure(
     list(
       output    = output,
-      datain    = as.data.table(tmp),
-      dataout   = as.data.table(cbind(tmp, dataout)),
+      datain    = as.data.table(data),
+      dataout   = as.data.table(cbind(data, dataout)),
       transform = transform,
       idvar     = idvar
     ),
