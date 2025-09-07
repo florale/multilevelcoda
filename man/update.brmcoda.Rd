@@ -4,7 +4,7 @@
 \alias{update.brmcoda}
 \title{Update \code{\link{brmcoda}} models}
 \usage{
-\method{update}{brmcoda}(object, formula. = NULL, newdata = NULL, newcomplr = NULL, ...)
+\method{update}{brmcoda}(object, formula. = NULL, newdata = NULL, ...)
 }
 \arguments{
 \item{object}{A fitted \code{\link{brmcoda}} object to be updated.}
@@ -15,9 +15,6 @@
 \item{newdata}{A \code{data.frame} or \code{data.table}
 containing data of all variables used in the analysis.
 It must include a composition and the same ID variable as the existing \code{\link{complr}} object.}
-
-\item{newcomplr}{A \code{\link{complr}} object containing data of composition,
-ILR coordinates, and other variables used in the updated model.}
 
 \item{...}{Further arguments passed to \code{\link[brms:brm]{brm}}.}
 }
@@ -35,16 +32,16 @@ This method allows for updating an existing \code{\link{brmcoda}} object.
 if(requireNamespace("cmdstanr")){
 
 # model with compositional predictor at between and within-person levels
-fit <- brmcoda(complr = complr(data = mcompd, sbp = sbp, 
-                               parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), 
-                               idvar = "ID"), 
-              formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                 wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID), 
-              chain = 1, iter = 500,
+fit <- brmcoda(complr = complr(data = mcompd, sbp = sbp,
+                               parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+                               idvar = "ID"),
+                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                   wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
+                chain = 1, iter = 500,
               backend = "cmdstanr")
 
-# removing the effect of wilr1
-fit1 <- update(fit, formula. = ~ . - wilr1)
+# removing the effect of bz1_1
+fit1 <- update(fit, formula. = ~ . - bz1_1)
 
 # using only a subset
 fit2 <- update(fit, newdata = mcompd[ID != 1])

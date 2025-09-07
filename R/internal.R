@@ -273,6 +273,5 @@ NULL
         # strip.text.x      = element_blank()
       )
     gg
-    
   }
 }

@@ -71,9 +71,8 @@ brmcoda <- function (complr, formula, ...) {
       )
     )
   }
-  tmp <- complr$dataout
   
-  m <- brm(formula, data = tmp, ...)
-  
+  # fit the model
+  m <- brm(formula, data = complr$dataout, ...)
   structure(list(complr = complr, model = m), class = "brmcoda")
 }

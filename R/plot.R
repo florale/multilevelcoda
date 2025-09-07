@@ -11,45 +11,48 @@
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
 #' each pair of compositional variables are substituted for a specific time.
-#' 
+#'
 #' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_pointrange geom_ribbon facet_grid xlab ylab
 #' @importFrom data.table copy
-#' 
+#'
 #' @method plot substitution
 #' @export
-plot.substitution <- function(x, to,
-                              ref, level, ...) {
+plot.substitution <- function(x, to, ref, level, ...) {
   
   if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref)) ||
       isTRUE(length(ref) > 1)) {
-    stop("'ref' should be either one of the following: \"grandmean\", \"clustermean\", or \"users\".")
+    stop(
+      "'ref' should be either one of the following: \"grandmean\", \"clustermean\", or \"users\"."
+    )
   }
   ref <- as.character(ref)
   
   if (isFALSE(any(c("between", "within", "aggregate") %in% level)) ||
       isTRUE(length(level) > 1)) {
-    stop("'level' should be either one of the following: \"between\", \"within\", \"aggregate\".")
+    stop(
+      "'level' should be either one of the following: \"between\", \"within\", \"aggregate\"."
+    )
   }
   level <- as.character(level)
   
   # extract delta
   delta.pos <- x$delta
-  delta.neg <- -1*abs(x$delta)
+  delta.neg <- -1 * abs(x$delta)
   delta <- c(delta.pos, delta.neg)
   
   # extract data
-  tmp <- summary(object = x,
-                 delta = delta,
-                 to = to,
-                 ref = ref,
-                 level = level,
-                 digits = "asis"
+  tmp <- summary(
+    object = x,
+    delta = delta,
+    to = to,
+    ref = ref,
+    level = level,
+    digits = "asis"
   )
   
   # plot
   if (isTRUE(is.sequential(delta.pos))) {
-    plotsub <- ggplot(tmp, 
-                      aes(x = Delta, y = Mean)) +
+    plotsub <- ggplot(tmp, aes(x = Delta, y = Mean)) +
       geom_hline(yintercept = 0,
                  linewidth = 0.2,
                  linetype = 2) +
@@ -57,16 +60,19 @@ plot.substitution <- function(x, to,
                  linewidth = 0.2,
                  linetype = 2) +
       geom_ribbon(
-        aes(ymin = CI_low,
-            ymax = CI_high, fill = From),
+        aes(
+          ymin = CI_low,
+          ymax = CI_high,
+          fill = From
+        ),
         alpha = 2 / 10,
-        linewidth = 1 / 10) +
+        linewidth = 1 / 10
+      ) +
       geom_line(aes(colour = From), linewidth = 1) +
-      facet_grid( ~ From)
+      facet_grid(~ From)
     
   } else {
-    plotsub <- ggplot(tmp,
-                      aes(x = Delta, y = Mean)) +
+    plotsub <- ggplot(tmp, aes(x = Delta, y = Mean)) +
       geom_hline(yintercept = 0,
                  linewidth = 0.2,
                  linetype = 2) +
@@ -74,8 +80,12 @@ plot.substitution <- function(x, to,
                  linewidth = 0.2,
                  linetype = 2) +
       geom_line(aes(colour = From)) +
-      geom_pointrange(aes(ymin = CI_low, ymax = CI_high, colour = From)) +
-      facet_grid( ~ From)
+      geom_pointrange(aes(
+        ymin = CI_low,
+        ymax = CI_high,
+        colour = From
+      )) +
+      facet_grid(~ From)
     
   }
   plotsub
@@ -91,7 +101,7 @@ plot.substitution <- function(x, to,
 #' @inherit brms::plot.brmsfit return
 #'
 #' @seealso \code{\link[brms:plot.brmsfit]{plot.brmsfit}}
-#' 
+#'
 #' @method plot brmcoda
 #' @export
 #' @examples
@@ -101,8 +111,8 @@ plot.substitution <- function(x, to,
 #'
 #' # model with compositional predictor at between and within-person levels
 #' fit <- brmcoda(complr = cilr,
-#'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#'                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'                chain = 1, iter = 500)
 #' plot(fit)
 #' }
@@ -119,9 +129,9 @@ plot.brmcoda <- function(x, ...) {
 #' @param ... Further arguments passed to \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}.
 #'
 #' @inherit brms::pairs.brmsfit return
-#' 
+#'
 #' @seealso \code{\link[brms:pairs.brmsfit]{pairs.brmsfit}}
-#' 
+#'
 #' @importFrom graphics pairs
 #' @method pairs brmcoda
 #' @export
@@ -132,8 +142,8 @@ plot.brmcoda <- function(x, ...) {
 #'
 #' # model with compositional predictor at between and within-person levels
 #' fit <- brmcoda(complr = cilr,
-#'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#'                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'                chain = 1, iter = 500)
 #' pairs(fit)
 #' }
@@ -148,14 +158,14 @@ pairs.brmcoda <- function(x, ...) {
 #'
 #' @param object A \code{brmcoda} class object.
 #' @param ... Further arguments passed to \code{\link[brms:mcmc_plot.brmsfit]{mcmc_plot.brmsfit}}.
-#' 
+#'
 #' @inherit brms::mcmc_plot.brmsfit return
-#' 
+#'
 #' @seealso \code{\link[brms:mcmc_plot.brmsfit]{mcmc_plot.brmsfit}}
-#' 
+#'
 #' @importFrom brms mcmc_plot
 #' @method mcmc_plot brmcoda
-#' 
+#'
 #' @export
 #' @examples
 #' \dontrun{
@@ -164,8 +174,8 @@ pairs.brmcoda <- function(x, ...) {
 #'
 #' # model with compositional predictor at between and within-person levels
 #' fit <- brmcoda(complr = cilr,
-#'                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#'                                  wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#'                 formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#'                                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #'                chain = 1, iter = 500)
 #' mcmc_plot(fit)
 #' }
