@@ -67,7 +67,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'brmcoda'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, formula. <span class="op">=</span> <span class="cn">NULL</span>, newdata <span class="op">=</span> <span class="cn">NULL</span>, newcomplr <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, formula. <span class="op">=</span> <span class="cn">NULL</span>, newdata <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,11 +87,6 @@
 <dd><p>A <code>data.frame</code> or <code>data.table</code>
 containing data of all variables used in the analysis.
 It must include a composition and the same ID variable as the existing <code><a href="complr.html">complr</a></code> object.</p></dd>
-
-
-<dt id="arg-newcomplr">newcomplr<a class="anchor" aria-label="anchor" href="#arg-newcomplr"></a></dt>
-<dd><p>A <code><a href="complr.html">complr</a></code> object containing data of composition,
-ILR coordinates, and other variables used in the updated model.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -120,22 +115,21 @@ along with many other useful information about the model.</p></dd>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"cmdstanr"</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># model with compositional predictor at between and within-person levels</span></span></span>
-<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>, </span></span>
-<span class="r-in"><span>                               parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>                               idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>              formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bilr1</span> <span class="op">+</span> <span class="va">bilr2</span> <span class="op">+</span> <span class="va">bilr3</span> <span class="op">+</span> <span class="va">bilr4</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                                 <span class="va">wilr1</span> <span class="op">+</span> <span class="va">wilr2</span> <span class="op">+</span> <span class="va">wilr3</span> <span class="op">+</span> <span class="va">wilr4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span>              chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
+<span class="r-in"><span>                               parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                               idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bz1_1</span> <span class="op">+</span> <span class="va">bz2_1</span> <span class="op">+</span> <span class="va">bz3_1</span> <span class="op">+</span> <span class="va">bz4_1</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>                                   <span class="va">wz1_1</span> <span class="op">+</span> <span class="va">wz2_1</span> <span class="op">+</span> <span class="va">wz3_1</span> <span class="op">+</span> <span class="va">wz4_1</span> <span class="op">+</span> <span class="va">Female</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
 <span class="r-in"><span>              backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># removing the effect of wilr1</span></span></span>
-<span class="r-in"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">fit</span>, formula. <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="va">wilr1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># removing the effect of bz1_1</span></span></span>
+<span class="r-in"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">fit</span>, formula. <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="va">bz1_1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># using only a subset</span></span></span>
 <span class="r-in"><span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">mcompd</span><span class="op">[</span><span class="va">ID</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> The following variables can neither be found in 'data' nor in 'data2':</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 'bilr1', 'bilr2', 'bilr3', 'bilr4', 'wilr1', 'wilr2', 'wilr3', 'wilr4'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
