@@ -99,7 +99,7 @@ in the <code>complr</code> object. Default to the first composition in the <code
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list of <code><a href="brmcoda.html">brmcoda</a></code> output for pivot balance coordinates representing the
+    <p>Estimated pivot balance coordinates representing the
 effect of increasing one compositional part relative to the remaining compositional parts.</p>
     </div>
     <div class="section level2">
@@ -125,7 +125,7 @@ effect of increasing one compositional part relative to the remaining compositio
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">m_pivot_coord_rotate</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span>  <span class="va">m_pivot_coord_raw</span> <span class="op">&lt;-</span>  <span class="fu">pivot_coord_rotate</span><span class="op">(</span><span class="va">m</span>, summary <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu">posterior</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/posterior/reference/draws_summary.html" class="external-link">summarise_draws</a></span><span class="op">(</span><span class="fu">posterior</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/posterior/reference/draws_array.html" class="external-link">as_draws_array</a></span><span class="op">(</span><span class="va">m_pivot_coord_raw</span><span class="op">$</span><span class="va">output</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">m_pivot_coord_raw</span><span class="op">$</span><span class="va">output</span>, <span class="va">posterior_summary</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="co"># }</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
 </code></pre></div>
