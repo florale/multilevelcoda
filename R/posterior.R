@@ -56,7 +56,7 @@
 #'
 #'   ## fit a model with compositional outcome
 #'   m2 <- brmcoda(complr = x,
-#'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~bz1_1 + bz2_1 + bz3_1 + bz4_1 + (1 | ID),
+#'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + Female + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'
@@ -80,26 +80,26 @@ predict.brmcoda <- function(object,
     complr_vars  <- get_variables(object$complr)
     
     # check which composition is identical used in model estimation
-    idx <- which(
-      vapply(complr_vars, function(elem) {
-        any(sapply(c("Z", "bZ", "wZ"), function(sub) {
-          identical(sort(elem[[sub]]), sort(brmcoda_vars$y))
+    idy <- which(
+      vapply(complr_vars, function(y) {
+        any(sapply(c("Z", "bZ", "wZ"), function(z) {
+          identical(sort(y[[z]]), sort(brmcoda_vars$y))
         }))
       }, logical(1))
     )
     
     # check which type of response
-    if (identical(brmcoda_vars$y, complr_vars[[idx]]$bZ)) {
+    if (identical(brmcoda_vars$y, complr_vars[[idy]]$bZ)) {
       model_resp_level <- "between"
-      total <- object$complr$output[[idx]]$total
+      total <- object$complr$output[[idy]]$total
     }
-    if (identical(brmcoda_vars$y, complr_vars[[idx]]$wZ)) {
+    if (identical(brmcoda_vars$y, complr_vars[[idy]]$wZ)) {
       model_resp_level <- "within"
       total <- 1
     }
-    if (identical(brmcoda_vars$y, complr_vars[[idx]]$Z)) {
+    if (identical(brmcoda_vars$y, complr_vars[[idy]]$Z)) {
       model_resp_level <- "aggregate"
-      total <- object$complr$output[[idx]]$total
+      total <- object$complr$output[[idy]]$total
     }
     if (!exists("model_resp_level")) {
       stop(
@@ -113,7 +113,7 @@ predict.brmcoda <- function(object,
       
       # back transform
       out <- lapply(asplit(out, 1), function(x) {
-        x <- ilrInv(x, V = object$complr$output[[idx]]$psi)
+        x <- ilrInv(x, V = object$complr$output[[idy]]$psi)
         as.data.table(clo(x, total = total))
       })
       out <- brms::do_call(abind::abind, c(out, along = 3))
@@ -201,26 +201,26 @@ fitted.brmcoda <- function(object,
     complr_vars  <- get_variables(object$complr)
     
     # check which composition is identical used in model estimation
-    idx <- which(
-      vapply(complr_vars, function(elem) {
-        any(sapply(c("Z", "bZ", "wZ"), function(sub) {
-          identical(sort(elem[[sub]]), sort(brmcoda_vars$y))
+    idy <- which(
+      vapply(complr_vars, function(y) {
+        any(sapply(c("Z", "bZ", "wZ"), function(z) {
+          identical(sort(y[[z]]), sort(brmcoda_vars$y))
         }))
       }, logical(1))
     )
     
     # check which type of response
-    if (identical(brmcoda_vars$y, complr_vars[[idx]]$bZ)) {
+    if (identical(brmcoda_vars$y, complr_vars[[idy]]$bZ)) {
       model_resp_level <- "between"
-      total <- object$complr$output[[idx]]$total
+      total <- object$complr$output[[idy]]$total
     }
-    if (identical(brmcoda_vars$y, complr_vars[[idx]]$wZ)) {
+    if (identical(brmcoda_vars$y, complr_vars[[idy]]$wZ)) {
       model_resp_level <- "within"
       total <- 1
     }
-    if (identical(brmcoda_vars$y, complr_vars[[idx]]$Z)) {
+    if (identical(brmcoda_vars$y, complr_vars[[idy]]$Z)) {
       model_resp_level <- "aggregate"
-      total <- object$complr$output[[idx]]$total
+      total <- object$complr$output[[idy]]$total
     }
     if (!exists("model_resp_level")) {
       stop(
@@ -234,7 +234,7 @@ fitted.brmcoda <- function(object,
       
       # back transform
       out <- lapply(asplit(out, 1), function(x) {
-        x <- ilrInv(x, V = object$complr$output[[idx]]$psi)
+        x <- ilrInv(x, V = object$complr$output[[idy]]$psi)
         as.data.table(clo(x, total = total))
       })
       out <- brms::do_call(abind::abind, c(out, along = 3))
@@ -243,7 +243,7 @@ fitted.brmcoda <- function(object,
       # summary posteriors
       if (summary) {
         out <- posterior_summary(out)
-        dimnames(out)[[3]] <- object$complr$output[[idx]]$parts
+        dimnames(out)[[3]] <- object$complr$output[[idy]]$parts
       }
     } else {
       out <- fitted(object$model, summary = summary, ...)
