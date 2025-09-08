@@ -74,8 +74,7 @@ wsubmargin <- function (object,
     scale = scale,
     summary = FALSE
   )
-  y0 <- rowMeans(as.data.frame(y0)) # average across participants when there is no change
-  
+
   # ywmargins ---------------------------------
   # substitution model
   out <- .get.wsubmargin(

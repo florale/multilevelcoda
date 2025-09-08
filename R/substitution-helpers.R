@@ -298,7 +298,6 @@ NULL
         cbind(dsub[, .(Delta, From, To, Level, Reference)], t(z))))
     
     # final results for entire composition
-    names(posterior_delta_y) <- y_vars
     list(posterior_delta_y)
   }
   
@@ -326,7 +325,7 @@ NULL
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(seq_along(iouti), function(i) {
         if (aorg)
-          as.data.table(iouti[[i]])
+          iouti[[i]]
         else
           list(posterior = iouti[[i]], grid = as.data.table(grid[, names(at), with = FALSE]))
       })
@@ -554,7 +553,6 @@ NULL
         cbind(dsub[, .(Delta, From, To, Level, Reference)], t(z))))
     
     # final results for entire composition
-    names(posterior_delta_y) <- y_vars
     list(posterior_delta_y)
   }
   
@@ -582,7 +580,7 @@ NULL
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(seq_along(iouti), function(i) {
         if (aorg)
-          as.data.table(iouti[[i]])
+          iouti[[i]]
         else
           list(posterior = iouti[[i]], grid = as.data.table(grid[, names(at), with = FALSE]))
       })
@@ -804,7 +802,6 @@ NULL
         cbind(dsub[, .(Delta, From, To, Level, Reference)], t(z))))
     
     # final results for entire composition
-    names(posterior_delta_y) <- y_vars
     list(posterior_delta_y)
   }
   
@@ -832,7 +829,7 @@ NULL
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(seq_along(iouti), function(i) {
         if (aorg)
-          as.data.table(iouti[[i]])
+          iouti[[i]]
         else
           list(posterior = iouti[[i]], grid = as.data.table(grid[, names(at), with = FALSE]))
       })
@@ -845,20 +842,20 @@ NULL
 }
 
 # Clustermean Between-person Substitution model
-.get.bsubmargins <- function(object,
-                             delta,
-                             base,
-                             parts,
-                             x0,
-                             y0,
-                             d0,
-                             summary,
-                             level,
-                             ref,
-                             scale,
-                             type,
-                             cores,
-                             ...) {
+.get.bsubmargin <- function(object,
+                            delta,
+                            base,
+                            parts,
+                            x0,
+                            y0,
+                            d0,
+                            summary,
+                            level,
+                            ref,
+                            scale,
+                            type,
+                            cores,
+                            ...) {
   brmcoda_vars <- get_variables(object)
   complr_vars  <- get_variables(object$complr)
   
@@ -884,19 +881,16 @@ NULL
   
   sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
   
-  if (inherits(object$model$formula, "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars$y, z_vars)  ||
-        identical(brmcoda_vars$y, bz_vars) ||
-        identical(brmcoda_vars$y, wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$X
+  if (inherits(object$model$formula, "mvbrmsformula")) {
+    if (identical(brmcoda_vars$y, z_vars)) {
+      y_vars <- complr_vars[[paste0("composition_", idy)]][[if (identical(scale, "response")) "X" else "Z"]]
+    } else if (identical(brmcoda_vars$y, bz_vars)) {
+      y_vars <- complr_vars[[paste0("composition_", idy)]][[if (identical(scale, "response")) "bX" else "bZ"]]
+    } else if (identical(brmcoda_vars$y, wz_vars)) {
+      y_vars <- complr_vars[[paste0("composition_", idy)]][[if (identical(scale, "response")) "wX" else "wZ"]]
     } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$Z
+      y_vars <- brmcoda_vars$y
     }
-  } else {
-    y_vars <- brmcoda_vars$y
   }
   
   vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
@@ -956,6 +950,13 @@ NULL
         x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
         d1 <- cbind(x0_xsub_delta_k, d0[, colnames(d0) %nin% vars, with = FALSE])
         
+        # useful information for the final results
+        d1[, From := rep(sub_from_var, length.out = nrow(sub_delta_j))[k]]
+        d1[, To := sub_to_var]
+        d1[, Delta := as.numeric(Delta)]
+        d1[, Level := level]
+        d1[, Reference := ref]
+        
         # remove impossible reallocation that result in negative values
         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
         d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
@@ -981,61 +982,71 @@ NULL
           scale = scale,
           summary = FALSE
         )
-        ysub <- rowMeans(as.data.frame(ysub))
-        
-        # difference in outcomes between substitution and no change
-        delta_y <- ysub - y0
-        kout[[k]] <- cbind(as.data.table(t(delta_y)), dsub[1, .(Delta)]) # take first delta row as all rows are identical
+        if (length(brmcoda_vars$y) > 1) {
+          # when multiple outcomes
+          delta_y <- lapply(seq(dim(ysub)[3]), function(m)
+            # loop outcomes, then avg across participants
+            rowMeans(ysub[, , m] - y0[, , m]))
+        } else {
+          delta_y <- list(rowMeans(ysub - y0))
+        }
+        kout[[k]] <- lapply(delta_y, function(dy) {
+          cbind.data.frame(unique(d1[, c("Delta", "From", "To", "Level", "Reference")]), t(dy))
+        })
       }
-      jout[[j]] <- rbindlist(kout)
+      ## restructure so that
+      ## first level is the outcome
+      ## second level is delta
+      kout <- lapply(seq_along(y_vars), function(m) {
+        rbindlist(lapply(kout, `[[`, m))
+      })
+      jout[[j]] <- kout
     }
-    jout <- lapply(jout, function(out) {
-      out[, Delta := as.numeric(Delta)]
-      out[, From := rep(sub_from_var, length.out = nrow(out))]
-      out[, To := sub_to_var]
-      out[, Level := level]
-      out[, Reference := ref]
+    jout <- lapply(seq_along(y_vars), function(m) {
+      rbindlist(lapply(jout, `[[`, m))
     })
-    jout
+    list(jout)
   }
-  
-  # split by part
-  iout <- split(iout, factor(vapply(iout, function(x)
-    unique(x$To), character(1)), levels = parts))
   
   if (summary) {
-    iout <- lapply(iout, function(y) {
-      rbindlist(lapply(y, function(x) {
-        dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
-        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+    iout <- lapply(iout, function(iouti) {
+      iouti <- lapply(iouti, function(ioutii) {
+        dmeta  <- unique(ioutii[, c("Delta", "From", "To", "Level", "Reference")])
+        result <- apply(ioutii[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
         row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
-      }))
+      })
+      names(iouti) <- y_vars
+      iouti
     })
   } else {
-    iout <- lapply(iout, function(x)
-      rbindlist(lapply(x, as.data.table)))
+    iout <- lapply(iout, function(iouti) {
+      iouti <- lapply(seq_along(iouti), function(i) {
+        iouti[[i]]
+      })
+      names(iouti) <- y_vars
+      iouti
+    })
   }
-  
   names(iout) <- parts
   iout
 }
 
 # Clustermean Within-person Substitution model
-.get.wsubmargins <- function(object,
-                             delta,
-                             base,
-                             parts,
-                             x0,
-                             y0,
-                             d0,
-                             summary,
-                             level,
-                             ref,
-                             scale,
-                             type,
-                             cores,
-                             ...) {
+.get.wsubmargin <- function(object,
+                            delta,
+                            base,
+                            parts,
+                            x0,
+                            y0,
+                            d0,
+                            summary,
+                            level,
+                            ref,
+                            scale,
+                            type,
+                            cores,
+                            ...) {
   brmcoda_vars <- get_variables(object)
   complr_vars  <- get_variables(object$complr)
   
@@ -1132,6 +1143,13 @@ NULL
         x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
         d1 <- cbind(x0_xsub_delta_k, d0[, colnames(d0) %nin% vars, with = FALSE])
         
+        # useful information for the final results
+        d1[, From := rep(sub_from_var, length.out = nrow(sub_delta_j))[k]]
+        d1[, To := sub_to_var]
+        d1[, Delta := as.numeric(Delta)]
+        d1[, Level := level]
+        d1[, Reference := ref]
+        
         # remove impossible reallocation that result in negative values
         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
         d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
@@ -1159,42 +1177,52 @@ NULL
           scale = scale,
           summary = FALSE
         )
-        ysub <- rowMeans(as.data.frame(ysub))
-        
-        # difference in outcomes between substitution and no change
-        delta_y <- ysub - y0
-        kout[[k]] <- cbind(as.data.table(t(delta_y)), dsub[1, .(Delta)]) # take first delta row as all rows are identical
+        if (length(brmcoda_vars$y) > 1) {
+          # when multiple outcomes
+          delta_y <- lapply(seq(dim(ysub)[3]), function(m)
+            # loop outcomes, then avg across participants
+            rowMeans(ysub[, , m] - y0[, , m]))
+        } else {
+          delta_y <- list(rowMeans(ysub - y0))
+        }
+        kout[[k]] <- lapply(delta_y, function(dy) {
+          cbind.data.frame(unique(d1[, c("Delta", "From", "To", "Level", "Reference")]), t(dy))
+        })
       }
-      jout[[j]] <- rbindlist(kout)
+      ## restructure so that
+      ## first level is the outcome
+      ## second level is delta
+      kout <- lapply(seq_along(y_vars), function(m) {
+        rbindlist(lapply(kout, `[[`, m))
+      })
+      jout[[j]] <- kout
     }
-    jout <- lapply(jout, function(out) {
-      out[, Delta := as.numeric(Delta)]
-      out[, From := rep(sub_from_var, length.out = nrow(out))]
-      out[, To := sub_to_var]
-      out[, Level := level]
-      out[, Reference := ref]
+    jout <- lapply(seq_along(y_vars), function(m) {
+      rbindlist(lapply(jout, `[[`, m))
     })
-    jout
+    list(jout)
   }
-  
-  # split by part
-  iout <- split(iout, factor(vapply(iout, function(x)
-    unique(x$To), character(1)), levels = parts))
   
   if (summary) {
-    iout <- lapply(iout, function(y) {
-      rbindlist(lapply(y, function(x) {
-        dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
-        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+    iout <- lapply(iout, function(iouti) {
+      iouti <- lapply(iouti, function(ioutii) {
+        dmeta  <- unique(ioutii[, c("Delta", "From", "To", "Level", "Reference")])
+        result <- apply(ioutii[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
         row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
-      }))
+      })
+      names(iouti) <- y_vars
+      iouti
     })
   } else {
-    iout <- lapply(iout, function(x)
-      rbindlist(lapply(x, as.data.table)))
+    iout <- lapply(iout, function(iouti) {
+      iouti <- lapply(seq_along(iouti), function(i) {
+        iouti[[i]]
+      })
+      names(iouti) <- y_vars
+      iouti
+    })
   }
-  
   names(iout) <- parts
   iout
 }
@@ -1310,6 +1338,14 @@ NULL
         xsub_delta_k <- setNames(xsub_delta_k, c(sx_vars, "Delta"))
         d1 <- cbind(xsub_delta_k, d0[, colnames(d0) %nin% vars, with = FALSE])
         
+        
+        # useful information for the final results
+        d1[, From := rep(sub_from_var, length.out = nrow(sub_delta_j))[k]]
+        d1[, To := sub_to_var]
+        d1[, Delta := as.numeric(Delta)]
+        d1[, Level := level]
+        d1[, Reference := ref]
+        
         # remove impossible reallocation that result in negative values
         cols <- colnames(d1) %sin% c(colnames(x0), colnames(base))
         d1   <- d1[rowSums(d1[, ..cols] < 0) == 0]
@@ -1331,42 +1367,52 @@ NULL
           scale = scale,
           summary = FALSE
         )
-        ysub <- rowMeans(as.data.frame(ysub))
-        
-        # difference in outcomes between substitution and no change
-        delta_y <- ysub - y0
-        kout[[k]] <- cbind(as.data.table(t(delta_y)), dsub[1, .(Delta)]) # take first delta row as all rows are identical
+        if (length(brmcoda_vars$y) > 1) {
+          # when multiple outcomes
+          delta_y <- lapply(seq(dim(ysub)[3]), function(m)
+            # loop outcomes, then avg across participants
+            rowMeans(ysub[, , m] - y0[, , m]))
+        } else {
+          delta_y <- list(rowMeans(ysub - y0))
+        }
+        kout[[k]] <- lapply(delta_y, function(dy) {
+          cbind.data.frame(unique(d1[, c("Delta", "From", "To", "Level", "Reference")]), t(dy))
+        })
       }
-      jout[[j]] <- rbindlist(kout)
+      ## restructure so that
+      ## first level is the outcome
+      ## second level is delta
+      kout <- lapply(seq_along(y_vars), function(m) {
+        rbindlist(lapply(kout, `[[`, m))
+      })
+      jout[[j]] <- kout
     }
-    jout <- lapply(jout, function(out) {
-      out[, Delta := as.numeric(Delta)]
-      out[, From := rep(sub_from_var, length.out = nrow(out))]
-      out[, To := sub_to_var]
-      out[, Level := level]
-      out[, Reference := ref]
+    jout <- lapply(seq_along(y_vars), function(m) {
+      rbindlist(lapply(jout, `[[`, m))
     })
-    jout
+    list(jout)
   }
-  
-  # split by part
-  iout <- split(iout, factor(vapply(iout, function(x)
-    unique(x$To), character(1)), levels = parts))
   
   if (summary) {
-    iout <- lapply(iout, function(y) {
-      rbindlist(lapply(y, function(x) {
-        dmeta  <- unique(x[, c("Delta", "From", "To", "Level", "Reference")])
-        result <- apply(x[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
+    iout <- lapply(iout, function(iouti) {
+      iouti <- lapply(iouti, function(ioutii) {
+        dmeta  <- unique(ioutii[, c("Delta", "From", "To", "Level", "Reference")])
+        result <- apply(ioutii[, -c("Delta", "From", "To", "Level", "Reference")], 1, posterior_summary, ...)
         row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
-      }))
+      })
+      names(iouti) <- y_vars
+      iouti
     })
   } else {
-    iout <- lapply(iout, function(x)
-      rbindlist(lapply(x, as.data.table)))
+    iout <- lapply(iout, function(iouti) {
+      iouti <- lapply(seq_along(iouti), function(i) {
+        iouti[[i]]
+      })
+      names(iouti) <- y_vars
+      iouti
+    })
   }
-  
   names(iout) <- parts
   iout
 }
