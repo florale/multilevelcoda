@@ -15,7 +15,7 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/bayes_factor.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/bsub.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/bsubmargins.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/bsubmargin.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/build.base.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/build.rg.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/build.sbp.html</loc></url>
@@ -59,7 +59,7 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/sbp.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/sim.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/sub.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/submargins.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/submargin.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/substitution.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/summary.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/summary.complr.html</loc></url>
@@ -69,6 +69,6 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/var.complr.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/vcov.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/wsub.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/wsubmargins.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/wsubmargin.html</loc></url>
 </urlset>
 

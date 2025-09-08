@@ -73,12 +73,14 @@
 <span>  <span class="va">between_avg_sub</span>,</span>
 <span>  <span class="va">within_avg_sub</span>,</span>
 <span>  <span class="va">avg_sub</span>,</span>
+<span>  <span class="va">brmsformula</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  <span class="va">ref</span>,</span>
 <span>  <span class="va">level</span>,</span>
-<span>  <span class="va">weight</span>,</span>
 <span>  <span class="va">parts</span>,</span>
-<span>  <span class="va">aorg</span></span>
+<span>  <span class="va">weight</span>,</span>
+<span>  <span class="va">at</span>,</span>
+<span>  <span class="va">type</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,15 +101,19 @@
 
 
 <dt id="arg-between-avg-sub">between_avg_sub<a class="anchor" aria-label="anchor" href="#arg-between-avg-sub"></a></dt>
-<dd><p>A list of results from <code>bsubmargins</code> or <code>NULL</code></p></dd>
+<dd><p>A list of results from <code>bsubmargin</code> or <code>NULL</code></p></dd>
 
 
 <dt id="arg-within-avg-sub">within_avg_sub<a class="anchor" aria-label="anchor" href="#arg-within-avg-sub"></a></dt>
-<dd><p>A list of results from <code>wsubmargins</code> or <code>NULL</code></p></dd>
+<dd><p>A list of results from <code>wsubmargin</code> or <code>NULL</code></p></dd>
 
 
 <dt id="arg-avg-sub">avg_sub<a class="anchor" aria-label="anchor" href="#arg-avg-sub"></a></dt>
-<dd><p>A list of results from <code>submargins</code> or <code>NULL</code></p></dd>
+<dd><p>A list of results from <code>submargin</code> or <code>NULL</code></p></dd>
+
+
+<dt id="arg-brmsformula">brmsformula<a class="anchor" aria-label="anchor" href="#arg-brmsformula"></a></dt>
+<dd><p>A <code>brmsformula</code> object</p></dd>
 
 
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
@@ -122,16 +128,20 @@
 <dd><p>A character value specifying the level of substitution</p></dd>
 
 
-<dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
-<dd><p>The weight to use in calculation of the reference composition</p></dd>
-
-
 <dt id="arg-parts">parts<a class="anchor" aria-label="anchor" href="#arg-parts"></a></dt>
 <dd><p>The parts of the composition</p></dd>
 
 
-<dt id="arg-aorg">aorg<a class="anchor" aria-label="anchor" href="#arg-aorg"></a></dt>
-<dd><p>A logical value specifying whether to summarize the results (average over the reference grid)</p></dd>
+<dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
+<dd><p>The weight to use in calculation of the reference composition</p></dd>
+
+
+<dt id="arg-at">at<a class="anchor" aria-label="anchor" href="#arg-at"></a></dt>
+<dd><p>An named list of levels for the corresponding variables in the reference grid or <code>NULL</code></p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>A character value specifying the type of substitution.</p></dd>
 
 </dl></div>
     <div class="section level2">
