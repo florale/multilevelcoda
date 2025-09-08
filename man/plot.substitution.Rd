@@ -4,17 +4,10 @@
 \alias{plot.substitution}
 \title{Substitution Plot}
 \usage{
-\method{plot}{substitution}(x, to, ref, level, ...)
+\method{plot}{substitution}(x, ...)
 }
 \arguments{
 \item{x}{A \code{\link{substitution}} class object.}
-
-\item{to}{A character value or vector specifying the names of the compositional parts
-that were reallocated to in the model.}
-
-\item{ref}{A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),}
-
-\item{level}{A character value of (\code{"between"}, \code{"within"}), or \code{"aggregate"}).}
 
 \item{...}{Further components to the plot, followed by a plus sign (+).}
 }

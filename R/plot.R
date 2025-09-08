@@ -3,92 +3,99 @@
 #' Make a plot of \code{\link{substitution}} model results.
 #'
 #' @param x A \code{\link{substitution}} class object.
-#' @param to A character value or vector specifying the names of the compositional parts
-#' that were reallocated to in the model.
-#' @param ref A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),
-#' @param level A character value of (\code{"between"}, \code{"within"}), or \code{"aggregate"}).
 #' @param ... Further components to the plot, followed by a plus sign (+).
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
 #' each pair of compositional variables are substituted for a specific time.
 #'
-#' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_pointrange geom_ribbon facet_grid xlab ylab
+#' @importFrom ggplot2 ggplot aes geom_hline geom_vline geom_line geom_pointrange geom_ribbon
+#' @importFrom ggplot2 facet_wrap vars label_both label_bquote position_dodge2
+#' @importFrom ggplot2 theme theme_bw scale_fill_manual scale_colour_manual
 #' @importFrom data.table copy
+#' @importFrom bayesplot color_scheme_get
 #'
 #' @method plot substitution
 #' @export
-plot.substitution <- function(x, to, ref, level, ...) {
+plot.substitution <- function(x, ...) {
   
-  if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref)) ||
-      isTRUE(length(ref) > 1)) {
-    stop(
-      "'ref' should be either one of the following: \"grandmean\", \"clustermean\", or \"users\"."
+  if (length(x$delta) > 1) {
+    # extract data
+    tmp <- summary(
+      object = x,
+      delta = sort(c(-abs(x$delta), abs(x$delta))),
+      ref = x$ref,
+      level = x$level,
+      digits = "asis"
     )
-  }
-  ref <- as.character(ref)
-  
-  if (isFALSE(any(c("between", "within", "aggregate") %in% level)) ||
-      isTRUE(length(level) > 1)) {
-    stop(
-      "'level' should be either one of the following: \"between\", \"within\", \"aggregate\"."
-    )
-  }
-  level <- as.character(level)
-  
-  # extract delta
-  delta.pos <- x$delta
-  delta.neg <- -1 * abs(x$delta)
-  delta <- c(delta.pos, delta.neg)
-  
-  # extract data
-  tmp <- summary(
-    object = x,
-    delta = delta,
-    to = to,
-    ref = ref,
-    level = level,
-    digits = "asis"
-  )
-  
-  # plot
-  if (isTRUE(is.sequential(delta.pos))) {
-    plotsub <- ggplot(tmp, aes(x = Delta, y = Mean)) +
+    col_pal <- rev(unlist(color_scheme_get("brewer-PuBuGn")))
+    names(col_pal) <- x$parts
+    
+    ggplot(tmp, aes(x = Delta,  y = Estimate, colour = From, fill = From)) +
       geom_hline(yintercept = 0,
-                 linewidth = 0.2,
+                 linewidth = 0.25,
                  linetype = 2) +
       geom_vline(xintercept = 0,
-                 linewidth = 0.2,
+                 linewidth = 0.25,
                  linetype = 2) +
-      geom_ribbon(
-        aes(
-          ymin = CI_low,
-          ymax = CI_high,
-          fill = From
-        ),
-        alpha = 2 / 10,
-        linewidth = 1 / 10
+      geom_line(linewidth = 0.75) +
+      geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
+                  alpha = 3 / 10,
+                  linewidth = 0) +
+      scale_colour_manual(values = col_pal) +
+      scale_fill_manual(values = col_pal) +
+      facet_wrap(
+        vars(From, To),
+        labeller = ggplot2::label_bquote(cols = .(as.character(From)) %<-% minutes %->% .(as.character(To))),
+        nrow = length(x$parts)
       ) +
-      geom_line(aes(colour = From), linewidth = 1) +
-      facet_grid(~ From)
+      theme_bw() +
+      theme(
+        legend.position  = "none",
+        strip.background = element_rect(fill = "transparent", color = "black", linewidth = 0.5),
+        axis.ticks       = element_blank()
+      )
     
   } else {
-    plotsub <- ggplot(tmp, aes(x = Delta, y = Mean)) +
-      geom_hline(yintercept = 0,
-                 linewidth = 0.2,
-                 linetype = 2) +
-      geom_vline(xintercept = 0,
-                 linewidth = 0.2,
-                 linetype = 2) +
-      geom_line(aes(colour = From)) +
-      geom_pointrange(aes(
-        ymin = CI_low,
-        ymax = CI_high,
-        colour = From
-      )) +
-      facet_grid(~ From)
+    # extract data
+    tmp <- summary(
+      object = x,
+      delta = x$delta,
+      ref = x$ref,
+      level = x$level,
+      digits = "asis"
+    )
+    col_pal <- unlist(color_scheme_get("blue"))
+    names(col_pal) <- x$parts
     
+    ggplot(tmp, aes(x = Delta, y = Estimate, colour = From)) +
+      geom_hline(yintercept = 0,
+                 linewidth = 0.25,
+                 linetype = 2) +
+      # geom_vline(xintercept = 0,
+      #            linewidth = 0.2,
+      #            linetype = 2) +
+      geom_pointrange(aes(ymin = CI_low, ymax = CI_high), 
+                      position = position_dodge2(width = 0.25),
+                      size = 0.5, linewidth = 0.75
+                      ) +
+      scale_colour_manual(values = col_pal) +
+      facet_wrap(~ To,
+                 labeller = label_both,
+                 nrow = length(x$parts)) +
+      # facet_wrap(
+      #   vars(From, To),
+      #   labeller = ggplot2::label_bquote(cols = .(as.character(From)) %->% .(as.character(To))),
+      #   nrow = length(x$parts)
+      # ) +
+      theme_bw() +
+      theme(
+        legend.position = "bottom",
+        strip.background = element_rect(fill = "transparent", color = "black", linewidth = 0.5),
+        axis.text.x      = element_blank(),
+        axis.title.x     = element_blank(),
+        axis.ticks       = element_blank()
+      )
   }
-  plotsub
 }
 
 #' Trace and Density Plots for MCMC Draws plot
