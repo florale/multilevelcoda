@@ -297,17 +297,23 @@ summary.substitution <- function(object,
     }
     from <- as.character(from)
   }
-  
+
   # combine all results
-  out <- rbindlist(lapply(object[c(
-    "between_simple_sub",
-    "within_simple_sub",
-    "simple_sub",
-    "between_avg_sub",
-    "within_avg_sub",
-    "avg_sub"
-  )], rbindlist), use.names = TRUE)
-  
+  out <- rbindlist(lapply(
+    Filter(Negate(is.null), object[c(
+      "between_simple_sub",
+      "within_simple_sub",
+      "simple_sub",
+      "between_avg_sub",
+      "within_avg_sub",
+      "avg_sub"
+    )]),
+    function(outi) {
+      rbindlist(lapply(outi, function(outii) {
+        rbindlist(Map(function(x, nm) cbind(x, resp = nm), outii, names(outii)))
+      }))
+    }))
+
   if (object$type == "one-to-all") {
     out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
     out[, Delta := abs(Delta)]
