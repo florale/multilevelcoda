@@ -40,10 +40,9 @@ is.sequential <- function(x) {
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 theme_void
 #' @importFrom ggplot2 unit
-#' @importFrom hrbrthemes theme_ipsum 
-NULL
-
-# plot for shiny sim
+#' @importFrom hrbrthemes theme_ipsum
+#' 
+#' @noRd
 .par_plot <- function(data, shiny = FALSE, d = 4, font = "Arial Narrow") {
   
   # colour palette --------------

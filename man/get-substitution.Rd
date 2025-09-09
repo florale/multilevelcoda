@@ -2,7 +2,7 @@
 % Please edit documentation in R/substitution-helpers.R
 \name{get-substitution}
 \alias{get-substitution}
-\title{Helper functions used only internally to estimate substitution model}
+\title{Substitution analysis helper functions}
 \description{
-Helper functions used only internally to estimate substitution model
+Functions used only internally to estimate substitution model
 }

@@ -28,6 +28,7 @@ is.substitution <- function(x) {
 #'
 #' @return An object of class \code{substitution}
 #'
+#'@noRd
 create_substitution <- function(between_simple_sub,
                                 within_simple_sub,
                                 simple_sub,
@@ -71,6 +72,7 @@ create_substitution <- function(between_simple_sub,
 }
 
 #' Helper extract variables from complr and brmcoda objects for use in substitution models
+#' @noRd
 .get.subvars <- function(object, parts, scale) {
   brmcoda_vars <- get_variables(object)
   complr_vars  <- get_variables(object$complr)
@@ -128,7 +130,10 @@ create_substitution <- function(between_simple_sub,
   )
 }
 
-#' Helper functions used only internally to estimate substitution model
+#' Substitution analysis helper functions
+#' 
+#' Functions used only internally to estimate substitution model
+#' 
 #' @importFrom data.table as.data.table data.table copy := setDT rbindlist .SD
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom brms posterior_summary
