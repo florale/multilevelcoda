@@ -98,16 +98,13 @@ pivot_coord_rotate <- function (object,
   # get parts
   parts <- get_parts(object$complr, parts)
   
-  ## get the index of which index elements of object$complr$output does the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
+  ## get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
+  idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
     x$parts), function(p)
-      identical(sort(parts), sort(p)), logical(1)))
+      identical(sort(parts), sort(p)), logical(1))))[1]
   
+  b_sbp0 <- fixef(object, summary = FALSE,  ...)
   
-  b_sbp0 <- fixef(object,
-                  summary = FALSE,
-                  ...
-  )
   # grab the correct logratio names
   z_vars  <- get_variables(object$complr)[["Z", paste0("composition_", idx)]]
   bz_vars <- get_variables(object$complr)[["bZ", paste0("composition_", idx)]]
@@ -125,25 +122,25 @@ pivot_coord_rotate <- function (object,
     sbpd   <- build.sbp(partsd)
     
     # rotate sbp but keep parts the same so first part is the part of interest when rotated
-    sbp_rotate <- lapply(object$complr$output, function(x) x$sbp)
+    sbp_rotate <- lapply(object[["complr"]][["output"]], function(x) x[["sbp"]])
     sbp_rotate[[idx]] <- sbpd[, parts]
     
-    parts_rotate <- lapply(object$complr$output, function(x) x$parts)
+    parts_rotate <- lapply(object[["complr"]][["output"]], function(x) x[["parts"]])
     parts_rotate[[idx]] <- parts
     
-    total_rotate <- lapply(object$complr$output, function(x) x$total)
-    total_rotate[[idx]] <- object$complr$output[[idx]]$total
+    total_rotate <- lapply(object[["complr"]][["output"]], function(x) x[["total"]])
+    total_rotate[[idx]] <- object[["complr"]][["output"]][[idx]][["total"]]
     
     clrd   <- complr(
-      data  = object$complr$datain,
+      data  = object[["complr"]][["datain"]],
       sbp   = sbp_rotate,
       parts = parts_rotate,
       total = total_rotate,
-      idvar = if(!is.null(object$complr$idvar)) object$complr$idvar else NULL
+      idvar = if(!is.null(object[["complr"]][["idvar"]])) object[["complr"]][["idvar"]] else NULL
     )
     
     # rotation matrix
-    R <- crossprod(object$complr$output[[idx]]$psi, clrd$output[[idx]]$psi)
+    R <- crossprod(object[["complr"]][["output"]][[idx]]$psi, clrd$output[[idx]]$psi)
     
     # multiply posterior samples with rotation matrix
     b_sbpd <- list(
@@ -219,12 +216,12 @@ pivot_coord_refit <- function (object,
                                ...) {
   
   # get parts
-  parts <- get_parts(object$complr, parts)
+  parts <- get_parts(object[["complr"]], parts)
   
-  ## get the index of which index elements of object$complr$output does the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
+  ## get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
+  idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
     x$parts), function(p)
-      identical(sort(parts), sort(p)), logical(1)))
+      identical(sort(parts), sort(p)), logical(1))))[1]
   
   b_sbp0 <- fixef(object,
                   summary = FALSE,
@@ -244,28 +241,24 @@ pivot_coord_refit <- function (object,
     partsd <- append(d, grep(d, parts, value = T, invert = T))
     
     # swap first element in composition to make new sbp
-    sbp_refit <- lapply(object$complr$output, function(x) x$sbp)
+    sbp_refit <- lapply(object[["complr"]][["output"]], function(x) x[["sbp"]])
     sbp_refit[[idx]] <- build.sbp(partsd)
     
-    parts_refit <- lapply(object$complr$output, function(x) x$parts)
+    parts_refit <- lapply(object[["complr"]][["output"]], function(x) x[["parts"]])
     parts_refit[[idx]] <- partsd
     
-    total_refit <- lapply(object$complr$output, function(x) x$total)
-    total_refit[[idx]] <- object$complr$output[[idx]]$total
+    total_refit <- lapply(object[["complr"]][["output"]], function(x) x[["total"]])
+    total_refit[[idx]] <- object[["complr"]][["output"]][[idx]][["total"]]
     
     clrd   <- complr(
-      data  = object$complr$datain,
+      data  = object[["complr"]][["datain"]],
       sbp   = sbp_refit,
       parts = parts_refit,
       total = total_refit,
-      idvar = if(!is.null(object$complr$idvar)) object$complr$idvar else NULL
+      idvar = if(!is.null(object[["complr"]][["idvar"]])) object[["complr"]][["idvar"]] else NULL
     )
-    
     brmcodad <- update(object$model, newdata = clrd$dataout, ...)
-    
-    b_sbpd <- fixef(brmcodad,
-                    summary = FALSE,
-                    ...)
+    b_sbpd   <- fixef(brmcodad, summary = FALSE,  ...)
     
     # summarise posteriors
     if (summary) {

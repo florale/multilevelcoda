@@ -10,7 +10,6 @@ utils::globalVariables(c("i",  "..cols", ".", "To", "t", "head",  "fitted",
                          "multisession", "sequential"
 ))
 
-
 # expand grid data frame
 expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
 
@@ -19,6 +18,7 @@ is.sequential <- function(x) {
   all(length(x) > 2 & all(abs(diff(x)) == 1))
 }
 
+#' Make plots for simulation results
 #' @keywords internal
 #' 
 #' @importFrom ggplot2 aes

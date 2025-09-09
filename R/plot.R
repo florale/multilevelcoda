@@ -28,7 +28,7 @@ plot.substitution <- function(x, ...) {
       digits = "asis"
     )
     col_pal <- rev(unlist(color_scheme_get("brewer-PuBuGn")))
-    names(col_pal) <- x$parts
+    names(col_pal) <- sort(x$parts)
     
     ggplot(tmp, aes(x = Delta,  y = Estimate, colour = From, fill = From)) +
       geom_hline(yintercept = 0,
@@ -41,8 +41,8 @@ plot.substitution <- function(x, ...) {
       geom_ribbon(aes(ymin = CI_low, ymax = CI_high),
                   alpha = 3 / 10,
                   linewidth = 0) +
-      scale_colour_manual(values = col_pal) +
-      scale_fill_manual(values = col_pal) +
+      scale_colour_manual(values = if (length(x$parts) < 7) col_pal else NULL) +
+      scale_fill_manual(values = if (length(x$parts) < 7) col_pal else NULL) +
       facet_wrap(
         vars(From, To),
         labeller = ggplot2::label_bquote(cols = .(as.character(From)) %<-% minutes %->% .(as.character(To))),
@@ -65,7 +65,7 @@ plot.substitution <- function(x, ...) {
       digits = "asis"
     )
     col_pal <- unlist(color_scheme_get("blue"))
-    names(col_pal) <- x$parts
+    names(col_pal) <- sort(x$parts)
     
     ggplot(tmp, aes(x = Delta, y = Estimate, colour = From)) +
       geom_hline(yintercept = 0,
@@ -78,7 +78,7 @@ plot.substitution <- function(x, ...) {
                       position = position_dodge2(width = 0.25),
                       size = 0.5, linewidth = 0.75
                       ) +
-      scale_colour_manual(values = col_pal) +
+      scale_colour_manual(values = if (length(x$parts) < 7) col_pal else NULL) +
       facet_wrap(~ To,
                  labeller = label_both,
                  nrow = length(x$parts)) +

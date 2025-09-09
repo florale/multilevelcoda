@@ -74,8 +74,8 @@ predict.brmcoda <- function(object,
                             parts = 1,
                             ...) {
   
-  if (inherits(object$model$formula, "mvbrmsformula")) {
-    # get brmcoda variables
+  if (inherits(object[["model"]][["formula"]], "mvbrmsformula")) {
+    # get variables
     brmcoda_vars <- get_variables(object)
     complr_vars  <- get_variables(object$complr)
     
@@ -195,7 +195,7 @@ fitted.brmcoda <- function(object,
                            summary = TRUE,
                            ...) {
   
-  if (inherits(object$model$formula, "mvbrmsformula")) {
+  if (inherits(object[["model"]][["formula"]], "mvbrmsformula")) {
     # get brmcoda variables
     brmcoda_vars <- get_variables(object)
     complr_vars  <- get_variables(object$complr)
@@ -235,20 +235,20 @@ fitted.brmcoda <- function(object,
       # back transform
       out <- lapply(asplit(out, 1), function(x) {
         x <- ilrInv(x, V = object$complr$output[[idy]]$psi)
-        as.data.table(clo(x, total = total))
+        clo(x, total = total)
       })
-      out <- brms::do_call(abind::abind, c(out, along = 3))
+      out <- brms::do_call(abind::abind, c(out, along = 3)) # 1 = draw, 2 = ob, 3 = part
       out <- aperm(out, c(3, 1, 2)) #draw-row-col
+      dimnames(out)[[3]] <- brmcoda_vars$y_vars
       
       # summary posteriors
       if (summary) {
         out <- posterior_summary(out)
-        dimnames(out)[[3]] <- object$complr$output[[idy]]$parts
+        dimnames(out)[[3]] <- brmcoda_vars$y_vars
       }
     } else {
       out <- fitted(object$model, summary = summary, ...)
     }
-    
   } else {
     out <- fitted(object$model, summary = summary, ...)
   }

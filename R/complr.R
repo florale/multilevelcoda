@@ -84,7 +84,6 @@ complr <- function(data,
                    total = 1,
                    idvar = NULL,
                    transform = "ilr") {
-  
   if (isFALSE(inherits(data, c("data.table", "data.frame", "matrix")))) {
     stop("data must be a data table, data frame or matrix.")
   }
@@ -107,7 +106,7 @@ complr <- function(data,
     stop(" 'transform' should be one of the following: \"ilr\", \"alr\", \"clr\".")
   }
   
-  ## CHECK NUMBER OF COMPOSITION HERE?
+  # check number of composition
   # check if parts is a list
   if (is.list(parts)) {
     if (length(parts) == 0) {
@@ -117,7 +116,6 @@ complr <- function(data,
       ! is.character(x))))) {
       stop("parts should be a character vector or a list of character vectors.")
     }
-    
   } else if (is.character(parts)) {
     parts <- list(parts)
   } else {
@@ -127,12 +125,15 @@ complr <- function(data,
   # loop through list to compute composition and lr
   output <- vector("list", length = length(parts))
   
-  for (idx in seq_along(parts)) {
-    parts_i <- parts[[idx]]
-    total_i <- total[[idx]]
+  for (nx in seq_along(parts)) {
+    partsx <- parts[[nx]]
+    totalx <- total[[nx]]
     
     if (length(parts) == 1) {
-      sbp_i   <- if (is.list(sbp)) sbp[[1]] else sbp
+      sbpx <- if (is.list(sbp))
+        sbp[[1]]
+      else
+        sbp
     }
     else {
       if (length(parts) != length(total)) {
@@ -143,11 +144,11 @@ complr <- function(data,
           stop("parts and sbp should have the same length.")
         }
       }
-      sbp_i   <- sbp[[idx]]
+      sbpx <- sbp[[nx]]
     }
     
     # check NAs
-    if (isTRUE(any(apply(tmp[, parts_i, with = FALSE], 2, function(x)
+    if (isTRUE(any(apply(tmp[, partsx, with = FALSE], 2, function(x)
       any(is.na(
         x
       )))))) {
@@ -163,7 +164,7 @@ complr <- function(data,
     }
     
     # check 0s
-    if (isTRUE(any(apply(tmp[, parts_i, with = FALSE], 2, function(x)
+    if (isTRUE(any(apply(tmp[, partsx, with = FALSE], 2, function(x)
       x == 0)))) {
       stop(
         paste(
@@ -178,155 +179,167 @@ complr <- function(data,
     
     # specific for ilr
     if (identical(transform, "ilr")) {
-      if (is.null(sbp_i)) {
+      if (is.null(sbpx)) {
         # build default sbp
         message(
           " A sequential binary partition (sbp), is required for ilr transform but is not supplied.
  A default sbp, which is a pivot balance, will be applied."
         )
-        sbp_i <- build.sbp(parts = parts_i)
+        sbpx <- build.sbp(parts = partsx)
       }
-      if (isFALSE(inherits(sbp_i, "matrix"))) {
+      if (isFALSE(inherits(sbpx, "matrix"))) {
         message(sprintf(
           "sbp is a '%s' but must be a matrix.",
-          paste(class(sbp_i), collapse = " ")
+          paste(class(sbpx), collapse = " ")
         ))
-        sbp_i <- as.matrix(sbp_i)
+        sbpx <- as.matrix(sbpx)
       }
-      if (isTRUE(any(apply(sbp_i, 2, function(x)
+      if (isTRUE(any(apply(sbpx, 2, function(x)
         x %nin% c(-1, 0, 1))))) {
         stop("sbp should only contain 1, -1 and 0 (a partition)")
       }
-      if (isFALSE(identical(length(parts_i), ncol(sbp_i)))) {
+      if (isFALSE(identical(length(partsx), ncol(sbpx)))) {
         stop(
           sprintf(
             "The number of compositional variables in parts (%d)
-  must be the same as in sbp (%d).",
-            length(parts_i),
-            ncol(sbp_i)
+             must be the same as in sbp (%d).",
+            length(partsx),
+            ncol(sbpx)
           )
         )
       }
-      psi_i <- gsi.buildilrBase(t(sbp_i))
+      psix <- gsi.buildilrBase(t(sbpx))
     } else {
-      psi_i <- sbp_i <- NULL
+      psix <- sbpx <- NULL
     }
     
     # MAKE COMPOSITION AND LOG RATIO TRANSFORMATIONS ----------------
     if (shape == "wide") {
       # make composition
-      tX_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
-      bX_i <- wX_i <- NULL
-      colnames(tX_i) <- paste0("t", parts_i)
+      tXx <- acomp(tmp[, partsx, with = FALSE], total = totalx)
+      bXx <- wXx <- NULL
+      colnames(tXx) <- paste0("t", partsx)
       
       # ILR
       if (identical(transform, "ilr")) {
-        tilr_i <- ilr(tX_i, V = psi_i)
-        bilr_i <- wilr_i <- NULL
-        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", idx)
+        tilrx <- ilr(tXx, V = psix)
+        bilrx <- wilrx <- NULL
+        colnames(tilrx)  <- paste0("z", seq_len(ncol(tilrx)), "_", nx)
         
       } else if (identical(transform, "alr")) {
-        talr_i <- alr(tX_i)
-        balr_i <- walr_i <- NULL
-        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", idx)
+        talrx <- alr(tXx)
+        balrx <- walrx <- NULL
+        colnames(talrx)  <- paste0("z", seq_len(ncol(talrx)), "_", nx)
         
       } else if (identical(transform, "clr")) {
-        tclr_i <- clr(tX_i)
-        bclr_i <- wclr_i <- NULL
-        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", idx)
+        tclrx <- clr(tXx)
+        bclrx <- wclrx <- NULL
+        colnames(tclrx)  <- paste0("z", seq_len(ncol(tclrx)), "_", nx)
       }
     }
     
     if (shape == "long") {
       # make composition
       # combined
-      tX_i <- acomp(tmp[, parts_i, with = FALSE], total = total_i)
+      tXx <- acomp(tmp[, partsx, with = FALSE], total = totalx)
       
       # between-person
-      for (v in parts_i) {
+      for (v in partsx) {
         tmp[, paste0("b", v) := mean(get(v), na.rm = TRUE), by = eval(idvar)]
       }
-      bX_i <- acomp(tmp[, colnames(tmp) %in% paste0("b", parts_i), with = FALSE], total = total_i)
+      bXx <- acomp(tmp[, colnames(tmp) %in% paste0("b", partsx), with = FALSE], total = totalx)
       
-      # within-person
-      wX_i <- tX_i - bX_i
+      # within-person (notes unclass(x)/unclass(y))
+      wXx <- tXx - bXx
       
       # name them for later use
-      colnames(bX_i) <- paste0("b", parts_i)
-      colnames(wX_i) <- paste0("w", parts_i)
-      colnames(tX_i) <- paste0("t", parts_i)
+      colnames(bXx) <- paste0("b", partsx)
+      colnames(wXx) <- paste0("w", partsx)
+      colnames(tXx) <- paste0("t", partsx)
       
       ## ILR ---------------
       if (identical(transform, "ilr")) {
-        tilr_i <- ilr(tX_i, V = psi_i)
-        bilr_i <- ilr(bX_i, V = psi_i)
-        wilr_i <- ilr(wX_i, V = psi_i)
+        tilrx <- ilr(tXx, V = psix)
+        bilrx <- ilr(bXx, V = psix)
+        wilrx <- ilr(wXx, V = psix)
         
-        colnames(bilr_i)  <- paste0("bz", seq_len(ncol(bilr_i)), "_", idx)
-        colnames(wilr_i)  <- paste0("wz", seq_len(ncol(wilr_i)), "_", idx)
-        colnames(tilr_i)  <- paste0("z", seq_len(ncol(tilr_i)), "_", idx)
+        colnames(bilrx)  <- paste0("bz", seq_len(ncol(bilrx)), "_", nx)
+        colnames(wilrx)  <- paste0("wz", seq_len(ncol(wilrx)), "_", nx)
+        colnames(tilrx)  <- paste0("z", seq_len(ncol(tilrx)), "_", nx)
       }
       
       ## ALR ---------------
       if (identical(transform, "alr")) {
-        talr_i <- alr(tX_i)
-        balr_i <- alr(bX_i)
-        walr_i <- alr(wX_i)
+        talrx <- alr(tXx)
+        balrx <- alr(bXx)
+        walrx <- alr(wXx)
         
-        colnames(balr_i)  <- paste0("bz", seq_len(ncol(balr_i)), "_", idx)
-        colnames(walr_i)  <- paste0("bz", seq_len(ncol(walr_i)), "_", idx)
-        colnames(talr_i)  <- paste0("z", seq_len(ncol(talr_i)), "_", idx)
+        colnames(balrx)  <- paste0("bz", seq_len(ncol(balrx)), "_", nx)
+        colnames(walrx)  <- paste0("bz", seq_len(ncol(walrx)), "_", nx)
+        colnames(talrx)  <- paste0("z", seq_len(ncol(talrx)), "_", nx)
       }
       
       ## CLR ---------------
       if (identical(transform, "clr")) {
-        tclr_i <- clr(tX_i)
-        bclr_i <- clr(bX_i)
-        wclr_i <- clr(wX_i)
+        tclrx <- clr(tXx)
+        bclrx <- clr(bXx)
+        wclrx <- clr(wXx)
         
-        colnames(bclr_i)  <- paste0("bz", seq_len(ncol(bclr_i)), "_", idx)
-        colnames(wclr_i)  <- paste0("bz", seq_len(ncol(wclr_i)), "_", idx)
-        colnames(tclr_i)  <- paste0("z", seq_len(ncol(tclr_i)), "_", idx)
+        colnames(bclrx)  <- paste0("bz", seq_len(ncol(bclrx)), "_", nx)
+        colnames(wclrx)  <- paste0("bz", seq_len(ncol(wclrx)), "_", nx)
+        colnames(tclrx)  <- paste0("z", seq_len(ncol(tclrx)), "_", nx)
       }
     }
     
-    Z_i <-  if (exists("tilr_i")) (tilr_i)
-    else if (exists("talr_i")) (talr_i)
-    else if (exists("tclr_i")) (tclr_i)
-    else  NULL
+    Zx <-  if (exists("tilrx"))
+      (tilrx)
+    else if (exists("talrx"))
+      (talrx)
+    else if (exists("tclrx"))
+      (tclrx)
+    else
+      NULL
     
-    bZ_i <- if (exists("bilr_i")) (bilr_i)
-    else if (exists("balr_i")) (balr_i)
-    else if (exists("bclr_i")) (bclr_i)
-    else NULL
+    bZx <- if (exists("bilrx"))
+      (bilrx)
+    else if (exists("balrx"))
+      (balrx)
+    else if (exists("bclrx"))
+      (bclrx)
+    else
+      NULL
     
-    wZ_i <- if (exists("wilr_i")) (wilr_i)
-    else if (exists("walr_i")) (walr_i)
-    else if (exists("wclr_i")) (wclr_i)
-    else NULL
+    wZx <- if (exists("wilrx"))
+      (wilrx)
+    else if (exists("walrx"))
+      (walrx)
+    else if (exists("wclrx"))
+      (wclrx)
+    else
+      NULL
     
     # cbind data output
-    dataout_i <- cbind(tX_i, bX_i, wX_i, Z_i, bZ_i, wZ_i)
+    dataoutx <- cbind(tXx, bXx, wXx, Zx, bZx, wZx)
     
-    output[[idx]] <- list(
-      X  = if(exists("tX_i")) (tX_i) else NULL,
-      bX = if(exists("bX_i")) (bX_i) else NULL,
-      wX = if(exists("wX_i")) (wX_i) else NULL,
+    output[[nx]] <- list(
+      X  = if (exists("tXx")) tXx else NULL,
+      bX = if (exists("bXx")) bXx else NULL,
+      wX = if (exists("wXx")) wXx else NULL,
+      Z  = if (exists("Zx")) Zx else NULL,
+      bZ = if (exists("bZx")) bZx else NULL,
+      wZ = if (exists("wZx")) wZx else NULL,
       
-      Z  = if(exists("Z_i")) (Z_i) else NULL,
-      bZ = if(exists("bZ_i")) (bZ_i) else NULL,
-      wZ = if(exists("wZ_i")) (wZ_i) else NULL,
-      
-      dataout = dataout_i,
-      parts = parts_i,
-      total = total_i,
-      sbp = sbp_i,
-      psi = psi_i
+      dataout = dataoutx,
+      parts = partsx,
+      total = totalx,
+      sbp = sbpx,
+      psi = psix
     )
   }
   
   # PATCH OUTPUT ----------------
-  dataout <- do.call(cbind, lapply(output, function(x) x$dataout))
+  dataout <- do.call(cbind, lapply(output, function(x)
+    x$dataout))
   
   # check any repetitive names between tmp and dataout before cbind
   if (isTRUE(any(colnames(data) %in% colnames(dataout)))) {
@@ -344,11 +357,15 @@ complr <- function(data,
     list(
       output    = output,
       datain    = as.data.table(data),
-      dataout   = as.data.table(cbind(data, dataout)),
+      dataout   = if (nrow(dataout) == nrow(data))
+        cbind(as.data.table(data), dataout)
+      else
+        cbind(as.data.table(tmp[colnames(data)]), dataout),
       transform = transform,
       idvar     = idvar
     ),
-    class = "complr")
+    class = "complr"
+  )
 }
 
 #' Indices from a (dataset of) Multilevel Composition(s) (deprecated.)

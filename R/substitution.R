@@ -124,12 +124,12 @@ substitution <- function(object,
     )
   }
   
-  if (isFALSE(identical(object$complr$transform, "ilr"))) {
+  if (isFALSE(identical(object[["complr"]][["transform"]], "ilr"))) {
     stop(
       sprintf(
         "Can't handle an object of class (%s) in 'substitution',
       'brmcoda' should be fitted with ilr transform to enable substitution analysis.",
-        object$complr$transform
+        object[["complr"]][["transform"]]
       )
     )
   }
@@ -173,12 +173,12 @@ substitution <- function(object,
   }
   
   # get parts
-  parts <- get_parts(object$complr, parts)
+  parts <- get_parts(object[["complr"]], parts)
   
-  # get the index of which index elements of object$complr$output does the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
+  # get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
+  idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
     x$parts), function(p)
-      identical(sort(parts), sort(p)), logical(1)))
+      identical(sort(parts), sort(p)), logical(1))))[1]
   
   # get brmcoda variables
   brmcoda_vars <- get_variables(object)
@@ -186,8 +186,7 @@ substitution <- function(object,
   # type - check with JW what would be the best way to detect onetoone vs onetoall
   if (missing(type)) {
     if (missing(base)) {
-      base <- build.base(parts = object$complr$output[[idx]]$parts)
-      names(base) <- object$complr$output[[idx]]$parts
+      base <- build.base(parts = object[["complr"]][["output"]][[idx]][["parts"]])
       type <- "one-to-one"
     } else {
       if (inherits(base, c("data.frame", "data.table", "matrix"))) {
@@ -198,25 +197,22 @@ substitution <- function(object,
     }
   } else {
     if (identical(type, "one-to-one")) {
-      base <- build.base(parts = object$complr$output[[idx]]$parts)
-      names(base) <- object$complr$output[[idx]]$parts
+      base <- build.base(parts = object[["complr"]][["output"]][[idx]][["parts"]])
       type <- "one-to-one"
     } else if (inherits(type, "character") &&
                identical(type, "one-to-all")) {
-      base <- build.base(parts = object$complr$output[[idx]]$parts,
-                         type = "one-to-all")
-      names(base) <- object$complr$output[[idx]]$parts
+      base <- build.base(parts = object[["complr"]][["output"]][[idx]][["parts"]], type = "one-to-all")
       type <- "one-to-all"
     }
   }
   
-  if (is.null(brmcoda_vars$fixef_level)) {
+  if (is.null(brmcoda_vars[["fixef_level"]])) {
     stop("No fixed effects of composition in the model to perform substitution analysis.")
   }
   
   ## only grandmean and aggregate for single level model
-  if ("aggregate" %in% brmcoda_vars$fixef_level) {
-    if (brmcoda_vars$ranef_level == "single") {
+  if ("aggregate" %in% brmcoda_vars[["fixef_level"]]) {
+    if (brmcoda_vars[["ranef_level"]] == "single") {
       if ("clustermean" %in% ref) {
         warning("Can only use grandmean for single level model.")
       }
@@ -230,12 +226,12 @@ substitution <- function(object,
   }
   
   ## no between or within for single level model
-  if (any(c("between", "within") %in% brmcoda_vars$fixef_level)) {
-    if (brmcoda_vars$ranef_level == "single") {
+  if (any(c("between", "within") %in% brmcoda_vars[["fixef_level"]])) {
+    if (brmcoda_vars[["ranef_level"]] == "single") {
       stop(
         " between and within substitution analysis cannot be computed on a single level model"
       )
-    } else if (brmcoda_vars$ranef_level == "multilevel") {
+    } else if (brmcoda_vars[["ranef_level"]] == "multilevel") {
       level <- level
       ref <- ref
     }
@@ -248,60 +244,60 @@ substitution <- function(object,
   
   ## level args match with coefs in object
   if (any(c("between", "within") %in% level)) {
-    if (isFALSE(any(c("between", "within") %in% brmcoda_vars$fixef_level))) {
+    if (isFALSE(any(c("between", "within") %in% brmcoda_vars[["fixef_level"]]))) {
       stop(
         sprintf(
           "between and within substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-          brmcoda_vars$fixef_level,
-          brmcoda_vars$fixef_level
+          brmcoda_vars[["fixef_level"]],
+          brmcoda_vars[["fixef_level"]]
         )
       )
     }
     if ("between" %in% level &&
-        isFALSE(all(names(object$complr$output[[idx]]$bZ %in% brmcoda_vars$x)))) {
+        isFALSE(all(names(object[["complr"]][["output"]][[idx]][["bZ"]] %in% brmcoda_vars[["x"]])))) {
       stop(
         sprintf(
           "brmcoda model %s should include a complete set of between and within ilr predictors %s",
           "for substitution analysis at between level to be performed",
-          brmcoda_vars$x,
-          names(object$complr$output[[idx]]$bZ)
+          brmcoda_vars[["x"]],
+          names(object[["complr"]][["output"]][[idx]][["bZ"]])
         )
       )
     }
     
     if ("within" %in% level &&
-        isFALSE(all(names(object$complr$output[[idx]]$wZ %in% brmcoda_vars$x)))) {
+        isFALSE(all(names(object[["complr"]][["output"]][[idx]][["wZ"]] %in% brmcoda_vars[["x"]])))) {
       stop(
         sprintf(
           "brmcoda model %s should include a complete set of between and within ilr predictors %s",
           "for substitution analysis at within level to be performed",
-          brmcoda_vars$x,
-          names(object$complr$output[[idx]]$wZ)
+          brmcoda_vars[["x"]],
+          names(object[["complr"]][["output"]][[idx]][["wZ"]])
         )
       )
     }
   }
   if ("aggregate" %in% level) {
-    if (isFALSE("aggregate" %in% brmcoda_vars$fixef_level)) {
+    if (isFALSE("aggregate" %in% brmcoda_vars[["fixef_level"]])) {
       stop(
         sprintf(
           "'aggregate' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-          brmcoda_vars$fixef_level,
-          brmcoda_vars$fixef_level
+          brmcoda_vars[["fixef_level"]],
+          brmcoda_vars[["fixef_level"]]
         )
       )
     }
-    if (isFALSE(all(names(object$complr$output[[idx]]$Z) %in% brmcoda_vars$x))) {
+    if (isFALSE(all(names(object[["complr"]][["output"]][[idx]][["Z"]]) %in% brmcoda_vars[["x"]]))) {
       stop(
         sprintf(
           "brmcoda model %s should include a complete set of aggregate ilr predictors %s",
           "for substitution analysis at aggregate level to be performed",
-          brmcoda_vars$x,
-          names(object$complr$output[[idx]]$Z)
+          brmcoda_vars[["x"]],
+          names(object[["complr"]][["output"]][[idx]][["Z"]])
         )
       )
     }

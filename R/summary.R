@@ -249,13 +249,13 @@ summary.substitution <- function(object,
   }
   
   if (missing(delta)) {
-    delta <- object$delta
+    delta <- object[["delta"]]
   } else {
     delta <- as.integer(delta)
   }
   
   if (missing(ref)) {
-    ref <- object$ref
+    ref <- object[["ref"]]
   } else {
     if (isFALSE(any(c("grandmean", "clustermean", "users") %in% ref))) {
       stop(
@@ -266,7 +266,7 @@ summary.substitution <- function(object,
   }
   
   if (missing(level)) {
-    level <- object$level
+    level <- object[["level"]]
   } else {
     if (isFALSE(any(c("between", "within", "aggregate") %in% level))) {
       stop(
@@ -277,9 +277,9 @@ summary.substitution <- function(object,
   }
   
   if (missing(to)) {
-    to <- object$parts
+    to <- object[["parts"]]
   } else {
-    if (isFALSE(any(object$parts %in% to))) {
+    if (isFALSE(any(object[["parts"]] %in% to))) {
       stop(
         "'to' should be names of one or more compositional parts present in the substitution model."
       )
@@ -288,9 +288,9 @@ summary.substitution <- function(object,
   }
   
   if (missing(from)) {
-    from <- object$parts
+    from <- object[["parts"]]
   } else {
-    if (isFALSE(any(object$parts %in% from))) {
+    if (isFALSE(any(object[["parts"]] %in% from))) {
       stop(
         "'from' should be names of one or more compositional parts present in the substitution model."
       )
@@ -310,11 +310,11 @@ summary.substitution <- function(object,
     )]),
     function(outi) {
       rbindlist(lapply(outi, function(outii) {
-        rbindlist(Map(function(x, nm) cbind(x, resp = nm), outii, names(outii)))
+        rbindlist(Map(function(x, nm) cbind(x, Resp = nm), outii, names(outii)))
       }))
     }))
 
-  if (object$type == "one-to-all") {
+  if (object[["type"]] == "one-to-all") {
     out <- out[abs(Delta) %in% delta & Level %in% level & Reference %in% ref & (To %in% to | From %in% to)]
     out[, Delta := abs(Delta)]
   } else {
@@ -334,8 +334,7 @@ summary.substitution <- function(object,
       else
         X)
   }
-  print(out, row.names = FALSE)
-  invisible(out)
+  out
 }
 
 #' Print a Summary for a \code{substitution} object

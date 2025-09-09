@@ -6,7 +6,7 @@
 #'
 #' @param object A fitted model object of class \code{brmcoda}.
 #' @param ... Optional arguments to pass to
-#' \code{\link[shinystan:launch_shinystan]{launch_shinystan}} or 
+#' \code{\link[shinystan:launch_shinystan]{launch_shinystan}} or
 #' \code{\link[shiny:runApp]{runApp}}.
 #'
 #' @seealso \code{\link[shinystan:launch_shinystan]{launch_shinystan}}
@@ -62,7 +62,6 @@ launch_shinystan.brmcoda <- function(object, ...) {
 #' @importFrom htmltools a
 #' @export
 multilevelcoda_sim <- function() {
-  
   # shiny input
   tryCatch({
     data("sim", package = "multilevelcoda", envir = environment())
@@ -108,11 +107,13 @@ multilevelcoda_sim <- function() {
       "navbar-light-brand-color" = "#FAF7F3",
       "navbar-light-active-color" = "#F1DDCF",
       "navbar-light-hover-color" = "#d18d9a",
-      "navbar-light-bg" = "#665C58", #90766B
+      "navbar-light-bg" = "#665C58",
+      #90766B
       "navbar-default-link-hover-bg" = "#708885",
       "navbar-light-panel-bg" = "#A1B2C2",
       
-      "table-bg" = "#EFE3E0",   #E5E8E1 DFD7D6
+      "table-bg" = "#EFE3E0",
+      #E5E8E1 DFD7D6
       "table-accent-bg" = "#fff",
       "table-light-striped-bg" = "#FAF7F3",
       "table-light-striped-bg-active" = "#CFDAE2",
@@ -145,25 +146,20 @@ multilevelcoda_sim <- function() {
       "btn-success-bg" = "#A1B2C2",
       "input-bg" = "#fff",
       
-      
       "legend-color" = "#DCD5CE",
       "border-primary" = "#3d251e",
       "bg-primary" = "#3d251e",
-      
-      
-      
+
       "table-active-bg" = "#F0DBDE  !important"
       # "bs-table-hover-bg" = "#CFDAE2",
       #
       # "bs-table-bg-accent" = "#CFDAE2"
       
       # "inverse-bg" = "#DCD5CE"
-      
     )
   
   # shiny server  ----------------------
   server <- function(input, output, session) {
-    
     # Summary Statistics -------------------
     ## brmcoda tab ---------------
     output$simsum_brmcoda_table <- DT::renderDataTable(DT::datatable({
@@ -192,15 +188,20 @@ multilevelcoda_sim <- function() {
       } else if (input$par_brmcoda == "sigma") {
         par_brmcoda <- "  sigma"
       }
-      if (input$rint_sd_brmcoda == "medium" & input$res_sd1_brmcoda == "medium") {
+      if (input$rint_sd_brmcoda == "medium" &
+          input$res_sd1_brmcoda == "medium") {
         brmcoda_tab <- brmcoda_tab[condition == "base"]
-      } else if (input$rint_sd_brmcoda == "medium" & input$res_sd1_brmcoda == "small") {
+      } else if (input$rint_sd_brmcoda == "medium" &
+                 input$res_sd1_brmcoda == "small") {
         brmcoda_tab <- brmcoda_tab[condition == "REbase_RESsmall"]
-      } else if (input$rint_sd_brmcoda == "medium" & input$res_sd1_brmcoda == "large") {
+      } else if (input$rint_sd_brmcoda == "medium" &
+                 input$res_sd1_brmcoda == "large") {
         brmcoda_tab <- brmcoda_tab[condition == "REbase_RESlarge"]
-      } else if (input$rint_sd_brmcoda == "small" & input$res_sd2_brmcoda == "large") {
+      } else if (input$rint_sd_brmcoda == "small" &
+                 input$res_sd2_brmcoda == "large") {
         brmcoda_tab <- brmcoda_tab[condition == "REsmall_RESlarge"]
-      } else if (input$rint_sd_brmcoda == "large" & input$res_sd3_brmcoda == "small") {
+      } else if (input$rint_sd_brmcoda == "large" &
+                 input$res_sd3_brmcoda == "small") {
         brmcoda_tab <- brmcoda_tab[condition == "RElarge_RESsmall"]
       }
       if (input$N_brmcoda != "All") {
@@ -215,15 +216,17 @@ multilevelcoda_sim <- function() {
       
       brmcoda_tab <-
         brmcoda_tab[by %in% par_brmcoda &
-                      Stat == input$stat_brmcoda, .(Stat,
-                                                    Estimates,
-                                                    MCSE,
-                                                    N,
-                                                    K,
-                                                    D,
-                                                    # sd_ID_Intercept,
-                                                    sigma,
-                                                    OnTarget)]
+                      Stat == input$stat_brmcoda, .(
+                        Stat,
+                        Estimates,
+                        MCSE,
+                        N,
+                        K,
+                        D,
+                        # sd_ID_Intercept,
+                        sigma,
+                        OnTarget
+                      )]
       
       # brmcoda_tab[] <- lapply(brmcoda_tab, function(x) if(is.numeric(x)) round(x, 2) else x)
       
@@ -239,16 +242,19 @@ multilevelcoda_sim <- function() {
     
     ## substitution tab ------------
     output$simsum_sub_table <- DT::renderDataTable(DT::datatable({
-      
       if (input$rint_sd_sub == "medium" & input$res_sd1_sub == "medium") {
         sub_tab <- sub_tab[condition == "base"]
-      } else if (input$rint_sd_sub == "medium" & input$res_sd1_sub == "small") {
+      } else if (input$rint_sd_sub == "medium" &
+                 input$res_sd1_sub == "small") {
         sub_tab <- sub_tab[condition == "REbase_RESsmall"]
-      } else if (input$rint_sd_sub == "medium" & input$res_sd1_sub == "large") {
+      } else if (input$rint_sd_sub == "medium" &
+                 input$res_sd1_sub == "large") {
         sub_tab <- sub_tab[condition == "REbase_RESlarge"]
-      } else if (input$rint_sd_sub == "small" & input$res_sd2_sub == "large") {
+      } else if (input$rint_sd_sub == "small" &
+                 input$res_sd2_sub == "large") {
         sub_tab <- sub_tab[condition == "REsmall_RESlarge"]
-      } else if (input$rint_sd_sub == "large" & input$res_sd3_sub == "small") {
+      } else if (input$rint_sd_sub == "large" &
+                 input$res_sd3_sub == "small") {
         sub_tab <- sub_tab[condition == "RElarge_RESsmall"]
       }
       if (input$N_sub != "All") {
@@ -274,15 +280,17 @@ multilevelcoda_sim <- function() {
       }
       
       sub_tab <-
-        sub_tab[Stat == input$stat_sub, .(Stat,
-                                          Estimates,
-                                          MCSE,
-                                          N,
-                                          K,
-                                          D,
-                                          # sd_ID_Intercept,
-                                          sigma,
-                                          OnTarget)]
+        sub_tab[Stat == input$stat_sub, .(
+          Stat,
+          Estimates,
+          MCSE,
+          N,
+          K,
+          D,
+          # sd_ID_Intercept,
+          sigma,
+          OnTarget
+        )]
       
       # sub_tab[] <- lapply(sub_tab, function(x) if(is.numeric(x)) round(x, 2) else x)
       
@@ -301,46 +309,65 @@ multilevelcoda_sim <- function() {
     
     ## brmcoda plot ---------------
     output$simsum_brmcoda_plot <- renderPlotly({
-      
-      if (input$rint_sd_brmcoda_plot == "medium" & input$res_sd1_brmcoda_plot == "medium") {
+      if (input$rint_sd_brmcoda_plot == "medium" &
+          input$res_sd1_brmcoda_plot == "medium") {
         if (input$D_brmcoda_plot == 3) {
-          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot & condition == "base"], shiny = TRUE)
+          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot &
+                                 condition == "base"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 4) {
-          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot & condition == "base"], shiny = TRUE)
+          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot &
+                                 condition == "base"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 5) {
-          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot & condition == "base"], shiny = TRUE)
+          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot &
+                                 condition == "base"], shiny = TRUE)
         }
-      } else if (input$rint_sd_brmcoda_plot == "medium" & input$res_sd1_brmcoda_plot == "small") {
+      } else if (input$rint_sd_brmcoda_plot == "medium" &
+                 input$res_sd1_brmcoda_plot == "small") {
         if (input$D_brmcoda_plot == 3) {
-          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot & condition == "REbase_RESsmall"], shiny = TRUE)
+          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot &
+                                 condition == "REbase_RESsmall"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 4) {
-          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot & condition == "REbase_RESsmall"], shiny = TRUE)
+          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot &
+                                 condition == "REbase_RESsmall"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 5) {
-          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot & condition == "REbase_RESsmall"], shiny = TRUE)
+          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot &
+                                 condition == "REbase_RESsmall"], shiny = TRUE)
         }
-      } else if (input$rint_sd_brmcoda_plot == "medium" & input$res_sd1_brmcoda_plot == "large") {
+      } else if (input$rint_sd_brmcoda_plot == "medium" &
+                 input$res_sd1_brmcoda_plot == "large") {
         if (input$D_brmcoda_plot == 3) {
-          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot & condition == "REbase_RESlarge"], shiny = TRUE)
+          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot &
+                                 condition == "REbase_RESlarge"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 4) {
-          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot & condition == "REbase_RESlarge"], shiny = TRUE)
+          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot &
+                                 condition == "REbase_RESlarge"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 5) {
-          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot & condition == "REbase_RESlarge"], shiny = TRUE)
+          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot &
+                                 condition == "REbase_RESlarge"], shiny = TRUE)
         }
-      } else if (input$rint_sd_brmcoda_plot == "small" & input$res_sd2_brmcoda_plot == "large") {
+      } else if (input$rint_sd_brmcoda_plot == "small" &
+                 input$res_sd2_brmcoda_plot == "large") {
         if (input$D_brmcoda_plot == 3) {
-          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot & condition == "REsmall_RESlarge"], shiny = TRUE)
+          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot &
+                                 condition == "REsmall_RESlarge"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 4) {
-          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot & condition == "REsmall_RESlarge"], shiny = TRUE)
+          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot &
+                                 condition == "REsmall_RESlarge"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 5) {
-          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot & condition == "REsmall_RESlarge"], shiny = TRUE)
+          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot &
+                                 condition == "REsmall_RESlarge"], shiny = TRUE)
         }
-      } else if (input$rint_sd_brmcoda_plot == "large" & input$res_sd3_brmcoda_plot == "small") {
+      } else if (input$rint_sd_brmcoda_plot == "large" &
+                 input$res_sd3_brmcoda_plot == "small") {
         if (input$D_brmcoda_plot == 3) {
-          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot & condition == "RElarge_RESsmall"], shiny = TRUE)
+          .par_plot(brmcoda_d3[Stat == input$stat_brmcoda_plot &
+                                 condition == "RElarge_RESsmall"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 4) {
-          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot & condition == "RElarge_RESsmall"], shiny = TRUE)
+          .par_plot(brmcoda_d4[Stat == input$stat_brmcoda_plot &
+                                 condition == "RElarge_RESsmall"], shiny = TRUE)
         } else if (input$D_brmcoda_plot == 5) {
-          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot & condition == "RElarge_RESsmall"], shiny = TRUE)
+          .par_plot(brmcoda_d5[Stat == input$stat_brmcoda_plot &
+                                 condition == "RElarge_RESsmall"], shiny = TRUE)
         }
       }
       
@@ -348,49 +375,67 @@ multilevelcoda_sim <- function() {
     
     ## substitution plot ---------------
     output$simsum_sub_plot <- renderPlotly({
-      
-      if (input$rint_sd_sub_plot == "medium" & input$res_sd1_sub_plot == "medium") {
+      if (input$rint_sd_sub_plot == "medium" &
+          input$res_sd1_sub_plot == "medium") {
         if (input$D_sub_plot == 3) {
-          .par_plot(sub_d3[Stat == input$stat_sub_plot & condition == "base"], shiny = TRUE)
+          .par_plot(sub_d3[Stat == input$stat_sub_plot &
+                             condition == "base"], shiny = TRUE)
         } else if (input$D_sub_plot == 4) {
-          .par_plot(sub_d4[Stat == input$stat_sub_plot & condition == "base"], shiny = TRUE)
+          .par_plot(sub_d4[Stat == input$stat_sub_plot &
+                             condition == "base"], shiny = TRUE)
         } else if (input$D_sub_plot == 5) {
-          .par_plot(sub_d5[Stat == input$stat_sub_plot & condition == "base"], shiny = TRUE)
+          .par_plot(sub_d5[Stat == input$stat_sub_plot &
+                             condition == "base"], shiny = TRUE)
         }
-      } else if (input$rint_sd_sub_plot == "medium" & input$res_sd1_sub_plot == "small") {
+      } else if (input$rint_sd_sub_plot == "medium" &
+                 input$res_sd1_sub_plot == "small") {
         if (input$D_sub_plot == 3) {
-          .par_plot(sub_d3[Stat == input$stat_sub_plot & condition == "REbase_RESsmall"], shiny = TRUE)
+          .par_plot(sub_d3[Stat == input$stat_sub_plot &
+                             condition == "REbase_RESsmall"], shiny = TRUE)
         } else if (input$D_sub_plot == 4) {
-          .par_plot(sub_d4[Stat == input$stat_sub_plot & condition == "REbase_RESsmall"], shiny = TRUE)
+          .par_plot(sub_d4[Stat == input$stat_sub_plot &
+                             condition == "REbase_RESsmall"], shiny = TRUE)
         } else if (input$D_sub_plot == 5) {
-          .par_plot(sub_d5[Stat == input$stat_sub_plot & condition == "REbase_RESsmall"], shiny = TRUE)
+          .par_plot(sub_d5[Stat == input$stat_sub_plot &
+                             condition == "REbase_RESsmall"], shiny = TRUE)
         }
-      } else if (input$rint_sd_sub_plot == "medium" & input$res_sd1_sub_plot == "large") {
+      } else if (input$rint_sd_sub_plot == "medium" &
+                 input$res_sd1_sub_plot == "large") {
         if (input$D_sub_plot == 3) {
-          .par_plot(sub_d3[Stat == input$stat_sub_plot & condition == "REbase_RESlarge"], shiny = TRUE)
+          .par_plot(sub_d3[Stat == input$stat_sub_plot &
+                             condition == "REbase_RESlarge"], shiny = TRUE)
         } else if (input$D_sub_plot == 4) {
-          .par_plot(sub_d4[Stat == input$stat_sub_plot & condition == "REbase_RESlarge"], shiny = TRUE)
+          .par_plot(sub_d4[Stat == input$stat_sub_plot &
+                             condition == "REbase_RESlarge"], shiny = TRUE)
         } else if (input$D_sub_plot == 5) {
-          .par_plot(sub_d5[Stat == input$stat_sub_plot & condition == "REbase_RESlarge"], shiny = TRUE)
+          .par_plot(sub_d5[Stat == input$stat_sub_plot &
+                             condition == "REbase_RESlarge"], shiny = TRUE)
         }
-      } else if (input$rint_sd_sub_plot == "small" & input$res_sd2_sub_plot == "large") {
+      } else if (input$rint_sd_sub_plot == "small" &
+                 input$res_sd2_sub_plot == "large") {
         if (input$D_sub_plot == 3) {
-          .par_plot(sub_d3[Stat == input$stat_sub_plot & condition == "REsmall_RESlarge"], shiny = TRUE)
+          .par_plot(sub_d3[Stat == input$stat_sub_plot &
+                             condition == "REsmall_RESlarge"], shiny = TRUE)
         } else if (input$D_sub_plot == 4) {
-          .par_plot(sub_d4[Stat == input$stat_sub_plot & condition == "REsmall_RESlarge"], shiny = TRUE)
+          .par_plot(sub_d4[Stat == input$stat_sub_plot &
+                             condition == "REsmall_RESlarge"], shiny = TRUE)
         } else if (input$D_sub_plot == 5) {
-          .par_plot(sub_d5[Stat == input$stat_sub_plot & condition == "REsmall_RESlarge"], shiny = TRUE)
+          .par_plot(sub_d5[Stat == input$stat_sub_plot &
+                             condition == "REsmall_RESlarge"], shiny = TRUE)
         }
-      } else if (input$rint_sd_sub_plot == "large" & input$res_sd3_sub_plot == "small") {
+      } else if (input$rint_sd_sub_plot == "large" &
+                 input$res_sd3_sub_plot == "small") {
         if (input$D_sub_plot == 3) {
-          .par_plot(sub_d3[Stat == input$stat_sub_plot & condition == "RElarge_RESsmall"], shiny = TRUE)
+          .par_plot(sub_d3[Stat == input$stat_sub_plot &
+                             condition == "RElarge_RESsmall"], shiny = TRUE)
         } else if (input$D_sub_plot == 4) {
-          .par_plot(sub_d4[Stat == input$stat_sub_plot & condition == "RElarge_RESsmall"], shiny = TRUE)
+          .par_plot(sub_d4[Stat == input$stat_sub_plot &
+                             condition == "RElarge_RESsmall"], shiny = TRUE)
         } else if (input$D_sub_plot == 5) {
-          .par_plot(sub_d5[Stat == input$stat_sub_plot & condition == "RElarge_RESsmall"], shiny = TRUE)
+          .par_plot(sub_d5[Stat == input$stat_sub_plot &
+                             condition == "RElarge_RESsmall"], shiny = TRUE)
         }
       }
-      
     })
     
     output$coda <- renderImage({
@@ -398,7 +443,8 @@ multilevelcoda_sim <- function() {
       
       # Return a list containing the filename and alt text
       list(src = filename,
-           heigh = "40px", width = "50px")
+           heigh = "40px",
+           width = "50px")
       
     }, deleteFile = FALSE)
     # observe(session$setCurrentTheme(
@@ -415,7 +461,6 @@ multilevelcoda_sim <- function() {
     #     ranges_brmcoda$y <- NULL
     #   }
     # })
-    
   }
   
   # shiny ui -----------------
@@ -489,7 +534,10 @@ multilevelcoda_sim <- function() {
       position = "fixed-top",
       # title(div(img(src = "coda.png")),
       title = "multilevelcoda Simulation Study",
-      footer = a("You can also read a summary of this simulation study in our publication here.", href = "https://doi.org/10.1037/met0000750"),
+      footer = a(
+        "You can also read a summary of this simulation study in our publication here.",
+        href = "https://doi.org/10.1037/met0000750"
+      ),
       # nav_item(img(src = 'coda.png'), fillable = FALSE, height="30px"),
       # imageOutput("coda.png")),
       ## Simulation Summary -----------------------------
@@ -510,14 +558,12 @@ multilevelcoda_sim <- function() {
               h5("Simulation Condition"),
               br(),
               
-              selectInput("N_brmcoda",
-                          "Number of individuals (N):",
-                          c("All",
-                            30, 50, 360, 1200)),
-              selectInput("K_brmcoda",
-                          "Number of days (K):",
-                          c("All",
-                            3, 5, 7, 14)),
+              selectInput(
+                "N_brmcoda",
+                "Number of individuals (N):",
+                c("All", 30, 50, 360, 1200)
+              ),
+              selectInput("K_brmcoda", "Number of days (K):", c("All", 3, 5, 7, 14)),
               radioButtons(
                 "D_brmcoda",
                 "Number of compositional parts (D):",
@@ -540,15 +586,11 @@ multilevelcoda_sim <- function() {
               ),
               conditionalPanel(
                 condition = "input.rint_sd_brmcoda == 'small'",
-                selectInput("res_sd2_brmcoda",
-                            "Residual variance:",
-                            c("large"))
+                selectInput("res_sd2_brmcoda", "Residual variance:", c("large"))
               ),
               conditionalPanel(
                 condition = "input.rint_sd_brmcoda == 'large'",
-                selectInput("res_sd3_brmcoda",
-                            "Residual variance:",
-                            c("small"))
+                selectInput("res_sd3_brmcoda", "Residual variance:", c("small"))
               )
               # selectInput("res_sd",
               #             "Residual variance:",
@@ -612,14 +654,12 @@ multilevelcoda_sim <- function() {
               h5("Simulation Condition"),
               br(),
               
-              selectInput("N_sub",
-                          "Number of individuals (N):",
-                          c("All",
-                            30, 50, 360, 1200)),
-              selectInput("K_sub",
-                          "Number of days (K):",
-                          c("All",
-                            3, 5, 7, 14)),
+              selectInput(
+                "N_sub",
+                "Number of individuals (N):",
+                c("All", 30, 50, 360, 1200)
+              ),
+              selectInput("K_sub", "Number of days (K):", c("All", 3, 5, 7, 14)),
               radioButtons(
                 "D_sub",
                 "Number of compositional parts (D):",
@@ -642,15 +682,11 @@ multilevelcoda_sim <- function() {
               ),
               conditionalPanel(
                 condition = "input.rint_sd_sub == 'small'",
-                selectInput("res_sd2_sub",
-                            "Residual variance:",
-                            c("large"))
+                selectInput("res_sd2_sub", "Residual variance:", c("large"))
               ),
               conditionalPanel(
                 condition = "input.rint_sd_sub == 'large'",
-                selectInput("res_sd3_sub",
-                            "Residual variance:",
-                            c("small"))
+                selectInput("res_sd3_sub", "Residual variance:", c("small"))
               )
               # selectInput("res_sd",
               #             "Residual variance:",
@@ -747,8 +783,6 @@ multilevelcoda_sim <- function() {
             )
           )
         )
-        
-        
       ),
       ## Simulation Plots -----------------------------
       nav_menu(
@@ -767,20 +801,16 @@ multilevelcoda_sim <- function() {
               h5("Simulation Condition"),
               br(),
               
-              selectInput(
-                "N_brmcoda_plot",
-                "Number of individuals (N):",
-                c("All"
-                  # ,
-                  # 30, 50, 360, 1200
-                )
-              ),
-              selectInput("K_brmcoda_plot",
-                          "Number of days (K):",
-                          c("All"
-                            # ,
-                            # 3, 5, 7, 14
-                          )),
+              selectInput("N_brmcoda_plot", "Number of individuals (N):", c(
+                "All"
+                # ,
+                # 30, 50, 360, 1200
+              )),
+              selectInput("K_brmcoda_plot", "Number of days (K):", c(
+                "All"
+                # ,
+                # 3, 5, 7, 14
+              )),
               radioButtons(
                 "D_brmcoda_plot",
                 "Number of compositional parts (D):",
@@ -845,30 +875,24 @@ multilevelcoda_sim <- function() {
               
               fluidRow(column(
                 12,
-                selectInput(
-                  "par_brmcoda_plot",
-                  "Parameter:",
-                  c(
-                    "All"
-                    # ,
-                    # "b_Intercept",
-                    # "b_bilr1",
-                    # "b_bilr2",
-                    # "b_bilr3",
-                    # "b_bilr4",
-                    # "b_wilr1",
-                    # "b_wilr2",
-                    # "b_wilr3",
-                    # "b_wilr4",
-                    # "sd_ID_Intercept",
-                    # "sigma"
-                  ),
-                  width = "100%"
-                )
+                selectInput("par_brmcoda_plot", "Parameter:", c(
+                  "All"
+                  # ,
+                  # "b_Intercept",
+                  # "b_bilr1",
+                  # "b_bilr2",
+                  # "b_bilr3",
+                  # "b_bilr4",
+                  # "b_wilr1",
+                  # "b_wilr2",
+                  # "b_wilr3",
+                  # "b_wilr4",
+                  # "sd_ID_Intercept",
+                  # "sigma"
+                ), width = "100%")
               )),
               # br(),
-              plotlyOutput("simsum_brmcoda_plot",
-                           height = "1300px")
+              plotlyOutput("simsum_brmcoda_plot", height = "1300px")
             )
           )
         ),
@@ -886,19 +910,16 @@ multilevelcoda_sim <- function() {
               h5("Simulation Condition"),
               br(),
               
-              selectInput(
-                "N_sub_plot",
-                "Number of individuals (N):",
-                c("All"
-                  # ,
-                  # 30, 50, 360, 1200
-                )),
-              selectInput("K_suub_plot",
-                          "Number of days (K):",
-                          c("All"
-                            # ,
-                            # 3, 5, 7, 14
-                          )),
+              selectInput("N_sub_plot", "Number of individuals (N):", c(
+                "All"
+                # ,
+                # 30, 50, 360, 1200
+              )),
+              selectInput("K_suub_plot", "Number of days (K):", c(
+                "All"
+                # ,
+                # 3, 5, 7, 14
+              )),
               radioButtons(
                 "D_sub_plot",
                 "Number of compositional parts (D):",
@@ -925,16 +946,11 @@ multilevelcoda_sim <- function() {
               ),
               conditionalPanel(
                 condition = "input.rint_sd_sub_plot == 'small'",
-                selectInput("res_sd2_sub_plot",
-                            "Residual variance:",
-                            c("large"),
-                            width = "100%")
+                selectInput("res_sd2_sub_plot", "Residual variance:", c("large"), width = "100%")
               ),
               conditionalPanel(
                 condition = "input.rint_sd_sub_plot == 'large'",
-                selectInput("res_sd3_sub_plot",
-                            "Residual variance:",
-                            c("small"), width = "100%")
+                selectInput("res_sd3_sub_plot", "Residual variance:", c("small"), width = "100%")
               )
             ),
             mainPanel(
@@ -956,77 +972,69 @@ multilevelcoda_sim <- function() {
                 )
               )),
               
-              fluidRow(
-                column(
-                  6,
-                  selectInput(
-                    "delta_sub_plot",
-                    "Substitution of:",
-                    c("All"),
-                    width = "100%"
+              fluidRow(column(
+                6,
+                selectInput("delta_sub_plot", "Substitution of:", c("All"), width = "100%"),
+                # conditionalPanel(
+                #   condition = "input.D_sub_plot == '3'",
+                #   selectInput(
+                #     "delta3_sub_plot",
+                #     "Substitution of:",
+                #     c(
+                #       "Sleep",
+                #       "Physical Activity" = "PA",
+                #       "Sedentary Behaviour" = "SB"
+                #     ),
+                #     width = "100%"
+                #   )
+                # ),
+                # conditionalPanel(
+                #   condition = "input.D_sub_plot == '4'",
+                #   selectInput(
+                #     "delta4_sub_plot",
+                #     "Substitution of:",
+                #     c(
+                #       "Sleep",
+                #       "Moderate-Vigorous Physical Activity" = "MVPA",
+                #       "Light Physical Activity" = "LPA",
+                #       "Sedentary Behaviour" = "SB"
+                #     ),
+                #     width = "100%"
+                #   )
+                # ),
+                # conditionalPanel(
+                #   condition = "input.D_sub_plot == '5'",
+                #   selectInput(
+                #     "delta5_sub_plot",
+                #     "Substitution of:",
+                #     c(
+                #       "Sleep" = "TST",
+                #       "Awake in Bed" = "WAKE",
+                #       "Moderate-Vigorous Physical Activity" = "MVPA",
+                #       "Light Physical Activity" = "LPA",
+                #       "Sedentary Behaviour" = "SB"
+                #     ),
+                #     width = "100%"
+                #   )
+                # )
+              ), column(
+                6,
+                selectInput(
+                  "level_sub_plot",
+                  "Level:",
+                  c(
+                    "All"
+                    # ,
+                    # "Between", "Within"
                   ),
-                  # conditionalPanel(
-                  #   condition = "input.D_sub_plot == '3'",
-                  #   selectInput(
-                  #     "delta3_sub_plot",
-                  #     "Substitution of:",
-                  #     c(
-                  #       "Sleep",
-                  #       "Physical Activity" = "PA",
-                  #       "Sedentary Behaviour" = "SB"
-                  #     ),
-                  #     width = "100%"
-                  #   )
-                  # ),
-                  # conditionalPanel(
-                  #   condition = "input.D_sub_plot == '4'",
-                  #   selectInput(
-                  #     "delta4_sub_plot",
-                  #     "Substitution of:",
-                  #     c(
-                  #       "Sleep",
-                  #       "Moderate-Vigorous Physical Activity" = "MVPA",
-                  #       "Light Physical Activity" = "LPA",
-                  #       "Sedentary Behaviour" = "SB"
-                  #     ),
-                  #     width = "100%"
-                  #   )
-                  # ),
-                  # conditionalPanel(
-                  #   condition = "input.D_sub_plot == '5'",
-                  #   selectInput(
-                  #     "delta5_sub_plot",
-                  #     "Substitution of:",
-                  #     c(
-                  #       "Sleep" = "TST",
-                  #       "Awake in Bed" = "WAKE",
-                  #       "Moderate-Vigorous Physical Activity" = "MVPA",
-                  #       "Light Physical Activity" = "LPA",
-                  #       "Sedentary Behaviour" = "SB"
-                  #     ),
-                  #     width = "100%"
-                  #   )
-                  # )
-                ),
-                column(
-                  6,
-                  selectInput(
-                    "level_sub_plot",
-                    "Level:",
-                    c("All"
-                      # ,
-                      # "Between", "Within"
-                    ),
-                    selected = "All",
-                    # inline = TRUE,
-                    width = "100%"
-                  )
+                  selected = "All",
+                  # inline = TRUE,
+                  width = "100%"
                 )
-              )
+              ))
               ,
               # br(),
-              plotlyOutput("simsum_sub_plot",
-                           height = "1600px")
+              plotlyOutput("simsum_sub_plot", height = "1600px")
             )
           )
         )
@@ -1036,11 +1044,9 @@ multilevelcoda_sim <- function() {
       # nav_item(icon = icon("arrow-right-arrow-left", lib = "font-awesome")),
       nav_item(imageOutput("coda", height = "50px"), fillable = FALSE),
       
-      
     )
   )
   # run app ------------------------
   shinyApp(ui = ui, server = server)
-  
   
 }
