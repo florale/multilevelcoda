@@ -42,7 +42,6 @@ create_substitution <- function(between_simple_sub,
                                 weight,
                                 at,
                                 type) {
-  
   stopifnot(is.list(between_simple_sub) || is.null(between_simple_sub))
   stopifnot(is.list(within_simple_sub) || is.null(within_simple_sub))
   stopifnot(is.list(simple_sub) || is.null(simple_sub))
@@ -68,6 +67,64 @@ create_substitution <- function(between_simple_sub,
       type = type
     ),
     class = "substitution"
+  )
+}
+
+#' Helper extract variables from complr and brmcoda objects for use in substitution models
+.get.subvars <- function(object, parts, scale) {
+  brmcoda_vars <- get_variables(object)
+  complr_vars  <- get_variables(object$complr)
+  
+  ## get the index of which index elements of object$complr$output do the parts correspond to
+  idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
+    x$parts), function(p)
+      identical(sort(parts), sort(p)), logical(1))))[1]
+  
+  idy <- as.integer(which(vapply(complr_vars, function(y) {
+    any(sapply(c("Z", "bZ", "wZ"), function(z) {
+      identical(sort(y[[z]]), sort(brmcoda_vars[["y"]]))
+    }))
+  }, logical(1))))[1]
+  
+  # grab logratio and composition names
+  z_vars  <- complr_vars[[paste0("composition_", idx)]][["Z"]]
+  bz_vars <- complr_vars[[paste0("composition_", idx)]][["bZ"]]
+  wz_vars <- complr_vars[[paste0("composition_", idx)]][["wZ"]]
+  x_vars  <- complr_vars[[paste0("composition_", idx)]][["X"]]
+  bx_vars <- complr_vars[[paste0("composition_", idx)]][["bX"]]
+  wx_vars <- complr_vars[[paste0("composition_", idx)]][["wX"]]
+  
+  xz_vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
+  sx_vars <- paste0("s", object[["complr"]][["output"]][[idx]][["parts"]])
+  
+  if (inherits(object[["model"]][["formula"]], "mvbrmsformula") &&
+      (
+        identical(brmcoda_vars[["y"]], z_vars)  ||
+        identical(brmcoda_vars[["y"]], bz_vars) ||
+        identical(brmcoda_vars[["y"]], wz_vars)
+      )) {
+    if (identical(scale, "response")) {
+      y_vars <- complr_vars[[paste0("composition_", idy)]][["X"]]
+    } else {
+      y_vars <- complr_vars[[paste0("composition_", idy)]][["Z"]]
+    }
+  } else {
+    y_vars <- brmcoda_vars[["y"]]
+  }
+  
+  list(brmcoda_vars = brmcoda_vars,
+       complr_vars = complr_vars,
+       z_vars = z_vars,
+       bz_vars = bz_vars,
+       wz_vars = wz_vars,
+       x_vars = x_vars,
+       bx_vars = bx_vars,
+       wx_vars = wx_vars,
+       xz_vars = xz_vars,
+       sx_vars = sx_vars,
+       y_vars = y_vars,
+       idx = idx,
+       idy = if(!is.na(idy)) idy else 0L
   )
 }
 
@@ -100,53 +157,10 @@ NULL
                       type,
                       cores,
                       ...) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
+  # extract variables from complr and brmcoda objects for use in substitution models
+  all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
-    x$parts), function(p)
-      identical(parts, p), logical(1)))
-  
-  idy <- which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars$y))
-    }))
-  }, logical(1)))
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]]$Z
-  bz_vars <- complr_vars[[paste0("composition_", idx)]]$bZ
-  wz_vars <- complr_vars[[paste0("composition_", idx)]]$wZ
-  
-  x_vars  <- complr_vars[[paste0("composition_", idx)]]$X
-  bx_vars <- complr_vars[[paste0("composition_", idx)]]$bX
-  wx_vars <- complr_vars[[paste0("composition_", idx)]]$wX
-  
-  sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
-  
-  if (inherits(object$model$formula, "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars$y, z_vars)  ||
-        identical(brmcoda_vars$y, bz_vars) ||
-        identical(brmcoda_vars$y, wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$X
-    } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$Z
-    }
-  } else {
-    y_vars <- brmcoda_vars$y
-  }
-  
-  grid <- d0[, colnames(d0) %nin% c(z_vars,
-                                    bz_vars,
-                                    wz_vars,
-                                    x_vars,
-                                    bx_vars,
-                                    wx_vars,
-                                    object$complr$idvar), with = FALSE]
+  grid <- d0[, colnames(d0) %nin% c(all_vars[["xz_vars"]], object[["complr"]][["idvar"]]), with = FALSE]
   grid[, at := if (!is.null(at))
     names(at)
     else
@@ -200,7 +214,7 @@ NULL
       for (k in seq_len(nrow(sub_delta_j))) {
         xsub <- x0 + sub_delta_j[k, ]
         x0_xsub_delta_k <- cbind(x0, xsub, sub_delta_j[k, get(i)])
-        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
+        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(all_vars[["bx_vars"]], all_vars[["sx_vars"]], "Delta"))
         kout[[k]]     <- x0_xsub_delta_k
       }
       jout[[j]] <- rbindlist(kout)
@@ -219,18 +233,18 @@ NULL
     d1   <- d1[rowSums(d1[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bx0   <- acomp(d1[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
-    bxsub <- acomp(d1[, sx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+    bx0   <- acomp(d1[, all_vars[["bx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
+    bxsub <- acomp(d1[, all_vars[["sx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
     
-    bzsub <- ilr(bxsub, V = object$complr$output[[idx]]$psi)
+    bzsub <- ilr(bxsub, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
     wz0   <- as.data.table(matrix(0, nrow = nrow(bzsub), ncol = ncol(bzsub)))
     
-    colnames(bzsub) <- bz_vars
-    colnames(wz0)   <- wz_vars
+    colnames(bzsub) <- all_vars[["bz_vars"]]
+    colnames(wz0)   <- all_vars[["wz_vars"]]
     
     # reference grid
     ## get covariate + idvar names
-    covs <- colnames(d0) %snin% c(bz_vars, wz_vars, bx_vars, wx_vars)
+    covs <- colnames(d0) %snin% c(all_vars[["bz_vars"]], all_vars[["wz_vars"]], all_vars[["bx_vars"]], all_vars[["wx_vars"]])
     refgrid <- d0[, covs, with = FALSE]
     
     # predictions
@@ -244,12 +258,24 @@ NULL
         scale = scale,
         summary = FALSE
       )
-      if (length(brmcoda_vars$y) > 1) {
+      if (length(all_vars[["brmcoda_vars"]][["y"]]) > 1) {
         # when multiple outcomes
-        delta_y <- lapply(seq(dim(ysub)[3]), function(m)
-          # loop outcomes
-          ysub[, , m] - y0[, h, m])
-      } else {
+        ## when outcome is compositional
+        ## delta y is acomp change
+        if (all(sort(dimnames(ysub)[[3]]) %in% c(
+          sort(all_vars$x_vars),
+          sort(all_vars$wx_vars),
+          sort(all_vars$bx_vars)
+        ))) {
+          delta_y <- lapply(seq(dim(ysub)[2]), function(j)
+            ## j = delta, h = ref grid
+            acomp(ysub[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]])
+            - acomp(y0[, h, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]]))
+        } else { ## when outcome is not compositional
+          delta_y <- lapply(seq(dim(ysub)[3]), function(v)
+            ysub[, , v] - y0[, h, v])
+        }
+      } else { # when single outcome
         delta_y <- list(ysub - y0[, h])
       }
       hout[[h]] <- delta_y
@@ -258,7 +284,7 @@ NULL
     ## restructure hout so that
     ## first level is the outcome
     ## second level is the reference grid
-    hout <- lapply(seq_along(y_vars), function(m)
+    hout <- lapply(seq_along(all_vars[["y_vars"]]), function(m)
       Map(`[[`, hout, m))
     
     if (aorg) {
@@ -316,7 +342,7 @@ NULL
             cbind(t(result), dmeta, grid[ida, names(at), with = FALSE])
         }, ioutii, seq_along(ioutii)))
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   } else {
@@ -329,7 +355,7 @@ NULL
         else
           list(posterior = iouti[[i]], grid = as.data.table(grid[, names(at), with = FALSE]))
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   }
@@ -354,53 +380,10 @@ NULL
                       type,
                       cores,
                       ...) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
+  # extract variables from complr and brmcoda objects for use in substitution models
+  all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
-    x$parts), function(p)
-      identical(parts, p), logical(1)))
-  
-  idy <- which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars$y))
-    }))
-  }, logical(1)))
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]]$Z
-  bz_vars <- complr_vars[[paste0("composition_", idx)]]$bZ
-  wz_vars <- complr_vars[[paste0("composition_", idx)]]$wZ
-  
-  x_vars  <- complr_vars[[paste0("composition_", idx)]]$X
-  bx_vars <- complr_vars[[paste0("composition_", idx)]]$bX
-  wx_vars <- complr_vars[[paste0("composition_", idx)]]$wX
-  
-  sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
-  
-  if (inherits(object$model$formula, "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars$y, z_vars)  ||
-        identical(brmcoda_vars$y, bz_vars) ||
-        identical(brmcoda_vars$y, wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$X
-    } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$Z
-    }
-  } else {
-    y_vars <- brmcoda_vars$y
-  }
-  
-  grid <- d0[, colnames(d0) %nin% c(z_vars,
-                                    bz_vars,
-                                    wz_vars,
-                                    x_vars,
-                                    bx_vars,
-                                    wx_vars,
-                                    object$complr$idvar), with = FALSE]
+  grid <- d0[, colnames(d0) %nin% c(all_vars[["xz_vars"]], object[["complr"]][["idvar"]]), with = FALSE]
   grid[, at := if (!is.null(at))
     names(at)
     else
@@ -454,7 +437,7 @@ NULL
       for (k in seq_len(nrow(sub_delta_j))) {
         xsub <- x0 + sub_delta_j[k, ]
         x0_xsub_delta_k <- cbind(x0, xsub, sub_delta_j[k, get(i)])
-        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
+        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(all_vars[["bx_vars"]], all_vars[["sx_vars"]], "Delta"))
         kout[[k]]       <- x0_xsub_delta_k
       }
       jout[[j]] <- rbindlist(kout)
@@ -473,19 +456,19 @@ NULL
     d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    bx0   <- acomp(d1[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
-    bxsub <- acomp(d1[, sx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+    bx0   <- acomp(d1[, all_vars[["bx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
+    bxsub <- acomp(d1[, all_vars[["sx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
     
-    bz0   <- ilr(bx0, V = object$complr$output[[idx]]$psi)
-    bzsub <- ilr(bxsub, V = object$complr$output[[idx]]$psi)
+    bz0   <- ilr(bx0, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
+    bzsub <- ilr(bxsub, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
     wzsub <- bzsub - bz0
     
-    colnames(bz0)   <- bz_vars
-    colnames(wzsub) <- wz_vars
+    colnames(bz0)   <- all_vars[["bz_vars"]]
+    colnames(wzsub) <- all_vars[["wz_vars"]]
     
     # reference grid
     ## get covariate + idvar names
-    covs <- colnames(d0) %snin% c(bz_vars, wz_vars, bx_vars, wx_vars)
+    covs <- colnames(d0) %snin% c(all_vars[["bz_vars"]], all_vars[["wz_vars"]], all_vars[["bx_vars"]], all_vars[["wx_vars"]])
     refgrid <- d0[, covs, with = FALSE]
     
     # predictions
@@ -499,12 +482,24 @@ NULL
         scale = scale,
         summary = FALSE
       )
-      if (length(brmcoda_vars$y) > 1) {
+      if (length(all_vars[["brmcoda_vars"]][["y"]]) > 1) {
         # when multiple outcomes
-        delta_y <- lapply(seq(dim(ysub)[3]), function(m)
-          # loop outcomes
-          ysub[, , m] - y0[, h, m])
-      } else {
+        ## when outcome is compositional
+        ## delta y is acomp change
+        if (all(sort(dimnames(ysub)[[3]]) %in% c(
+          sort(all_vars$x_vars),
+          sort(all_vars$wx_vars),
+          sort(all_vars$bx_vars)
+        ))) {
+          delta_y <- lapply(seq(dim(ysub)[2]), function(j)
+            ## j = delta, h = ref grid
+            acomp(ysub[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]])
+            - acomp(y0[, h, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]]))
+        } else { ## when outcome is not compositional
+          delta_y <- lapply(seq(dim(ysub)[3]), function(v)
+            ysub[, , v] - y0[, h, v])
+        }
+      } else { # when single outcome
         delta_y <- list(ysub - y0[, h])
       }
       hout[[h]] <- delta_y
@@ -513,7 +508,7 @@ NULL
     ## restructure hout so that
     ## first level is the outcome
     ## second level is the reference grid
-    hout <- lapply(seq_along(y_vars), function(m)
+    hout <- lapply(seq_along(all_vars[["y_vars"]]), function(m)
       Map(`[[`, hout, m))
     
     if (aorg) {
@@ -571,7 +566,7 @@ NULL
             cbind(t(result), dmeta, grid[ida, names(at), with = FALSE])
         }, ioutii, seq_along(ioutii)))
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   } else {
@@ -584,7 +579,7 @@ NULL
         else
           list(posterior = iouti[[i]], grid = as.data.table(grid[, names(at), with = FALSE]))
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   }
@@ -609,53 +604,10 @@ NULL
                      type,
                      cores,
                      ...) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
+  # extract variables from complr and brmcoda objects for use in substitution models
+  all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
-    x$parts), function(p)
-      identical(parts, p), logical(1)))
-  
-  idy <- which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars$y))
-    }))
-  }, logical(1)))
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]]$Z
-  bz_vars <- complr_vars[[paste0("composition_", idx)]]$bZ
-  wz_vars <- complr_vars[[paste0("composition_", idx)]]$wZ
-  
-  x_vars  <- complr_vars[[paste0("composition_", idx)]]$X
-  bx_vars <- complr_vars[[paste0("composition_", idx)]]$bX
-  wx_vars <- complr_vars[[paste0("composition_", idx)]]$wX
-  
-  sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
-  
-  if (inherits(object$model$formula, "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars$y, z_vars)  ||
-        identical(brmcoda_vars$y, bz_vars) ||
-        identical(brmcoda_vars$y, wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$X
-    } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$Z
-    }
-  } else {
-    y_vars <- brmcoda_vars$y
-  }
-  
-  grid <- d0[, colnames(d0) %nin% c(z_vars,
-                                    bz_vars,
-                                    wz_vars,
-                                    x_vars,
-                                    bx_vars,
-                                    wx_vars,
-                                    object$complr$idvar), with = FALSE]
+  grid <- d0[, colnames(d0) %nin% c(all_vars[["xz_vars"]], object[["complr"]][["idvar"]]), with = FALSE]
   grid[, at := if (!is.null(at))
     names(at)
     else
@@ -709,7 +661,7 @@ NULL
       for (k in seq_len(nrow(sub_delta_j))) {
         xsub <- x0 + sub_delta_j[k, ]
         xsub_delta_k <- cbind(xsub, sub_delta_j[k, get(i)])
-        xsub_delta_k <- setNames(xsub_delta_k, c(sx_vars, "Delta"))
+        xsub_delta_k <- setNames(xsub_delta_k, c(all_vars[["sx_vars"]], "Delta"))
         kout[[k]]  <- xsub_delta_k
       }
       jout[[j]] <- rbindlist(kout)
@@ -728,13 +680,13 @@ NULL
     d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
     
     # compositions and ilrs for predictions
-    xsub  <- acomp(d1[, sx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
-    zsub  <- ilr(xsub, V = object$complr$output[[idx]]$psi)
-    colnames(zsub) <- z_vars
+    xsub  <- acomp(d1[, all_vars[["sx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
+    zsub  <- ilr(xsub, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
+    colnames(zsub) <- all_vars[["z_vars"]]
     
     # reference grid
     ## get covariate + idvar names
-    covs <- colnames(d0) %snin% c(z_vars, x_vars)
+    covs <- colnames(d0) %snin% c(all_vars[["z_vars"]], all_vars$x_vars)
     refgrid <- d0[, covs, with = FALSE]
     
     # predictions
@@ -748,12 +700,24 @@ NULL
         scale = scale,
         summary = FALSE
       )
-      if (length(brmcoda_vars$y) > 1) {
+      if (length(all_vars[["brmcoda_vars"]][["y"]]) > 1) {
         # when multiple outcomes
-        delta_y <- lapply(seq(dim(ysub)[3]), function(m)
-          # loop outcomes
-          ysub[, , m] - y0[, h, m])
-      } else {
+        ## when outcome is compositional
+        ## delta y is acomp change
+        if (all(sort(dimnames(ysub)[[3]]) %in% c(
+          sort(all_vars$x_vars),
+          sort(all_vars$wx_vars),
+          sort(all_vars$bx_vars)
+        ))) {
+          delta_y <- lapply(seq(dim(ysub)[2]), function(j)
+            ## j = delta, h = ref grid
+            acomp(ysub[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]])
+            - acomp(y0[, h, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]]))
+        } else { ## when outcome is not compositional
+          delta_y <- lapply(seq(dim(ysub)[3]), function(v)
+            ysub[, , v] - y0[, h, v])
+        }
+      } else { # when single outcome
         delta_y <- list(ysub - y0[, h])
       }
       hout[[h]] <- delta_y
@@ -762,7 +726,7 @@ NULL
     ## restructure hout so that
     ## first level is the outcome
     ## second level is the reference grid
-    hout <- lapply(seq_along(y_vars), function(m)
+    hout <- lapply(seq_along(all_vars[["y_vars"]]), function(m)
       Map(`[[`, hout, m))
     
     if (aorg) {
@@ -820,7 +784,7 @@ NULL
             cbind(t(result), dmeta, grid[ida, names(at), with = FALSE])
         }, ioutii, seq_along(ioutii)))
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   } else {
@@ -833,7 +797,7 @@ NULL
         else
           list(posterior = iouti[[i]], grid = as.data.table(grid[, names(at), with = FALSE]))
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   }
@@ -856,44 +820,8 @@ NULL
                             type,
                             cores,
                             ...) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
-  
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
-    x$parts), function(p)
-      identical(parts, p), logical(1)))
-  
-  idy <- which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars$y))
-    }))
-  }, logical(1)))
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]]$Z
-  bz_vars <- complr_vars[[paste0("composition_", idx)]]$bZ
-  wz_vars <- complr_vars[[paste0("composition_", idx)]]$wZ
-  
-  x_vars  <- complr_vars[[paste0("composition_", idx)]]$X
-  bx_vars <- complr_vars[[paste0("composition_", idx)]]$bX
-  wx_vars <- complr_vars[[paste0("composition_", idx)]]$wX
-  
-  sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
-  
-  if (inherits(object$model$formula, "mvbrmsformula")) {
-    if (identical(brmcoda_vars$y, z_vars)) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][[if (identical(scale, "response")) "X" else "Z"]]
-    } else if (identical(brmcoda_vars$y, bz_vars)) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][[if (identical(scale, "response")) "bX" else "bZ"]]
-    } else if (identical(brmcoda_vars$y, wz_vars)) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][[if (identical(scale, "response")) "wX" else "wZ"]]
-    } else {
-      y_vars <- brmcoda_vars$y
-    }
-  }
-  
-  vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
+  # extract variables from complr and brmcoda objects for use in substitution models
+  all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -947,8 +875,8 @@ NULL
         xsub <- x0 + sub_delta_k
         
         x0_xsub_delta_k <- cbind(x0, xsub, sub_delta_k[, get(i)])
-        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
-        d1 <- cbind(x0_xsub_delta_k, d0[, colnames(d0) %nin% vars, with = FALSE])
+        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(all_vars[["bx_vars"]], all_vars[["sx_vars"]], "Delta"))
+        d1 <- cbind(x0_xsub_delta_k, d0[, colnames(d0) %nin% all_vars[["xz_vars"]], with = FALSE])
         
         # useful information for the final results
         d1[, From := rep(sub_from_var, length.out = nrow(sub_delta_j))[k]]
@@ -962,16 +890,16 @@ NULL
         d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        bx0   <- acomp(d1[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
-        bxsub <- acomp(d1[, sx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+        bx0   <- acomp(d1[, all_vars[["bx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
+        bxsub <- acomp(d1[, all_vars[["sx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
         
-        bz0   <- ilr(bx0, V = object$complr$output[[idx]]$psi)
-        bzsub <- ilr(bxsub, V = object$complr$output[[idx]]$psi)
+        bz0   <- ilr(bx0, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
+        bzsub <- ilr(bxsub, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
         
         wz0 <- as.data.table(matrix(0, nrow = nrow(bzsub), ncol = ncol(bzsub)))
         
-        colnames(bzsub) <- bz_vars
-        colnames(wz0)   <- wz_vars
+        colnames(bzsub) <- all_vars[["bz_vars"]]
+        colnames(wz0)   <- all_vars[["wz_vars"]]
         
         # prediction
         dsub <- cbind(d1, bzsub, wz0)
@@ -982,11 +910,28 @@ NULL
           scale = scale,
           summary = FALSE
         )
-        if (length(brmcoda_vars$y) > 1) {
+        if (length(all_vars[["brmcoda_vars"]][["y"]]) > 1) {
           # when multiple outcomes
-          delta_y <- lapply(seq(dim(ysub)[3]), function(m)
-            # loop outcomes, then avg across participants
-            rowMeans(ysub[, , m] - y0[, , m]))
+          ## when outcome is compositional
+          ## delta y is acomp change
+          if (all(sort(dimnames(ysub)[[3]]) %in% c(
+            sort(all_vars$x_vars),
+            sort(all_vars$wx_vars),
+            sort(all_vars$bx_vars)
+          ))) {
+            delta_y <- lapply(seq(dim(ysub)[2]), function(j)
+              # cal delta by participants, then avg across participants
+              acomp(ysub[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]])
+              - acomp(y0[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]]))
+            delta_y <- array(unlist(delta_y), dim = c(dim(ysub)[1], dim(ysub)[2], dim(ysub)[3]))
+            delta_y <- lapply(seq(dim(delta_y)[3]), function(k)
+              rowMeans(delta_y[, , k]))
+          } else {
+            ## when outcome is not compositional
+            delta_y <- lapply(seq(dim(ysub)[3]), function(v)
+              # loop outcomes, then avg across participants
+              rowMeans(ysub[, , v] - y0[, , v]))
+          }
         } else {
           delta_y <- list(rowMeans(ysub - y0))
         }
@@ -994,15 +939,16 @@ NULL
           cbind.data.frame(unique(d1[, c("Delta", "From", "To", "Level", "Reference")]), t(dy))
         })
       }
+      
       ## restructure so that
       ## first level is the outcome
       ## second level is delta
-      kout <- lapply(seq_along(y_vars), function(m) {
+      kout <- lapply(seq_along(all_vars[["y_vars"]]), function(m) {
         rbindlist(lapply(kout, `[[`, m))
       })
       jout[[j]] <- kout
     }
-    jout <- lapply(seq_along(y_vars), function(m) {
+    jout <- lapply(seq_along(all_vars[["y_vars"]]), function(m) {
       rbindlist(lapply(jout, `[[`, m))
     })
     list(jout)
@@ -1016,7 +962,7 @@ NULL
         row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   } else {
@@ -1024,7 +970,7 @@ NULL
       iouti <- lapply(seq_along(iouti), function(i) {
         iouti[[i]]
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   }
@@ -1047,47 +993,8 @@ NULL
                             type,
                             cores,
                             ...) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
-  
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
-    x$parts), function(p)
-      identical(parts, p), logical(1)))
-  
-  idy <- which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars$y))
-    }))
-  }, logical(1)))
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]]$Z
-  bz_vars <- complr_vars[[paste0("composition_", idx)]]$bZ
-  wz_vars <- complr_vars[[paste0("composition_", idx)]]$wZ
-  
-  x_vars  <- complr_vars[[paste0("composition_", idx)]]$X
-  bx_vars <- complr_vars[[paste0("composition_", idx)]]$bX
-  wx_vars <- complr_vars[[paste0("composition_", idx)]]$wX
-  
-  sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
-  
-  if (inherits(object$model$formula, "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars$y, z_vars)  ||
-        identical(brmcoda_vars$y, bz_vars) ||
-        identical(brmcoda_vars$y, wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$X
-    } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$Z
-    }
-  } else {
-    y_vars <- brmcoda_vars$y
-  }
-  
-  vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
+  # extract variables from complr and brmcoda objects for use in substitution models
+  all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -1140,8 +1047,8 @@ NULL
         xsub <- x0 + sub_delta_k
         
         x0_xsub_delta_k <- cbind(x0, xsub, sub_delta_k[, get(i)])
-        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(bx_vars, sx_vars, "Delta"))
-        d1 <- cbind(x0_xsub_delta_k, d0[, colnames(d0) %nin% vars, with = FALSE])
+        x0_xsub_delta_k <- setNames(x0_xsub_delta_k, c(all_vars[["bx_vars"]], all_vars[["sx_vars"]], "Delta"))
+        d1 <- cbind(x0_xsub_delta_k, d0[, colnames(d0) %nin% all_vars[["xz_vars"]], with = FALSE])
         
         # useful information for the final results
         d1[, From := rep(sub_from_var, length.out = nrow(sub_delta_j))[k]]
@@ -1155,16 +1062,16 @@ NULL
         d1 <- d1[rowSums(d1[, ..cols] < 0) == 0]
         
         # compositions and ilr for predictions
-        bx0   <- acomp(d1[, bx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
-        bxsub <- acomp(d1[, sx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
+        bx0   <- acomp(d1[, all_vars[["bx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
+        bxsub <- acomp(d1[, all_vars[["sx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
         
-        bz0   <- ilr(bx0, V = object$complr$output[[idx]]$psi)
-        bzsub <- ilr(bxsub, V = object$complr$output[[idx]]$psi)
+        bz0   <- ilr(bx0, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
+        bzsub <- ilr(bxsub, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
         
         wzsub <- bzsub - bz0
         
-        colnames(bz0)   <- bz_vars
-        colnames(wzsub) <- wz_vars
+        colnames(bz0)   <- all_vars[["bz_vars"]]
+        colnames(wzsub) <- all_vars[["wz_vars"]]
         
         # substitution data
         dsub <- cbind(d1, bz0, wzsub)
@@ -1177,11 +1084,28 @@ NULL
           scale = scale,
           summary = FALSE
         )
-        if (length(brmcoda_vars$y) > 1) {
+        if (length(all_vars[["brmcoda_vars"]][["y"]]) > 1) {
           # when multiple outcomes
-          delta_y <- lapply(seq(dim(ysub)[3]), function(m)
-            # loop outcomes, then avg across participants
-            rowMeans(ysub[, , m] - y0[, , m]))
+          ## when outcome is compositional
+          ## delta y is acomp change
+          if (all(sort(dimnames(ysub)[[3]]) %in% c(
+            sort(all_vars$x_vars),
+            sort(all_vars$wx_vars),
+            sort(all_vars$bx_vars)
+          ))) {
+            delta_y <- lapply(seq(dim(ysub)[2]), function(j)
+              # cal delta by participants, then avg across participants
+              acomp(ysub[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]])
+              - acomp(y0[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]]))
+            delta_y <- array(unlist(delta_y), dim = c(dim(ysub)[1], dim(ysub)[2], dim(ysub)[3]))
+            delta_y <- lapply(seq(dim(delta_y)[3]), function(k)
+              rowMeans(delta_y[, , k]))
+          } else {
+            ## when outcome is not compositional
+            delta_y <- lapply(seq(dim(ysub)[3]), function(v)
+              # loop outcomes, then avg across participants
+              rowMeans(ysub[, , v] - y0[, , v]))
+          }
         } else {
           delta_y <- list(rowMeans(ysub - y0))
         }
@@ -1189,15 +1113,16 @@ NULL
           cbind.data.frame(unique(d1[, c("Delta", "From", "To", "Level", "Reference")]), t(dy))
         })
       }
+      
       ## restructure so that
       ## first level is the outcome
       ## second level is delta
-      kout <- lapply(seq_along(y_vars), function(m) {
+      kout <- lapply(seq_along(all_vars[["y_vars"]]), function(m) {
         rbindlist(lapply(kout, `[[`, m))
       })
       jout[[j]] <- kout
     }
-    jout <- lapply(seq_along(y_vars), function(m) {
+    jout <- lapply(seq_along(all_vars[["y_vars"]]), function(m) {
       rbindlist(lapply(jout, `[[`, m))
     })
     list(jout)
@@ -1211,7 +1136,7 @@ NULL
         row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   } else {
@@ -1219,7 +1144,7 @@ NULL
       iouti <- lapply(seq_along(iouti), function(i) {
         iouti[[i]]
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   }
@@ -1242,47 +1167,8 @@ NULL
                            type,
                            cores,
                            ...) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
-  
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- which(vapply(lapply(object$complr$output, function(x)
-    x$parts), function(p)
-      identical(parts, p), logical(1)))
-  
-  idy <- which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars$y))
-    }))
-  }, logical(1)))
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]]$Z
-  bz_vars <- complr_vars[[paste0("composition_", idx)]]$bZ
-  wz_vars <- complr_vars[[paste0("composition_", idx)]]$wZ
-  
-  x_vars  <- complr_vars[[paste0("composition_", idx)]]$X
-  bx_vars <- complr_vars[[paste0("composition_", idx)]]$bX
-  wx_vars <- complr_vars[[paste0("composition_", idx)]]$wX
-  
-  sx_vars <- paste0("s", object$complr$output[[idx]]$parts)
-  
-  if (inherits(object$model$formula, "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars$y, z_vars)  ||
-        identical(brmcoda_vars$y, bz_vars) ||
-        identical(brmcoda_vars$y, wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$X
-    } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]]$Z
-    }
-  } else {
-    y_vars <- brmcoda_vars$y
-  }
-  
-  vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
+  # extract variables from complr and brmcoda objects for use in substitution models
+  all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -1335,8 +1221,8 @@ NULL
         xsub <- x0 + sub_delta_k
         
         xsub_delta_k <- cbind(xsub, sub_delta_k[, get(i)])
-        xsub_delta_k <- setNames(xsub_delta_k, c(sx_vars, "Delta"))
-        d1 <- cbind(xsub_delta_k, d0[, colnames(d0) %nin% vars, with = FALSE])
+        xsub_delta_k <- setNames(xsub_delta_k, c(all_vars[["sx_vars"]], "Delta"))
+        d1 <- cbind(xsub_delta_k, d0[, colnames(d0) %nin% all_vars[["xz_vars"]], with = FALSE])
         
         
         # useful information for the final results
@@ -1351,10 +1237,10 @@ NULL
         d1   <- d1[rowSums(d1[, ..cols] < 0) == 0]
         
         # compositions and ilrs for predictions
-        xsub <- acomp(d1[, sx_vars, with = FALSE], total = object$complr$output[[idx]]$total)
-        zsub <- ilr(xsub, V = object$complr$output[[idx]]$psi)
+        xsub <- acomp(d1[, all_vars[["sx_vars"]], with = FALSE], total = object[["complr"]][["output"]][[all_vars[["idx"]]]][["total"]])
+        zsub <- ilr(xsub, V = object[["complr"]][["output"]][[all_vars[["idx"]]]][["psi"]])
         
-        colnames(zsub) <- z_vars
+        colnames(zsub) <- all_vars[["z_vars"]]
         
         # substitution data
         dsub <- cbind(d1, zsub)
@@ -1367,11 +1253,28 @@ NULL
           scale = scale,
           summary = FALSE
         )
-        if (length(brmcoda_vars$y) > 1) {
+        if (length(all_vars[["brmcoda_vars"]][["y"]]) > 1) {
           # when multiple outcomes
-          delta_y <- lapply(seq(dim(ysub)[3]), function(m)
-            # loop outcomes, then avg across participants
-            rowMeans(ysub[, , m] - y0[, , m]))
+          ## when outcome is compositional
+          ## delta y is acomp change
+          if (all(sort(dimnames(ysub)[[3]]) %in% c(
+            sort(all_vars$x_vars),
+            sort(all_vars$wx_vars),
+            sort(all_vars$bx_vars)
+          ))) {
+            delta_y <- lapply(seq(dim(ysub)[2]), function(j)
+              # cal delta by participants, then avg across participants
+              acomp(ysub[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]])
+              - acomp(y0[, j, ], total = object[["complr"]][["output"]][[all_vars[["idy"]]]][["total"]]))
+            delta_y <- array(unlist(delta_y), dim = c(dim(ysub)[1], dim(ysub)[2], dim(ysub)[3]))
+            delta_y <- lapply(seq(dim(delta_y)[3]), function(k)
+              rowMeans(delta_y[, , k]))
+          } else {
+            ## when outcome is not compositional
+            delta_y <- lapply(seq(dim(ysub)[3]), function(v)
+              # loop outcomes, then avg across participants
+              rowMeans(ysub[, , v] - y0[, , v]))
+          }
         } else {
           delta_y <- list(rowMeans(ysub - y0))
         }
@@ -1379,15 +1282,16 @@ NULL
           cbind.data.frame(unique(d1[, c("Delta", "From", "To", "Level", "Reference")]), t(dy))
         })
       }
+      
       ## restructure so that
       ## first level is the outcome
       ## second level is delta
-      kout <- lapply(seq_along(y_vars), function(m) {
+      kout <- lapply(seq_along(all_vars[["y_vars"]]), function(m) {
         rbindlist(lapply(kout, `[[`, m))
       })
       jout[[j]] <- kout
     }
-    jout <- lapply(seq_along(y_vars), function(m) {
+    jout <- lapply(seq_along(all_vars[["y_vars"]]), function(m) {
       rbindlist(lapply(jout, `[[`, m))
     })
     list(jout)
@@ -1401,7 +1305,7 @@ NULL
         row.names(result) <- c("Estimate", "Est.Error", "CI_low", "CI_high")
         cbind(t(result), dmeta)
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   } else {
@@ -1409,7 +1313,7 @@ NULL
       iouti <- lapply(seq_along(iouti), function(i) {
         iouti[[i]]
       })
-      names(iouti) <- y_vars
+      names(iouti) <- all_vars[["y_vars"]]
       iouti
     })
   }
