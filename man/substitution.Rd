@@ -98,26 +98,26 @@ if(requireNamespace("cmdstanr")){
                  idvar = "ID", total = 1440)
 
   # model with compositional predictor at between and within-person levels
-  m <- brmcoda(complr = x,
+  m1 <- brmcoda(complr = x,
                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 +
                                      Female + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
 
   # one to one reallocation at between and within-person levels
-  sub1 <- substitution(object = m, delta = 5, level = c("between"))
+  sub1 <- substitution(object = m1, delta = 5, level = c("between"))
   summary(sub1)
 
   # one to all reallocation at between and within-person levels
-  sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"),
+  sub2 <- substitution(object = m1, delta = 5, level = c("between", "within"),
                        type = "one-to-all")
   summary(sub2)
 
   # model with compositional predictor at aggregate level
-  fit2 <- brmcoda(complr = x,
+  m2 <- brmcoda(complr = x,
                   formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
-  sub3 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
+  sub3 <- substitution(object = m2, delta = 5, level = c("aggregate"))
 
 }}
 }

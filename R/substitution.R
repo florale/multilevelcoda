@@ -66,26 +66,26 @@
 #'                  idvar = "ID", total = 1440)
 #'
 #'   # model with compositional predictor at between and within-person levels
-#'   m <- brmcoda(complr = x,
+#'   m1 <- brmcoda(complr = x,
 #'                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
 #'                                      wz1_1 + wz2_1 + wz3_1 + wz4_1 +
 #'                                      Female + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
 #'
 #'   # one to one reallocation at between and within-person levels
-#'   sub1 <- substitution(object = m, delta = 5, level = c("between"))
+#'   sub1 <- substitution(object = m1, delta = 5, level = c("between"))
 #'   summary(sub1)
 #'
 #'   # one to all reallocation at between and within-person levels
-#'   sub2 <- substitution(object = fit1, delta = 5, level = c("between", "within"),
+#'   sub2 <- substitution(object = m1, delta = 5, level = c("between", "within"),
 #'                        type = "one-to-all")
 #'   summary(sub2)
 #'
 #'   # model with compositional predictor at aggregate level
-#'   fit2 <- brmcoda(complr = x,
+#'   m2 <- brmcoda(complr = x,
 #'                   formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
 #'                   chain = 1, iter = 500, backend = "cmdstanr")
-#'   sub3 <- substitution(object = fit2, delta = 5, level = c("aggregate"))
+#'   sub3 <- substitution(object = m2, delta = 5, level = c("aggregate"))
 #'
 #' }}
 #' @export
@@ -173,7 +173,7 @@ substitution <- function(object,
   }
   
   # get parts
-  parts <- get_parts(object[["complr"]], parts)
+  parts <- .get_parts(object[["complr"]], parts)
   
   # get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
   idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
@@ -206,13 +206,13 @@ substitution <- function(object,
     }
   }
   
-  if (is.null(brmcoda_vars[["fixef_level"]])) {
+  if (is.null(brmcoda_vars[["fixef_type"]])) {
     stop("No fixed effects of composition in the model to perform substitution analysis.")
   }
   
   ## only grandmean and aggregate for single level model
-  if ("aggregate" %in% brmcoda_vars[["fixef_level"]]) {
-    if (brmcoda_vars[["ranef_level"]] == "single") {
+  if ("aggregate" %in% brmcoda_vars[["fixef_type"]]) {
+    if (identical(brmcoda_vars[["ranef_type"]], "single")) {
       if ("clustermean" %in% ref) {
         warning("Can only use grandmean for single level model.")
       }
@@ -226,12 +226,12 @@ substitution <- function(object,
   }
   
   ## no between or within for single level model
-  if (any(c("between", "within") %in% brmcoda_vars[["fixef_level"]])) {
-    if (brmcoda_vars[["ranef_level"]] == "single") {
+  if (any(c("between", "within") %in% brmcoda_vars[["fixef_type"]])) {
+    if (identical(brmcoda_vars[["ranef_type"]], "single")) {
       stop(
         " between and within substitution analysis cannot be computed on a single level model"
       )
-    } else if (brmcoda_vars[["ranef_level"]] == "multilevel") {
+    } else if (identical(brmcoda_vars[["ranef_type"]], "multilevel")) {
       level <- level
       ref <- ref
     }
@@ -244,14 +244,14 @@ substitution <- function(object,
   
   ## level args match with coefs in object
   if (any(c("between", "within") %in% level)) {
-    if (isFALSE(any(c("between", "within") %in% brmcoda_vars[["fixef_level"]]))) {
+    if (isFALSE(any(c("between", "within") %in% brmcoda_vars[["fixef_type"]]))) {
       stop(
         sprintf(
           "between and within substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-          brmcoda_vars[["fixef_level"]],
-          brmcoda_vars[["fixef_level"]]
+          brmcoda_vars[["fixef_type"]],
+          brmcoda_vars[["fixef_type"]]
         )
       )
     }
@@ -280,14 +280,14 @@ substitution <- function(object,
     }
   }
   if ("aggregate" %in% level) {
-    if (isFALSE("aggregate" %in% brmcoda_vars[["fixef_level"]])) {
+    if (isFALSE("aggregate" %in% brmcoda_vars[["fixef_type"]])) {
       stop(
         sprintf(
           "'aggregate' substitution analysis cannot be computed
   on a model estimated using the (%s) variance of ilrs.
   Please specify the level argument as \"(%s)\" instead or refit 'brmcoda' model.",
-          brmcoda_vars[["fixef_level"]],
-          brmcoda_vars[["fixef_level"]]
+          brmcoda_vars[["fixef_type"]],
+          brmcoda_vars[["fixef_type"]]
         )
       )
     }

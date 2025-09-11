@@ -42,6 +42,7 @@ summary.complr <- function(object, ...) {
   
   # output
   output_data <- get_variables(object)
+  output_data <- lapply(output_data, function(x) Filter(Negate(is.null), x)) # remove NULL
   output_data <- do.call(cbind, output_data)
   meta_data   <- setNames(data.frame(total = unlist(total), row.names = "total"), colnames(output_data))
   output_data <- rbind(output_data, meta_data)

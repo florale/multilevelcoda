@@ -157,7 +157,7 @@ build.rg <- function(object,
   brmcoda_vars <- get_variables(object)
   
   # d0 and x0 for multilevel level model
-  if (identical(brmcoda_vars$ranef_level, "multilevel")) {
+  if (identical(brmcoda_vars$ranef_type, "multilevel")) {
     
     # for clustermean
     if ("clustermean" %in% ref) {
@@ -380,7 +380,7 @@ build.rg <- function(object,
   }
   
   ## d0 and x0 for single level model
-  if (brmcoda_vars$ranef_level == "single") {
+  if (identical(brmcoda_vars$ranef_type, "single")) {
     
     x0 <- object[["complr"]][["output"]][[idx]][["X"]]
     x0 <- mean.acomp(x0, robust = TRUE)
