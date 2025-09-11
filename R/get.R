@@ -112,16 +112,18 @@ get_variables.brmcoda <- function(object) {
       model_pred_type <- "compositional"
       
       # if so which ones
-      Z_pred  <- model_pred[which(model_pred %in% c(complr_vars$bZ, complr_vars$wZ, complr_vars$Z))]
-      nZ_pred <- model_pred[which(model_pred %nin% c(complr_vars$bZ, complr_vars$wZ, complr_vars$Z))]
+      bZ_pred  <- model_pred[which(model_pred %in% c(complr_vars$bZ))]
+      wZ_pred  <- model_pred[which(model_pred %in% c(complr_vars$wZ))]
+      Z_pred   <- model_pred[which(model_pred %in% c(complr_vars$Z))]
+      nZ_pred  <- model_pred[which(model_pred %nin% c(complr_vars$bZ, complr_vars$wZ, complr_vars$Z))]
       
-      if (all(Z_pred %in% complr_vars$bZ)) {
+      if (length(bZ_pred) > 0 && all(bZ_pred %in% complr_vars$bZ)) {
         model_fixef_type <- append(model_fixef_type, "between")
       }
-      if (all(Z_pred %in% complr_vars$wZ)) {
+      if (length(wZ_pred) > 0 && all(wZ_pred %in% complr_vars$wZ)) {
         model_fixef_type <- append(model_fixef_type, "within")
       }
-      if (all(Z_pred %in% complr_vars$Z)) {
+      if (length(Z_pred) > 0 && all(Z_pred %in% complr_vars$Z)) {
         model_fixef_type <- append(model_fixef_type, "aggregate")
       }
     } else {
@@ -165,16 +167,18 @@ get_variables.brmcoda <- function(object) {
       model_pred_type <- "compositional"
       
       # if so which ones
-      Z_pred  <- model_pred[which(model_pred %in% c(complr_vars$bZ, complr_vars$wZ, complr_vars$Z))]
-      nZ_pred <- model_pred[which(model_pred %nin% c(complr_vars$bZ, complr_vars$wZ, complr_vars$Z))]
+      bZ_pred  <- model_pred[which(model_pred %in% complr_vars$bZ)]
+      wZ_pred  <- model_pred[which(model_pred %in% complr_vars$wZ)]
+      Z_pred   <- model_pred[which(model_pred %in% complr_vars$Z)]
+      nZ_pred  <- model_pred[which(model_pred %nin% c(complr_vars$bZ, complr_vars$wZ, complr_vars$Z))]
       
-      if (all(Z_pred %in% complr_vars$bZ)) {
+      if (length(bZ_pred) > 0 && all(bZ_pred %in% complr_vars$bZ)) {
         model_fixef_type <- append(model_fixef_type, "between")
       }
-      if (all(Z_pred %in% complr_vars$wZ)) {
+      if (length(wZ_pred) > 0 && all(wZ_pred %in% complr_vars$wZ)) {
         model_fixef_type <- append(model_fixef_type, "within")
       }
-      if (all(Z_pred %in% complr_vars$Z)) {
+      if (length(Z_pred) > 0 && all(Z_pred %in% complr_vars$Z)) {
         model_fixef_type <- append(model_fixef_type, "aggregate")
       }
     } else {
