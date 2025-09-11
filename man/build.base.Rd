@@ -4,12 +4,12 @@
 \alias{build.base}
 \title{Build Base Pairwise Substitution}
 \usage{
-build.base(parts, comparison = NULL)
+build.base(parts, type = NULL)
 }
 \arguments{
 \item{parts}{A character vector specifying the names of compositional variables to be used.}
 
-\item{comparison}{Either \code{"one-to-one"} or \code{"one-to-all"}. Default is \code{"one-to-one"}.}
+\item{type}{Either \code{"one-to-one"} or \code{"one-to-all"}. Default is \code{"one-to-one"}.}
 }
 \value{
 A data table of all possible pairwise substitution.
@@ -22,6 +22,6 @@ the base for substitution models.
 ps1 <- build.base(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 print(ps1)
 
-ps2 <- build.base(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
+ps2 <- build.base(c("WAKE", "MVPA", "LPA", "SB"), type = "one-to-all")
 print(ps2)
 }

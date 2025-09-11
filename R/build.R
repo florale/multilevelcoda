@@ -4,7 +4,7 @@
 #' Make a data set of all possible pairwise substitution of a composition which can be used as 
 #' the base for substitution models.
 #' @param parts A character vector specifying the names of compositional variables to be used.
-#' @param comparison Either \code{"one-to-one"} or \code{"one-to-all"}. Default is \code{"one-to-one"}.
+#' @param type Either \code{"one-to-one"} or \code{"one-to-all"}. Default is \code{"one-to-one"}.
 #' 
 #' @return A data table of all possible pairwise substitution.
 #' @importFrom data.table as.data.table 
@@ -13,12 +13,12 @@
 #' ps1 <- build.base(parts = c("TST", "WAKE", "MVPA", "LPA", "SB"))
 #' print(ps1)
 #' 
-#' ps2 <- build.base(c("WAKE", "MVPA", "LPA", "SB"), comparison = "one-to-all")
+#' ps2 <- build.base(c("WAKE", "MVPA", "LPA", "SB"), type = "one-to-all")
 #' print(ps2)
-build.base <- function(parts, comparison = NULL) {
+build.base <- function(parts, type = NULL) {
   
-  if (is.null(comparison)) {
-    comparison <- "one-to-one"
+  if (is.null(type)) {
+    type <- "one-to-one"
   }
   
   d <- length(parts)
@@ -32,7 +32,7 @@ build.base <- function(parts, comparison = NULL) {
   nr <- (nc - 1) * d
   k <- 0
   
-  if (comparison == "one-to-all") {
+  if (type == "one-to-all") {
     base_sub_to <- matrix(0, nrow = d, ncol = d, dimnames = list(NULL, parts))
     for (i in 1:nc)
       for (j in 1:nc)
