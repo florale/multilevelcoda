@@ -50,7 +50,6 @@ Imports:
     bayesplot,
     emmeans,
     plotly,
-    hrbrthemes,
     htmltools,
     bslib,
     DT,

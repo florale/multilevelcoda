@@ -24,23 +24,16 @@ is.sequential <- function(x) {
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 coord_flip
 #' @importFrom ggplot2 element_blank
-#' @importFrom ggplot2 element_rect
-#' @importFrom ggplot2 element_text
-#' @importFrom ggplot2 facet_wrap
+#' @importFrom ggplot2 element_rect element_line element_text
+#' @importFrom ggplot2 facet_wrap label_context vars
 #' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 geom_hline
-#' @importFrom ggplot2 geom_linerange
-#' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 geom_segment
-#' @importFrom ggplot2 geom_text
+#' @importFrom ggplot2 geom_hline geom_point geom_segment geom_linerange geom_text
 #' @importFrom ggplot2 labs
-#' @importFrom ggplot2 scale_colour_manual
-#' @importFrom ggplot2 scale_x_discrete
-#' @importFrom ggplot2 scale_y_continuous
+#' @importFrom ggplot2 scale_colour_manual scale_x_discrete scale_y_continuous
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 theme_void
 #' @importFrom ggplot2 unit
-#' @importFrom hrbrthemes theme_ipsum
+#' @importFrom plotly ggplotly
 #' 
 #' @noRd
 .par_plot <- function(data, shiny = FALSE, d = 4, font = "Arial Narrow") {
@@ -178,11 +171,11 @@ is.sequential <- function(x) {
   }
   
   point_size <- ifelse(shiny == TRUE, 2, 2.25)
-  line_size <- ifelse(shiny == TRUE, 0.75, 0.75)
+  line_size  <- ifelse(shiny == TRUE, 0.75, 0.75)
   btext_size <- ifelse(shiny == TRUE, 14, 12)
-  text_size <- ifelse(shiny == TRUE, 12, 13)
-  yseg <- y_breaks[[1]]
-  yendseg <- y_breaks[[3]]
+  text_size  <- ifelse(shiny == TRUE, 12, 13)
+  yseg       <- y_breaks[[1]]
+  yendseg    <- y_breaks[[3]]
   
   if (isTRUE(shiny)) {
     gg <- 
@@ -198,30 +191,26 @@ is.sequential <- function(x) {
       scale_y_continuous(limits = y_lims,
                          breaks = y_breaks) +
       scale_x_discrete(drop = FALSE) +
-      # facet_wrap(ggplot2::vars(N, K), labeller = ggplot2::label_both) +
-      facet_wrap(ggplot2::vars(JI), labeller = ggplot2::label_context, strip.position = "top") +
-      theme_ipsum() +
+      facet_wrap(vars(JI), labeller = label_context, strip.position = "top") +
       coord_flip() +
+      theme_void() +
       theme(
         axis.ticks        = element_blank(),
         panel.background  = element_rect(fill = "transparent", colour = "black", linewidth = line_size),
         panel.border      = element_rect(fill = "transparent", colour = "black", linewidth = line_size),
-        # panel.grid.major  = element_blank(),
-        # panel.grid.minor  = element_blank(),
         plot.background   = element_rect(fill = "transparent", colour = NA),
-        axis.title.y      = element_text(size = btext_size, face = "bold"),
-        axis.title.x      = element_text(size = btext_size, face = "bold"),
-        axis.text.x       = element_text(size = text_size),
+        axis.title.y      = element_text(size = btext_size, face = "bold", family = font),
+        axis.title.x      = element_text(size = btext_size, face = "bold", family = font),
+        axis.text.x       = element_text(size = text_size, family = font),
         axis.text.y       = element_blank(),
-        title             = element_text(size = btext_size, face = "bold"),
-        legend.text       = element_text(size = text_size),
-        strip.text.x      = element_text(size = text_size),
+        title             = element_text(size = btext_size, face = "bold", family = font),
+        legend.text       = element_text(size = text_size, family = font),
+        strip.text.x      = element_text(size = text_size, family = font),
         legend.position   = "none",
         panel.spacing.y   = unit(0, "lines"),
         panel.spacing.x   = unit(0.75, "lines")
-        # strip.text.x      = element_blank()
       )
-    plotly::ggplotly(gg, height = 1300)
+    ggplotly(gg, height = 1300)
     
   } else {
     gg <- 
@@ -232,18 +221,14 @@ is.sequential <- function(x) {
       geom_segment(aes(x = 0.5, xend = xvar, y = yintercept, yend = yintercept), color = "#666666", linetype = "dashed", linewidth = 0.5) +
       geom_segment(aes(y = yseg, yend = yendseg, x = 0.5, xend = 0.5), color = "black", linewidth = 0.5) +
       geom_text(aes(label = JI, y = yintercept, x = xtext), color = "black", family = font, vjust = "inward", hjust = "inward") +
-      # geom_hline(yintercept = yintercept, color = "#666666", linetype = "dashed", linewidth = 0.5) +
       geom_point(size = point_size) +
       geom_linerange(linewidth = line_size) +
-      # geom_segment(aes(x = "sigma", xend = xvar, y = yintercept, yend = yintercept), color = "#666666", linetype = "dashed", linewidth = 0.25) +
       labs(x = "", y = ylab, colour = "Parameter") +
       scale_colour_manual(values = col) +
       scale_y_continuous(limits = y_lims,
                          breaks = y_breaks) +
       scale_x_discrete(drop = FALSE, expand = c(0,1.05)) +
-      # facet_wrap(ggplot2::vars(N, K), labeller = ggplot2::label_both) +
-      # facet_wrap(ggplot2::vars(NK), labeller = ggplot2::label_context, strip.position = "top") +
-      hrbrthemes::theme_ipsum() + theme_void() +
+      theme_void() +
       coord_flip() +
       theme(
         axis.ticks        = element_blank(),
@@ -252,24 +237,13 @@ is.sequential <- function(x) {
         panel.grid.major  = element_blank(),
         panel.grid.minor  = element_blank(),
         plot.background   = element_rect(fill = "transparent", colour = NA),
-        axis.title.y      = element_text(size = btext_size, face = "bold"),
-        # axis.title.x      = element_text(size = btext_size, face = "bold"),
-        # axis.text.x       = element_text(size = text_size),
-        # axis.text.y       = element_blank(),
-        # title             = element_blank(),
+        axis.title.y      = element_text(size = btext_size, face = "bold", family = font),
         legend.text       = element_blank(),
-        # strip.text.x      = element_text(size = text_size),
         legend.position   = "none",
-        # panel.grid.major  = element_blank(),
-        # panel.grid.minor  = element_blank(),
         axis.title.x      = element_blank(),
         axis.line.y       = element_blank(),
         axis.text.x       = element_text(size = text_size, family = font),
         axis.text.y       = element_blank()
-        # strip.text.x      = element_text(size = text_size, family = font),
-        # strip.background  = element_blank(),
-        # strip.placement   = "outside"
-        # strip.text.x      = element_blank()
       )
     gg
   }

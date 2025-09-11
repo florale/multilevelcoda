@@ -115,7 +115,7 @@ if(requireNamespace("cmdstanr")){
 
   # model with compositional predictor at aggregate level
   m2 <- brmcoda(complr = x,
-                  formula = Stress ~ z1 + z2 + z3 + z4 + (1 | ID),
+                  formula = Stress ~ z1_1 + z2_1 + z3_1 + z4_1 + (1 | ID),
                   chain = 1, iter = 500, backend = "cmdstanr")
   sub3 <- substitution(object = m2, delta = 5, level = c("aggregate"))
 
