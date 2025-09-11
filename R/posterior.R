@@ -90,18 +90,18 @@ predict.brmcoda <- function(object,
     
     # check which type of response
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$bZ)) {
-      model_resp_level <- "between"
+      model_resp_type <- "between"
       total <- object$complr$output[[idy]]$total
     }
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$wZ)) {
-      model_resp_level <- "within"
+      model_resp_type <- "within"
       total <- 1
     }
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$Z)) {
-      model_resp_level <- "aggregate"
+      model_resp_type <- "aggregate"
       total <- object$complr$output[[idy]]$total
     }
-    if (!exists("model_resp_level")) {
+    if (!exists("model_resp_type")) {
       stop(
         "The response variables in the brmcoda model do not correspond to any of the compositional parts in the complr object."
       )
@@ -211,18 +211,18 @@ fitted.brmcoda <- function(object,
     
     # check which type of response
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$bZ)) {
-      model_resp_level <- "between"
+      model_resp_type <- "between"
       total <- object$complr$output[[idy]]$total
     }
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$wZ)) {
-      model_resp_level <- "within"
+      model_resp_type <- "within"
       total <- 1
     }
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$Z)) {
-      model_resp_level <- "aggregate"
+      model_resp_type <- "aggregate"
       total <- object$complr$output[[idy]]$total
     }
-    if (!exists("model_resp_level")) {
+    if (!exists("model_resp_type")) {
       stop(
         "The response variables in the brmcoda model do not correspond to any of the compositional parts in the complr object."
       )

@@ -71,64 +71,6 @@ create_substitution <- function(between_simple_sub,
   )
 }
 
-#' Helper extract variables from complr and brmcoda objects for use in substitution models
-#' @noRd
-.get.subvars <- function(object, parts, scale) {
-  brmcoda_vars <- get_variables(object)
-  complr_vars  <- get_variables(object$complr)
-  
-  ## get the index of which index elements of object$complr$output do the parts correspond to
-  idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
-    x$parts), function(p)
-      identical(sort(parts), sort(p)), logical(1))))[1]
-  
-  idy <- as.integer(which(vapply(complr_vars, function(y) {
-    any(sapply(c("Z", "bZ", "wZ"), function(z) {
-      identical(sort(y[[z]]), sort(brmcoda_vars[["y"]]))
-    }))
-  }, logical(1))))[1]
-  
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]][["Z"]]
-  bz_vars <- complr_vars[[paste0("composition_", idx)]][["bZ"]]
-  wz_vars <- complr_vars[[paste0("composition_", idx)]][["wZ"]]
-  x_vars  <- complr_vars[[paste0("composition_", idx)]][["X"]]
-  bx_vars <- complr_vars[[paste0("composition_", idx)]][["bX"]]
-  wx_vars <- complr_vars[[paste0("composition_", idx)]][["wX"]]
-  
-  xz_vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
-  sx_vars <- paste0("s", object[["complr"]][["output"]][[idx]][["parts"]])
-  
-  if (inherits(object[["model"]][["formula"]], "mvbrmsformula") &&
-      (
-        identical(brmcoda_vars[["y"]], z_vars)  ||
-        identical(brmcoda_vars[["y"]], bz_vars) ||
-        identical(brmcoda_vars[["y"]], wz_vars)
-      )) {
-    if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][["X"]]
-    } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][["Z"]]
-    }
-  } else {
-    y_vars <- brmcoda_vars[["y"]]
-  }
-  
-  list(brmcoda_vars = brmcoda_vars,
-       complr_vars = complr_vars,
-       z_vars = z_vars,
-       bz_vars = bz_vars,
-       wz_vars = wz_vars,
-       x_vars = x_vars,
-       bx_vars = bx_vars,
-       wx_vars = wx_vars,
-       xz_vars = xz_vars,
-       sx_vars = sx_vars,
-       y_vars = y_vars,
-       idx = idx,
-       idy = if(!is.na(idy)) idy else 0L
-  )
-}
 
 #' Substitution analysis helper functions
 #' 

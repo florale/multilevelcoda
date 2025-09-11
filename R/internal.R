@@ -9,8 +9,9 @@ utils::globalVariables(c("i",  "..cols", ".", "To", "t", "head",  "fitted",
                          "sigma", "OnTarget",
                          "multisession", "sequential"
 ))
-
-# expand grid data frame
+#' @keywords internal
+#' expand grid data frame
+#' @noRd
 expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
 
 # check sequence of number
@@ -19,7 +20,6 @@ is.sequential <- function(x) {
 }
 
 #' Make plots for simulation results
-#' @keywords internal
 #' 
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 coord_flip

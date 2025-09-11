@@ -142,8 +142,6 @@ var.complr <- function(x,
   invisible(out)
 }
 
-#' Extract Compositional Data from \code{complr} object.
-#'
 #' Extract amounts and compositions in conventional formats
 #' as data.frames, matrices, or arrays.
 #'
@@ -163,78 +161,4 @@ as.data.frame.complr <- function(x,
 #' @export
 as.matrix.complr <- function(x, ...) {
   as.matrix(as.data.frame(x, ...))
-}
-
-#' Extract variable names from a \code{complr} object.
-#' @param object A \code{complr} object
-#' 
-#' @method get_variables complr
-#' 
-#' @export
-get_variables = function(object) UseMethod("get_variables")
-
-#' @rdname get_variables
-#' @export
-get_variables.complr <- function(object) {
-  out <- lapply(object$output, function(x) {
-    list(X = names(x$X),
-         bX = names(x$bX),
-         wX = names(x$wX),
-         Z = names(x$Z),
-         bZ = names(x$bZ),
-         wZ =names(x$wZ))
-  })
-  names(out) <- paste0("composition_", seq_along(out))
-  # print(as.data.frame(do.call(cbind, out)))
-  out
-}
-
-#' Extract names parts  from a \code{complr} object.
-#' 
-#' Internal function used to validate and extract the names of compositional parts.
-#' 
-#' @param object A \code{complr} object
-#' @param parts A optional character string specifying names of compositional parts that should be considered
-#' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
-#' in the \code{complr} object. Default to the first composition in the \code{complr} object.
-#' 
-#' @keywords internal
-#' @noRd
-get_parts <- function(object, parts = 1) {
-  
-  if (isFALSE(inherits(object, "complr"))) {
-    stop(sprintf(
-      "Can't handle an object of class (%s)
-  It should be a 'complr' object
-  See ?complr for details.",
-      class(object)))
-  }
-  
-  if (is.numeric(parts)) {
-    if (length(parts) > 1) {
-      stop(" 'parts' should be a single numeric value indicating which set of compositional parts to use.")
-    }
-    if (parts < 1 || parts > length(object$output)) {
-      stop(sprintf(
-        " 'parts' should be a single numeric value between 1 and %s, corresponding to the number of sets of compositional parts in the 'complr' object.",
-        length(object$output)))
-    }
-    parts <- object$output[[parts]]$parts
-    
-  } else {
-    if (isFALSE(inherits(parts, "character"))) {
-      stop(" 'parts' should be a character vector of compositional parts.")
-    }
-    ## parts should be identical with either one of the parts presented in output of complr
-    if (isFALSE((any(vapply(lapply(object$output, function(x) x$parts), function(p) identical(sort(parts), sort(p)), logical(1)))))) {
-      stop(sprintf(
-        "The specified 'parts' (%s) are not found in the complr object.",
-        "  It should corespond to one set of compositional parts, either one of the following:",
-        "%s",
-        paste(parts, collapse = ", "),
-        invisible(lapply(object$output, function(x) cat(paste(x$parts, collapse = ", "), "\n"))),
-        sep = "\n"))
-    }
-  }
-  parts
 }

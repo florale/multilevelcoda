@@ -96,7 +96,7 @@ pivot_coord_rotate <- function (object,
                                 parts = 1,
                                 ...) {
   # get parts
-  parts <- get_parts(object$complr, parts)
+  parts <- .get_parts(object$complr, parts)
   
   ## get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
   idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
@@ -219,7 +219,7 @@ pivot_coord_refit <- function (object,
                                ...) {
   
   # get parts
-  parts <- get_parts(object[["complr"]], parts)
+  parts <- .get_parts(object[["complr"]], parts)
   
   ## get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
   idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)

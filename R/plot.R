@@ -3,6 +3,10 @@
 #' Make a plot of \code{\link{substitution}} model results.
 #'
 #' @param x A \code{\link{substitution}} class object.
+#' @param to An optional character value or vector specifying the names of the compositional parts
+#' that were reallocated to in the model.
+#' @param ref A character value of ((\code{"grandmean"} or \code{"clustermean"} or \code{"users"}),
+#' @param level An optional character value of (\code{"between"}, \code{"within"}), or \code{"aggregate"}).
 #' @param ... Further components to the plot, followed by a plus sign (+).
 #'
 #' @return A ggplot graph object showing the estimated difference in outcome when
@@ -16,15 +20,26 @@
 #'
 #' @method plot substitution
 #' @export
-plot.substitution <- function(x, ...) {
+plot.substitution <- function(x, to, ref, level, ...) {
+  
+  if (missing(ref)) {
+    ref <- x$ref
+  }
+  if (missing(level)) {
+    level <- x$level
+  }
+  if (missing(to)) {
+    to <- x$parts
+  }
   
   if (length(x$delta) > 1) {
     # extract data
     tmp <- summary(
       object = x,
       delta = sort(c(-abs(x$delta), abs(x$delta))),
-      ref = x$ref,
-      level = x$level,
+      to = to,
+      ref = ref,
+      level = level,
       digits = "asis"
     )
     col_pal <- rev(unlist(color_scheme_get("brewer-PuBuGn")))
@@ -60,8 +75,9 @@ plot.substitution <- function(x, ...) {
     tmp <- summary(
       object = x,
       delta = x$delta,
-      ref = x$ref,
-      level = x$level,
+      to = to,
+      ref = ref,
+      level = level,
       digits = "asis"
     )
     col_pal <- unlist(color_scheme_get("blue"))
