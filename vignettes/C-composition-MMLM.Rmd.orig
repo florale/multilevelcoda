@@ -62,12 +62,12 @@ Our `brms` model can be then fitted using the `brmcoda()` function.
 
 ```{r brmcoda, results = "hide", message=FALSE}
 mv <- brmcoda(complr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
+              formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
 Here is a `summary()` of the model. 
-We can see that stress significantly predicted `ilr1` and `ilr2`. 
+We can see that stress significantly predicted `z1_1` and `z2_1`. 
 
 ```{r summary}
 summary(mv)
@@ -94,12 +94,12 @@ Let's examine whether stress predicts the overall sleep-wake composition.
 ```{r bfmodel, results = "hide", message=FALSE}
 # intercept only
 mv0 <- brmcoda(complr = cilr,
-               formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ 1 + (1 | ID),
+               formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ 1 + (1 | ID),
                iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
                backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 # full model
 mv <- brmcoda(complr = cilr,
-              formula = mvbind(ilr1, ilr2, ilr3, ilr4) ~ Stress + (1 | ID),
+              formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + (1 | ID),
               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
 ```
@@ -109,8 +109,6 @@ We can now compare these models with the `bayesfactor_models()` function
 ```{r bf, message=FALSE}
 bayes_factor(mv$model, mv0$model)
 ```
-
-
 
 With a $BF$ < 1, our data favours the intercept only model, showing that there is 
 insufficient evidence for stress predicting the overall sleep-wake composition.

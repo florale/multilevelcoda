@@ -67,8 +67,8 @@ cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 m <- brmcoda(complr = cilr,
-             formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
@@ -80,7 +80,7 @@ summary(m)
 
 We can see that the first and forth within-person ILR coordinates were both associated with stress. 
 Interpretation for multilevel ILR coordinates can often be less intuitive. 
-For example, the significant coefficient for wilr1 shows that the within-person change in sleep behaviours 
+For example, the significant coefficient for wz1_1 shows that the within-person change in sleep behaviours 
 (sleep duration and time awake in bed combined), relative to wake behaviours 
 (moderate to vigorous physical activity, light physical activity, and sedentary behaviour) on a given day, 
 is associated with stress. However, as there are

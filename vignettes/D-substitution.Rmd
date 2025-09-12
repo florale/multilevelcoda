@@ -58,8 +58,8 @@ cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 m <- brmcoda(complr = cilr,
-             formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                                wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
              cores = 8, seed = 123, backend = "cmdstanr")
 ```
 
@@ -70,7 +70,7 @@ A `summary()` of the model results.
 summary(m)
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
-#> Formula: Stress ~ bilr1 + bilr2 + bilr3 + bilr4 + wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID) 
+#> Formula: Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID) 
 #>    Data: tmp (Number of observations: 3540) 
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 4000
@@ -83,14 +83,14 @@ summary(m)
 #> Regression Coefficients:
 #>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 #> Intercept     2.65      0.48     1.69     3.56 1.00     1494     2202
-#> bilr1         0.11      0.32    -0.53     0.74 1.00      967     1699
-#> bilr2         0.50      0.34    -0.16     1.15 1.00     1081     2071
-#> bilr3         0.11      0.21    -0.31     0.53 1.00     1059     2057
-#> bilr4         0.04      0.28    -0.51     0.60 1.00     1266     2174
-#> wilr1        -0.34      0.12    -0.58    -0.09 1.00     2797     2882
-#> wilr2         0.05      0.13    -0.21     0.32 1.00     3134     2299
-#> wilr3        -0.10      0.08    -0.26     0.06 1.00     2712     2653
-#> wilr4         0.24      0.10     0.04     0.44 1.00     2963     2874
+#> bz1_1         0.11      0.32    -0.53     0.74 1.00      967     1699
+#> bz2_1         0.50      0.34    -0.16     1.15 1.00     1081     2071
+#> bz3_1         0.11      0.21    -0.31     0.53 1.00     1059     2057
+#> bz4_1         0.04      0.28    -0.51     0.60 1.00     1266     2174
+#> wz1_1        -0.34      0.12    -0.58    -0.09 1.00     2797     2882
+#> wz2_1         0.05      0.13    -0.21     0.32 1.00     3134     2299
+#> wz3_1        -0.10      0.08    -0.26     0.06 1.00     2712     2653
+#> wz4_1         0.24      0.10     0.04     0.44 1.00     2963     2874
 #> Female       -0.41      0.17    -0.77    -0.07 1.00     1364     1823
 #> 
 #> Further Distributional Parameters:
@@ -104,7 +104,7 @@ summary(m)
 
 We can see that the first and forth within-person ILR coordinates were both associated with stress. 
 Interpretation for multilevel ILR coordinates can often be less intuitive. 
-For example, the significant coefficient for wilr1 shows that the within-person change in sleep behaviours 
+For example, the significant coefficient for wz1_1 shows that the within-person change in sleep behaviours 
 (sleep duration and time awake in bed combined), relative to wake behaviours 
 (moderate to vigorous physical activity, light physical activity, and sedentary behaviour) on a given day, 
 is associated with stress. However, as there are
