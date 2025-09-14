@@ -52,6 +52,7 @@ bsub <- function(object,
     d0 <- build.rg(object = object,
                    ref = ref,
                    parts = parts,
+                   at = at,
                    level = level,
                    weight = weight,
                    fill = FALSE)
