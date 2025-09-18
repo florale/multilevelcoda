@@ -32,8 +32,7 @@ mean.complr <- function(x,
                         weight = c("equal", "proportional"),
                         parts = 1,
                         ...) {
-  
-  parts <- get_parts(object = x, parts = parts)
+  parts <- .get_parts(object = x, parts = parts)
   idx   <- which(vapply(lapply(x$output, 
                                function(x) x$parts), 
                         function(p) identical(sort(parts), sort(p)), logical(1)))
@@ -96,7 +95,7 @@ var.complr <- function(x,
                        parts = 1,
                        ...) {
   
-  parts <- get_parts(object = x, parts = parts)
+  parts <- .get_parts(object = x, parts = parts)
   idx   <- which(vapply(lapply(x$output, 
                                function(x) x$parts), 
                         function(p) identical(sort(parts), sort(p)), logical(1)))
