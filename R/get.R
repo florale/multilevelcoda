@@ -88,15 +88,16 @@ get_variables.brmcoda <- function(object) {
       x$rhs)))
     
     ## response type
-    if (all(complr_vars$bZ %in% model_resp)) {
+    if (length(complr_vars$bZ) > 0 && all(complr_vars$bZ %in% model_resp)) {
       model_resp_type <- append(model_resp_type, "multivariate-between")
     }
-    if (all(complr_vars$wZ %in% model_resp)) {
+    if (length(complr_vars$wZ) > 0 && all(complr_vars$wZ %in% model_resp)) {
       model_resp_type <- append(model_resp_type, "multivariate-within")
     }
-    if (all(complr_vars$Z %in% model_resp)) {
+    if (length(complr_vars$Z) > 0 && all(complr_vars$Z %in% model_resp)) {
       model_resp_type <- append(model_resp_type, "multivariate-aggregate")
     }
+
     if (!is.null(model_resp_type) && length(model_resp_type) > 1) {
       stop(
         "Multivariate response models with different levels (between, within, aggregate) are not supported."
@@ -194,7 +195,6 @@ get_variables.brmcoda <- function(object) {
   )
 }
 
-
 #' Extract Sequential Binary Partition from a \code{complr} object.
 #' 
 #' @param object A \code{complr} object
@@ -271,6 +271,7 @@ get_sbp <- function(object) {
        idy = if(!is.na(idy)) idy else 0L
   )
 }
+
 #' Extract names of parts from a \code{complr} object.
 #' 
 #' Internal use only
