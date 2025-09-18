@@ -69,14 +69,20 @@ mean.complr <- function(x,
   names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
   
   out <- list(X  = out$X$mean, 
-              bX = out$bX$mean,
+              bX = if(!is.null(bX)) out$bX$mean else NULL,
               wX = out$wX$mean,
               Z  = out$Z["Mean", ],
               bZ = out$bZ["Mean", ],
               wZ = out$wZ["Mean", ]
   )
+  # remove null elments
+  out <- out[!vapply(out, is.null, logical(1))]
+  
+  # print as numeric
   print(lapply(out, function(x) {
-    as.data.frame(t(x))
+   x_print <- as.numeric(x)
+    names(x_print) <- names(x)
+    x
   }), row.names = FALSE)
   
   invisible(out)
