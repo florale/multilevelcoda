@@ -108,11 +108,11 @@ NULL
   all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
 
   grid <- d0[, colnames(d0) %nin% c(all_vars[["xz_vars"]], object[["complr"]][["idvar"]]), with = FALSE]
-  grid[, at := if (!is.null(at)) {
-    names(at)
-  } else {
-    NA
-  }]
+  # grid[, at := if (!is.null(at)) {
+  #   names(at)
+  # } else {
+  #   NA
+  # }]
 
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -338,11 +338,11 @@ NULL
   all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
 
   grid <- d0[, colnames(d0) %nin% c(all_vars[["xz_vars"]], object[["complr"]][["idvar"]]), with = FALSE]
-  grid[, at := if (!is.null(at)) {
-    names(at)
-  } else {
-    NA
-  }]
+  # grid[, at := if (!is.null(at)) {
+  #   names(at)
+  # } else {
+  #   NA
+  # }]
 
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -567,13 +567,13 @@ NULL
                      ...) {
   # extract variables from complr and brmcoda objects for use in substitution models
   all_vars <- .get.subvars(object = object, parts = parts, scale = scale)
-
+  
   grid <- d0[, colnames(d0) %nin% c(all_vars[["xz_vars"]], object[["complr"]][["idvar"]]), with = FALSE]
-  grid[, at := if (!is.null(at)) {
-    names(at)
-  } else {
-    NA
-  }]
+  # grid[, at := if (!is.null(at)) {
+  #   names(at)
+  # } else {
+  #   NA
+  # }]
 
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -734,10 +734,7 @@ NULL
     # final results for entire composition
     list(posterior_delta_y)
   }
-
   if (summary) {
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), at = list(Female = c(0,1)), summary = TRUE)
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), summary = TRUE)
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(iouti, function(ioutii) {
         do.call(rbind, Map(function(d, ida) {
@@ -755,8 +752,6 @@ NULL
       iouti
     })
   } else {
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), at = list(Female = c(0,1)), summary = FALSE)
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), summary = FALSE)
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(seq_along(iouti), function(i) {
         if (aorg) {
