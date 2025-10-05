@@ -108,11 +108,11 @@ NULL
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
   grid <- d0[, colnames(d0) %nin% c(get_vars[["Xxz"]], object[["complr"]][["idvar"]]), with = FALSE]
-  grid[, at := if (!is.null(at)) {
-    names(at)
-  } else {
-    NA
-  }]
+  # grid[, at := if (!is.null(at)) {
+  #   names(at)
+  # } else {
+  #   NA
+  # }]
 
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -338,11 +338,11 @@ NULL
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
 
   grid <- d0[, colnames(d0) %nin% c(get_vars[["Xxz"]], object[["complr"]][["idvar"]]), with = FALSE]
-  grid[, at := if (!is.null(at)) {
-    names(at)
-  } else {
-    NA
-  }]
+  # grid[, at := if (!is.null(at)) {
+  #   names(at)
+  # } else {
+  #   NA
+  # }]
 
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
@@ -569,11 +569,11 @@ NULL
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
   
   grid <- d0[, colnames(d0) %nin% c(get_vars[["Xxz"]], object[["complr"]][["idvar"]]), with = FALSE]
-  grid[, at := if (!is.null(at)) {
-    names(at)
-  } else {
-    NA
-  }]
+  # grid[, at := if (!is.null(at)) {
+  #   names(at)
+  # } else {
+  #   NA
+  # }]
 
   # setup parallel processing
   if (isFALSE(is.null(cores))) {
