@@ -734,10 +734,7 @@ NULL
     # final results for entire composition
     list(posterior_delta_y)
   }
-
   if (summary) {
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), at = list(Female = c(0,1)), summary = TRUE)
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), summary = TRUE)
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(iouti, function(ioutii) {
         do.call(rbind, Map(function(d, ida) {
@@ -755,8 +752,6 @@ NULL
       iouti
     })
   } else {
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), at = list(Female = c(0,1)), summary = FALSE)
-    ## sub1 <- substitution(object = m, delta = 5, level = c("between"), summary = FALSE)
     iout <- lapply(iout, function(iouti) {
       iouti <- lapply(seq_along(iouti), function(i) {
         if (aorg) {
