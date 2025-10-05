@@ -213,17 +213,17 @@ fitted.brmcoda <- function(object,
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$bZ)) {
       model_resp_type <- "between"
       total <- object$complr$output[[idy]]$total
-      yn <- complr_vars[[idy]]$bX
+      Yn <- complr_vars[[idy]]$bX
     }
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$wZ)) {
       model_resp_type <- "within"
       total <- 1
-      yn <- complr_vars[[idy]]$wX
+      Yn <- complr_vars[[idy]]$wX
     }
     if (identical(brmcoda_vars$y, complr_vars[[idy]]$Z)) {
       model_resp_type <- "aggregate"
       total <- object$complr$output[[idy]]$total
-      yn <- complr_vars[[idy]]$X
+      Yn <- complr_vars[[idy]]$X
     }
     if (!exists("model_resp_type")) {
       stop(
@@ -242,12 +242,12 @@ fitted.brmcoda <- function(object,
       })
       out <- brms::do_call(abind::abind, c(out, along = 3)) # 1 = draw, 2 = ob, 3 = part
       out <- aperm(out, c(3, 1, 2)) #draw-row-col
-      dimnames(out)[[3]] <- yn
+      dimnames(out)[[3]] <- Yn
 
       # summary posteriors
       if (summary) {
         out <- posterior_summary(out)
-        dimnames(out)[[3]] <- yn
+        dimnames(out)[[3]] <- Yn
       }
     } else {
       out <- fitted(object$model, summary = summary, ...)

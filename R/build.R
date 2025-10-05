@@ -141,13 +141,13 @@ build.rg <- function(object,
       identical(sort(parts), sort(p)), logical(1))))[1]
   
   # grab logratio and composition names
-  z_vars  <- get_variables(object$complr)[[paste0("composition_", idx)]][["Z"]]
-  bz_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["bZ"]]
-  wz_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["wZ"]]
+  Xz_vars  <- get_variables(object$complr)[[paste0("composition_", idx)]][["Z"]]
+  Xbz_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["bZ"]]
+  Xwz_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["wZ"]]
   
-  x_vars  <- get_variables(object$complr)[[paste0("composition_", idx)]][["X"]]
-  bx_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["bX"]]
-  wx_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["wX"]]
+  Xtx_vars  <- get_variables(object$complr)[[paste0("composition_", idx)]][["X"]]
+  Xbx_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["bX"]]
+  Xwx_vars <- get_variables(object$complr)[[paste0("composition_", idx)]][["wX"]]
   
   ## NOTES
   ## ignore weight for clustermean
@@ -166,13 +166,13 @@ build.rg <- function(object,
       ## aggregate
       if ("aggregate" %in% level) {
         d0 <- object[["complr"]][["dataout"]][, head(.SD, 1), by = eval(object[["complr"]][["idvar"]])]
-        x0 <- acomp(d0[, x_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
+        x0 <- acomp(d0[, Xtx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
         
         z0 <- ilr(x0, V = object[["complr"]][["output"]][[idx]][["psi"]])
         z0 <- as.data.table(z0)
         
-        colnames(z0) <- z_vars
-        colnames(x0) <- x_vars
+        colnames(z0) <- Xz_vars
+        colnames(x0) <- Xtx_vars
         
         d0 <- cbind(z0, x0, d0[, -colnames(x0), with = FALSE])
       }
@@ -180,7 +180,7 @@ build.rg <- function(object,
       ## between and within
       if (any(c("between", "within") %in% level)) {
         d0   <- object[["complr"]][["dataout"]][, head(.SD, 1), by = eval(object[["complr"]][["idvar"]])]
-        bx0  <- acomp(d0[, bx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
+        bx0  <- acomp(d0[, Xbx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
         
         bz0 <- ilr(bx0, V = object[["complr"]][["output"]][[idx]][["psi"]])
         bz0 <- as.data.table(bz0)
@@ -188,21 +188,21 @@ build.rg <- function(object,
         wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
         wz0 <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
         
-        colnames(bz0) <- bz_vars
-        colnames(wz0) <- wz_vars
-        colnames(bx0) <- bx_vars
-        colnames(wx0) <- wx_vars
+        colnames(bz0) <- Xbz_vars
+        colnames(wz0) <- Xwz_vars
+        colnames(bx0) <- Xbx_vars
+        colnames(wx0) <- Xwx_vars
         
-        d0 <- cbind(bz0, wz0, bx0, wx0, d0[, colnames(d0) %nin% c(bz_vars, wz_vars, bx_vars, wx_vars), with = FALSE])
+        d0 <- cbind(bz0, wz0, bx0, wx0, d0[, colnames(d0) %nin% c(Xbz_vars, Xwz_vars, Xbx_vars, Xwx_vars), with = FALSE])
       }
     } else {
       ## assemble reference grid
       ## get var names
-      zs <- c(bz_vars, wz_vars, z_vars)
+      zs <- c(Xbz_vars, Xwz_vars, Xz_vars)
       
       resp  <- brmcoda_vars[["y"]]
       grp   <- object[["complr"]][["idvar"]]
-      preds <- brmcoda_vars[["x"]] %sin% c(z_vars, bz_vars, wz_vars)
+      preds <- brmcoda_vars[["x"]] %sin% c(Xz_vars, Xbz_vars, Xwz_vars)
       covs  <- brmcoda_vars[["x"]] %snin% c(resp, grp, preds)
       
       ## default reference grid
@@ -225,7 +225,7 @@ build.rg <- function(object,
             
           } else {
             x0 <- object[["complr"]][["dataout"]][, head(.SD, 1), by = eval(object[["complr"]][["idvar"]])]
-            x0 <- acomp(x0[, x_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
+            x0 <- acomp(x0[, Xtx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
             x0 <- mean.acomp(x0, robust = TRUE)
           }
           
@@ -235,8 +235,8 @@ build.rg <- function(object,
           z0 <- ilr(x0, V = object[["complr"]][["output"]][[idx]][["psi"]])
           z0 <- as.data.table(t(z0))
           
-          colnames(z0) <- z_vars
-          colnames(x0) <- x_vars
+          colnames(z0) <- Xz_vars
+          colnames(x0) <- Xtx_vars
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
         }
@@ -248,7 +248,7 @@ build.rg <- function(object,
             
           } else {
             bx0 <- object[["complr"]][["dataout"]][, head(.SD, 1), by = eval(object[["complr"]][["idvar"]])]
-            bx0 <- acomp(bx0[, bx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
+            bx0 <- acomp(bx0[, Xbx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
             bx0 <- mean.acomp(bx0, robust = TRUE)
           }
           
@@ -261,10 +261,10 @@ build.rg <- function(object,
           wx0 <- as.data.table(matrix(1, nrow = nrow(bx0), ncol = ncol(bx0)))
           wz0 <- as.data.table(matrix(0, nrow = nrow(bz0), ncol = ncol(bz0)))
           
-          colnames(bz0) <- bz_vars
-          colnames(wz0) <- wz_vars
-          colnames(bx0) <- bx_vars
-          colnames(wx0) <- wx_vars
+          colnames(bz0) <- Xbz_vars
+          colnames(wz0) <- Xwz_vars
+          colnames(bx0) <- Xbx_vars
+          colnames(wx0) <- Xwx_vars
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
         }
@@ -342,15 +342,15 @@ build.rg <- function(object,
           z0 <- ilr(x0, V = object[["complr"]][["output"]][[idx]][["psi"]])
           z0 <- as.data.table(t(z0))
           
-          colnames(z0) <- z_vars
-          colnames(x0) <- x_vars
+          colnames(z0) <- Xz_vars
+          colnames(x0) <- Xtx_vars
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(z0, x0, id)) else (expand.grid.df(z0, x0, id, refgrid))
           
         }
         if (level %in% c("between", "within")) {
           x0 <- object[["complr"]][["dataout"]][, head(.SD, 1), by = eval(object[["complr"]][["idvar"]])]
-          x0 <- acomp(x0[, bx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
+          x0 <- acomp(x0[, Xbx_vars, with = FALSE], total = object[["complr"]][["output"]][[idx]][["total"]])
           x0 <- mean.acomp(x0, robust = TRUE)
           
           # assemble d0
@@ -367,10 +367,10 @@ build.rg <- function(object,
           
           id <- data.table::data.table(1) # to make fitted() happy
           
-          colnames(bz0) <- bz_vars
-          colnames(wz0) <- wz_vars
-          colnames(bx0) <- bx_vars
-          colnames(wx0) <- wx_vars
+          colnames(bz0) <- Xbz_vars
+          colnames(wz0) <- Xwz_vars
+          colnames(bx0) <- Xbx_vars
+          colnames(wx0) <- Xwx_vars
           colnames(id)  <- object[["complr"]][["idvar"]]
           
           d0 <- if (all(dim(refgrid) == 0)) (cbind(bz0, wz0, bx0, wx0, id)) else (expand.grid.df(bz0, wz0, bx0, wx0, id, refgrid))
@@ -390,15 +390,15 @@ build.rg <- function(object,
     z0 <- ilr(x0, V = object[["complr"]][["output"]][[idx]][["psi"]])
     z0 <- as.data.table(t(z0))
     
-    colnames(z0) <- z_vars
-    colnames(x0) <- x_vars
+    colnames(z0) <- Xz_vars
+    colnames(x0) <- Xtx_vars
     
     # assemble reference grid
     # get var names
-    zs <- c(z_vars, bz_vars, wz_vars)
+    zs <- c(Xz_vars, Xbz_vars, Xwz_vars)
     
     resp  <- brmcoda_vars[["y"]]
-    preds <- z_vars
+    preds <- Xz_vars
     covs  <- brmcoda_vars[["x"]] %snin% c(resp, zs)
     
     refgrid <- as.data.table(ref_grid(object[["model"]], at = at)@grid)

@@ -129,6 +129,7 @@ get_variables.brmcoda <- function(object) {
       }
     } else {
       model_pred_type <- "non-compositional"
+      # model_fixef_type <- model_pred
     }
     
   } else {
@@ -230,43 +231,60 @@ get_sbp <- function(object) {
     }))
   }, logical(1))))[1]
   
-  # grab logratio and composition names
-  z_vars  <- complr_vars[[paste0("composition_", idx)]][["Z"]]
-  bz_vars <- complr_vars[[paste0("composition_", idx)]][["bZ"]]
-  wz_vars <- complr_vars[[paste0("composition_", idx)]][["wZ"]]
-  x_vars  <- complr_vars[[paste0("composition_", idx)]][["X"]]
-  bx_vars <- complr_vars[[paste0("composition_", idx)]][["bX"]]
-  wx_vars <- complr_vars[[paste0("composition_", idx)]][["wX"]]
+  # grab logratio and composition names of X
+  XZ <- complr_vars[[paste0("composition_", idx)]][["Z"]]
+  XbZ <- complr_vars[[paste0("composition_", idx)]][["bZ"]]
+  XwZ <- complr_vars[[paste0("composition_", idx)]][["wZ"]]
+  XX <- complr_vars[[paste0("composition_", idx)]][["X"]]
+  XbX <- complr_vars[[paste0("composition_", idx)]][["bX"]]
+  XwX <- complr_vars[[paste0("composition_", idx)]][["wX"]]
   
-  xz_vars <- c(z_vars, bz_vars, wz_vars, x_vars, bx_vars, wx_vars)
-  sx_vars <- paste0("s", object[["complr"]][["output"]][[idx]][["parts"]])
+  Xxz <- c(XZ, XbZ, XwZ, XX, XbX, XwX)
+  sX <- paste0("s", object[["complr"]][["output"]][[idx]][["parts"]])
+  
+  YZ <- complr_vars[[paste0("composition_", idy)]][["Z"]]
+  YbZ <- complr_vars[[paste0("composition_", idy)]][["bZ"]]
+  YwZ <- complr_vars[[paste0("composition_", idy)]][["wZ"]]
+  YX <- complr_vars[[paste0("composition_", idy)]][["X"]]
+  YbX <- complr_vars[[paste0("composition_", idy)]][["bX"]]
+  YwX <- complr_vars[[paste0("composition_", idy)]][["wX"]]
   
   if (inherits(object[["model"]][["formula"]], "mvbrmsformula") &&
       (
-        identical(brmcoda_vars[["y"]], z_vars)  ||
-        identical(brmcoda_vars[["y"]], bz_vars) ||
-        identical(brmcoda_vars[["y"]], wz_vars)
+        identical(brmcoda_vars[["y"]], YZ)  ||
+        identical(brmcoda_vars[["y"]], YbZ) ||
+        identical(brmcoda_vars[["y"]], YwZ)
       )) {
     if (identical(scale, "response")) {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][["X"]]
+      Yn <- YX
     } else {
-      y_vars <- complr_vars[[paste0("composition_", idy)]][["Z"]]
+      Yn <- YZ
     }
   } else {
-    y_vars <- brmcoda_vars[["y"]]
+    Yn <- brmcoda_vars[["y"]]
   }
   
-  list(brmcoda_vars = brmcoda_vars,
-       complr_vars = complr_vars,
-       z_vars = z_vars,
-       bz_vars = bz_vars,
-       wz_vars = wz_vars,
-       x_vars = x_vars,
-       bx_vars = bx_vars,
-       wx_vars = wx_vars,
-       xz_vars = xz_vars,
-       sx_vars = sx_vars,
-       y_vars = y_vars,
+  list(brmcoda = brmcoda_vars,
+       complr = complr_vars,
+       XZ = XZ,
+       XbZ = XbZ,
+       XwZ = XwZ,
+       XX = XX,
+       XbX = XbX,
+       XwX = XwX,
+       
+       Xxz = Xxz,
+       sX = sX,
+       
+       YZ = YZ,
+       YbZ = YbZ,
+       YwZ = YwZ,
+       YX = YX,
+       YbX = YbX,
+       YwX = YwX,
+       
+       Yn = Yn,
+       
        idx = idx,
        idy = if(!is.na(idy)) idy else 0L
   )
