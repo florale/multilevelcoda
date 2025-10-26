@@ -27,13 +27,13 @@ cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 
 test_that("bsub errors for invalid input", {
   # missing complr
-  expect_error(m <- brmcoda(formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                              wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+  expect_error(m <- brmcoda(formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                              wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
                             chain = 1, iter = 500, seed = 123,
                             backend = backend))
   expect_error(m <- brmcoda(complr = psub,
-                            formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                              wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+                            formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                              wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
                             chain = 1, iter = 500, seed = 123,
                             backend = backend))
 })
@@ -63,10 +63,10 @@ test_that("wilr from brmcoda gives expected predictions", {
   sbp <- as.matrix(data.table(1, -1))
   cilr <- complr(data = daydata, sbp = sbp,
                  parts = c("TST", "Wake"), idvar = "ID")
-  psub <- build.basesub(c("TST", "Wake"))
+  psub <- build.base(c("TST", "Wake"))
   suppressWarnings(
     m <- brmcoda(complr = cilr,
-                 formula = PA ~ wilr1 + (1 | ID),
+                 formula = PA ~ wz1_1 + (1 | ID),
                  chain = 1, iter = 500, seed = 123,
                  backend = backend))
   daydata2 <- cbind(daydata, fitted(m$model))

@@ -34,8 +34,8 @@
 # 
 # suppressWarnings(
 #   m <- brmcoda(complr = cilr,
-#                formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#                  wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+#                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#                  wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
 #                chain = 1, iter = 500, seed = 123,
 #                backend = backend))
 # foreach::registerDoSEQ()
@@ -65,11 +65,11 @@
 #   expect_error(x <- substitution(object = m1, basesub = psub))
 # 
 #   ## basesub does not have the same components as parts in cilr
-#   ps <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"))
+#   ps <- build.base(c("WAKE", "MVPA", "LPA", "SB"))
 #   expect_error(x <- bsub(object = m, basesub = ps, delta = 2))
 # 
 #   ## basesub does have the same names as parts in cilr
-#   ps <- build.basesub(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
+#   ps <- build.base(parts = c("Sleep", "WAKE", "MVPA", "LPA", "SB"))
 #   expect_error(x <- bsub(object = m, basesub = ps, delta = 2))
 # 
 
@@ -80,8 +80,8 @@
 #   ## reference grid is provided for unadjusted model
 #   suppressWarnings(
 #     m2 <- brmcoda(complr = cilr,
-#                   formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#                     wilr1 + wilr2 + wilr3 + wilr4 + (1 | ID),
+#                   formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#                     wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
 #                   chain = 1, iter = 500, seed = 123,
 #                   backend = "cmdstanr"))
 #   rg <- data.table(Age = 1)
@@ -92,11 +92,11 @@
 #   expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
 #   
 #   ## reference grid has matching names with ILRs
-#   rg <- data.table(bilr1 = 1)
+#   rg <- data.table(bz1_1 = 1)
 #   expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
 #   
 #   ## incorect reference grid 2
-#   rg <- data.table(bilr1 = 1, Age = 1)
+#   rg <- data.table(bz1_1 = 1, Age = 1)
 #   expect_error(x <- bsub(object = m, basesub = psub, delta = 2, regrid = rg))
 #   
 #   # delta out of range
@@ -142,8 +142,8 @@
 #   
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#                    wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+#                  formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#                    wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   
@@ -306,10 +306,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "WAKE"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("TST", "WAKE"))
+#   psub <- build.base(c("TST", "WAKE"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   a <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -337,10 +337,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "MVPA"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("TST", "MVPA"))
+#   psub <- build.base(c("TST", "MVPA"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   b <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -368,10 +368,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "LPA"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("TST", "LPA"))
+#   psub <- build.base(c("TST", "LPA"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   c <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -399,10 +399,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("TST", "SB"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("TST", "SB"))
+#   psub <- build.base(c("TST", "SB"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   d <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -430,11 +430,11 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("WAKE", "MVPA"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("WAKE", "MVPA"))
+#   psub <- build.base(c("WAKE", "MVPA"))
 #   
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   e <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -462,10 +462,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("WAKE", "LPA"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("WAKE", "LPA"))
+#   psub <- build.base(c("WAKE", "LPA"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   f <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -493,10 +493,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("WAKE", "SB"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("WAKE", "SB"))
+#   psub <- build.base(c("WAKE", "SB"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   g <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -524,9 +524,9 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("MVPA", "LPA"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("MVPA", "LPA"))
+#   psub <- build.base(c("MVPA", "LPA"))
 #   suppressWarnings(m <- brmcoda(complr = cilr,
-#                                 formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                                 formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                                 chain = 1, iter = 500, seed = 123,
 #                                 backend = "cmdstanr"))
 #   h <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -554,10 +554,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("MVPA", "SB"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("MVPA", "SB"))
+#   psub <- build.base(c("MVPA", "SB"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   i <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -585,10 +585,10 @@
 #   sbp <- as.matrix(data.table(1, -1))
 #   cilr <- complr(data = mcompd[ID %in% 1:10, .SD[1:3], by = ID], sbp = sbp,
 #                   parts = c("LPA", "SB"), idvar = "ID", total = 1440)
-#   psub <- build.basesub(c("LPA", "SB"))
+#   psub <- build.base(c("LPA", "SB"))
 #   suppressWarnings(
 #     m <- brmcoda(complr = cilr,
-#                  formula = Stress ~ bilr1 + wilr1 + (1 | ID),
+#                  formula = Stress ~ bz1_1 + wz1_1 + (1 | ID),
 #                  chain = 1, iter = 500, seed = 123,
 #                  backend = "cmdstanr"))
 #   j <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -626,8 +626,8 @@
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(complr = cilr,
-#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+#                               formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#                                 wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
 #                               chain = 10, iter = 10000, cores = 8, seed = 123))
 # 
 # h <- bsub(object = m, basesub = psub, delta = 1:2)
@@ -642,8 +642,8 @@
 #                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 # 
 # suppressWarnings(m <- brmcoda(complr = cilr,
-#                               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-#                                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+#                               formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+#                                 wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
 #                               chain = 10, iter = 10000, cores = 8, seed = 123))
 # 
 # j <- bsub(object = m, basesub = psub, delta = 1:2)

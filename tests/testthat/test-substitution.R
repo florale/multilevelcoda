@@ -30,8 +30,8 @@ cilr <- complr(data = mcompd[ID %in% 1:200, .SD[1:5], by = ID], sbp = sbp,
 
 suppressWarnings(
   m <- brmcoda(complr = cilr,
-               formula = Stress ~ bilr1 + bilr2 + bilr3 + bilr4 +
-                 wilr1 + wilr2 + wilr3 + wilr4 + Female + (1 | ID),
+               formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                 wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
                backend = backend))
 foreach::registerDoSEQ()
@@ -57,16 +57,16 @@ test_that("substitution errors for invalid input", {
   expect_error(x <- substitution(object = m))
   
   # ## reference grid has matching names with ILRs
-  # rg <- data.table(bilr1 = 1)
+  # rg <- data.table(bz1_1 = 1)
   # expect_error(x <- substitution(object = m, delta = 2, regrid = rg))
   
-  ## basesub does not have the same components as parts in cilr
-  ps <- build.basesub(c("WAKE", "MVPA", "LPA", "SB"))
-  expect_error(x <- substitution(object = m, basesub = ps, delta = 2))
+  ## base does not have the same components as parts in cilr
+  ps <- build.base(c("WAKE", "MVPA", "LPA", "SB"))
+  expect_error(x <- substitution(object = m, base = ps, delta = 2))
   
-  ## basesub does not have the same names as parts in cilr
-  ps <- build.basesub(parts = c("Sleep", "WAKE", "MVPA", "LIPA", "SB"))
-  expect_error(x <- substitution(object = m, basesub = ps, delta = 2))
+  ## base does not have the same names as parts in cilr
+  ps <- build.base(parts = c("Sleep", "WAKE", "MVPA", "LIPA", "SB"))
+  expect_error(x <- substitution(object = m, base = ps, delta = 2))
   
 })
 
