@@ -23,3 +23,5 @@ data/adjusted-mvmcoda.RData
 vignettes/fit_centered
 
 *.pdf
+
+R/optimise.R
