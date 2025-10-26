@@ -125,6 +125,10 @@ Single-level models are default to <code>"aggregate"</code>.</p></dd>
 Currently only support outputing raw values for model using grandmean as reference composition.</p></dd>
 
 
+<dt id="arg-aorg">aorg<a class="anchor" aria-label="anchor" href="#arg-aorg"></a></dt>
+<dd><p>Internal use. A logical value indicating whether the results should be average across reference grid.</p></dd>
+
+
 <dt id="arg-at">at<a class="anchor" aria-label="anchor" href="#arg-at"></a></dt>
 <dd><p>An optional named list of levels for the corresponding variables in the reference grid.</p></dd>
 
@@ -215,15 +219,14 @@ The first six lists contain the results of the substitution estimation for a com
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># model with compositional predictor at between and within-person levels</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="brmcoda.html">brmcoda</a></span><span class="op">(</span>complr <span class="op">=</span> <span class="va">cilr</span>, </span></span>
-<span class="r-in"><span>             formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bz1</span> <span class="op">+</span> <span class="va">bz2</span> <span class="op">+</span> <span class="va">bz3</span> <span class="op">+</span> <span class="va">bz4</span> <span class="op">+</span> </span></span>
-<span class="r-in"><span>                                <span class="va">wz1</span> <span class="op">+</span> <span class="va">wz2</span> <span class="op">+</span> <span class="va">wz3</span> <span class="op">+</span> <span class="va">wz4</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>             formula <span class="op">=</span> <span class="va">Stress</span> <span class="op">~</span> <span class="va">bz1_1</span> <span class="op">+</span> <span class="va">bz2_1</span> <span class="op">+</span> <span class="va">bz3_1</span> <span class="op">+</span> <span class="va">bz4_1</span> <span class="op">+</span> </span></span>
+<span class="r-in"><span>                                <span class="va">wz1_1</span> <span class="op">+</span> <span class="va">wz2_1</span> <span class="op">+</span> <span class="va">wz3_1</span> <span class="op">+</span> <span class="va">wz4_1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>             chain <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span>,</span></span>
 <span class="r-in"><span>             backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>             </span></span>
 <span class="r-in"><span><span class="va">subm</span> <span class="op">&lt;-</span> <span class="fu">wsub</span><span class="op">(</span>object <span class="op">=</span> <span class="va">m</span>, base <span class="op">=</span> <span class="va">psub</span>, delta <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in validate_data(data, bterms = bterms, data2 = data2, knots = knots,     drop_unused_levels = drop_unused_levels, data_name = substitute_name(data)):</span> The following variables can neither be found in 'data' nor in 'data2':</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 'bz1', 'bz2', 'bz3', 'bz4', 'wz1', 'wz2', 'wz3', 'wz4'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> CmdStan path has not been set yet. See ?set_cmdstan_path.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
