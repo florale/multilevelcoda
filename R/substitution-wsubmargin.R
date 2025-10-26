@@ -23,8 +23,8 @@
 #' 
 #' # model with compositional predictor at between and within-person levels
 #' m <- brmcoda(complr = cilr, 
-#'              formula = Stress ~ bz1 + bz2 + bz3 + bz4 + 
-#'                                 wz1 + wz2 + wz3 + wz4 + (1 | ID), 
+#'              formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + 
+#'                                 wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID), 
 #'              chain = 1, iter = 500,
 #'              backend = "cmdstanr")
 #'                      

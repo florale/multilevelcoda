@@ -10,12 +10,6 @@
 \item{object}{An object of class \code{complr}.}
 
 \item{...}{generic argument, not in use.}
-
-\item{weight}{A character value specifying the weight to use in calculation of the reference composition.
-If \code{"equal"}, give equal weight to units (e.g., individuals).
-If \code{"proportional"}, weights in proportion to the frequencies of units being averaged
-(e.g., observations across individuals).
-Default is \code{equal}.}
 }
 \description{
 Create a Summary of a \code{complr} object

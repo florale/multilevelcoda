@@ -1,3 +1,19 @@
+#' Extract variable names from an object
+#'
+#' Generic function to extract variable names from a supported object.
+#'
+#' @param object An object from which to extract variable names.
+#'
+#' @return A list of variable names.
+#'
+#' @examples
+#' # For a complr object:
+#' # get_variables(complr_object)
+#'
+#' # For a brmcoda object:
+#' # get_variables(brmcoda_object)
+#'
+#' @export
 get_variables = function(object) UseMethod("get_variables")
 
 #' Extract variable names from a \code{complr} object.

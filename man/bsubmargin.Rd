@@ -96,8 +96,8 @@ cilr <- complr(data = mcompd[ID \%in\% 1:10, .SD[1:3], by = ID], sbp = sbp,
                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
 m <- brmcoda(complr = cilr, 
-             formula = Stress ~ bz1 + bz2 + bz3 + bz4 + 
-                                wz1 + wz2 + wz3 + wz4 + 
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + 
+                                wz1_1 + wz2_1 + wz3_1 + wz4_1 + 
                                 Female + (1 | ID), 
              chains = 1, iter = 500,
              backend = "cmdstanr")

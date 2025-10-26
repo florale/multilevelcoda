@@ -56,7 +56,8 @@
 #'
 #'   ## fit a model with compositional outcome
 #'   m2 <- brmcoda(complr = x,
-#'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + Female + (1 | ID),
+#'                 formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ 
+#'                           bz1_1 + bz2_1 + bz3_1 + bz4_1 + Female + (1 | ID),
 #'                 chain = 1, iter = 500,
 #'                 backend = "cmdstanr")
 #'
@@ -144,6 +145,7 @@ predict.brmcoda <- function(object,
 #' @aliases fitted
 #'
 #' @inheritParams predict.brmcoda
+#' @param summary Should summary statistics be returned instead of the raw values? Default is \code{TRUE}.
 #' @param ... Further arguments passed to \code{\link[brms:fitted.brmsfit]{fitted.brmsfit}}
 #' that control additional aspects of prediction.
 #'

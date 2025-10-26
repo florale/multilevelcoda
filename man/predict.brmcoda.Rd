@@ -72,7 +72,8 @@ if(requireNamespace("cmdstanr")){
 
   ## fit a model with compositional outcome
   m2 <- brmcoda(complr = x,
-                formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + Female + (1 | ID),
+                formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ 
+                          bz1_1 + bz2_1 + bz3_1 + bz4_1 + Female + (1 | ID),
                 chain = 1, iter = 500,
                 backend = "cmdstanr")
 

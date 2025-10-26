@@ -40,6 +40,8 @@ Single-level models are default to \code{"aggregate"}.}
 \item{summary}{A logical value to obtain summary statistics instead of the raw values. Default is \code{TRUE}.
 Currently only support outputing raw values for model using grandmean as reference composition.}
 
+\item{aorg}{Internal use. A logical value indicating whether the results should be average across reference grid.}
+
 \item{at}{An optional named list of levels for the corresponding variables in the reference grid.}
 
 \item{parts}{A optional character string specifying names of compositional parts that should be considered
@@ -98,8 +100,8 @@ cilr <- complr(data = mcompd, sbp = sbp,
 
 # model with compositional predictor at between and between-person levels
 m <- brmcoda(complr = cilr, 
-             formula = Stress ~ bz1 + bz2 + bz3 + bz4 + 
-                                wz1 + wz2 + wz3 + wz4 + Female + (1 | ID), 
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + 
+                                wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID), 
              chain = 1, iter = 500,
              backend = "cmdstanr")
 subm <- bsub(object = m, base = psub, delta = 5)

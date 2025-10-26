@@ -38,6 +38,7 @@
 #' If \code{"response"}, results are returned on the scale of the response variable.
 #' If \code{"linear"}, results are returned on the scale of the linear predictor term,
 #' that is without applying the inverse link function or other transformations.
+#' @param aorg Internal use. A logical value indicating whether the results should be average across reference grid.
 #' @param cores Number of cores to use when executing the chains in parallel,
 #' we recommend setting the \code{mc.cores} option
 #' to be as many processors as the hardware and RAM allow (up to the number of compositional parts).
@@ -100,6 +101,7 @@ substitution <- function(object,
                          type,
                          weight = c("equal", "proportional"),
                          scale = c("response", "linear"),
+                         aorg = NULL,
                          cores = NULL,
                          ...) {
   if (missing(object)) {
@@ -165,14 +167,14 @@ substitution <- function(object,
     ref <- "grandmean"
   }
   
-  # default aorg to  TRUE when at is null
+  # default aorg to TRUE when at is null
   if (is.null(at)) {
     aorg <- TRUE
   } else {
     aorg <- FALSE
   }
   
-  # get parts
+  # get part names
   parts <- .get_parts(object[["complr"]], parts)
   
   # get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
@@ -183,7 +185,7 @@ substitution <- function(object,
   # get brmcoda variables
   brmcoda_vars <- get_variables(object)
   
-  # type - check with JW what would be the best way to detect onetoone vs onetoall
+  # type
   if (missing(type)) {
     if (missing(base)) {
       base <- build.base(parts = object[["complr"]][["output"]][[idx]][["parts"]])
@@ -193,6 +195,15 @@ substitution <- function(object,
         type <- "one-to-one"
       } else {
         stop("If 'base' is provided, it should be a data frame or data table.")
+      }
+      # names in base should match parts
+      if (isFALSE(identical(sort(parts), sort(colnames(base))))) {
+        stop(
+          sprintf(
+            "'base' should contain the same compositional parts as specified in 'parts' argument: %s",
+            paste(parts, collapse = ", ")
+          )
+        )
       }
     }
   } else {

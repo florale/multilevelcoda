@@ -22,6 +22,8 @@ A optional character string specifying names of compositional parts that make up
 This should correspond to a single set of names of compositional parts specified
 in the \code{complr} object. Default to the first composition in the \code{complr} object.}
 
+\item{summary}{Should summary statistics be returned instead of the raw values? Default is \code{TRUE}.}
+
 \item{...}{Further arguments passed to \code{\link[brms:fitted.brmsfit]{fitted.brmsfit}}
 that control additional aspects of prediction.}
 }

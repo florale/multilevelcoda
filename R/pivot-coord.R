@@ -18,6 +18,8 @@
 #' @return Estimated pivot balance coordinates representing the
 #' effect of increasing one compositional part relative to the remaining compositional parts.
 #' 
+#' @importFrom brms posterior_summary
+#' 
 #' @examples
 #' \donttest{
 #' if(requireNamespace("cmdstanr")){

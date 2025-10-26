@@ -76,10 +76,11 @@ create_substitution <- function(between_simple_sub,
 #'
 #' Functions used only internally to estimate substitution model
 #'
-#' @importFrom data.table as.data.table data.table copy := setDT rbindlist .SD
+#' @importFrom data.table as.data.table data.table copy := setDT rbindlist .SD .I
+#' @importFrom stats setNames
 #' @importFrom compositions acomp ilr clo mean.acomp
 #' @importFrom brms posterior_summary
-#' @importFrom extraoperators %snin% %sin%
+#' @importFrom extraoperators %snin% %sin% %ain%
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doFuture %dofuture%
 #' @importFrom future plan multisession sequential

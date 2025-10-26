@@ -7,13 +7,16 @@ utils::globalVariables(c("i",  "..cols", ".", "To", "t", "head",  "fitted",
                          "sim", "condition",
                          "est", "lower", "upper", "JI", "N", "K", "D", "Stat", "Estimates", "MCSE",
                          "sigma", "OnTarget",
-                         "multisession", "sequential"
+                         "multisession", "sequential",
+                         "%->%", "%<-%", ".wgt.", "Estimate", "ida", "minutes", "wgt_at"
 ))
 #' @keywords internal
 #' expand grid data frame
 #' @noRd
 expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
-
+expand.grid.dt <- function(...) {
+  as.data.table(Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...)))
+}
 # check sequence of number
 is.sequential <- function(x) {
   all(length(x) > 2 & all(abs(diff(x)) == 1))

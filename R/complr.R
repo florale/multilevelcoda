@@ -345,11 +345,10 @@ complr <- function(data,
   if (isTRUE(any(colnames(data) %in% colnames(dataout)))) {
     stop(
       sprintf(
-        "'data' cannot have any column names the same with logratio variables",
-        "  Please ensure that the names of the columns in 'data' are not any of the following:",
-        "  %s",
-        paste(colnames(data)[colnames(data) %in% colnames(dataout)], collapse = ", "),
-        sep = "\n"
+        "'data' cannot have any column names the same as logratio variables. 
+   Please ensure that the names of the columns in 'data' are not any of the following:
+   %s",
+        paste(colnames(data)[colnames(data) %in% colnames(dataout)], collapse = ", ")
       )
     )
   }
