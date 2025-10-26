@@ -26,7 +26,7 @@ Default is \code{"rotate"}.}
 in the substitution analysis. This should correspond to a single set of names of compositional parts specified
 in the \code{complr} object. Default to the first composition in the \code{complr} object.}
 
-\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
+\item{...}{Further arguments passed to \code{\link[brms:posterior_summary]{posterior_summary}}.}
 }
 \value{
 Estimated pivot balance coordinates representing the

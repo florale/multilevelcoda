@@ -11,7 +11,7 @@ bsubmargin(
   level = "between",
   summary = TRUE,
   at = NULL,
-  parts,
+  parts = 1,
   base,
   type = "one-to-one",
   weight = "proportional",
@@ -70,7 +70,7 @@ to be as many processors as the hardware and RAM allow (up to the number of comp
 For non-Windows OS in non-interactive R sessions, forking is used instead of PSOCK clusters.
 Default to \code{"one-to-one"}.}
 
-\item{...}{Further arguments passed to \code{\link{posterior_summary}}.}
+\item{...}{Further arguments passed to \code{\link[brms:posterior_summary]{posterior_summary}}.}
 }
 \value{
 A list containing the results of multilevel compositional substitution model.

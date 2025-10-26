@@ -13,7 +13,7 @@
 #' in the substitution analysis. This should correspond to a single set of names of compositional parts specified
 #' in the \code{complr} object. Default to the first composition in the \code{complr} object.
 #' @param summary Should summary statistics be returned instead of the raw values? Default is \code{TRUE}.
-#' @param ... Further arguments passed to \code{\link{posterior_summary}}.
+#' @param ... Further arguments passed to \code{\link[brms:posterior_summary]{posterior_summary}}.
 #' 
 #' @return Estimated pivot balance coordinates representing the
 #' effect of increasing one compositional part relative to the remaining compositional parts.

@@ -13,7 +13,6 @@
 #' 
 #' @importFrom data.table as.data.table copy :=
 #' @importFrom compositions acomp ilr clo
-#' @importFrom brms posterior_summary
 #' 
 #' @examples
 #' \donttest{
@@ -37,7 +36,7 @@ bsub <- function(object,
                  summary = TRUE,
                  aorg = TRUE,
                  at = NULL,
-                 parts,
+                 parts = 1,
                  base,
                  type = "one-to-one",
                  weight = "equal",
