@@ -6,17 +6,17 @@
 \title{Extract amounts and compositions in conventional formats
 as data.frames, matrices, or arrays.}
 \usage{
-\method{as.data.frame}{complr}(x, ...)
+\method{as.data.frame}{complr}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{as.matrix}{complr}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{complr}.}
 
-\item{...}{generic argument, not in use.}
-
 \item{row.names, optional}{Unused and only added for consistency with
 the \code{\link[base:as.data.frame]{as.data.frame}} generic.}
+
+\item{...}{generic argument, not in use.}
 }
 \description{
 Extract amounts and compositions in conventional formats

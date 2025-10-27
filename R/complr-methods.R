@@ -156,6 +156,7 @@ var.complr <- function(x,
 #'
 #' @export
 as.data.frame.complr <- function(x,
+                                 row.names = NULL, optional = FALSE,
                                  ...) {
   do.call(cbind, lapply(x$output, function(y) {
     data.frame(y$X, y$bX, y$wX, y$Z, y$bZ, y$wZ)
