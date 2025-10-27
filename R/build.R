@@ -135,7 +135,12 @@ build.rg <- function(object,
   
   covgrid <- NULL
   
-  ## get the index of which index elements of object[["complr"]][["output"]] do the parts correspond to
+  # get part names
+  if (is.numeric(parts)) {
+    parts <- .get_parts(object[["complr"]], parts)
+  }
+  
+  # get the index of which index elements of object[["complr"]][["output"]] does the parts correspond to
   idx <- as.integer(which(vapply(lapply(object[["complr"]][["output"]], function(x)
     x$parts), function(p)
       identical(sort(parts), sort(p)), logical(1))))[1]

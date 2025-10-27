@@ -47,6 +47,12 @@ bsubmargin <- function (object,
   ref   <- "clustermean"
   level <- "between"
   
+  # if parts is numeric, get_parts
+  if (is.numeric(parts)) {
+    parts <- .get_parts(object[["complr"]], parts)
+  }
+  
+  # d0 ---------------------------------------
   d0 <- build.rg(object = object,
                  ref = ref,
                  parts = parts,

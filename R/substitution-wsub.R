@@ -49,6 +49,11 @@ wsub <- function(object,
   # ref <- "grandmean"
   level <- "within"
   
+  # if parts is numeric, get_parts
+  if (is.numeric(parts)) {
+    parts <- .get_parts(object[["complr"]], parts)
+  }
+  
   # d0 -------------------------------
   if (isTRUE(ref == "grandmean")) {
     d0 <- build.rg(object = object,
