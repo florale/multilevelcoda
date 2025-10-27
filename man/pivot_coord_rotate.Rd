@@ -43,7 +43,8 @@ if(requireNamespace("cmdstanr")){
   summary(m_pivot_coord_rotate)
   
   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
-  lapply(m_pivot_coord_raw$output, posterior_summary)
+  lapply(m_pivot_coord_raw$output, brms::posterior_summary)
+  
   }}
 }
 \seealso{

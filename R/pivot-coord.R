@@ -90,7 +90,8 @@ pivot_coord <- function (object,
 #'   summary(m_pivot_coord_rotate)
 #'   
 #'   m_pivot_coord_raw <-  pivot_coord_rotate(m, summary = FALSE)
-#'   lapply(m_pivot_coord_raw$output, posterior_summary)
+#'   lapply(m_pivot_coord_raw$output, brms::posterior_summary)
+#'   
 #'   }}
 #' @export
 pivot_coord_rotate <- function (object,
@@ -196,7 +197,7 @@ pivot_coord_rotate <- function (object,
 #' 
 #' @examples
 #' \donttest{
-#' if(requireNamespace("cmdstanr")){
+#' if(requireNamespace("cmdstanr", "brms")){
 #'   x <- complr(data = mcompd, sbp = sbp,
 #'                  parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID",
 #'                  total = 1440)
@@ -211,7 +212,7 @@ pivot_coord_rotate <- function (object,
 #'   summary(m_pivot_coord_refit)
 #'   
 #'   m_pivot_coord_raw <-  pivot_coord_refit(m, summary = FALSE)
-#'   lapply(m_pivot_coord_raw$output, posterior_summary)
+#'   lapply(m_pivot_coord_raw$output, brms::posterior_summary)
 #'   
 #'   }}
 #' @export
