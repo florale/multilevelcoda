@@ -1,3 +1,14 @@
+# multilevelcoda 1.3.3
+
+### New Features
+* `substitution()` supports moderated substituion via `at` argument.
+* `complr()` now supports multiple composition input (see examples).
+* `substitution()` supports compositional outcomes.
+* `substitution()` output is now weighted across levels of the reference grid.
+
+### Other Changes
+* Syntax for `brmcoda()` updated to support multiple compositions (see examples).
+
 # multilevelcoda 1.2.2
 
 ### New Features

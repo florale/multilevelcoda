@@ -1,8 +1,8 @@
 Package: multilevelcoda
 Type: Package
 Title: Estimate Bayesian Multilevel Models for Compositional Data
-Version: 1.3.2
-Date: 2025-05-22
+Version: 1.3.3
+Date: 2025-10-25
 Authors@R: 
     c(person(given = "Flora",
              family = "Le",
@@ -24,7 +24,7 @@ Description: Implement Bayesian multilevel modelling for compositional data.
              and run post-hoc analyses such as isotemporal substitution models.
              References: 
              Le, Stanford, Dumuid, and Wiley (2025) <doi:10.1037/met0000750>,
-             Le, Dumuid, Stanford, and Wiley (2024) <doi:10.48550/arXiv.2411.12407>.
+             Le, Dumuid, Stanford, and Wiley (2025) <doi:10.1080/00273171.2025.2565598>.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
