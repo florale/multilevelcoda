@@ -1,0 +1,202 @@
+# Multilevel Model with Compositional Outcomes
+
+In this vignette, we discuss how to specify multilevel models with
+compositional outcomes using `multilevelcoda`. In addition to
+`multilevelcoda`, we will use `brms` package (to fit models) and
+`bayestestR` package (to compute useful indices and compare models). We
+will also attach built in datasets `mcompd` (simulated compositional
+sleep and wake variables) and `sbp` (sequential binary partition).
+
+``` r
+library(multilevelcoda)
+library(brms)
+library(bayestestR)
+
+data("mcompd") 
+data("sbp") 
+
+options(digits = 3)
+```
+
+## Multilevel model with compositional outcomes.
+
+### Computing compositions and isometric log ratio coordinates.
+
+The ILR coordinates outcomes can be calculated using the
+[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
+functions.
+
+``` r
+cilr <- complr(data = mcompd, sbp = sbp,
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+
+head(cilr$TotalILR)
+#> NULL
+```
+
+### Fitting model
+
+A model with multilevel compositional outcomes is multivariate, as it
+has multiple ILR coordinate outcomes,each of which is predicted by a set
+of predictors. Our `brms` model can be then fitted using the
+[`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md)
+function.
+
+``` r
+mv <- brmcoda(complr = cilr,
+              formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + (1 | ID),
+              cores = 8, seed = 123, backend = "cmdstanr")
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus
+#> recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+```
+
+Here is a [`summary()`](https://rdrr.io/r/base/summary.html) of the
+model. We can see that stress significantly predicted `z1_1` and `z2_1`.
+
+``` r
+summary(mv)
+#>  Family: MV(gaussian, gaussian, gaussian, gaussian) 
+#>   Links: mu = identity; sigma = identity
+#>          mu = identity; sigma = identity
+#>          mu = identity; sigma = identity
+#>          mu = identity; sigma = identity 
+#> Formula: z1_1 ~ Stress + (1 | ID) 
+#>          z2_1 ~ Stress + (1 | ID) 
+#>          z3_1 ~ Stress + (1 | ID) 
+#>          z4_1 ~ Stress + (1 | ID) 
+#>    Data: tmp (Number of observations: 3540) 
+#>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 4000
+#> 
+#> Multilevel Hyperparameters:
+#> ~ID (Number of levels: 266) 
+#>                    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(z1_1_Intercept)     0.33      0.02     0.30     0.37 1.00     1228     2060
+#> sd(z2_1_Intercept)     0.30      0.01     0.28     0.33 1.00     1134     1929
+#> sd(z3_1_Intercept)     0.39      0.02     0.35     0.43 1.00     1731     2763
+#> sd(z4_1_Intercept)     0.30      0.02     0.27     0.33 1.00     1710     2483
+#> 
+#> Regression Coefficients:
+#>                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> z1_1_Intercept    -0.44      0.02    -0.48    -0.39 1.00      942     1598
+#> z2_1_Intercept     1.47      0.02     1.42     1.51 1.01      876     1608
+#> z3_1_Intercept    -0.88      0.03    -0.94    -0.82 1.00     1740     2565
+#> z4_1_Intercept     0.65      0.02     0.60     0.69 1.00     1648     2562
+#> z1_1_Stress       -0.01      0.00    -0.02    -0.00 1.00     5967     3302
+#> z2_1_Stress        0.01      0.00     0.00     0.01 1.00     5446     3533
+#> z3_1_Stress        0.00      0.01    -0.01     0.01 1.00     6975     3101
+#> z4_1_Stress        0.01      0.00    -0.00     0.01 1.00     6794     3387
+#> 
+#> Further Distributional Parameters:
+#>            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma_z1_1     0.44      0.01     0.43     0.45 1.00     6228     3088
+#> sigma_z2_1     0.38      0.00     0.37     0.39 1.00     6496     3182
+#> sigma_z3_1     0.70      0.01     0.68     0.71 1.00     5403     3385
+#> sigma_z4_1     0.53      0.01     0.51     0.54 1.00     5484     3418
+#> 
+#> Residual Correlations: 
+#>                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> rescor(z1_1,z2_1)    -0.54      0.01    -0.57    -0.52 1.00     5503     3659
+#> rescor(z1_1,z3_1)    -0.18      0.02    -0.21    -0.14 1.00     5662     3335
+#> rescor(z2_1,z3_1)    -0.05      0.02    -0.08    -0.02 1.00     4974     3475
+#> rescor(z1_1,z4_1)     0.11      0.02     0.07     0.14 1.00     6096     3480
+#> rescor(z2_1,z4_1)    -0.05      0.02    -0.08    -0.01 1.00     5544     3305
+#> rescor(z3_1,z4_1)     0.56      0.01     0.54     0.58 1.00     5224     3252
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+
+## Bayes Factor for compositional multilevel modelling
+
+We are often interested in whether a predictor significantly predict the
+overall composition, in addition to the individual ILR coordinates. In
+Bayesian, this can be done by comparing the marginal likelihoods of two
+models. Bayes Factors (BFs) are indices of relative evidence of one
+model over another. In the context of compositional multilevel
+modelling, Bayes Factors provide two main useful functions:
+
+- Testing single parameters within a model
+- Comparing models
+
+We can utilize Bayes factors to answer the following question: *“Which
+model (i.e., set of composition predictors, expressed as ILRs) is more
+likely to have produced the observed data?”*
+
+Let’s examine whether stress predicts the overall sleep-wake
+composition.
+
+*Note*: To use Bayes factors, `brmsfit` models must be fitted with an
+additional non-default argument `save_pars = save_pars(all = TRUE)`.
+
+``` r
+# intercept only
+mv0 <- brmcoda(complr = cilr,
+               formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ 1 + (1 | ID),
+               iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+               backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus
+#> recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+# full model
+mv <- brmcoda(complr = cilr,
+              formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + (1 | ID),
+              iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+              backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+#> Warning: In the future, 'rescor' will be set to FALSE by default for all models. It is thus
+#> recommended to explicitely set 'rescor' via 'set_rescor' instead of using the default.
+```
+
+We can now compare these models with the `bayesfactor_models()` function
+
+``` r
+bayes_factor(mv$model, mv0$model)
+#> Iteration: 1
+#> Iteration: 2
+#> Iteration: 3
+#> Iteration: 4
+#> Iteration: 5
+#> Iteration: 6
+#> Iteration: 7
+#> Iteration: 8
+#> Iteration: 9
+#> Iteration: 10
+#> Iteration: 11
+#> Iteration: 12
+#> Iteration: 13
+#> Iteration: 14
+#> Iteration: 15
+#> Iteration: 16
+#> Iteration: 17
+#> Iteration: 18
+#> Iteration: 19
+#> Iteration: 1
+#> Iteration: 2
+#> Iteration: 3
+#> Iteration: 4
+#> Iteration: 5
+#> Iteration: 6
+#> Iteration: 7
+#> Iteration: 8
+#> Iteration: 9
+#> Iteration: 10
+#> Iteration: 11
+#> Iteration: 12
+#> Iteration: 13
+#> Iteration: 14
+#> Iteration: 15
+#> Iteration: 16
+#> Iteration: 17
+#> Iteration: 18
+#> Iteration: 19
+#> Iteration: 20
+#> Estimated Bayes factor in favor of mv$model over mv0$model: 0.00015
+```
+
+With a $BF$ \< 1, our data favours the intercept only model, showing
+that there is insufficient evidence for stress predicting the overall
+sleep-wake composition.
+
+Bayes factors provide a intuitive measure of the strength of evidence of
+one model over the other or among different models. Check out the
+`bayestestR` packages for several other useful functions related to BFs.

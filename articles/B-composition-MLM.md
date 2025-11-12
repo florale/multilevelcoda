@@ -1,0 +1,415 @@
+# Multilevel Models with Compositional Predictors
+
+In this vignette, we discuss how to use `multilevelcoda` to specify
+multilevel models where compositional data are used as predictors.
+
+The following table outlines the packages used and a brief description
+of their purpose.
+
+|     Package      |                                        Purpose                                        |
+|:----------------:|:-------------------------------------------------------------------------------------:|
+| `multilevelcoda` | calculate between and within composition variables, calculate substitutions and plots |
+|      `brms`      |                fit Bayesian multilevel models using Stan as a backend                 |
+|   `bayestestR`   |                     compute Bayes factors used to compare models                      |
+|    `doFuture`    |                       parallel processing to speed up run times                       |
+
+``` r
+library(multilevelcoda)
+#> 
+#> Attaching package: 'multilevelcoda'
+#> The following objects are masked _by_ '.GlobalEnv':
+#> 
+#>     psub, sbp
+library(brms)
+#> Loading required package: Rcpp
+#> Loading 'brms' package (version 2.21.0). Useful instructions
+#> can be found by typing help('brms'). A more detailed introduction
+#> to the package is available through vignette('brms_overview').
+#> 
+#> Attaching package: 'brms'
+#> The following object is masked from 'package:stats':
+#> 
+#>     ar
+library(bayestestR)
+library(doFuture)
+#> Loading required package: foreach
+#> Loading required package: future
+
+options(digits = 3) # reduce number of digits shown
+```
+
+For the examples, we make use of three built in datasets:
+
+| Dataset  |                                               Purpose                                               |
+|:--------:|:---------------------------------------------------------------------------------------------------:|
+| `mcompd` |        compositional sleep and wake variables and additional predictors/outcomes (simulated)        |
+|  `sbp`   |      a pre-specified sequential binary partition, used in calculating compositional predictors      |
+|  `psub`  | all possible pairwise substitutions between compositional variables, used for substitution analyses |
+
+``` r
+data("mcompd") 
+data("sbp")
+data("psub")
+```
+
+The following table shows a few rows of data from `mcompd`.
+
+|  ID | Time | Stress | TST | WAKE | MVPA | LPA |  SB | Age | Female |
+|----:|-----:|-------:|----:|-----:|-----:|----:|----:|----:|-------:|
+| 185 |    1 |      4 | 542 |   99 |  297 | 460 |  41 |  30 |      0 |
+| 185 |    2 |      7 | 458 |   49 |  117 | 653 | 162 |  30 |      0 |
+| 185 |    3 |      3 | 271 |   41 |  489 | 625 |  15 |  30 |      0 |
+| 184 |   12 |      2 | 286 |   53 |  107 | 906 |  89 |  22 |      1 |
+| 184 |   13 |      1 | 281 |   19 |  403 | 611 | 126 |  22 |      1 |
+| 184 |   14 |      0 | 397 |   26 |   40 | 587 | 390 |  22 |      1 |
+
+The following table shows the sequential binary partition being used in
+`sbp`. Columns correspond to the composition variables (TST, WAKE, MVPA,
+LPA, SB). Rows correspond to distinct ILR coordinates.
+
+| TST | WAKE | MVPA | LPA |  SB |
+|----:|-----:|-----:|----:|----:|
+|   1 |    1 |   -1 |  -1 |  -1 |
+|   1 |   -1 |    0 |   0 |   0 |
+|   0 |    0 |    1 |  -1 |  -1 |
+|   0 |    0 |    0 |   1 |  -1 |
+
+The following table shows how all the possible binary substitutions
+contrasts are setup. Time substitutions work by taking time from the -1
+variable and adding time to the +1 variable.
+
+| TST | WAKE | MVPA | LPA |  SB |
+|----:|-----:|-----:|----:|----:|
+|   1 |   -1 |    0 |   0 |   0 |
+|   1 |    0 |   -1 |   0 |   0 |
+|   1 |    0 |    0 |  -1 |   0 |
+|   1 |    0 |    0 |   0 |  -1 |
+|  -1 |    1 |    0 |   0 |   0 |
+|   0 |    1 |   -1 |   0 |   0 |
+|   0 |    1 |    0 |  -1 |   0 |
+|   0 |    1 |    0 |   0 |  -1 |
+|  -1 |    0 |    1 |   0 |   0 |
+|   0 |   -1 |    1 |   0 |   0 |
+|   0 |    0 |    1 |  -1 |   0 |
+|   0 |    0 |    1 |   0 |  -1 |
+|  -1 |    0 |    0 |   1 |   0 |
+|   0 |   -1 |    0 |   1 |   0 |
+|   0 |    0 |   -1 |   1 |   0 |
+|   0 |    0 |    0 |   1 |  -1 |
+|  -1 |    0 |    0 |   0 |   1 |
+|   0 |   -1 |    0 |   0 |   1 |
+|   0 |    0 |   -1 |   0 |   1 |
+|   0 |    0 |    0 |  -1 |   1 |
+
+## Multilevel model with compositional predictors
+
+### Compositions and isometric log ratio (ILR) coordinates.
+
+Compositional data are often expressed as a set of isometric log ratio
+(ILR) coordinates in regression models. We can use the
+[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
+function to calculate both between- and within-level ILR coordinates for
+use in subsequent models as predictors.
+
+*Notes:
+[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
+also calculates total ILR coordinates to be used as outcomes (or
+predictors) in models, if the decomposition into a between- and
+within-level ILR coordinates was not desired.*
+
+The
+[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
+function for multilevel data requires four arguments:
+
+| Argument | Description                                                                                                      |
+|----------|------------------------------------------------------------------------------------------------------------------|
+| `data`   | A long data set containing all variables needed to fit the multilevel models,                                    |
+|          | including the repeated measure compositional predictors and outcomes, along with any additional covariates.      |
+| `sbp`    | A Sequential Binary Partition to calculate $ilr$ coordinates.                                                    |
+| `parts`  | The name of the compositional components in `data`.                                                              |
+| `idvar`  | The grouping factor on `data` to compute the between-person and within-person composition and $ilr$ coordinates. |
+| `total`  | Optional argument to specify the amount to which the compositions should be closed.                              |
+
+``` r
+cilr <- complr(data = mcompd, sbp = sbp,
+                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
+```
+
+### Fitting model
+
+We now will use output from the
+[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
+to fit our `brms` model, using the
+[`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md).
+Here is a model predicting `Stress` from between- and within-person
+sleep-wake behaviours (expressed as ILR coordinates).
+
+*Notes: make sure you pass the correct names of the ILR coordinates to
+`brms` model.*
+
+``` r
+m <- brmcoda(complr = cilr,
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+               wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
+             cores = 8, seed = 123, backend = "cmdstanr")
+```
+
+Here is a [`summary()`](https://rdrr.io/r/base/summary.html) of the
+model results.
+
+``` r
+summary(m)
+#>  Family: gaussian 
+#>   Links: mu = identity; sigma = identity 
+#> Formula: Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID) 
+#>    Data: tmp (Number of observations: 3540) 
+#>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+#>          total post-warmup draws = 4000
+#> 
+#> Multilevel Hyperparameters:
+#> ~ID (Number of levels: 266) 
+#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)     1.00      0.06     0.88     1.12 1.00     1169     2516
+#> 
+#> Regression Coefficients:
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept     2.61      0.49     1.66     3.60 1.00     1101     1761
+#> bz1_1         0.19      0.32    -0.46     0.82 1.00      943     1863
+#> bz2_1         0.39      0.35    -0.29     1.06 1.00     1061     1922
+#> bz3_1         0.14      0.22    -0.28     0.56 1.01      895     1673
+#> bz4_1        -0.04      0.28    -0.59     0.51 1.00      976     1923
+#> wz1_1        -0.33      0.12    -0.56    -0.09 1.00     3226     3037
+#> wz2_1         0.06      0.13    -0.20     0.33 1.00     3469     2836
+#> wz3_1        -0.09      0.08    -0.25     0.06 1.00     3088     2932
+#> wz4_1         0.23      0.10     0.04     0.42 1.00     3225     2965
+#> 
+#> Further Distributional Parameters:
+#>       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma     2.38      0.03     2.33     2.44 1.00     5896     2788
+#> 
+#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+#> and Tail_ESS are effective sample size measures, and Rhat is the potential
+#> scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+
+Results show that the first and forth within-person ILR coordinate was
+associated with stress. The interpretation of these outputs depends on
+how you construct your sequential binary partition. For the built-in
+sequential binary partition `sbp` (shown previously), the resulting
+interpretation would be as follows:
+
+| ILR     | Interpretation                                                                    |
+|---------|-----------------------------------------------------------------------------------|
+| `bz1_1` | Between-person sleep (`TST` & `WAKE`) vs wake (`MVPA`, `LPA`, & `SB`) behaviours  |
+| `bz2_1` | Between-person `TST` vs `WAKE`                                                    |
+| `bz3_1` | Between-person `MVPA` vs (`LPA` and `SB`)                                         |
+| `bz4_1` | Between-person `LPA` vs `SB`                                                      |
+| `wz1_1` | Within-person `Sleep` (`TST` & `WAKE`) vs wake (`MVPA`, `LPA`, & `SB`) behaviours |
+| `wz2_1` | Within-person `TST` vs `WAKE`                                                     |
+| `wz3_1` | Within-person `MVPA` vs (`LPA` and `SB`)                                          |
+| `wz4_1` | Within-person `LPA` vs `SB`                                                       |
+
+Due to the nature of within-person ILR coordinates, it is often
+challenging to interpret these results in great details. For example,
+the significant coefficient for `wz1_1` shows that the within-person
+change in sleep behaviours (sleep duration and time awake in bed
+combined), relative to wake behaviours (moderate to vigorous physical
+activity, light physical activity, and sedentary behaviour) on a given
+day, was associated with stress. However, as there are several
+behaviours involved in this coordinate, we don’t know the within-person
+change in which of them drives the association. It could be the change
+in sleep, such that people sleep more than their own average on a given
+day, but it could also be the change in time awake. Further, we don’t
+know about the specific changes in time spent across behaviours. That
+is, if people slept more, what behaviour did they spend less time in?
+
+One approach to gain further insights into these relationships, and the
+changes in outcomes associated with changes in specific time across
+compositionl components is the substitution model. We will discuss the
+substitution model later in this vignette.
+
+### Bayes Factor for significance testing
+
+In the frequentist approach, we usually compare the fits of models using
+[`anova()`](https://rdrr.io/r/stats/anova.html). In Bayesian, this can
+be done by comparing the marginal likelihoods of two models. Bayes
+Factors (BFs) are indices of relative evidence of one model over
+another. In the context of compositional multilevel modelling, Bayes
+Factors provide two main useful functions:
+
+- Testing single parameters within a model
+- Comparing models
+
+We may utilize Bayes factors to answer the following question: *“Which
+model (i.e., set of ILR predictors) is more likely to have produced the
+observed data?”*
+
+Let’s fit a series of model with
+[`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md)
+to predict `Stress` from sleep-wake composition. For precise Bayes
+factors, we will use 40,000 posterior draws for each model.
+
+*Notes* : To use Bayes factors, `brmsfit` models must be fitted with an
+additional non-default argument `save_pars = save_pars(all = TRUE)`.
+
+``` r
+# intercept only model
+m0 <- brmcoda(complr = cilr,
+             formula = Stress ~ 1 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+
+# between-person composition only model
+m1 <- brmcoda(complr = cilr,
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+
+# within-person composition only model
+m2 <- brmcoda(complr = cilr,
+             formula = Stress ~ wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+
+# full model
+m <- brmcoda(complr = cilr,
+             formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+               wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
+             iter = 6000, chains = 8, cores = 8, seed = 123, warmup = 1000,
+             backend = "cmdstanr", save_pars = save_pars(all = TRUE))
+```
+
+We can now compare these models with the `bayesfactor_models()`
+function, using the intercept-only model as reference.
+
+``` r
+comparison <- bayesfactor_models(m$model, m1$model, m2$model, denominator = m0$model)
+#> Error in `[.data.frame`(x, i, j, drop): undefined columns selected
+```
+
+``` r
+comparison
+#> Bayes Factors for Model Comparison
+#> 
+#>     Model                                                                       BF
+#> [1] bz1_1 + bz2_1 + bz3_1 + bz4_1 + wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID)  3.45
+#> [2] bz1_1 + bz2_1 + bz3_1 + bz4_1 + (1 | ID)                                 0.294
+#> [3] wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID)                                 11.63
+#> 
+#> * Against Denominator: [4] 1 + (1 | ID)
+#> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
+```
+
+We can see that model with only within-person composition is the best
+model - with $BF$ = 11.00 compared to the null (intercept only).
+
+Let’s compare these models against the full model.
+
+``` r
+update(comparison, reference = 1)
+#> Bayes Factors for Model Comparison
+#> 
+#>     Model                                       BF
+#> [2] bz1_1 + bz2_1 + bz3_1 + bz4_1 + (1 | ID) 0.085
+#> [3] wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID)  3.37
+#> [4] 1 + (1 | ID)                             0.290
+#> 
+#> * Against Denominator: [1] bz1_1 + bz2_1 + bz3_1 + bz4_1 + wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID)
+#> *   Bayes Factor Type: marginal likelihoods (bridgesampling)
+```
+
+Again, our data favours the within-person composition only model over
+the full model, giving 2.79 times more support.
+
+## Substitution model
+
+When examining the relationships between compositional data and an
+outcome, we often are also interested in the changes in an outcomes when
+a fixed duration of time is reallocated from one compositional component
+to another, while the other components remain constant. These changes
+can be examined using the compositional isotemporal substitution model.
+In `multilevelcoda`, we extend this model to multilevel approach to test
+both between-person and within-person changes. All substitution models
+can be computed using the
+[`substitution()`](https://florale.github.io/multilevelcoda/reference/substitution.md)
+function, with the following arguments:
+
+| Argument  | Description                                                                                                                                            |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `object`  | A fitted `brmcoda` object                                                                                                                              |
+| `base`    | A `data.frame` or `data.table` of possible substitution of variables.                                                                                  |
+|           | This data set can be computed using function `possub`                                                                                                  |
+| `delta`   | A integer, numeric value or vector indicating the amount of change in compositional parts for substitution                                             |
+| `level`   | A character value or vector to specify whether the change in composition should be at `between`-person and/or `within`-person levels                   |
+| `type`    | A character value or vector to specify whether the estimated change in outcome should be `conditional` or `marginal`                                   |
+| `regrid`  | Optional reference grid consisting of combinations of covariates over which predictions are made. If not provided, the default reference grid is used. |
+| `summary` | A logical value to indicate whether the prediction at each level of the reference grid or an average of them should be returned.                       |
+| `...`     | Additional arguments to be passed to `describe_posterior`                                                                                              |
+
+### Between-person substitution model
+
+The below example examines the changes in stress for different pairwise
+substitution of sleep-wake behaviours for 5 minutes, at between-person
+level.
+
+``` r
+bsubm <- substitution(object = m, delta = 5, 
+                      level = "between", ref = "grandmean")
+```
+
+The output contains multiple data sets of results for all compositional
+components. Here are the results for changes in stress when sleep (TST)
+is substituted for 5 minutes, averaged across levels of covariates.
+
+``` r
+knitr::kable(summary(bsubm, level = "between", to = "TST"))
+```
+
+| Mean | CI_low | CI_high | Delta | From | To  | Level   | Reference |
+|-----:|-------:|--------:|------:|:-----|:----|:--------|:----------|
+| 0.02 |  -0.01 |    0.05 |     5 | WAKE | TST | between | grandmean |
+| 0.00 |  -0.01 |    0.02 |     5 | MVPA | TST | between | grandmean |
+| 0.01 |  -0.01 |    0.02 |     5 | LPA  | TST | between | grandmean |
+| 0.01 |  -0.01 |    0.02 |     5 | SB   | TST | between | grandmean |
+
+None of the results are significant, given that the credible intervals
+did not cross 0, showing that increasing sleep (TST) at the expense of
+any other behaviours was not associated in changes in stress. Notice
+there is no column indicating the levels of convariates, indicating that
+these results have been averaged.
+
+### Within-person substitution model
+
+Let’s now take a look at how stress changes when different pairwise of
+sleep-wake behaviours are substituted for 5 minutes, at within-person
+level.
+
+``` r
+# Within-person substitution
+wsubm <- substitution(object = m, delta = 5, 
+                      level = "within", ref = "grandmean")
+```
+
+Results for 5 minute substitution.
+
+``` r
+knitr::kable(summary(wsubm, level = "within", to = "TST"))
+```
+
+| Mean | CI_low | CI_high | Delta | From | To  | Level  | Reference |
+|-----:|-------:|--------:|------:|:-----|:----|:-------|:----------|
+| 0.02 |   0.00 |    0.03 |     5 | WAKE | TST | within | grandmean |
+| 0.00 |  -0.01 |    0.00 |     5 | MVPA | TST | within | grandmean |
+| 0.00 |  -0.01 |    0.00 |     5 | LPA  | TST | within | grandmean |
+| 0.00 |  -0.01 |    0.00 |     5 | SB   | TST | within | grandmean |
+
+At within-person level, there were significant results for substitution
+of sleep (TST) and time awake in bed (WAKE) for 5 minutes, but not other
+behaviours. Increasing sleep at the expense of time spent awake in bed
+predicted 0.02 higher stress \[95% CI 0.00, 0.03\], on a given day.
+
+### More interesting substitution models
+
+You can learn more about different types of substitution models at  
+[Compositional Multilevel Substitution
+Analysis](https://florale.github.io/multilevelcoda/articles/D-substitution.html).

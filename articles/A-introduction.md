@@ -1,0 +1,48 @@
+# Introduction to Bayesian Compositional Multilevel Modelling
+
+The `multilevelcoda` package implements Bayesian multilevel models for
+compositional data in R, by combining the principles of the two
+well-known analyses, Multilevel Modelling and Compositional Data
+Analysis. Formula syntax is built using package brms and is similar to
+package lme4, which allows for different modelling options in a
+multilevel framework. The package also provides several useful functions
+for post-hoc analyses and visualisation of final results.
+
+## Compositional Data Analysis
+
+Compositional data analysis (CoDA) is an analysis of compositional and
+multivariate positive data. Compositional data are typically expressed
+in amount, e.g., percentage, proportion, and often sum up to a constant,
+usually 100% or one. These data are common in many fields: ecology
+(e.g., relative abundances of species), geography (e.g., proportions of
+land use), biochemistry (e.g., fatty acid proportions), nutritional
+epidemiology (e.g., intake of macronutrients like proteins, fats and
+carbohydrates), and time-use epidemiology (e.g., time spent in different
+sleep-wake behaviours during the 24-hour day).
+
+## Multilevel Modelling for Compositional Data
+
+Compositional data can be non-independent and repeated measures data.
+For example, sleep-wake behaviours are often measured across multiple
+time points (e.g., across several consecutive days).
+
+Therefore, we often use multilevel models to include both fixed effects
+(regression coefficients that are identical for everyone) and random
+effects (regression coefficients that vary randomly for each person). In
+addition, we can also decompose these data into two sources of
+variability: between-person (differences between individuals) and
+within-person (differences within individuals).
+
+In `multilevelcoda` package, we implements Compositional Multilevel
+Model to model compositional data in amultilevel framework.
+`mulitlevelcoda` includes functions to compute Isometric log ratio (ILR)
+for between and within-person levels, fit Baysian multilevel model, and
+conduct post-hoc analyses such as susbtitution models. See below for
+vignettes:
+
+- [Multilevel Model with Compositional
+  Predictors](https://florale.github.io/multilevelcoda/articles/B-composition-MLM.html)
+- [Multilevel Model with Compositional
+  Outcomes](https://florale.github.io/multilevelcoda/articles/C-composition-MMLM.html)
+- [Compositional Multilevel Substitution
+  Analyses](https://florale.github.io/multilevelcoda/articles/D-substitution.html)
