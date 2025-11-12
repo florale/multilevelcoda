@@ -75,23 +75,18 @@ sub <- function (object,
     ref <- "users"
   }
   d0 <- as.data.table(d0)
-
-  # warning if delta out of range
+  # 
+  # error if delta out of range
   x0 <- d0[1, paste0("t", parts), with = FALSE]
-  delta <- as.integer(delta)
   
-  if (isTRUE(any(delta > min(x0)))) {
-    part_name <- colnames(x0)[which.min(as.numeric(x0))]
-    min_value <- round(min(x0), 2)
-    message(
-      sprintf(
-        "'delta' value is larger than %s for %s, which is the amount of composition part available for substitution.\nThis will result in unrealistic substitution and be omitted from the output.",
-        min_value,
-        part_name
-      )
-    )
+  delta <- as.integer(delta)
+  if(isTRUE(any(delta > min(x0)))) {
+    stop(sprintf(
+      "delta value should be less than or equal to %s, which is the amount of composition part available for pairwise substitution.",
+      round(min(x0), 2)
+    ))
   }
-
+  
   # y0 --------------------------------
   y0 <- fitted(
     object,
