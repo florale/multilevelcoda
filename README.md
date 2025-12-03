@@ -2,8 +2,8 @@
 
 # multilevelcoda
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/florale/multilevelcoda/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/florale/multilevelcoda/actions)
 [![CRAN Version](https://www.r-pkg.org/badges/version/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
+[![R-CMD-check](https://github.com/florale/multilevelcoda/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/florale/multilevelcoda/actions)
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![](https://cranlogs.r-pkg.org/badges/grand-total/multilevelcoda)](https://cran.r-project.org/package=multilevelcoda)
 <!-- [![Coverage Status](https://codecov.io/gh/florale/multilevelcoda/branch/main/graphs/badge.svg?branch=main)](https://app.codecov.io/gh/florale/multilevelcoda)  -->
