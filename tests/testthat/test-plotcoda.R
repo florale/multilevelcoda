@@ -31,13 +31,47 @@ suppressWarnings(
                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
                  wz1_1 + wz2_1 + wz3_1 + wz4_1 + Female + (1 | ID),
                chain = 1, iter = 500, seed = 123,
-               backend = backend))
+               backend = backend,
+               silent = 2, refresh = 0))
 foreach::registerDoSEQ()
 
-x <- substitution(object = m, delta = 1:10,
-                          ref = "grandmean",
-                          level = c("between", "within"))
+x_multi <- substitution(object = m, delta = 1:10,
+                        ref = "grandmean",
+                        level = c("between", "within"))
+x_single <- substitution(object = m, delta = 5,
+                         ref = "grandmean",
+                         level = c("between", "within"))
 
 # Testing
 #---------------------------------------------------------------------------------------------------
+test_that("plot.substitution returns a ggplot for multiple deltas", {
+  tmp <- plot(x_multi)
+  expect_s3_class(tmp, "ggplot")
+  expect_length(tmp$layers, 4L)
+})
 
+test_that("plot.substitution returns a ggplot for a single delta", {
+  tmp <- plot(x_single)
+  expect_s3_class(tmp, "ggplot")
+  expect_length(tmp$layers, 2L)
+})
+
+test_that("plot.brmcoda returns a non-empty list of plots", {
+  tmp <- plot(m, combo = c("hist", "trace"))
+  expect_type(tmp, "list")
+  expect_gt(length(tmp), 0L)
+})
+
+test_that("pairs.brmcoda returns a bayesplot grid", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+
+  suppressWarnings(tmp <- pairs(m, off_diag_args = list(size = 0.5)))
+  expect_true(inherits(tmp, "bayesplot_grid"))
+  expect_s3_class(tmp, "gtable")
+})
+
+test_that("mcmc_plot.brmcoda returns a ggplot", {
+  tmp <- mcmc_plot(m, type = "trace")
+  expect_s3_class(tmp, "ggplot")
+})
