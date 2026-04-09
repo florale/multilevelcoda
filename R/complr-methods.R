@@ -77,7 +77,6 @@ is.complr <- function(x) {
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID")
 #' mean(x)
-#' var(x)
 #' @export
 mean.complr <- function(x,
                         weight = c("equal", "proportional"),
@@ -86,7 +85,7 @@ mean.complr <- function(x,
   out <- .meanvar.complr(x = x, weight = weight, parts = parts, ...)
 
   out <- list(X  = out$X$mean,
-              bX = if(!is.null(bX)) out$bX$mean else NULL,
+              bX = if(!is.null(out$bX$mean)) out$bX$mean else NULL,
               wX = out$wX$mean,
               Z  = out$Z["Mean", ],
               bZ = out$bZ["Mean", ],
@@ -105,6 +104,11 @@ mean.complr <- function(x,
 #' @importFrom compositions var
 #'
 #' @method var complr
+#' @examples
+#' x <- complr(data = mcompd, sbp = sbp,
+#'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+#'                 idvar = "ID")
+#' var(x)
 #' @export
 var.complr <- function(x,
                        weight = c("equal", "proportional"),
