@@ -55,7 +55,7 @@ pivot_coord <- function (object,
     out <- pivot_coord_rotate(object = object, summary = summary, parts = parts, ...)
   }
   if (method == "refit") {
-    out <- pivot_coord_refit(object = object, parts = parts, ...)
+    out <- pivot_coord_refit(object = object, summary = summary, parts = parts, ...)
   }
   structure(out, class = "pivot_coord")
   out
@@ -282,4 +282,3 @@ pivot_coord_refit <- function (object,
   names(out) <- parts
   structure(list(output = out, method = "refit", summary = summary), class = "pivot_coord")
 }
-
