@@ -42,7 +42,7 @@ update.brmcoda <- function(object,
                            ...) {
   if (!is.null(newdata)) {
     update_complr   <- complr(
-      data  = object$complr$datain,
+      data  = newdata,
       sbp   = lapply(object$complr$output, function(x)
         x$sbp),
       parts = lapply(object$complr$output, function(x)
@@ -53,6 +53,7 @@ update.brmcoda <- function(object,
         NULL,
       total = lapply(object$complr$output, function(x)
         x$total),
+      transform = object$complr$transform
     )
     
     update_fit <- update(object$model,
