@@ -89,8 +89,31 @@ in the <code>complr</code> object. Default to the first composition in the <code
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in var(x):</span> is.atomic(x) is not TRUE</span>
+<span class="r-in"><span><span class="fu">multilevelcoda</span><span class="fu">:::</span><span class="fu">var.complr</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $X</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             tTST     tWAKE     tMVPA       tLPA       tSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tTST  0.00000000 0.2407016 0.2147058 0.06574185 0.1677480</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tWAKE 0.24070156 0.0000000 0.4651644 0.27222191 0.4910045</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tMVPA 0.21470581 0.4651644 0.0000000 0.19851113 0.4266598</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tLPA  0.06574185 0.2722219 0.1985111 0.00000000 0.2176891</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tSB   0.16774797 0.4910045 0.4266598 0.21768908 0.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $bX</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             bTST     bWAKE     bMVPA       bLPA       bSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bTST  0.00000000 0.2407008 0.2146939 0.06573977 0.1677550</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bWAKE 0.24070082 0.0000000 0.4651665 0.27222554 0.4910121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bMVPA 0.21469390 0.4651665 0.0000000 0.19850554 0.4266513</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bLPA  0.06573977 0.2722255 0.1985055 0.00000000 0.2176890</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> bSB   0.16775502 0.4910121 0.4266513 0.21768902 0.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $wX</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               wTST        wWAKE        wMVPA         wLPA          wSB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wTST  0.0000000000 0.0003468755 0.0007531461 0.0001656332 0.0006786266</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wWAKE 0.0003468755 0.0000000000 0.0008223263 0.0005175806 0.0009265183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wMVPA 0.0007531461 0.0008223263 0.0000000000 0.0007049798 0.0018683307</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wLPA  0.0001656332 0.0005175806 0.0007049798 0.0000000000 0.0009627149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wSB   0.0006786266 0.0009265183 0.0018683307 0.0009627149 0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
