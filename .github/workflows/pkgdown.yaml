@@ -3,6 +3,7 @@
 on:
   push:
     branches: [main, master]
+
   release:
     types: [published]
   workflow_dispatch:
@@ -51,7 +52,6 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           install.packages(c("pkgdown", "devtools"))
-          remotes::install_github("amirmasoudabdol/preferably")
         shell: Rscript {0}	  
 
       - name: Build site

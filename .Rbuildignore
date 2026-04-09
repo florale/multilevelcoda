@@ -17,3 +17,4 @@ LICENSE
 ^docs$
 internal.md
 ^\.RData
+.codex

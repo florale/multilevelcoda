@@ -26,5 +26,5 @@ footer:
     right: built_with
 
 template:
-  package: preferably
   bootstrap: 5
+  light-switch: true
