@@ -108,7 +108,7 @@ mean.complr <- function(x,
 #' x <- complr(data = mcompd, sbp = sbp,
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID")
-#' var(x)
+#' multilevelcoda:::var.complr(x)
 #' @export
 var.complr <- function(x,
                        weight = c("equal", "proportional"),

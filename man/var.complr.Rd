@@ -28,5 +28,5 @@ Variance of compositions presented in a \code{complr} object.
 x <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")
-var(x)
+multilevelcoda:::var.complr(x)
 }
