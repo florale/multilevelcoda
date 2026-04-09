@@ -51,6 +51,11 @@
 
   Extract Diagnostic Quantities from `brmsfit` Models in `brmcoda`
 
+- [`.meanvar.complr()`](https://florale.github.io/multilevelcoda/reference/dot-meanvar.complr.md)
+  :
+
+  Mean and Variance of compositions presented in a `complr` object.
+
 - [`variables(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.md)
   [`nvariables(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.md)
   [`niterations(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.md)

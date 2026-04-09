@@ -1,5 +1,12 @@
 # Changelog
 
+## multilevelcoda 1.3.4
+
+#### Bug Fixes
+
+- [`update.brmcoda()`](https://florale.github.io/multilevelcoda/reference/update.brmcoda.md)
+  method did not correctly use `newdata`. This is now fixed.
+
 ## multilevelcoda 1.3.3
 
 CRAN release: 2025-11-11

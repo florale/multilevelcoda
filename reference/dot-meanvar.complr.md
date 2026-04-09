@@ -1,12 +1,11 @@
-# Variance of compositions presented in a `complr` object.
+# Mean and Variance of compositions presented in a `complr` object.
 
-Variance of compositions presented in a `complr` object.
+Internal function only.
 
 ## Usage
 
 ``` r
-# S3 method for class 'complr'
-var(x, weight = c("equal", "proportional"), parts = 1, ...)
+.meanvar.complr(x, weight = c("equal", "proportional"), parts = 1, ...)
 ```
 
 ## Arguments
@@ -34,13 +33,3 @@ var(x, weight = c("equal", "proportional"), parts = 1, ...)
 - ...:
 
   generic argument, not in use.
-
-## Examples
-
-``` r
-x <- complr(data = mcompd, sbp = sbp,
-                parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
-                idvar = "ID")
-var(x)
-#> Error in var(x): is.atomic(x) is not TRUE
-```

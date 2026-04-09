@@ -52,6 +52,7 @@ print(ps1)
 #> 19:     0     0    -1     0     1
 #> 20:     0     0     0    -1     1
 #>       TST  WAKE  MVPA   LPA    SB
+#>     <num> <num> <num> <num> <num>
 
 ps2 <- build.base(c("WAKE", "MVPA", "LPA", "SB"), type = "one-to-all")
 print(ps2)
