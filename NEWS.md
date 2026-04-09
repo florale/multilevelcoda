@@ -1,3 +1,9 @@
+# multilevelcoda 1.3.4
+
+### Bug Fixes
+
+* `update.brmcoda()` method did not correctly use `newdata`. This is now fixed.
+
 # multilevelcoda 1.3.3
 
 ### New Features
