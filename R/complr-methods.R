@@ -27,14 +27,15 @@ is.complr <- function(x) {
 #'                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
 #'                 idvar = "ID")
 #' mean(x)
+#' var(x)
 #' @export
 mean.complr <- function(x,
                         weight = c("equal", "proportional"),
                         parts = 1,
                         ...) {
   parts <- .get_parts(object = x, parts = parts)
-  idx   <- which(vapply(lapply(x$output, 
-                               function(x) x$parts), 
+  idx   <- which(vapply(lapply(x$output,
+                               function(x) x$parts),
                         function(p) identical(sort(parts), sort(p)), logical(1)))
   X  <- x$output[[idx]]$X
   bX <- x$output[[idx]]$bX
@@ -67,8 +68,8 @@ mean.complr <- function(x,
     )
   }
   names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
-  
-  out <- list(X  = out$X$mean, 
+
+  out <- list(X  = out$X$mean,
               bX = if(!is.null(bX)) out$bX$mean else NULL,
               wX = out$wX$mean,
               Z  = out$Z["Mean", ],
@@ -77,15 +78,8 @@ mean.complr <- function(x,
   )
   # remove null elments
   out <- out[!vapply(out, is.null, logical(1))]
-  
-  # print as numeric
-  print(lapply(out, function(x) {
-   x_print <- as.numeric(x)
-    names(x_print) <- names(x)
-    x
-  }), row.names = FALSE)
-  
-  invisible(out)
+
+  return(out)
 }
 
 #' Variance of compositions presented in a \code{complr} object.
@@ -102,8 +96,8 @@ var.complr <- function(x,
                        ...) {
   
   parts <- .get_parts(object = x, parts = parts)
-  idx   <- which(vapply(lapply(x$output, 
-                               function(x) x$parts), 
+  idx   <- which(vapply(lapply(x$output,
+                               function(x) x$parts),
                         function(p) identical(sort(parts), sort(p)), logical(1)))
   X  <- x$output[[idx]]$X
   bX <- x$output[[idx]]$bX
@@ -112,7 +106,7 @@ var.complr <- function(x,
   bZ <- x$output[[idx]]$bZ
   wZ <- x$output[[idx]]$wZ
   
-  if (identical(weight, "proportional") | is.null(x$idvar)) {
+  if (identical(weight, "proportional") || is.null(x$idvar)) {
     out <- list(
       if(!is.null(X)) (summary(X, robust = TRUE)) else (NULL),
       if(!is.null(bX)) (summary(bX, robust = TRUE)) else (NULL),
@@ -122,6 +116,8 @@ var.complr <- function(x,
       if(!is.null(wZ)) (data.frame(summary(wZ))) else (NULL)
     )
   } else {
+    data <- cbind(x$dataout[, x$idvar, with = FALSE], data.frame(X, bX, wX, Z, bZ, wZ))
+
     out  <- list(
       # average X by ID in data
       summary(acomp(data[, lapply(.SD, mean), by = get(x$idvar), .SDcols = colnames(X)][, colnames(X), with = FALSE]), robust = TRUE),
@@ -135,16 +131,13 @@ var.complr <- function(x,
     )
   }
   names(out) <- c("X", "bX", "wX", "Z", "bZ", "wZ")
-  
-  out <- list(X  = out$X$variation, 
+
+  out <- list(X  = out$X$variation,
               bX = out$bX$variation,
               wX = out$wX$variation
   )
-  print(lapply(out, function(x) {
-    as.data.frame(t(x))
-  }), row.names = FALSE)
-  
-  invisible(out)
+
+  return(out)
 }
 
 #' Extract amounts and compositions in conventional formats
