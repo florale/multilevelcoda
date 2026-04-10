@@ -41,7 +41,9 @@ var(x, weight = c("equal", "proportional"), parts = 1, ...)
 x <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")
-multilevelcoda:::var.complr(x)
+## ensure dispatch to the s3 generic var function
+## defined in the compositions package
+compositions::var(x)
 #> $X
 #>             tTST     tWAKE     tMVPA       tLPA       tSB
 #> tTST  0.00000000 0.2407016 0.2147058 0.06574185 0.1677480

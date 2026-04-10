@@ -89,7 +89,9 @@ in the <code>complr</code> object. Default to the first composition in the <code
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="complr.html">complr</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mcompd</span>, sbp <span class="op">=</span> <span class="va">sbp</span>,</span></span>
 <span class="r-in"><span>                parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TST"</span>, <span class="st">"WAKE"</span>, <span class="st">"MVPA"</span>, <span class="st">"LPA"</span>, <span class="st">"SB"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                idvar <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">multilevelcoda</span><span class="fu">:::</span><span class="fu">var.complr</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## ensure dispatch to the s3 generic var function</span></span></span>
+<span class="r-in"><span><span class="co">## defined in the compositions package</span></span></span>
+<span class="r-in"><span><span class="fu">compositions</span><span class="fu">::</span><span class="fu">var</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $X</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             tTST     tWAKE     tMVPA       tLPA       tSB</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> tTST  0.00000000 0.2407016 0.2147058 0.06574185 0.1677480</span>
