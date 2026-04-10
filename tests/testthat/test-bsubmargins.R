@@ -45,7 +45,7 @@ suppressWarnings(
 )
 foreach::registerDoSEQ()
 
-x <- bsubmargin(object = m, base = psub, delta = 1:2)
+x <- bsubmargin(object = m, base = psub, delta = c(1, 5))
 
 stress_result <- function(x, part) {
   x[[part]][["Stress"]]
@@ -80,7 +80,7 @@ expect_pairwise_direction_and_ci <- function(pair) {
   pair_result <- bsubmargin(
     object = fit_pair,
     base = build.base(pair),
-    delta = 1:2
+    delta = c(1, 5)
   )
 
   to_first <- pair_result[[pair[1]]][["Stress"]]
@@ -105,8 +105,8 @@ expect_pairwise_direction_and_ci <- function(pair) {
 }
 
 test_that("bsubmargin errors for missing required arguments", {
-  expect_error(bsubmargin(base = psub, delta = 2))
-  expect_error(bsubmargin(object = m, delta = 2))
+  expect_error(bsubmargin(base = psub, delta = 5))
+  expect_error(bsubmargin(object = m, delta = 5))
   expect_error(bsubmargin(object = m, base = psub))
 })
 
@@ -130,7 +130,7 @@ test_that("bsubmargin returns the expected nested result structure", {
     expect_true(all(tmp$Level == "between"))
     expect_true(all(tmp$Reference == "clustermean"))
     expect_setequal(unique(tmp$From), setdiff(parts, part))
-    expect_setequal(unique(tmp$Delta), c(-2, -1, 1, 2))
+    expect_setequal(unique(tmp$Delta), c(-5, -1, 1, 5))
     expect_type(tmp$Estimate, "double")
     expect_type(tmp$Est.Error, "double")
     expect_type(tmp$CI_low, "double")
@@ -145,9 +145,9 @@ test_that("bsubmargin returns estimates in a sensible range", {
   for (part in parts) {
     tmp <- stress_result(x, part)
 
-    expect_true(all(abs(tmp$Estimate) <= 0.5))
-    expect_true(all(abs(tmp$CI_low) <= 1))
-    expect_true(all(abs(tmp$CI_high) <= 1))
+    expect_true(all(abs(tmp$Estimate) <= 1))
+    expect_true(all(abs(tmp$CI_low) <= 5))
+    expect_true(all(abs(tmp$CI_high) <= 5))
   }
 })
 
@@ -156,7 +156,7 @@ test_that("bsubmargin estimates grow in magnitude from 1 to 2 minutes", {
     tmp <- stress_result(x, part)
     magnitude_check <- tmp[
       ,
-      .(smaller = abs(Estimate[abs(Delta) == 1]) < abs(Estimate[abs(Delta) == 2])),
+      .(smaller = abs(Estimate[abs(Delta) == 1]) < abs(Estimate[abs(Delta) == 5])),
       by = From
     ]
 

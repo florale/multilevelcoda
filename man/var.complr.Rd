@@ -28,5 +28,7 @@ Variance of compositions presented in a \code{complr} object.
 x <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")
-multilevelcoda:::var.complr(x)
+## ensure dispatch to the s3 generic var function
+## defined in the compositions package
+compositions::var(x)
 }

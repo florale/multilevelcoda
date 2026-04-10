@@ -27,7 +27,7 @@ test_that("mean.complr", {
 })
 
 test_that("var.complr", {
-  expect_type(var(x1), "list")
+  expect_type(compositions::var(x1), "list")
 })
 
 test_that("as.data.frame.complr", {
