@@ -107,7 +107,7 @@ NULL
                       ...) {
   # extract variables from complr and brmcoda objects for use in substitution models
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
-  
+
   grid <- d0[, colnames(d0) %nin% c(get_vars[["Xxz"]], object[["complr"]][["idvar"]]), with = FALSE]
   # grid[, at := if (!is.null(at)) {
   #   names(at)
@@ -116,12 +116,7 @@ NULL
   # }]
 
   # setup parallel processing
-  if (isFALSE(is.null(cores))) {
-    oplan <- plan(multisession, workers = cores)
-    on.exit(plan(oplan))
-  } else {
-    plan(sequential)
-  }
+  with(plan(multisession, workers = if (is.null(cores)) 1L else cores), local = TRUE)
 
   oopts <- options(
     future.globals.maxSize = +Inf,
@@ -220,7 +215,7 @@ NULL
           delta_y <- lapply(seq(dim(ysub)[2]), function(j) {
             ## j = delta, h = ref grid
             acomp(ysub[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
-            - acomp(y0[, h, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
+            -acomp(y0[, h, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
           })
         } else { ## when outcome is not compositional
           delta_y <- lapply(seq(dim(ysub)[3]), function(v) {
@@ -346,12 +341,7 @@ NULL
   # }]
 
   # setup parallel processing
-  if (isFALSE(is.null(cores))) {
-    oplan <- plan(multisession, workers = cores)
-    on.exit(plan(oplan))
-  } else {
-    plan(sequential)
-  }
+  with(plan(multisession, workers = if (is.null(cores)) 1L else cores), local = TRUE)
 
   oopts <- options(
     future.globals.maxSize = +Inf,
@@ -451,7 +441,7 @@ NULL
           delta_y <- lapply(seq(dim(ysub)[2]), function(j) {
             ## j = delta, h = ref grid
             acomp(ysub[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
-            - acomp(y0[, h, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
+            -acomp(y0[, h, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
           })
         } else { ## when outcome is not compositional
           delta_y <- lapply(seq(dim(ysub)[3]), function(v) {
@@ -474,7 +464,7 @@ NULL
     if (aorg) {
       # unadj OR adj averaging over reference grid
       weight <- grid$.wgt. / sum(grid$.wgt.)
-      
+
       posterior_delta_y <- lapply(hout, function(h) {
         weighted_hout <- Map(function(x, w) x * w, h, weight)
         list(Reduce(`+`, weighted_hout))
@@ -486,7 +476,7 @@ NULL
       at_levels <- grid[, names(at), with = FALSE]
       at_id <- at_levels[, ida := .I][, .(ida_list = list(ida)), by = names(at)]$ida_list
       unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
-      
+
       # for each outcome, weight the hout by at_weight
       posterior_delta_y <- lapply(hout, function(h) {
         at_weighted_hout <- Map(function(x, w) x * w, h, at_weight)
@@ -568,7 +558,7 @@ NULL
                      ...) {
   # extract variables from complr and brmcoda objects for use in substitution models
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
-  
+
   grid <- d0[, colnames(d0) %nin% c(get_vars[["Xxz"]], object[["complr"]][["idvar"]]), with = FALSE]
   # grid[, at := if (!is.null(at)) {
   #   names(at)
@@ -577,12 +567,7 @@ NULL
   # }]
 
   # setup parallel processing
-  if (isFALSE(is.null(cores))) {
-    oplan <- plan(multisession, workers = cores)
-    on.exit(plan(oplan))
-  } else {
-    plan(sequential)
-  }
+  with(plan(multisession, workers = if (is.null(cores)) 1L else cores), local = TRUE)
 
   oopts <- options(
     future.globals.maxSize = +Inf,
@@ -676,7 +661,7 @@ NULL
           delta_y <- lapply(seq(dim(ysub)[2]), function(j) {
             ## j = delta, h = ref grid
             acomp(ysub[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
-            - acomp(y0[, h, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
+            -acomp(y0[, h, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
           })
         } else { ## when outcome is not compositional
           delta_y <- lapply(seq(dim(ysub)[3]), function(v) {
@@ -699,7 +684,7 @@ NULL
     if (aorg) {
       # unadj OR adj averaging over reference grid
       weight <- grid$.wgt. / sum(grid$.wgt.)
-      
+
       posterior_delta_y <- lapply(hout, function(h) {
         weighted_hout <- Map(function(x, w) x * w, h, weight)
         list(Reduce(`+`, weighted_hout))
@@ -711,7 +696,7 @@ NULL
       at_levels <- grid[, names(at), with = FALSE]
       at_id <- at_levels[, ida := .I][, .(ida_list = list(ida)), by = names(at)]$ida_list
       unique_at_levels <- unique(at_levels[, names(at), with = FALSE])
-      
+
       # for each outcome, weight the hout by at_weight
       posterior_delta_y <- lapply(hout, function(h) {
         at_weighted_hout <- Map(function(x, w) x * w, h, at_weight)
@@ -788,12 +773,7 @@ NULL
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
 
   # setup parallel processing
-  if (isFALSE(is.null(cores))) {
-    oplan <- plan(multisession, workers = cores)
-    on.exit(plan(oplan))
-  } else {
-    plan(sequential)
-  }
+  with(plan(multisession, workers = if (is.null(cores)) 1L else cores), local = TRUE)
 
   oopts <- options(
     future.globals.maxSize = +Inf,
@@ -887,7 +867,7 @@ NULL
             delta_y <- lapply(seq(dim(ysub)[2]), function(j) {
               # cal delta by participants, then avg across participants
               acomp(ysub[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
-              - acomp(y0[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
+              -acomp(y0[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
             })
             delta_y <- array(unlist(delta_y), dim = c(dim(ysub)[1], dim(ysub)[2], dim(ysub)[3]))
             delta_y <- lapply(seq(dim(delta_y)[3]), function(k) {
@@ -965,12 +945,7 @@ NULL
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
 
   # setup parallel processing
-  if (isFALSE(is.null(cores))) {
-    oplan <- plan(multisession, workers = cores)
-    on.exit(plan(oplan))
-  } else {
-    plan(sequential)
-  }
+  with(plan(multisession, workers = if (is.null(cores)) 1L else cores), local = TRUE)
 
   oopts <- options(
     future.globals.maxSize = +Inf,
@@ -1065,7 +1040,7 @@ NULL
             delta_y <- lapply(seq(dim(ysub)[2]), function(j) {
               # cal delta by participants, then avg across participants
               acomp(ysub[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
-              - acomp(y0[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
+              -acomp(y0[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
             })
             delta_y <- array(unlist(delta_y), dim = c(dim(ysub)[1], dim(ysub)[2], dim(ysub)[3]))
             delta_y <- lapply(seq(dim(delta_y)[3]), function(k) {
@@ -1143,12 +1118,7 @@ NULL
   get_vars <- .get.subvars(object = object, parts = parts, scale = scale)
 
   # setup parallel processing
-  if (isFALSE(is.null(cores))) {
-    oplan <- plan(multisession, workers = cores)
-    on.exit(plan(oplan))
-  } else {
-    plan(sequential)
-  }
+  with(plan(multisession, workers = if (is.null(cores)) 1L else cores), local = TRUE)
 
   oopts <- options(
     future.globals.maxSize = +Inf,
@@ -1238,7 +1208,7 @@ NULL
             delta_y <- lapply(seq(dim(ysub)[2]), function(j) {
               # cal delta by participants, then avg across participants
               acomp(ysub[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
-              - acomp(y0[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
+              -acomp(y0[, j, ], total = object[["complr"]][["output"]][[get_vars[["idy"]]]][["total"]])
             })
             delta_y <- array(unlist(delta_y), dim = c(dim(ysub)[1], dim(ysub)[2], dim(ysub)[3]))
             delta_y <- lapply(seq(dim(delta_y)[3]), function(k) {
