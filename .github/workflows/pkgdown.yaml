@@ -21,14 +21,15 @@ jobs:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
       
-      - uses: n1hility/cancel-previous-runs@v3
+      - uses: styfle/cancel-workflow-action@0.12.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
           
       - uses: r-lib/actions/setup-pandoc@v2
 

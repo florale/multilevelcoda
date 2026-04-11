@@ -29,13 +29,14 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
       
-      - uses: n1hility/cancel-previous-runs@v3
+      - uses: styfle/cancel-workflow-action@0.12.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Install system dependencies
         if: runner.os == 'Linux'
