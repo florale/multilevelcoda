@@ -352,7 +352,7 @@ complr <- function(data,
       )
     )
   }
-  structure(
+  as.complr(
     list(
       output    = output,
       datain    = as.data.table(data),
@@ -362,8 +362,7 @@ complr <- function(data,
         cbind(as.data.table(tmp[colnames(data)]), dataout),
       transform = transform,
       idvar     = idvar
-    ),
-    class = "complr"
+    )
   )
 }
 

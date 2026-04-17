@@ -7,6 +7,72 @@ is.complr <- function(x) {
   inherits(x, "complr")
 }
 
+#' Coerce a list to a \code{complr} object
+#' 
+#' This is a constructor function for a \code{complr} object.
+#' It checks that the input list has the necessary structure and
+#' components to be considered a \code{complr} object,
+#' and if so, it assigns the class "complr" to it.
+#' This allows for method dispatch on \code{complr} objects.
+#'
+#' @param x A list with elements \code{output}, \code{datain}, \code{dataout},
+#' \code{transform}, and \code{idvar}.
+#' 
+#' @return A \code{complr} object.
+#' @importFrom data.table is.data.table
+#' @importFrom extraoperators %nin% %ain%
+#'
+#' @export
+as.complr <- function(x) {
+  if (is.complr(x)) {
+    return(x)
+  }
+
+  stopifnot(is.list(x))
+
+  required_names <- c("output", "datain", "dataout", "transform", "idvar")
+
+  if (!required_names %ain% names(x) || !names(x) %ain% required_names) {
+    stop("x must contain exactly the following elements: ",
+      paste(required_names, collapse = ", "))
+  }
+
+  if (!is.list(x$output)) {
+    stop(sprintf("output must be a list but has class %s.", class(x$output)))
+  }
+
+  if (!is.data.table(x$datain) || !is.data.table(x$dataout)) {
+    stop(sprintf("datain and dataout must be data.tables but have classes %s and %s.",
+      class(x$datain), class(x$dataout)))
+  }
+
+  if (!is.character(x$transform) || length(x$transform) != 1L) {
+    stop(sprintf(
+      "transform must be a length 1 character string, but has class %s and length %d.",
+      class(x$transform), length(x$transform)
+    ))
+  }
+
+  if (!is.null(x$idvar)) {
+    if (!is.character(x$idvar) || length(x$idvar) != 1L) {
+     stop(sprintf(
+        "idvar must be a length 1 character string, but has class %s and length %d.",
+        class(x$idvar), length(x$idvar)
+      ))
+    }
+    if (x$idvar %nin% names(x$dataout)) {
+      stop(sprintf(
+        "idvar '%s' is not a column in dataout.",
+        x$idvar
+      ))
+    }
+  }
+
+  x <- x[required_names]  # ensure correct order of elements
+
+  structure(x, class = "complr")
+}
+
 #' Mean and Variance of compositions presented in a \code{complr} object.
 #' 
 #' Internal function only.

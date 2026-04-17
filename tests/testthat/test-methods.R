@@ -22,6 +22,12 @@ test_that("is.complr", {
   expect_true(is.complr(x1))
 })
 
+test_that("as.complr", {
+  expect_s3_class(as.complr(unclass(x1)), "complr")
+  expect_identical(as.complr(x1), x1)
+  expect_error(as.complr(list()), "x must contain")
+})
+
 test_that("mean.complr", {
   expect_type(mean(x1), "list")
 })
