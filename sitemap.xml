@@ -11,7 +11,9 @@
 <url><loc>https://florale.github.io/multilevelcoda/index.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/news/index.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/VarCorr.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/as.complr.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/as.data.frame.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/as.diagnostics.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/bayes_factor.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/bsub.html</loc></url>
@@ -23,6 +25,8 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/compilr.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/complr.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/diagnostics.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/diagnostics.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/dot-meanvar.complr.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/draws-index-brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/fitted.brmcoda.html</loc></url>
@@ -33,6 +37,7 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/index.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/is.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/is.complr.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/is.diagnostics.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/is.substitution.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/launch_shinystan.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/loo.brmcoda.html</loc></url>
@@ -47,6 +52,7 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/pivot_coord_refit.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/pivot_coord_rotate.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/plot.brmcoda.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/plot.diagnostics.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/plot.substitution.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/pp_check.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/predict.brmcoda.html</loc></url>

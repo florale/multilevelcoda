@@ -5,10 +5,20 @@
 - [`VarCorr(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/VarCorr.brmcoda.md)
   : Extract Variance and Correlation Components
 
+- [`as.complr()`](https://florale.github.io/multilevelcoda/reference/as.complr.md)
+  :
+
+  Coerce a list to a `complr` object
+
 - [`as.data.frame(`*`<complr>`*`)`](https://florale.github.io/multilevelcoda/reference/as.data.frame.complr.md)
   [`as.matrix(`*`<complr>`*`)`](https://florale.github.io/multilevelcoda/reference/as.data.frame.complr.md)
   : Extract amounts and compositions in conventional formats as
   data.frames, matrices, or arrays.
+
+- [`as.diagnostics()`](https://florale.github.io/multilevelcoda/reference/as.diagnostics.md)
+  :
+
+  Coerce a list to a `diagnostics` object
 
 - [`bayes_factor(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/bayes_factor.brmcoda.md)
   : Bayes Factors from Marginal Likelihoods
@@ -51,6 +61,16 @@
 
   Extract Diagnostic Quantities from `brmsfit` Models in `brmcoda`
 
+- [`diagnostics()`](https://florale.github.io/multilevelcoda/reference/diagnostics.md)
+  :
+
+  Generic diagnostics function for multilevelcoda
+
+- [`diagnostics(`*`<complr>`*`)`](https://florale.github.io/multilevelcoda/reference/diagnostics.complr.md)
+  :
+
+  Robust multivariate normal diagnostics for `complr` coordinates
+
 - [`.meanvar.complr()`](https://florale.github.io/multilevelcoda/reference/dot-meanvar.complr.md)
   :
 
@@ -91,6 +111,11 @@
   :
 
   Checks if argument is a `complr` object
+
+- [`is.diagnostics()`](https://florale.github.io/multilevelcoda/reference/is.diagnostics.md)
+  :
+
+  Checks if argument is a `diagnostics` object
 
 - [`is.substitution()`](https://florale.github.io/multilevelcoda/reference/is.substitution.md)
   :
@@ -150,6 +175,9 @@
 
 - [`plot(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/plot.brmcoda.md)
   : Trace and Density Plots for MCMC Draws plot
+
+- [`plot(`*`<diagnostics>`*`)`](https://florale.github.io/multilevelcoda/reference/plot.diagnostics.md)
+  : Diagnostics Plot for Compositional Diagnostics
 
 - [`plot(`*`<substitution>`*`)`](https://florale.github.io/multilevelcoda/reference/plot.substitution.md)
   : Substitution Plot
