@@ -8,6 +8,7 @@ will also attach built in datasets `mcompd` (simulated compositional
 sleep and wake variables) and `sbp` (sequential binary partition).
 
 ``` r
+
 library(multilevelcoda)
 library(brms)
 library(bayestestR)
@@ -27,6 +28,7 @@ The ILR coordinates outcomes can be calculated using the
 functions.
 
 ``` r
+
 cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
@@ -43,6 +45,7 @@ of predictors. Our `brms` model can be then fitted using the
 function.
 
 ``` r
+
 mv <- brmcoda(complr = cilr,
               formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ Stress + (1 | ID),
               cores = 8, seed = 123, backend = "cmdstanr")
@@ -54,6 +57,7 @@ Here is a [`summary()`](https://rdrr.io/r/base/summary.html) of the
 model. We can see that stress significantly predicted `z1_1` and `z2_1`.
 
 ``` r
+
 summary(mv)
 #>  Family: MV(gaussian, gaussian, gaussian, gaussian) 
 #>   Links: mu = identity; sigma = identity
@@ -131,6 +135,7 @@ composition.
 additional non-default argument `save_pars = save_pars(all = TRUE)`.
 
 ``` r
+
 # intercept only
 mv0 <- brmcoda(complr = cilr,
                formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ 1 + (1 | ID),
@@ -150,6 +155,7 @@ mv <- brmcoda(complr = cilr,
 We can now compare these models with the `bayesfactor_models()` function
 
 ``` r
+
 bayes_factor(mv$model, mv0$model)
 #> Iteration: 1
 #> Iteration: 2
@@ -193,7 +199,7 @@ bayes_factor(mv$model, mv0$model)
 #> Estimated Bayes factor in favor of mv$model over mv0$model: 0.00015
 ```
 
-With a $BF$ \< 1, our data favours the intercept only model, showing
+With a $`BF`$ \< 1, our data favours the intercept only model, showing
 that there is insufficient evidence for stress predicting the overall
 sleep-wake composition.
 

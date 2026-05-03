@@ -27,6 +27,7 @@ print(x, ...)
 ## Examples
 
 ``` r
+
 cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
                 idvar = "ID")

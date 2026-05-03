@@ -6,7 +6,7 @@ In this vignettes, we present a case study we encountered in the
 simulation study for package `multilevelcoda`. Briefly, we found that
 multilevel model with compositional predictors with large sample size,
 large between-person heterogeneity and small within-person heterogeneity
-(large $\sigma_{u}^{2}$ and small $\sigma_{\varepsilon}^{2}$) produced
+(large $`\sigma^2_{u}`$ and small $`\sigma^2_{\varepsilon}`$) produced
 low bulk effective sample size (ESS). Here, we examined the diagnostics
 of the model of interest and explored different methods to improve the
 within-chain autocorrelation.
@@ -15,10 +15,11 @@ within-chain autocorrelation.
 
 We first generated a dataset consisting of a 3-part behaviour
 composition with 1200 individuals, 14 observations per individuals, and
-large random intercept variation ($\sigma_{u}^{2} = 1.5$), coupled with
-small residual variation ($\sigma_{\varepsilon}^{2}:0.5$).
+large random intercept variation ($`\sigma^2_{u} = 1.5`$), coupled with
+small residual variation ($`\sigma^2_{\varepsilon}: 0.5`$).
 
 ``` r
+
 set.seed(1) 
 sampled_cond <- cond[condition == "RElarge_RESsmall" & n_parts == 3 & N == 1200 & K == 14][1]
 i <- 1
@@ -95,6 +96,7 @@ dat <- cbind(cilr$data, cilr$BetweenILR, cilr$WithinILR)
 Here is the dataset `dat`, along with our variables of interest.
 
 ``` r
+
 knitr::kable(head(dat[, .(ID, sleepy, Sleep, PA, SB,
                           bilr1, bilr2, wilr1, wilr2)]))
 ```
@@ -112,9 +114,10 @@ knitr::kable(head(dat[, .(ID, sleepy, Sleep, PA, SB,
 
 The model of interest is a multilevel model with 3-part composition
 (Sleep, Physical Activity, Sedentary Behaviour), expressed as a 2 sets
-of 2-part between and within- $ilr$ coordinates predicting sleepiness.
+of 2-part between and within- $`ilr`$ coordinates predicting sleepiness.
 
 ``` r
+
 fit <- brmcoda(cilr, 
                sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID),
                cores = 4,
@@ -128,9 +131,10 @@ fit <- brmcoda(cilr,
 
 A summary of the model indicates that the bulk ESS values for the
 constant and varying intercept as well as the constant coefficients of
-the between $ilr$ coordinates are low.
+the between $`ilr`$ coordinates are low.
 
 ``` r
+
 summary(fit)
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
@@ -166,6 +170,7 @@ some areas of the samples being drawn from outside of the parameter
 space, but no strong evidence for non-convergence.
 
 ``` r
+
 plot(fit, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
 ```
 
@@ -189,6 +194,7 @@ increasing posterior draws and reparameterisation.
 As a first step, we test if increasing iterations and warmups helps.
 
 ``` r
+
 fit_it <- brmcoda(cilr, 
                   sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID),
                   cores = 4,
@@ -203,6 +209,7 @@ print(rstan::get_elapsed_time(fit$Model$fit_it))
 ```
 
 ``` r
+
 summary(fit_it)
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
@@ -234,6 +241,7 @@ summary(fit_it)
 ```
 
 ``` r
+
 plot(fit_it, variable = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
 ```
 
@@ -267,6 +275,7 @@ we are going to test if centered parameterisation improves the sampling.
 We first obtain the Stan code for the example model
 
 ``` r
+
 make_stancode(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
 #> // generated with brms 2.19.0
 #> functions {
@@ -336,6 +345,7 @@ We then can manually edit the generated brms code to center all
 parameters. The modified Stan code is
 
 ``` r
+
 m_centered <- cmdstan_model("fit_centered.stan")
 print(m_centered)
 #> data {
@@ -418,6 +428,7 @@ print(m_centered)
 Now we build data for the model and sample with `cmdstanr`
 
 ``` r
+
 sdat <- make_standata(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat)
 fit_centered <- m_centered$sample(data = sdat,
                                   parallel_chains = 4,
@@ -426,12 +437,14 @@ fit_centered <- m_centered$sample(data = sdat,
 ```
 
 ``` r
+
 bm_centered <- brm(sleepy ~ bilr1 + bilr2 + wilr1 + wilr2 + (1 | ID), data = dat, empty = TRUE)
 bm_centered$fit <- rstan::read_stan_csv(fit_centered$output_files())
 bm_centered <- rename_pars(bm_centered)
 ```
 
 ``` r
+
 summary(bm_centered)
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
@@ -466,6 +479,7 @@ Indeed, the centered parameterisation has improved the ESS for all
 parameters.
 
 ``` r
+
 plot(bm_centered, pars = c("b_Intercept", "b_bilr1", "b_bilr2", "sd_ID__Intercept"), regex = TRUE)
 ```
 
@@ -477,6 +491,7 @@ Density and Trace Plot when using centered parameterisation
 ## Computational Time
 
 ``` r
+
 # example model
 print(rstan::get_elapsed_time(fit$Model$fit))
 #>         warmup sample

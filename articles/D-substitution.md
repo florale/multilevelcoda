@@ -18,6 +18,7 @@ We will begin by loading necessary packages, `multilevelcoda`, `brms`
 (sequential binary partition), and `psub` (base possible substitution).
 
 ``` r
+
 library(multilevelcoda)
 library(brms)
 library(doFuture)
@@ -40,6 +41,7 @@ function. We can compute ILR coordinate predictors using
 function.
 
 ``` r
+
 cilr <- complr(data = mcompd, sbp = sbp,
                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"), idvar = "ID", total = 1440)
 
@@ -53,6 +55,7 @@ A [`summary()`](https://rdrr.io/r/base/summary.html) of the model
 results.
 
 ``` r
+
 summary(m)
 #>  Family: gaussian 
 #>   Links: mu = identity; sigma = identity 
@@ -143,6 +146,7 @@ covariates,
 will average predictions across levels of covariates as the default.
 
 ``` r
+
 subm1 <- substitution(object = m, delta = 1:10,
                       ref = "grandmean", level = c("between", "within"))
 ```
@@ -154,6 +158,7 @@ component. Here are the results for changes in stress when sleep (TST)
 is substituted for 10 minutes.
 
 ``` r
+
 knitr::kable(summary(subm1, delta = 10, level = "between", to = "TST"))
 ```
 
@@ -172,6 +177,7 @@ using the [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
 function.
 
 ``` r
+
 plot(subm1, to = "TST", level = "between", ref = "grandmean")
 ```
 
@@ -183,6 +189,7 @@ Example of Between-person Substitution Analysis
 Here are the results for within-person level.
 
 ``` r
+
 knitr::kable(summary(subm1, delta = 10, level = "within", to = "TST"))
 ```
 
@@ -200,6 +207,7 @@ awake in bed predicted 0.04 higher stress \[95% CI 0.01, 0.7\], on a
 given day. Let’s also plot theses results.
 
 ``` r
+
 plot(subm1, to = "TST", level = "within", ref = "grandmean")
 ```
 
@@ -225,6 +233,7 @@ will run 5 substitution models for 5 sleep-wake behaviours by parallel
 excuting them across 5 workers.
 
 ``` r
+
 subm2 <- substitution(object = m, delta = 1:10,
                       ref = "clustermean", level = c("between", "within"),
                       cores = 5)
@@ -233,6 +242,7 @@ subm2 <- substitution(object = m, delta = 1:10,
 Below are the results.
 
 ``` r
+
 knitr::kable(summary(subm2, delta = 10, to = "TST"))
 ```
 
@@ -253,6 +263,7 @@ sleep on stress, plot using
 `ggpubr::ggarrange()` functions.
 
 ``` r
+
 library(ggpubr)
 p1 <- plot(subm2, to = "TST", level = "between", ref = "clustermean")
 p2 <- plot(subm2, to = "TST", level = "within", ref = "clustermean")

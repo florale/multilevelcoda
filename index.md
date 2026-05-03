@@ -13,12 +13,14 @@ wide range of generalized (non-)linear multivariate multilevel models.
 To install the latest release version from CRAN, run
 
 ``` r
+
 install.packages("multilevelcoda")
 ```
 
 The current developmental version can be downloaded from github via
 
 ``` r
+
 if (!requireNamespace("remotes")) {
   install.packages("remotes")
 }
