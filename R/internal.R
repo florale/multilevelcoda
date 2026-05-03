@@ -10,8 +10,9 @@ utils::globalVariables(c("i",  "..cols", ".", "To", "t", "head",  "fitted",
                          "multisession", "sequential",
                          "%->%", "%<-%", ".wgt.", "Estimate", "ida", "minutes", "wgt_at"
 ))
-#' @keywords internal
+
 #' expand grid data frame
+#' @keywords internal
 #' @noRd
 expand.grid.df <- function(...) Reduce(function(...) merge.data.frame(..., by = NULL, all = TRUE), list(...))
 expand.grid.dt <- function(...) {

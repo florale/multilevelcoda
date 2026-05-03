@@ -166,3 +166,19 @@ test_that("predict.brmcoda and fitted.brmcoda respect newdata for compositional 
     tolerance = 1e-6
   )
 })
+
+test_that("pp_check.brmcoda supports compositional responses on linear scale", {
+  out <- with_seed(123, pp_check(fit_comp, scale = "linear", ndraws = 5, resp = "z11"))
+  out_part <- with_seed(123, pp_check(fit_comp, scale = "linear", ndraws = 5, resp = "z11"))
+
+  expect_s3_class(out, "ggplot")
+  expect_s3_class(out_part, "ggplot")
+})
+
+test_that("pp_check.brmcoda supports compositional responses on response scale", {
+  out <- with_seed(123, pp_check(fit_comp, scale = "response", ndraws = 5))
+  out_part <- with_seed(123, pp_check(fit_comp, scale = "response", parts = "TST", ndraws = 5))
+
+  expect_s3_class(out, "ggplot")
+  expect_s3_class(out_part, "ggplot")
+})

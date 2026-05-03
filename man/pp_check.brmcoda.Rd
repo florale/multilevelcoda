@@ -5,16 +5,99 @@
 \alias{pp_check}
 \title{Posterior Predictive Checks for \code{brmcoda} Objects}
 \usage{
-\method{pp_check}{brmcoda}(object, ...)
+\method{pp_check}{brmcoda}(
+  object,
+  type = "dens_overlay",
+  ndraws = NULL,
+  prefix = c("ppc", "ppd"),
+  newdata = NULL,
+  draw_ids = NULL,
+  nsamples = NULL,
+  subset = NULL,
+  scale = c("linear", "response"),
+  parts = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class \code{brmcoda}.}
+
+\item{type}{Type of the ppc plot as given by a character string.
+See \code{\link[bayesplot:PPC-overview]{PPC}} for an overview
+of currently supported types. You may also use an invalid
+type (e.g. \code{type = "xyz"}) to get a list of supported
+types in the resulting error message.}
+
+\item{ndraws}{Positive integer indicating how many
+posterior draws should be used.
+If \code{NULL} all draws are used. If not specified,
+the number of posterior draws is chosen automatically.
+Ignored if \code{draw_ids} is not \code{NULL}.}
+
+\item{prefix}{The prefix of the \pkg{bayesplot} function to be applied.
+Either `"ppc"` (posterior predictive check; the default)
+or `"ppd"` (posterior predictive distribution), the latter being the same
+as the former except that the observed data is not shown for `"ppd"`.}
+
+\item{newdata}{An optional data.frame for which to evaluate predictions. If
+\code{NULL} (default), the original data of the model is used. \code{NA}
+values within factors (excluding grouping variables) are interpreted as if
+all dummy variables of this factor are zero. This allows, for instance, to
+make predictions of the grand mean when using sum coding. \code{NA} values
+within grouping variables are treated as a new level.}
+
+\item{draw_ids}{An integer vector specifying the posterior draws to be used.
+If \code{NULL} (the default), all draws are used.}
+
+\item{nsamples}{Deprecated alias of \code{ndraws}.}
+
+\item{subset}{Deprecated alias of \code{draw_ids}.}
+
+\item{scale}{Specifically for models with compositional responses,
+either \code{"response"} or \code{"linear"}.
+If \code{"linear"},
+results are returned on the log-ratio scale.
+If \code{"response"}, results are returned on the compositional scale
+of the response variable.}
+
+\item{parts}{Optional names or indices of compositional response parts to
+include when \code{scale = "response"}. If \code{NULL}, all parts are used.}
 
 \item{...}{Further arguments passed to \code{\link[brms]{predict.brmsfit}}
 as well as to the PPC function specified in \code{type}.}
 }
 \description{
 Perform posterior predictive checks with the help of the \pkg{bayesplot} package.
+}
+\examples{
+\donttest{
+if(requireNamespace("cmdstanr")){
+  ## fit a model
+  x <- complr(data = mcompd, sbp = sbp,
+                 parts = c("TST", "WAKE", "MVPA", "LPA", "SB"),
+                 idvar = "ID", total = 1440)
+
+  m1 <- brmcoda(complr = x,
+                formula = Stress ~ bz1_1 + bz2_1 + bz3_1 + bz4_1 +
+                                   wz1_1 + wz2_1 + wz3_1 + wz4_1 + (1 | ID),
+                chain = 1, iter = 500,
+                backend = "cmdstanr")
+
+  ## posterior predictive checks
+  bayesplot::pp_check(m1, ndraws = 5)
+
+  ## fit a model with compositional outcome
+  m2 <- brmcoda(complr = x,
+                formula = mvbind(z1_1, z2_1, z3_1, z4_1) ~ 
+                          bz1_1 + bz2_1 + bz3_1 + bz4_1 + Female + (1 | ID),
+                chain = 1, iter = 500,
+                backend = "cmdstanr")
+
+  ## posterior predictive checks for compositional outcome -- linear scale
+  bayesplot::pp_check(m2, resp = "z11", ndraws = 10)
+  ## posterior predictive checks for compositional outcome -- original response scale
+  bayesplot::pp_check(m2, parts = "WAKE", scale = "response", ndraws = 10)
+}}
 }
 \seealso{
 \code{\link[brms:pp_check.brmsfit]{pp_check.brmsfit}}

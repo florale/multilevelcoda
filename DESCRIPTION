@@ -29,7 +29,6 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 4.0.0)
 Imports: 
@@ -68,3 +67,4 @@ Config/testthat/parallel: true
 Additional_repositories: 
     https://mc-stan.org/r-packages/
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

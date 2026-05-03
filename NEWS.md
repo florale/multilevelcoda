@@ -4,6 +4,11 @@
 
 * `update.brmcoda()` method did not correctly use `newdata`. This is now fixed.
 
+### New Features
+* `pp_check()` method now supports checking compositional outcome distributions on their response scale, via `scale = "response"` argument.
+* `diagnostics()` new method to calculate diagnostics from `complr` objects.
+* `plot()` new plot method for `diagnostics` class objects to enable visual plotting of diagnostics for `complr` objects, can help identify extreme values / outliers.
+
 # multilevelcoda 1.3.3
 
 ### New Features
