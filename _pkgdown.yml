@@ -19,6 +19,7 @@ articles:
   - C-composition-MMLM
   - D-substitution
   - E-simmodel-diag
+  - F-data-simulation
 
 footer:
   structure:
@@ -28,3 +29,4 @@ footer:
 template:
   bootstrap: 5
   light-switch: true
+  
