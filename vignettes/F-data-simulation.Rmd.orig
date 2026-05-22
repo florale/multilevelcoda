@@ -1,0 +1,1109 @@
+---
+title: "Data Simulation"
+output: 
+  html_document:
+    theme: spacelab
+    highlight: kate
+    toc: yes
+    toc_float: yes
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_caption: yes
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Data Simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dev = "CairoPNG", dpi = 150, 
+  fig.path = "mlmcoda-", fig.align = "center"
+)
+```
+
+**NOTE THIS IS EXPERIMENTAL FOR NOW**
+
+```{r setup}
+library(multilevelcoda)
+library(knitr)
+library(data.table)
+
+options(digits = 3, pillar.sigfig = 3)
+```
+
+Data simulation is useful for multiple purposes, such as:
+
+- Power analysis and sample size planning.
+- Method development and testing.
+- Generating synthetic data to test models, write code before data collection finishes, etc.
+
+Simulating data, especially if multilevel and/or compositional, can be complex.
+The `simulate_data()` function is designed to support these efforts.
+
+Broadly, `simulate_data()` builds an indexed design, runs named generators in order, and
+returns an `mlsim_data` object with four main pieces:
+
+- `data`: the generated `data.table`.
+- `metadata`: design metadata such as group sizes, time indexing, and generator
+  order.
+- `generator_specs`: the generator settings
+- `generator_metadata`: e.g., parameters, random effects, covariance
+  matrices, helper columns.
+
+# Summary Tables
+
+These tables give a high level summary of current features.
+
+## Design options
+
+Design options cover the highest level structure.
+
+| Option | Use |
+|---|---|
+| `n` | Total rows for a single-level design, or total rows to divide across groups. |
+| `n_groups` | Number of groups in a grouped or multilevel design. |
+| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list. |
+| `group_id` | Name of the grouping column. |
+| `obs_id` | Name of the within-design observation index. |
+| `time_id` | Optional time column name. |
+| `time_values` | Optional time vector or function, including Date/POSIXct values. |
+| `time_truncate` | Whether shared time values are truncated for shorter groups. |
+| `seed` | Reproducible simulation seed that restores the caller RNG state. |
+
+## Generator families
+
+Generators are used to add simulated data columns. They are independent of each other.
+Any generated column can be used as well to later generate an "outcome" column with `gen_outcome()`.
+Outcomes differ from the rest of the generators because outcomes can depend on 
+any previously generated predictor.
+
+Current predictor generators are listed below.
+
+| Generator | Role |
+|---|---|
+| `gen_normal()` | Univariate Gaussian predictors or outcomes on the identity scale. |
+| `gen_mvn()` | Correlated Gaussian blocks, including ILR compositional back-transforms. |
+| `gen_categorical()` | Binary, unordered categorical, and ordered categorical variables. |
+| `gen_binomial()` | Binomial counts with logit-scale multilevel support. |
+| `gen_poisson()` | Poisson counts with log-scale multilevel support. |
+| `gen_negbin()` | Negative-binomial counts with optional location-scale multilevel support. |
+| `gen_gamma()` | Positive continuous variables with optional location-scale multilevel support. |
+| `gen_beta()` | Bounded (0, 1) continuous variables with optional location-scale support. |
+| `gen_custom()` | User-supplied generators that receive the active simulation context. |
+
+## Advanced simulation options
+
+These are a sampling of more advanced simulation features and apply to 
+predictor generators and outcome generation.
+
+| Feature | Use |
+|---|---|
+| `level` | Choose row-level, group-level, or multilevel generation. |
+| `fixed_intercept` | Set the fixed location or link-scale intercept in multilevel generators. |
+| `random_cov` | Add group-specific random intercepts, and sometimes scale random effects. |
+| `residual_var` / `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
+| `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
+| `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
+| Outcome formula | Generate Gaussian outcomes from fixed, random, lagged, and helper terms. |
+| `lag1()`, `within()`, `between()`, `ar1()` | Create time-lag, within-group, between-group, and autoregressive terms. |
+| `scale_formula` | Simulate location-scale outcomes through a log residual SD model. |
+| `prepare_outcome_fit()` | Prepare simulated outcomes and helper columns for downstream fitting. |
+
+# Study Designs and Indexing
+
+Here is a simple single level example.
+Here no outcome is generated, so each variable will be generated 
+independently of other variables.
+
+```{r, results = "asis"}
+single <- simulate_data(
+  n = 20,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", mean = 0, sd = 1),
+    edu = gen_categorical("edu", categories = c("< Bachelor", "Bachelor", "> Bachelor"),
+      prob = c(.3, .3, .4)),
+    tx = gen_categorical("tx", categories = c("control", "treatment"), prob = .5)
+  )
+)
+
+kable(single$data)
+```
+
+```{r}
+single
+```
+
+The `mlsim_data` print method gives a compact console overview. Use `summary()`
+when you want design and generator metadata as `data.table` objects.
+
+```{r}
+summary(single)$design
+summary(single)$generators
+```
+
+We can generate multilevel structures as well.
+A single scalar `n_per_group` creates a balanced grouped design with the 
+exact same number of observations per group.
+
+```{r, results = "asis"}
+balanced <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", mean = 0, sd = 1)
+  )
+)
+
+kable(balanced$data)
+```
+
+However, this was still effectively single level, normal data.
+We can improve that. Here we give essentially the parameters of 
+a random intercept only multilevel model, which is used to generate
+matching data. The `fixed_intercept` is the overall mean,
+`random_cov` is the group-level variance, and
+`residual_var` is the residual variance. The same approach broadly applies to 
+other generator families when level = "multilevel".
+We can generator a level 2 variable as well, which is constant within groups
+but varies between groups.
+
+```{r, results = "asis"}
+balanced2 <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(balanced2$data)
+```
+
+
+Vectors specs create unbalanced designs.
+
+```{r, results = "asis"}
+unbalanced <- simulate_data(
+  n_groups = 4,
+  n_per_group = c(3, 5, 4, 2),
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(unbalanced$data)
+```
+
+```{r}
+drawn_sizes <- simulate_data(
+  n_groups = 5,
+  n_per_group = list(
+    distribution = "poisson",
+    lambda = 4,
+    minimum = 2,
+    maximum = 6
+  ),
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(drawn_sizes$data)
+```
+
+
+Longitudinal designs can add a time index. When groups have different lengths,
+`time_truncate = TRUE` uses the first values for shorter groups.
+Add a time index may not matter, but it can be used for 
+creating lags, etc.
+
+```{r}
+dated <- simulate_data(
+  n_groups = 3,
+  n_per_group = c(5, 3, 4),
+  time_id = "date",
+  time_values = as.Date("2026-01-01") + 0:4,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(dated$data)
+```
+
+# Single-Level, Group-Level, and Multilevel Predictors
+
+The `level` argument controls whether values vary by row, by group, or by row
+with group-specific random effects.
+
+```{r}
+levels_demo <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    row_x = gen_normal("row_x", mean = 0, sd = 1),
+    group_x = gen_normal("group_x", level = "level2", mean = 10, sd = 1),
+    mixed_x = gen_normal(
+      "mixed_x",
+      level = "multilevel",
+      fixed_intercept = 5,
+      random_cov = 0.50,
+      residual_var = 1
+    )
+  )
+)
+
+levels_demo
+```
+
+# Distribution Families
+
+Single-level generators use direct distribution parameters. Their multilevel
+forms use link-scale intercepts and random covariance terms.
+Here is a quick demonstration of various distribution families with single level data.
+
+```{r, results = "asis"}
+families <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    normal = gen_normal("normal", mean = 5, sd = 1),
+    successes = gen_binomial("successes", size = 5, prob = 0.40),
+    visits = gen_poisson("visits", lambda = 2),
+    events = gen_negbin("events", size = 3, mu = 2),
+    cost = gen_gamma("cost", shape = 4, mean = 20),
+    adherence = gen_beta("adherence", mean = 0.70, precision = 12)
+  )
+)
+
+kable(families$data)
+
+```
+
+Here is an example of a multilevel count generator.
+
+```{r}
+link_scale_counts <- simulate_data(
+  n_groups = 3,
+  n_per_group = 5,
+  seed = 2026,
+  generators = list(
+    count = gen_poisson(
+      "count",
+      level = "multilevel",
+      fixed_intercept = log(2.5),
+      random_cov = 0.20
+    )
+  )
+)
+
+link_scale_counts
+```
+
+# Categorical Variables
+
+`gen_categorical()` supports binary variables, labeled categories, ordered
+factors, character output, and integer codes.
+
+```{r, results = "asis"}
+categorical <- simulate_data(
+  n = 12,
+  seed = 2026,
+  generators = list(
+    binary_factor = gen_categorical("binary_factor", prob = 0.35),
+    education = gen_categorical(
+      "education",
+      categories = c("< bachelor", "bachelor", "> bachelor"),
+      prob = c(0.45, 0.35, 0.20),
+      ordered = TRUE
+    ),
+    education_code = gen_categorical(
+      "education_code",
+      categories = c("arts", "science", "psychology"),
+      prob = c(0.45, 0.35, 0.20),
+      output = "integer"
+    )
+  )
+)
+
+kable(categorical$data)
+```
+
+Multilevel categorical generators use baseline-category logits and optional
+group random effects. For 2 categories, it is basically a multilevel bernoulli.
+For more than 2 categoaries, it is a multilevel multinomial with the first category as the baseline.
+The random intercepts can have their own variances and covariances. A full random effect
+covariance matrix must be specified. Use 0s on the off diagonal for uncorrelated random intercepts.
+
+```{r}
+categorical_ml <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    education = gen_categorical(
+      "education",
+      level = "multilevel",
+      categories = c("< bachelor", "bachelor", "> bachelor"),
+      fixed_intercept = c("bachelor" = 0.15, "> bachelor" = -0.55),
+      random_cov = matrix(c(0.20, 0.04, 0.04, 0.12), nrow = 2),
+      ordered = TRUE
+    )
+  )
+)
+
+kable(categorical_ml$data)
+```
+
+# Correlated and Compositional Predictors
+
+`gen_mvn()` simulates correlated blocks. With `compositional = TRUE`, the MVN
+columns are interpreted as ILR coordinates and back-transformed into parts.
+Here we are back to single level data.
+
+```{r, results = "asis"}
+correlated_comp <- simulate_data(
+  n = 8,
+  seed = 2026,
+  generators = list(
+    affect_block = gen_mvn(
+      c("affect", "energy"),
+      mean = c(0, 1),
+      cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
+    ),
+    time_use = gen_mvn(
+      c("ilr_1", "ilr_2"),
+      mean = c(0, 0),
+      cov = diag(c(0.30, 0.20)),
+      compositional = TRUE,
+      parts = c("sleep", "active", "sedentary"),
+      total = 24,
+      keep_ilr = TRUE
+    )
+  )
+)
+
+kable(correlated_comp$data)
+```
+
+```{r}
+correlated_comp$generator_metadata$time_use$sbp
+correlated_comp$generator_metadata$time_use$ilr_coordinate_map
+```
+
+Use `keep_ilr = FALSE` when you only want the original parts in the output.
+
+```{r, results = "asis"}
+parts_only <- simulate_data(
+  n = 5,
+  seed = 2026,
+  generators = list(
+    time_use = gen_mvn(
+      c("z1", "z2"),
+      mean = c(0, 0),
+      cov = diag(2),
+      compositional = TRUE,
+      parts = c("sleep", "active", "sedentary"),
+      total = 24,
+      keep_ilr = FALSE
+    )
+  )
+)
+
+kable(parts_only$data)
+```
+
+# Location-Scale Predictors
+
+For multilevel predictors, `scale_fixed_intercept` adds group-varying scale
+parameters. For a normal generator this means log residual SD; for negative
+binomial, gamma, and beta generators it controls size, shape, and precision.
+
+Here you can see in the metadata the group specific parameters 
+that were generated.
+
+```{r, results = "asis"}
+location_scale <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  seed = 2026,
+  generators = list(
+    symptom = gen_normal(
+      "symptom",
+      level = "multilevel",
+      fixed_intercept = 10,
+      scale_fixed_intercept = log(1.2),
+      random_cov = matrix(
+        c(1.00, 0.15,
+          0.15, 0.08),
+        nrow = 2
+      )
+    ),
+    event_count = gen_negbin(
+      "event_count",
+      level = "multilevel",
+      fixed_intercept = log(2),
+      scale_fixed_intercept = log(6),
+      random_cov = matrix(
+        c(0.20, 0.03,
+          0.03, 0.06),
+        nrow = 2
+      )
+    )
+  )
+)
+
+kable(data.table(
+  group_id = location_scale$data$group_id,
+  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd,
+  event_count_size = location_scale$generator_metadata$event_count$size
+))
+```
+
+# Custom Generators
+
+Custom generators receive a simulation context and return generated data,
+column names, and optional metadata. They can use the active design columns,
+previously generated variables, and any extra arguments supplied to
+`gen_custom()`. Their metadata would be captured in the 
+same was as built in generators.
+
+```{r}
+pilot_sampler <- function(context, vars, level, pilot_values) {
+  values <- sample(pilot_values, context$n_rows, replace = TRUE)
+
+  list(
+    data = data.frame(values = values),
+    names = vars,
+    metadata = list(source = "pilot bootstrap", n_pilot = length(pilot_values))
+  )
+}
+
+clinic_load_sampler <- function(context, vars, level) {
+  load_values <- c("low", "medium", "high")
+  group_load <- load_values[context$data[[context$group_id]]]
+
+  list(
+    data = data.frame(load = group_load),
+    names = vars,
+    metadata = list(source = "derived from group index")
+  )
+}
+
+custom <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    pilot_x = gen_custom(
+      "pilot_x",
+      generator = pilot_sampler,
+      pilot_values = c(1.2, 1.4, 1.8, 2.5, 3.1)
+    ),
+    clinic_load = gen_custom(
+      "clinic_load",
+      generator = clinic_load_sampler
+    )
+  )
+)
+
+kable(custom$data)
+```
+
+# Simple Outcomes
+
+`gen_outcome()` appends Gaussian outcomes after earlier generators have added
+predictors. This example uses a fixed intercept and slope.
+The formula specifies how the outcome depends on predictors.
+You can see from fitting a linear regression afterwards that the 
+simulated coefficients are well recovered.
+
+```{r}
+simple_outcome <- simulate_data(
+  n = 200,
+  seed = 2026,
+  generators = list(
+    dose = gen_normal("dose", mean = 0, sd = 1),
+    score = gen_outcome(
+      score ~ dose,
+      coefficients = c("(Intercept)" = 10, dose = 2),
+      residual_cov = 4
+    )
+  )
+)
+
+summary(lm(score ~ dose, data = simple_outcome$data))
+
+```
+
+# Outcome Templates and Formula Helpers
+
+`outcome_template()` runs through the same formula parsing as `gen_outcome()`
+without adding outcome columns. It gives named coefficient and covariance
+objects that can be edited safely.
+
+This is important because as outcome models become more complicated, correctly specifying
+and naming all the necessary parameters becomes more difficult. The template approach allows you to
+first specify the model in a formula, then edit the parameters in a structured way, and finally
+generate the outcome with the edited parameters.
+
+Here we will consider a much more complicated data simulation.
+We will generate two predictors, a level2 only treatment and a multilevel stress variable.
+We will then use an outcome template to specify a complicated outcome model with fixed effects,
+random effects, and lagged terms. The template will give us the correctly named coefficient
+and covariance objects that we can edit before generating the outcome.
+
+A range of helper functions exist:
+
+- `between()`: group means of a predictor.
+- `within()`: row values minus group means.
+- `lag1()`: previous row value within groups.
+
+These are used in formulae to specify further data management that
+should occur on the predictors before they are used to generate the outcome.
+For example, `between(stress)` creates a helper column with group means of stress,
+and `within(stress)` creates a helper column with row values minus group means.
+These helper columns are then used in the outcome formula and have their own coefficients.
+
+```{r}
+f <- wellbeing ~
+  treatment +
+  between(stress) +
+  within(stress) +
+  lag1(stress) +
+  (1 + within(stress) | p | id)
+
+helper_template_sim <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "id",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing_template = outcome_template(f)
+  )
+)
+
+helper_template <- helper_template_sim$generator_metadata$wellbeing_template
+helper_template$coefficients
+rownames(helper_template$random_cov[["id::p"]])
+helper_template$fit_helpers
+```
+
+Now we can use these objects and enter our desired parameter values with
+confidence that they are correctly named and structured.
+
+
+```{r}
+helper_coef <- helper_template$coefficients
+helper_coef["(Intercept)", "wellbeing"] <- 50
+helper_coef["treatment", "wellbeing"] <- 2.0
+helper_coef["between(stress)", "wellbeing"] <- -1.5
+helper_coef["within(stress)", "wellbeing"] <- -0.8
+helper_coef["lag1(stress)", "wellbeing"] <- -0.4
+
+helper_residual_cov <- helper_template$residual_cov
+helper_residual_cov[,] <- 1.5
+
+helper_random_cov <- helper_template$random_cov
+helper_block <- helper_random_cov[["id::p"]]
+diag(helper_block) <- c(3.0, 0.30)
+helper_random_cov[["id::p"]] <- helper_block
+
+```
+
+The edited template objects can then be supplied to `gen_outcome()`.
+Note how with a lag specified, there are missing values for the outcome.
+This is because the lags are missing for the first row of each group.
+
+```{r, results = "asis"}
+
+helper_sim <- simulate_data(
+  n_groups = 20,
+  n_per_group = 5,
+  group_id = "id",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing = gen_outcome(
+      f,
+      coefficients = helper_coef,
+      residual_cov = helper_residual_cov,
+      random_cov = helper_random_cov
+    )
+  )
+)
+
+kable(head(helper_sim$data, 20))
+
+```
+
+# Autoregressive Outcomes
+
+In order to support time series and dynamics models, 
+we support autoregressive effects in outcome generation.
+
+Use `ar1()` inside an outcome formula to refer to the previous generated value
+of the outcome, within each group. Using autoregression, it is 
+possible to generate only an outcome, with no independent preditors generated.
+We will use an outcome template again to help us specify the correct names and structure of parameters.
+
+```{r, results = "asis"}
+ar_template <- simulate_data(
+  n = 5,
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    mood_template = outcome_template(mood ~ ar1(), burnin = 5)
+  )
+)$generator_metadata$mood_template
+
+ar_coef <- ar_template$coefficients
+ar_coef["(Intercept)", "mood"] <- 0
+ar_coef["ar1(mood)", "mood"] <- 0.55
+
+ar_residual_cov <- ar_template$residual_cov
+ar_residual_cov[,] <- 0.40
+
+ar_sim <- simulate_data(
+  n = 200,
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    mood = gen_outcome(
+      mood ~ ar1(),
+      coefficients = ar_coef,
+      residual_cov = ar_residual_cov,
+      burnin = 5
+    )
+  )
+)
+
+kable(head(ar_sim$data, 10))
+```
+
+Fitting a model to the simulated data shows that the autoregressive coefficient is well recovered.
+
+```{r}
+summary(lm(mood ~ lag_mood, data = ar_sim$data))
+```
+
+# Compositional Outcomes
+
+Outcomes can also be generated on ILR coordinates and returned as composition
+parts. Here the parts sum to 24 for each row.
+
+```{r}
+comp_formula <- mvbind(comp_ilr_1, comp_ilr_2) ~ stress
+comp_parts <- c("sleep", "active", "sedentary")
+
+comp_template <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    stress = gen_normal(
+      "stress",
+      mean = 0,
+      sd = 1
+    ),
+    time_use_template = outcome_template(
+      comp_formula,
+      compositional = TRUE,
+      parts = comp_parts,
+      total = 24
+    )
+  )
+)$generator_metadata$time_use_template
+
+comp_coef <- comp_template$coefficients
+comp_coef["(Intercept)", ] <- c(-0.30, 0.20)
+comp_coef["stress", ] <- c(-0.05, 0.04)
+
+comp_residual_cov <- comp_template$residual_cov
+comp_residual_cov[,] <- matrix(
+  c(0.12, 0.02,
+    0.02, 0.10),
+  nrow = 2
+)
+
+comp_sim <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    stress = gen_normal(
+      "stress",
+      mean = 0,
+      sd = 1
+    ),
+    time_use = gen_outcome(
+      comp_formula,
+      coefficients = comp_coef,
+      residual_cov = comp_residual_cov,
+      compositional = TRUE,
+      parts = comp_parts,
+      total = 24
+    )
+  )
+)
+
+kable(comp_sim$data)
+
+```
+
+# Location-Scale Outcomes
+
+For outcomes, `scale_formula` models the log residual SD. Residual correlations
+are supplied separately through `residual_cor`.
+
+```{r}
+scale_formula <- sigma ~ treatment + (1 | p | participant_id)
+scale_outcome_formula <- wellbeing ~ treatment + stress + (1 | p | participant_id)
+
+scale_template <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "participant_id",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing_template = outcome_template(
+      scale_outcome_formula,
+      scale_formula = scale_formula
+    )
+  )
+)$generator_metadata$wellbeing_template
+
+scale_coef <- scale_template$coefficients
+scale_coef["(Intercept)", "wellbeing"] <- 50
+scale_coef["treatment", "wellbeing"] <- 2
+scale_coef["stress", "wellbeing"] <- -1
+
+scale_sd_coef <- scale_template$scale_coefficients
+scale_sd_coef["(Intercept)", "wellbeing"] <- log(1.0)
+scale_sd_coef["treatment", "wellbeing"] <- log(1.4)
+
+cov_coef <- scale_template$random_cov
+cov_coef[["participant_id::p"]][, ] <- diag(c(3.0, 0.30))
+
+scale_sim <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "participant_id",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing = gen_outcome(
+      scale_outcome_formula,
+      coefficients = scale_coef,
+      scale_formula = scale_formula,
+      scale_coefficients = scale_sd_coef,
+      random_cov = cov_coef,
+      residual_cor = matrix(
+        1,
+        nrow = 1,
+        dimnames = list("wellbeing", "wellbeing")
+      )
+    )
+  )
+)
+
+scale_sim$data
+```
+
+# Preparing Simulated Outcomes for Later Fitting
+
+`prepare_outcome_fit()` does not fit a model. It prepares the simulated data,
+formula, helper columns, and term maps for a later fitting workflow.
+
+```{r}
+fit_prep <- prepare_outcome_fit(helper_sim, outcome = "wellbeing")
+
+str(fit_prep)
+
+```
+
+For compositional outcomes, `prepare_outcome_fit()` automatically targets the
+`multilevelcoda` preparation path.
+
+# Multilevel Dynamic Compositional Outcomes
+
+Now we will look at a much more complicated example.
+We have a 3 part compositional outcome of physical activity: MVPA, light PA, and sedentary time.
+It is a dynamic, so a time series. Imagine multiple participants measured with 
+accelerometry for multiple days. Participants also are part of an intervention or control group, 
+and stress was measured daily. We want to simulate data that reflects the following model:
+
+```{r formula}
+pa_formula <- mvbind(pa_ilr_1, pa_ilr_2) ~
+  intervention + stress + ar1() * intervention +
+  (1 + stress + ar1() | p | id)
+```
+
+## Build a Template
+
+We can build a template with the formula to get the correctly named coefficient and covariance objects.
+
+```{r template, results = "asis"}
+template_sim <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  group_id = "id",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    intervention = gen_categorical(
+      "intervention",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    pa_template = outcome_template(
+      pa_formula,
+      compositional = TRUE,
+      parts = c("mvpa", "light_pa", "sedentary")
+    )
+  )
+)
+
+pa_template <- template_sim$generator_metadata$pa_template
+
+kable(pa_template$coefficients)
+```
+
+There are multiple random effects. The random effects are all correlated, 
+so we need a full covariance matrix for the participant random effects. The row names of the covariance matrix
+show the correct naming structure for the random effects.
+
+```{r random-template}
+rownames(pa_template$random_cov[["id::p"]])
+```
+
+## Fill in Plausible Values
+
+The fixed coefficients below encode a modest intervention shift,
+a small stress effect, and positive autocorrelation. The
+interaction rows make autocorrelation weaker in the intervention group.
+
+```{r coefficients, results = "asis"}
+pa_coef <- pa_template$coefficients
+pa_coef["(Intercept)", ] <- c(-0.30, 0.20)
+pa_coef["intervention", ] <- c(0.15, -0.10)
+pa_coef["stress", ] <- c(-0.08, 0.05)
+
+pa_coef["ar1(pa_ilr_1)", ] <- c(0.35, 0.08)
+pa_coef["ar1(pa_ilr_2)", ] <- c(0.04, 0.30)
+pa_coef["intervention:ar1(pa_ilr_1)", ] <- c(-0.15, -0.02)
+pa_coef["intervention:ar1(pa_ilr_2)", ] <- c(-0.01, -0.12)
+
+kable(pa_coef)
+```
+
+There are several covariances. The residuals can also covary.
+We allow a small residual covariance.
+
+```{r rescovariances, results = "asis"}
+pa_residual_cov <- pa_template$residual_cov
+pa_residual_cov[,] <- matrix(
+  c(0.22, 0.04,
+    0.04, 0.18),
+  nrow = 2
+)
+
+kable(pa_residual_cov)
+```
+
+For simplicity, we start with all the random effects being uncorrelated, which we
+accomplish using `diag()` to set the covariance matrix. We then edit in a 
+few selected non zero covariances we want.
+
+```{r rancovariances, results = "asis"}
+pa_random_cov <- pa_template$random_cov
+participant_cov <- pa_random_cov[["id::p"]]
+
+diag(participant_cov) <- c(
+  0.080, # pa_ilr_1 random intercept
+  0.015, # pa_ilr_1 stress slope
+  0.001, # pa_ilr_1 ar1(pa_ilr_1) slope
+  0.001, # pa_ilr_1 ar1(pa_ilr_2) slope
+  0.060, # pa_ilr_2 random intercept
+  0.012, # pa_ilr_2 stress slope
+  0.001, # pa_ilr_2 ar1(pa_ilr_1) slope
+  0.001  # pa_ilr_2 ar1(pa_ilr_2) slope
+)
+
+participant_cov["pa_ilr_1:(Intercept)", "pa_ilr_2:(Intercept)"] <- 0.025
+participant_cov["pa_ilr_2:(Intercept)", "pa_ilr_1:(Intercept)"] <- 0.025
+participant_cov["pa_ilr_1:stress", "pa_ilr_2:stress"] <- 0.004
+participant_cov["pa_ilr_2:stress", "pa_ilr_1:stress"] <- 0.004
+
+pa_random_cov[["id::p"]] <- participant_cov
+
+kable(participant_cov)
+```
+
+## Simulate the Outcome
+
+The outcome generator uses the same formula as the template and receives the
+edited coefficient and covariance objects. The ILR coordinates are kept, and the
+composition parts are back-transformed to sum to 16 hours of waking time.
+The burnin get's used for autoregressive outcomes to avoid starting values driving the results.
+
+```{r simulate-outcome}
+pa_sim <- simulate_data(
+  n_groups = 100,
+  n_per_group = 14,
+  group_id = "id",
+  time_id = "day",
+  seed = 2027,
+  generators = list(
+    intervention = gen_categorical(
+      "intervention",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    pa = gen_outcome(
+      pa_formula,
+      coefficients = pa_coef,
+      residual_cov = pa_residual_cov,
+      random_cov = pa_random_cov,
+      compositional = TRUE,
+      total = 16,
+      parts = c("mvpa", "light_pa", "sedentary"),
+      burnin = 50
+    )
+  )
+)
+
+kable(head(pa_sim$data, 10))
+```
+
+
+## Prepare a `multilevelcoda` Object
+
+The simulator already kept the ILR coordinates used to generate the outcome, but
+`brmcoda()` fits the ILR variables created by `multilevelcoda::complr()`.
+`prepare_outcome_fit()` creates that object, adds the formula-required lagged
+ILR columns, and drops the first row per participant where lagged outcomes are
+undefined. In this example, the model ILR variables are named `z1_1` and
+`z2_1`.
+
+```{r fit-prep}
+pa_fit_prep <- prepare_outcome_fit(pa_sim, outcome = "pa")
+pa_complr_model <- pa_fit_prep$complr
+
+pa_fit_prep$formula
+get_variables(pa_complr_model)
+head(pa_fit_prep$data)
+```
+
+## Fit With `brms` Through `multilevelcoda`
+
+The prepared formula mirrors the simulation formula using the concrete ILR names
+created by `complr()`. The shared random-effect ID `p` allows the random
+intercepts, stress slopes, and all AR slopes to correlate across both ILR
+outcomes, matching the simulation structure.
+
+This chunk compiles and samples a Stan model, so it is intentionally the slow
+part of the vignette. The model uses the `cmdstanr` backend.
+The `meanfield` algorithm is used to speed up sampling, but it is less accurate than full HMC.
+Adjust the algorithm and sampling parameters as needed for your use case.
+We only used `meanfield` here to keep the vignette fast and illustrate analysis.
+
+```{r brmcoda-fit}
+
+pa_fit <- brmcoda(
+  complr = pa_complr_model,
+  formula = brms::bf(pa_fit_prep$formula) + brms::set_rescor(TRUE),
+  backend = "cmdstanr",
+  algorithm = "meanfield",
+  iter = 2000,
+  seed = 2028
+)
+
+summary(pa_fit)
+```

@@ -17,3 +17,7 @@ knit(
 knit(
   "vignettes/E-simmodel-diag.Rmd.orig",
   "vignettes/E-simmodel-diag.Rmd")
+
+knit(
+  "vignettes/F-data-simulation.Rmd.orig",
+  "vignettes/F-data-simulation.Rmd")
