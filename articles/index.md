@@ -12,3 +12,5 @@
   Analysis](https://florale.github.io/multilevelcoda/articles/D-substitution.md):
 - [Improving MCMC Sampling for Bayesian Compositional Multilevel
   Models](https://florale.github.io/multilevelcoda/articles/E-simmodel-diag.md):
+- [Data
+  Simulation](https://florale.github.io/multilevelcoda/articles/F-data-simulation.md):

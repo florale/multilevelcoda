@@ -135,6 +135,15 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
 - [`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
   : Indices from a (dataset of) Multilevel Composition(s)
 
+- [`gen_gamma()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md)
+  [`gen_beta()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md)
+  : Generate Positive and Bounded Continuous Variables
+
+- [`gen_binomial()`](https://florale.github.io/multilevelcoda/reference/count-generators.md)
+  [`gen_poisson()`](https://florale.github.io/multilevelcoda/reference/count-generators.md)
+  [`gen_negbin()`](https://florale.github.io/multilevelcoda/reference/count-generators.md)
+  : Generate Count Variables
+
 - [`log_posterior(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.md)
   [`nuts_params(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.md)
   [`rhat(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/diagnostic-quantities-brmcoda.md)
@@ -172,6 +181,18 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
 
 - [`fixef(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/fixef.brmcoda.md)
   : Population-Level Estimates
+
+- [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md)
+  : Generate Categorical Variables
+
+- [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md)
+  : Generate Variables with a User-Supplied Function
+
+- [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md)
+  : Generate Multivariate Normal and Compositional Variables
+
+- [`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
+  : Generate Normal Variables
 
 - [`get-substitution`](https://florale.github.io/multilevelcoda/reference/get-substitution.md)
   : Substitution analysis helper functions
@@ -238,6 +259,10 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
 
   Extract Number of Observations from `brmcoda` object
 
+- [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
+  [`outcome_template()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
+  : Generate Gaussian Outcomes from a Formula
+
 - [`pairs(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/pairs.brmcoda.md)
   :
 
@@ -272,6 +297,9 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
 - [`predict(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/predict.brmcoda.md)
   : Draws from the Posterior Predictive Distribution
 
+- [`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
+  : Prepare Simulated Outcomes for Model Fitting
+
 - [`print(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/print.brmcoda.md)
   :
 
@@ -282,10 +310,19 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
 
   Print a Summary for a `complr` object
 
+- [`print(`*`<mlsim_data>`*`)`](https://florale.github.io/multilevelcoda/reference/print.mlsim_data.md)
+  : Print Simulated Data
+
+- [`print(`*`<mlsim_fit_prep>`*`)`](https://florale.github.io/multilevelcoda/reference/print.mlsim_fit_prep.md)
+  : Print an Outcome Fit Preparation Object
+
 - [`print(`*`<substitution>`*`)`](https://florale.github.io/multilevelcoda/reference/print.substitution.md)
   :
 
   Print a Summary for a `substitution` object
+
+- [`print(`*`<summary.mlsim_data>`*`)`](https://florale.github.io/multilevelcoda/reference/print.summary.mlsim_data.md)
+  : Print a Simulated Data Summary
 
 - [`prior_summary(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/prior_summary.brmcoda.md)
   :
@@ -307,6 +344,9 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
 - [`sim`](https://florale.github.io/multilevelcoda/reference/sim.md) :
   multilevelcoda Simulation Study results
 
+- [`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
+  : Simulate Data from Generator Specifications
+
 - [`sub()`](https://florale.github.io/multilevelcoda/reference/sub.md) :
   Simple Substitution
 
@@ -325,6 +365,9 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
   :
 
   Create a Summary of a `complr` object
+
+- [`summary(`*`<mlsim_data>`*`)`](https://florale.github.io/multilevelcoda/reference/summary.mlsim_data.md)
+  : Summarize Simulated Data
 
 - [`summary(`*`<pivot_coord>`*`)`](https://florale.github.io/multilevelcoda/reference/summary.pivot_coord.md)
   :
@@ -371,3 +414,5 @@ As multilevelcoda depends on brms and Stan, please also consider citing:
   Analysis](https://florale.github.io/multilevelcoda/articles/D-substitution.md):
 - [Improving MCMC Sampling for Bayesian Compositional Multilevel
   Models](https://florale.github.io/multilevelcoda/articles/E-simmodel-diag.md):
+- [Data
+  Simulation](https://florale.github.io/multilevelcoda/articles/F-data-simulation.md):

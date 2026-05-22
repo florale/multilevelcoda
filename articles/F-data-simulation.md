@@ -1,0 +1,1864 @@
+# Data Simulation
+
+**NOTE THIS IS EXPERIMENTAL FOR NOW**
+
+``` r
+
+library(multilevelcoda)
+library(knitr)
+library(data.table)
+#> data.table 1.18.4 using 12 threads (see ?getDTthreads).  Latest news: r-datatable.com
+#> 
+#> Attaching package: 'data.table'
+#> 
+#> The following object is masked from 'package:base':
+#> 
+#>     %notin%
+
+options(digits = 3, pillar.sigfig = 3)
+```
+
+Data simulation is useful for multiple purposes, such as:
+
+- Power analysis and sample size planning.
+- Method development and testing.
+- Generating synthetic data to test models, write code before data
+  collection finishes, etc.
+
+Simulating data, especially if multilevel and/or compositional, can be
+complex. The
+[`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
+function is designed to support these efforts.
+
+Broadly,
+[`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
+builds an indexed design, runs named generators in order, and returns an
+`mlsim_data` object with four main pieces:
+
+- `data`: the generated `data.table`.
+- `metadata`: design metadata such as group sizes, time indexing, and
+  generator order.
+- `generator_specs`: the generator settings
+- `generator_metadata`: e.g., parameters, random effects, covariance
+  matrices, helper columns.
+
+## Summary Tables
+
+These tables give a high level summary of current features.
+
+### Design options
+
+Design options cover the highest level structure.
+
+| Option | Use |
+|----|----|
+| `n` | Total rows for a single-level design, or total rows to divide across groups. |
+| `n_groups` | Number of groups in a grouped or multilevel design. |
+| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list. |
+| `group_id` | Name of the grouping column. |
+| `obs_id` | Name of the within-design observation index. |
+| `time_id` | Optional time column name. |
+| `time_values` | Optional time vector or function, including Date/POSIXct values. |
+| `time_truncate` | Whether shared time values are truncated for shorter groups. |
+| `seed` | Reproducible simulation seed that restores the caller RNG state. |
+
+### Generator families
+
+Generators are used to add simulated data columns. They are independent
+of each other. Any generated column can be used as well to later
+generate an “outcome” column with
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md).
+Outcomes differ from the rest of the generators because outcomes can
+depend on any previously generated predictor.
+
+Current predictor generators are listed below.
+
+| Generator | Role |
+|----|----|
+| [`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md) | Univariate Gaussian predictors or outcomes on the identity scale. |
+| [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md) | Correlated Gaussian blocks, including ILR compositional back-transforms. |
+| [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md) | Binary, unordered categorical, and ordered categorical variables. |
+| [`gen_binomial()`](https://florale.github.io/multilevelcoda/reference/count-generators.md) | Binomial counts with logit-scale multilevel support. |
+| [`gen_poisson()`](https://florale.github.io/multilevelcoda/reference/count-generators.md) | Poisson counts with log-scale multilevel support. |
+| [`gen_negbin()`](https://florale.github.io/multilevelcoda/reference/count-generators.md) | Negative-binomial counts with optional location-scale multilevel support. |
+| [`gen_gamma()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md) | Positive continuous variables with optional location-scale multilevel support. |
+| [`gen_beta()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md) | Bounded (0, 1) continuous variables with optional location-scale support. |
+| [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md) | User-supplied generators that receive the active simulation context. |
+
+### Advanced simulation options
+
+These are a sampling of more advanced simulation features and apply to
+predictor generators and outcome generation.
+
+| Feature | Use |
+|----|----|
+| `level` | Choose row-level, group-level, or multilevel generation. |
+| `fixed_intercept` | Set the fixed location or link-scale intercept in multilevel generators. |
+| `random_cov` | Add group-specific random intercepts, and sometimes scale random effects. |
+| `residual_var` / `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
+| `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
+| `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
+| Outcome formula | Generate Gaussian outcomes from fixed, random, lagged, and helper terms. |
+| `lag1()`, [`within()`](https://rdrr.io/r/base/with.html), [`between()`](https://rdrr.io/pkg/data.table/man/between.html), `ar1()` | Create time-lag, within-group, between-group, and autoregressive terms. |
+| `scale_formula` | Simulate location-scale outcomes through a log residual SD model. |
+| [`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md) | Prepare simulated outcomes and helper columns for downstream fitting. |
+
+## Study Designs and Indexing
+
+Here is a simple single level example. Here no outcome is generated, so
+each variable will be generated independently of other variables.
+
+``` r
+
+single <- simulate_data(
+  n = 20,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", mean = 0, sd = 1),
+    edu = gen_categorical("edu", categories = c("< Bachelor", "Bachelor", "> Bachelor"),
+      prob = c(.3, .3, .4)),
+    tx = gen_categorical("tx", categories = c("control", "treatment"), prob = .5)
+  )
+)
+
+kable(single$data)
+```
+
+| obs_id |      x | edu         | tx        |
+|-------:|-------:|:------------|:----------|
+|      1 |  0.521 | Bachelor    | control   |
+|      2 | -1.080 | \> Bachelor | treatment |
+|      3 |  0.139 | Bachelor    | treatment |
+|      4 | -0.085 | Bachelor    | control   |
+|      5 | -0.667 | \< Bachelor | control   |
+|      6 | -2.516 | \< Bachelor | control   |
+|      7 | -0.735 | \> Bachelor | treatment |
+|      8 | -1.020 | \< Bachelor | control   |
+|      9 |  0.114 | Bachelor    | treatment |
+|     10 | -0.474 | \< Bachelor | treatment |
+|     11 | -0.408 | \> Bachelor | treatment |
+|     12 | -0.730 | \> Bachelor | control   |
+|     13 | -0.221 | \> Bachelor | treatment |
+|     14 | -0.226 | \> Bachelor | treatment |
+|     15 | -2.547 | Bachelor    | control   |
+|     16 |  1.347 | \> Bachelor | treatment |
+|     17 |  0.616 | \> Bachelor | treatment |
+|     18 |  0.218 | \< Bachelor | treatment |
+|     19 | -0.805 | \> Bachelor | control   |
+|     20 |  0.690 | \< Bachelor | treatment |
+
+``` r
+
+single
+#> <mlsim_data>
+#>   rows: 20
+#>   columns: 4 (generated: 3)
+#>   seed: 2026
+#>   grouping: none
+#>   generators: 3
+#> 
+#> Generators:
+#>  generator distribution  level vars
+#>          x       normal single    x
+#>        edu  categorical single  edu
+#>         tx  categorical single   tx
+```
+
+The `mlsim_data` print method gives a compact console overview. Use
+[`summary()`](https://rdrr.io/r/base/summary.html) when you want design
+and generator metadata as `data.table` objects.
+
+``` r
+
+summary(single)$design
+#>        n n_cols n_generated_cols n_groups group_id group_size_min
+#>    <int>  <int>            <int>    <int>   <char>          <int>
+#> 1:    20      4                3       NA     <NA>             NA
+#>    group_size_median group_size_max obs_id time_id  seed n_generators
+#>                <num>          <int> <char>  <char> <int>        <int>
+#> 1:                NA             NA obs_id    <NA>  2026            3
+summary(single)$generators
+#>    generator distribution  level   vars n_vars parameter_level parameter_count
+#>       <char>       <char> <char> <char>  <int>          <char>           <int>
+#> 1:         x       normal single      x      1             row              20
+#> 2:       edu  categorical single    edu      1             row              20
+#> 3:        tx  categorical single     tx      1             row              20
+#>    has_row_parameters has_group_parameters has_fixed_parameters has_random_cov
+#>                <lgcl>               <lgcl>               <lgcl>         <lgcl>
+#> 1:               TRUE                FALSE                FALSE          FALSE
+#> 2:               TRUE                FALSE                FALSE          FALSE
+#> 3:               TRUE                FALSE                FALSE          FALSE
+#>    has_random_effects has_residuals has_scale_model has_formula has_ar_terms
+#>                <lgcl>        <lgcl>          <lgcl>      <lgcl>       <lgcl>
+#> 1:              FALSE         FALSE           FALSE       FALSE        FALSE
+#> 2:              FALSE         FALSE           FALSE       FALSE        FALSE
+#> 3:              FALSE         FALSE           FALSE       FALSE        FALSE
+#>    has_composition has_custom_output
+#>             <lgcl>            <lgcl>
+#> 1:           FALSE             FALSE
+#> 2:           FALSE             FALSE
+#> 3:           FALSE             FALSE
+```
+
+We can generate multilevel structures as well. A single scalar
+`n_per_group` creates a balanced grouped design with the exact same
+number of observations per group.
+
+``` r
+
+balanced <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", mean = 0, sd = 1)
+  )
+)
+
+kable(balanced$data)
+```
+
+| group_id | obs_id |      x |
+|---------:|-------:|-------:|
+|        1 |      1 |  0.521 |
+|        1 |      2 | -1.080 |
+|        1 |      3 |  0.139 |
+|        1 |      4 | -0.085 |
+|        2 |      1 | -0.667 |
+|        2 |      2 | -2.516 |
+|        2 |      3 | -0.735 |
+|        2 |      4 | -1.020 |
+|        3 |      1 |  0.114 |
+|        3 |      2 | -0.474 |
+|        3 |      3 | -0.408 |
+|        3 |      4 | -0.730 |
+
+However, this was still effectively single level, normal data. We can
+improve that. Here we give essentially the parameters of a random
+intercept only multilevel model, which is used to generate matching
+data. The `fixed_intercept` is the overall mean, `random_cov` is the
+group-level variance, and `residual_var` is the residual variance. The
+same approach broadly applies to other generator families when level =
+“multilevel”. We can generator a level 2 variable as well, which is
+constant within groups but varies between groups.
+
+``` r
+
+balanced2 <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(balanced2$data)
+```
+
+| group_id | obs_id |      x |     y |
+|---------:|-------:|-------:|------:|
+|        1 |      1 |  0.512 | 1.347 |
+|        1 |      2 |  0.454 | 1.347 |
+|        1 |      3 |  0.269 | 1.347 |
+|        1 |      4 |  0.447 | 1.347 |
+|        2 |      1 | -1.182 | 0.616 |
+|        2 |      2 | -1.068 | 0.616 |
+|        2 |      3 | -1.127 | 0.616 |
+|        2 |      4 | -1.121 | 0.616 |
+|        3 |      1 |  0.066 | 0.218 |
+|        3 |      2 |  0.117 | 0.218 |
+|        3 |      3 |  0.117 | 0.218 |
+|        3 |      4 | -0.115 | 0.218 |
+
+Vectors specs create unbalanced designs.
+
+``` r
+
+unbalanced <- simulate_data(
+  n_groups = 4,
+  n_per_group = c(3, 5, 4, 2),
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(unbalanced$data)
+```
+
+| group_id | obs_id |      x |      y |
+|---------:|-------:|-------:|-------:|
+|        1 |      1 |  0.454 | -0.805 |
+|        1 |      2 |  0.269 | -0.805 |
+|        1 |      3 |  0.447 | -0.805 |
+|        2 |      1 | -1.182 |  0.690 |
+|        2 |      2 | -1.068 |  0.690 |
+|        2 |      3 | -1.127 |  0.690 |
+|        2 |      4 | -1.121 |  0.690 |
+|        2 |      5 | -1.153 |  0.690 |
+|        3 |      1 |  0.117 | -0.329 |
+|        3 |      2 |  0.117 | -0.329 |
+|        3 |      3 | -0.115 | -0.329 |
+|        3 |      4 |  0.274 | -0.329 |
+|        4 |      1 | -0.023 | -0.165 |
+|        4 |      2 | -0.063 | -0.165 |
+
+``` r
+
+drawn_sizes <- simulate_data(
+  n_groups = 5,
+  n_per_group = list(
+    distribution = "poisson",
+    lambda = 4,
+    minimum = 2,
+    maximum = 6
+  ),
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(drawn_sizes$data)
+```
+
+| group_id | obs_id |      x |      y |
+|---------:|-------:|-------:|-------:|
+|        1 |      1 | -1.994 |  0.339 |
+|        1 |      2 | -2.261 |  0.339 |
+|        1 |      3 | -2.169 |  0.339 |
+|        1 |      4 | -1.998 |  0.339 |
+|        1 |      5 | -2.112 |  0.339 |
+|        2 |      1 |  0.995 |  1.207 |
+|        2 |      2 |  0.977 |  1.207 |
+|        2 |      3 |  1.111 |  1.207 |
+|        2 |      4 |  0.992 |  1.207 |
+|        3 |      1 | -0.010 |  0.571 |
+|        3 |      2 |  0.185 |  0.571 |
+|        4 |      1 |  0.495 | -1.686 |
+|        4 |      2 |  0.488 | -1.686 |
+|        4 |      3 |  0.616 | -1.686 |
+|        5 |      1 |  1.015 | -0.838 |
+|        5 |      2 |  0.848 | -0.838 |
+|        5 |      3 |  0.976 | -0.838 |
+|        5 |      4 |  0.958 | -0.838 |
+
+Longitudinal designs can add a time index. When groups have different
+lengths, `time_truncate = TRUE` uses the first values for shorter
+groups. Add a time index may not matter, but it can be used for creating
+lags, etc.
+
+``` r
+
+dated <- simulate_data(
+  n_groups = 3,
+  n_per_group = c(5, 3, 4),
+  time_id = "date",
+  time_values = as.Date("2026-01-01") + 0:4,
+  seed = 2026,
+  generators = list(
+    x = gen_normal("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_var = .01),
+    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+  )
+)
+
+kable(dated$data)
+```
+
+| group_id | obs_id | date       |      x |     y |
+|---------:|-------:|:-----------|-------:|------:|
+|        1 |      1 | 2026-01-01 |  0.512 | 1.347 |
+|        1 |      2 | 2026-01-02 |  0.454 | 1.347 |
+|        1 |      3 | 2026-01-03 |  0.269 | 1.347 |
+|        1 |      4 | 2026-01-04 |  0.447 | 1.347 |
+|        1 |      5 | 2026-01-05 |  0.419 | 1.347 |
+|        2 |      1 | 2026-01-01 | -1.068 | 0.616 |
+|        2 |      2 | 2026-01-02 | -1.127 | 0.616 |
+|        2 |      3 | 2026-01-03 | -1.121 | 0.616 |
+|        3 |      1 | 2026-01-01 |  0.066 | 0.218 |
+|        3 |      2 | 2026-01-02 |  0.117 | 0.218 |
+|        3 |      3 | 2026-01-03 |  0.117 | 0.218 |
+|        3 |      4 | 2026-01-04 | -0.115 | 0.218 |
+
+## Single-Level, Group-Level, and Multilevel Predictors
+
+The `level` argument controls whether values vary by row, by group, or
+by row with group-specific random effects.
+
+``` r
+
+levels_demo <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    row_x = gen_normal("row_x", mean = 0, sd = 1),
+    group_x = gen_normal("group_x", level = "level2", mean = 10, sd = 1),
+    mixed_x = gen_normal(
+      "mixed_x",
+      level = "multilevel",
+      fixed_intercept = 5,
+      random_cov = 0.50,
+      residual_var = 1
+    )
+  )
+)
+
+levels_demo
+#> <mlsim_data>
+#>   rows: 16
+#>   columns: 5 (generated: 3)
+#>   seed: 2026
+#>   grouping: group_id (4 groups; size min/median/max: 4/4/4)
+#>   generators: 3
+#> 
+#> Generators:
+#>  generator distribution      level    vars
+#>      row_x       normal     single   row_x
+#>    group_x       normal     level2 group_x
+#>    mixed_x       normal multilevel mixed_x
+```
+
+## Distribution Families
+
+Single-level generators use direct distribution parameters. Their
+multilevel forms use link-scale intercepts and random covariance terms.
+Here is a quick demonstration of various distribution families with
+single level data.
+
+``` r
+
+families <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    normal = gen_normal("normal", mean = 5, sd = 1),
+    successes = gen_binomial("successes", size = 5, prob = 0.40),
+    visits = gen_poisson("visits", lambda = 2),
+    events = gen_negbin("events", size = 3, mu = 2),
+    cost = gen_gamma("cost", shape = 4, mean = 20),
+    adherence = gen_beta("adherence", mean = 0.70, precision = 12)
+  )
+)
+
+kable(families$data)
+```
+
+| obs_id | normal | successes | visits | events |  cost | adherence |
+|-------:|-------:|----------:|-------:|-------:|------:|----------:|
+|      1 |   5.52 |         2 |      4 |      1 | 10.63 |     0.875 |
+|      2 |   3.92 |         2 |      1 |      0 | 36.47 |     0.822 |
+|      3 |   5.14 |         1 |      3 |      5 | 38.06 |     0.657 |
+|      4 |   4.92 |         0 |      0 |      4 | 41.29 |     0.664 |
+|      5 |   4.33 |         2 |      2 |      2 | 33.78 |     0.500 |
+|      6 |   2.48 |         1 |      2 |      4 | 10.91 |     0.766 |
+|      7 |   4.26 |         2 |      1 |      0 | 24.79 |     0.897 |
+|      8 |   3.98 |         1 |      2 |      2 | 13.94 |     0.841 |
+|      9 |   5.11 |         0 |      3 |      1 | 14.41 |     0.568 |
+|     10 |   4.53 |         2 |      2 |      2 |  8.27 |     0.846 |
+
+Here is an example of a multilevel count generator.
+
+``` r
+
+link_scale_counts <- simulate_data(
+  n_groups = 3,
+  n_per_group = 5,
+  seed = 2026,
+  generators = list(
+    count = gen_poisson(
+      "count",
+      level = "multilevel",
+      fixed_intercept = log(2.5),
+      random_cov = 0.20
+    )
+  )
+)
+
+link_scale_counts
+#> <mlsim_data>
+#>   rows: 15
+#>   columns: 3 (generated: 1)
+#>   seed: 2026
+#>   grouping: group_id (3 groups; size min/median/max: 5/5/5)
+#>   generators: 1
+#> 
+#> Generators:
+#>  generator distribution      level  vars
+#>      count      poisson multilevel count
+```
+
+## Categorical Variables
+
+[`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md)
+supports binary variables, labeled categories, ordered factors,
+character output, and integer codes.
+
+``` r
+
+categorical <- simulate_data(
+  n = 12,
+  seed = 2026,
+  generators = list(
+    binary_factor = gen_categorical("binary_factor", prob = 0.35),
+    education = gen_categorical(
+      "education",
+      categories = c("< bachelor", "bachelor", "> bachelor"),
+      prob = c(0.45, 0.35, 0.20),
+      ordered = TRUE
+    ),
+    education_code = gen_categorical(
+      "education_code",
+      categories = c("arts", "science", "psychology"),
+      prob = c(0.45, 0.35, 0.20),
+      output = "integer"
+    )
+  )
+)
+
+kable(categorical$data)
+```
+
+| obs_id | binary_factor | education   | education_code |
+|-------:|:--------------|:------------|---------------:|
+|      1 | 1             | \< bachelor |              0 |
+|      2 | 0             | \> bachelor |              0 |
+|      3 | 0             | \< bachelor |              0 |
+|      4 | 0             | \< bachelor |              0 |
+|      5 | 0             | bachelor    |              0 |
+|      6 | 0             | \< bachelor |              1 |
+|      7 | 0             | \< bachelor |              2 |
+|      8 | 1             | \< bachelor |              0 |
+|      9 | 0             | \< bachelor |              1 |
+|     10 | 0             | \< bachelor |              0 |
+|     11 | 0             | \< bachelor |              1 |
+|     12 | 1             | \< bachelor |              0 |
+
+Multilevel categorical generators use baseline-category logits and
+optional group random effects. For 2 categories, it is basically a
+multilevel bernoulli. For more than 2 categoaries, it is a multilevel
+multinomial with the first category as the baseline. The random
+intercepts can have their own variances and covariances. A full random
+effect covariance matrix must be specified. Use 0s on the off diagonal
+for uncorrelated random intercepts.
+
+``` r
+
+categorical_ml <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    education = gen_categorical(
+      "education",
+      level = "multilevel",
+      categories = c("< bachelor", "bachelor", "> bachelor"),
+      fixed_intercept = c("bachelor" = 0.15, "> bachelor" = -0.55),
+      random_cov = matrix(c(0.20, 0.04, 0.04, 0.12), nrow = 2),
+      ordered = TRUE
+    )
+  )
+)
+
+kable(categorical_ml$data)
+```
+
+| group_id | obs_id | education   |
+|---------:|-------:|:------------|
+|        1 |      1 | bachelor    |
+|        1 |      2 | \< bachelor |
+|        1 |      3 | \< bachelor |
+|        1 |      4 | \< bachelor |
+|        2 |      1 | bachelor    |
+|        2 |      2 | bachelor    |
+|        2 |      3 | \< bachelor |
+|        2 |      4 | \< bachelor |
+|        3 |      1 | bachelor    |
+|        3 |      2 | \< bachelor |
+|        3 |      3 | bachelor    |
+|        3 |      4 | \< bachelor |
+|        4 |      1 | \< bachelor |
+|        4 |      2 | bachelor    |
+|        4 |      3 | \> bachelor |
+|        4 |      4 | \< bachelor |
+
+## Correlated and Compositional Predictors
+
+[`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md)
+simulates correlated blocks. With `compositional = TRUE`, the MVN
+columns are interpreted as ILR coordinates and back-transformed into
+parts. Here we are back to single level data.
+
+``` r
+
+correlated_comp <- simulate_data(
+  n = 8,
+  seed = 2026,
+  generators = list(
+    affect_block = gen_mvn(
+      c("affect", "energy"),
+      mean = c(0, 1),
+      cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
+    ),
+    time_use = gen_mvn(
+      c("ilr_1", "ilr_2"),
+      mean = c(0, 0),
+      cov = diag(c(0.30, 0.20)),
+      compositional = TRUE,
+      parts = c("sleep", "active", "sedentary"),
+      total = 24,
+      keep_ilr = TRUE
+    )
+  )
+)
+
+kable(correlated_comp$data)
+```
+
+| obs_id | affect | energy |  ilr_1 |  ilr_2 | sleep | active | sedentary |
+|-------:|-------:|-------:|-------:|-------:|------:|-------:|----------:|
+|      1 |  0.351 |  1.566 | -0.338 | -0.022 |  5.96 |   8.88 |      9.16 |
+|      2 | -0.587 | -0.290 | -0.119 | -0.853 |  6.40 |   4.05 |     13.54 |
+|      3 |  0.355 |  0.938 |  0.441 | -0.774 | 10.24 |   3.45 |     10.31 |
+|      4 |  0.366 |  0.561 | -0.378 | -0.026 |  5.75 |   8.96 |      9.29 |
+|      5 | -0.405 |  0.238 |  0.180 | -0.289 |  9.10 |   5.95 |      8.95 |
+|      6 | -1.890 | -1.579 |  0.090 | -0.772 |  7.83 |   4.06 |     12.10 |
+|      7 |  0.922 | -0.962 |  0.762 |  0.237 | 13.36 |   6.21 |      4.44 |
+|      8 | -1.621 |  0.655 | -0.803 | -0.074 |  3.78 |   9.58 |     10.64 |
+
+``` r
+
+correlated_comp$generator_metadata$time_use$sbp
+#>           sleep active sedentary
+#> balance_1     1     -1        -1
+#> balance_2     0      1        -1
+correlated_comp$generator_metadata$time_use$ilr_coordinate_map
+#>       ilr sbp_row positive_parts   negative_parts
+#>    <char>   <int>         <AsIs>           <AsIs>
+#> 1:  ilr_1       1          sleep active,sedentary
+#> 2:  ilr_2       2         active        sedentary
+```
+
+Use `keep_ilr = FALSE` when you only want the original parts in the
+output.
+
+``` r
+
+parts_only <- simulate_data(
+  n = 5,
+  seed = 2026,
+  generators = list(
+    time_use = gen_mvn(
+      c("z1", "z2"),
+      mean = c(0, 0),
+      cov = diag(2),
+      compositional = TRUE,
+      parts = c("sleep", "active", "sedentary"),
+      total = 24,
+      keep_ilr = FALSE
+    )
+  )
+)
+
+kable(parts_only$data)
+```
+
+| obs_id | sleep | active | sedentary |
+|-------:|------:|-------:|----------:|
+|      1 | 21.86 |   1.45 |     0.694 |
+|      2 | 11.64 |   2.21 |    10.153 |
+|      3 | 15.23 |   4.82 |     3.956 |
+|      4 |  7.27 |   7.87 |     8.867 |
+|      5 | 10.69 |   3.73 |     9.582 |
+
+## Location-Scale Predictors
+
+For multilevel predictors, `scale_fixed_intercept` adds group-varying
+scale parameters. For a normal generator this means log residual SD; for
+negative binomial, gamma, and beta generators it controls size, shape,
+and precision.
+
+Here you can see in the metadata the group specific parameters that were
+generated.
+
+``` r
+
+location_scale <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  seed = 2026,
+  generators = list(
+    symptom = gen_normal(
+      "symptom",
+      level = "multilevel",
+      fixed_intercept = 10,
+      scale_fixed_intercept = log(1.2),
+      random_cov = matrix(
+        c(1.00, 0.15,
+          0.15, 0.08),
+        nrow = 2
+      )
+    ),
+    event_count = gen_negbin(
+      "event_count",
+      level = "multilevel",
+      fixed_intercept = log(2),
+      scale_fixed_intercept = log(6),
+      random_cov = matrix(
+        c(0.20, 0.03,
+          0.03, 0.06),
+        nrow = 2
+      )
+    )
+  )
+)
+
+kable(data.table(
+  group_id = location_scale$data$group_id,
+  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd,
+  event_count_size = location_scale$generator_metadata$event_count$size
+))
+```
+
+| group_id | symptom_residual_sd | event_count_size |
+|---------:|--------------------:|-----------------:|
+|        1 |                1.29 |             5.99 |
+|        1 |                1.29 |             5.99 |
+|        1 |                1.29 |             5.99 |
+|        1 |                1.29 |             5.99 |
+|        1 |                1.29 |             5.99 |
+|        2 |                2.57 |             4.75 |
+|        2 |                2.57 |             4.75 |
+|        2 |                2.57 |             4.75 |
+|        2 |                2.57 |             4.75 |
+|        2 |                2.57 |             4.75 |
+|        3 |                1.39 |             6.04 |
+|        3 |                1.39 |             6.04 |
+|        3 |                1.39 |             6.04 |
+|        3 |                1.39 |             6.04 |
+|        3 |                1.39 |             6.04 |
+|        4 |                1.54 |             4.54 |
+|        4 |                1.54 |             4.54 |
+|        4 |                1.54 |             4.54 |
+|        4 |                1.54 |             4.54 |
+|        4 |                1.54 |             4.54 |
+
+## Custom Generators
+
+Custom generators receive a simulation context and return generated
+data, column names, and optional metadata. They can use the active
+design columns, previously generated variables, and any extra arguments
+supplied to
+[`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md).
+Their metadata would be captured in the same was as built in generators.
+
+``` r
+
+pilot_sampler <- function(context, vars, level, pilot_values) {
+  values <- sample(pilot_values, context$n_rows, replace = TRUE)
+
+  list(
+    data = data.frame(values = values),
+    names = vars,
+    metadata = list(source = "pilot bootstrap", n_pilot = length(pilot_values))
+  )
+}
+
+clinic_load_sampler <- function(context, vars, level) {
+  load_values <- c("low", "medium", "high")
+  group_load <- load_values[context$data[[context$group_id]]]
+
+  list(
+    data = data.frame(load = group_load),
+    names = vars,
+    metadata = list(source = "derived from group index")
+  )
+}
+
+custom <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    pilot_x = gen_custom(
+      "pilot_x",
+      generator = pilot_sampler,
+      pilot_values = c(1.2, 1.4, 1.8, 2.5, 3.1)
+    ),
+    clinic_load = gen_custom(
+      "clinic_load",
+      generator = clinic_load_sampler
+    )
+  )
+)
+
+kable(custom$data)
+```
+
+| group_id | obs_id | pilot_x | clinic_load |
+|---------:|-------:|--------:|:------------|
+|        1 |      1 |     3.1 | low         |
+|        1 |      2 |     1.2 | low         |
+|        1 |      3 |     1.2 | low         |
+|        1 |      4 |     3.1 | low         |
+|        2 |      1 |     1.8 | medium      |
+|        2 |      2 |     2.5 | medium      |
+|        2 |      3 |     2.5 | medium      |
+|        2 |      4 |     3.1 | medium      |
+|        3 |      1 |     2.5 | high        |
+|        3 |      2 |     1.4 | high        |
+|        3 |      3 |     1.4 | high        |
+|        3 |      4 |     1.8 | high        |
+
+## Simple Outcomes
+
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
+appends Gaussian outcomes after earlier generators have added
+predictors. This example uses a fixed intercept and slope. The formula
+specifies how the outcome depends on predictors. You can see from
+fitting a linear regression afterwards that the simulated coefficients
+are well recovered.
+
+``` r
+
+simple_outcome <- simulate_data(
+  n = 200,
+  seed = 2026,
+  generators = list(
+    dose = gen_normal("dose", mean = 0, sd = 1),
+    score = gen_outcome(
+      score ~ dose,
+      coefficients = c("(Intercept)" = 10, dose = 2),
+      residual_cov = 4
+    )
+  )
+)
+
+summary(lm(score ~ dose, data = simple_outcome$data))
+#> 
+#> Call:
+#> lm(formula = score ~ dose, data = simple_outcome$data)
+#> 
+#> Residuals:
+#>    Min     1Q Median     3Q    Max 
+#> -5.092 -1.299 -0.012  1.233  4.288 
+#> 
+#> Coefficients:
+#>             Estimate Std. Error t value Pr(>|t|)    
+#> (Intercept)   10.025      0.138    72.6   <2e-16 ***
+#> dose           2.015      0.141    14.3   <2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Residual standard error: 1.95 on 198 degrees of freedom
+#> Multiple R-squared:  0.509,  Adjusted R-squared:  0.507 
+#> F-statistic:  205 on 1 and 198 DF,  p-value: <2e-16
+```
+
+## Outcome Templates and Formula Helpers
+
+[`outcome_template()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
+runs through the same formula parsing as
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
+without adding outcome columns. It gives named coefficient and
+covariance objects that can be edited safely.
+
+This is important because as outcome models become more complicated,
+correctly specifying and naming all the necessary parameters becomes
+more difficult. The template approach allows you to first specify the
+model in a formula, then edit the parameters in a structured way, and
+finally generate the outcome with the edited parameters.
+
+Here we will consider a much more complicated data simulation. We will
+generate two predictors, a level2 only treatment and a multilevel stress
+variable. We will then use an outcome template to specify a complicated
+outcome model with fixed effects, random effects, and lagged terms. The
+template will give us the correctly named coefficient and covariance
+objects that we can edit before generating the outcome.
+
+A range of helper functions exist:
+
+- [`between()`](https://rdrr.io/pkg/data.table/man/between.html): group
+  means of a predictor.
+- [`within()`](https://rdrr.io/r/base/with.html): row values minus group
+  means.
+- `lag1()`: previous row value within groups.
+
+These are used in formulae to specify further data management that
+should occur on the predictors before they are used to generate the
+outcome. For example, `between(stress)` creates a helper column with
+group means of stress, and `within(stress)` creates a helper column with
+row values minus group means. These helper columns are then used in the
+outcome formula and have their own coefficients.
+
+``` r
+
+f <- wellbeing ~
+  treatment +
+  between(stress) +
+  within(stress) +
+  lag1(stress) +
+  (1 + within(stress) | p | id)
+
+helper_template_sim <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "id",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing_template = outcome_template(f)
+  )
+)
+
+helper_template <- helper_template_sim$generator_metadata$wellbeing_template
+helper_template$coefficients
+#>                 wellbeing
+#> (Intercept)             0
+#> treatment               0
+#> between(stress)         0
+#> within(stress)          0
+#> lag1(stress)            0
+rownames(helper_template$random_cov[["id::p"]])
+#> [1] "wellbeing:(Intercept)"    "wellbeing:within(stress)"
+helper_template$fit_helpers
+#>                          type source              internal         column
+#> .mlsim_between_stress between stress .mlsim_between_stress stress_between
+#> .mlsim_within_stress   within stress  .mlsim_within_stress  stress_within
+#> .mlsim_lag1_stress       lag1 stress    .mlsim_lag1_stress     lag_stress
+#>                              sim_term response_derived
+#> .mlsim_between_stress between(stress)            FALSE
+#> .mlsim_within_stress   within(stress)            FALSE
+#> .mlsim_lag1_stress       lag1(stress)            FALSE
+```
+
+Now we can use these objects and enter our desired parameter values with
+confidence that they are correctly named and structured.
+
+``` r
+
+helper_coef <- helper_template$coefficients
+helper_coef["(Intercept)", "wellbeing"] <- 50
+helper_coef["treatment", "wellbeing"] <- 2.0
+helper_coef["between(stress)", "wellbeing"] <- -1.5
+helper_coef["within(stress)", "wellbeing"] <- -0.8
+helper_coef["lag1(stress)", "wellbeing"] <- -0.4
+
+helper_residual_cov <- helper_template$residual_cov
+helper_residual_cov[,] <- 1.5
+
+helper_random_cov <- helper_template$random_cov
+helper_block <- helper_random_cov[["id::p"]]
+diag(helper_block) <- c(3.0, 0.30)
+helper_random_cov[["id::p"]] <- helper_block
+```
+
+The edited template objects can then be supplied to
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md).
+Note how with a lag specified, there are missing values for the outcome.
+This is because the lags are missing for the first row of each group.
+
+``` r
+
+
+helper_sim <- simulate_data(
+  n_groups = 20,
+  n_per_group = 5,
+  group_id = "id",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing = gen_outcome(
+      f,
+      coefficients = helper_coef,
+      residual_cov = helper_residual_cov,
+      random_cov = helper_random_cov
+    )
+  )
+)
+
+kable(head(helper_sim$data, 20))
+```
+
+| id | obs_id | day | treatment | stress | wellbeing | stress_between | stress_within | lag_stress |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 1 | 1 | 1 | -0.656 | NA | -0.201 | -0.455 | NA |
+| 1 | 2 | 2 | 1 | -0.034 | 51.7 | -0.201 | 0.167 | -0.656 |
+| 1 | 3 | 3 | 1 | -0.410 | 53.6 | -0.201 | -0.210 | -0.034 |
+| 1 | 4 | 4 | 1 | 0.115 | 51.7 | -0.201 | 0.316 | -0.410 |
+| 1 | 5 | 5 | 1 | -0.019 | 52.3 | -0.201 | 0.181 | 0.115 |
+| 2 | 1 | 1 | 1 | 0.715 | NA | -0.216 | 0.931 | NA |
+| 2 | 2 | 2 | 1 | 0.204 | 44.8 | -0.216 | 0.420 | 0.715 |
+| 2 | 3 | 3 | 1 | -1.124 | 49.0 | -0.216 | -0.908 | 0.204 |
+| 2 | 4 | 4 | 1 | 0.190 | 49.6 | -0.216 | 0.406 | -1.124 |
+| 2 | 5 | 5 | 1 | -1.064 | 48.5 | -0.216 | -0.848 | 0.190 |
+| 3 | 1 | 1 | 0 | -1.134 | NA | -0.477 | -0.658 | NA |
+| 3 | 2 | 2 | 0 | 0.597 | 50.3 | -0.477 | 1.073 | -1.134 |
+| 3 | 3 | 3 | 0 | -1.176 | 50.7 | -0.477 | -0.700 | 0.597 |
+| 3 | 4 | 4 | 0 | 0.175 | 50.5 | -0.477 | 0.652 | -1.176 |
+| 3 | 5 | 5 | 0 | -0.845 | 50.4 | -0.477 | -0.368 | 0.175 |
+| 4 | 1 | 1 | 0 | 1.167 | NA | 0.427 | 0.740 | NA |
+| 4 | 2 | 2 | 0 | 0.536 | 50.9 | 0.427 | 0.108 | 1.167 |
+| 4 | 3 | 3 | 0 | -0.461 | 51.3 | 0.427 | -0.888 | 0.536 |
+| 4 | 4 | 4 | 0 | 0.614 | 50.2 | 0.427 | 0.187 | -0.461 |
+| 4 | 5 | 5 | 0 | 0.280 | 48.8 | 0.427 | -0.147 | 0.614 |
+
+## Autoregressive Outcomes
+
+In order to support time series and dynamics models, we support
+autoregressive effects in outcome generation.
+
+Use `ar1()` inside an outcome formula to refer to the previous generated
+value of the outcome, within each group. Using autoregression, it is
+possible to generate only an outcome, with no independent preditors
+generated. We will use an outcome template again to help us specify the
+correct names and structure of parameters.
+
+``` r
+
+ar_template <- simulate_data(
+  n = 5,
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    mood_template = outcome_template(mood ~ ar1(), burnin = 5)
+  )
+)$generator_metadata$mood_template
+
+ar_coef <- ar_template$coefficients
+ar_coef["(Intercept)", "mood"] <- 0
+ar_coef["ar1(mood)", "mood"] <- 0.55
+
+ar_residual_cov <- ar_template$residual_cov
+ar_residual_cov[,] <- 0.40
+
+ar_sim <- simulate_data(
+  n = 200,
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    mood = gen_outcome(
+      mood ~ ar1(),
+      coefficients = ar_coef,
+      residual_cov = ar_residual_cov,
+      burnin = 5
+    )
+  )
+)
+
+kable(head(ar_sim$data, 10))
+```
+
+| obs_id | day |   mood | lag_mood |
+|-------:|----:|-------:|---------:|
+|      1 |   1 | -0.138 |       NA |
+|      2 |   2 | -0.759 |   -0.138 |
+|      3 |   3 | -0.329 |   -0.759 |
+|      4 |   4 | -0.235 |   -0.329 |
+|      5 |   5 | -0.551 |   -0.235 |
+|      6 |   6 | -1.894 |   -0.551 |
+|      7 |   7 | -1.507 |   -1.894 |
+|      8 |   8 | -1.474 |   -1.507 |
+|      9 |   9 | -0.739 |   -1.474 |
+|     10 |  10 | -0.706 |   -0.739 |
+
+Fitting a model to the simulated data shows that the autoregressive
+coefficient is well recovered.
+
+``` r
+
+summary(lm(mood ~ lag_mood, data = ar_sim$data))
+#> 
+#> Call:
+#> lm(formula = mood ~ lag_mood, data = ar_sim$data)
+#> 
+#> Residuals:
+#>     Min      1Q  Median      3Q     Max 
+#> -1.6081 -0.4578 -0.0056  0.3828  1.6566 
+#> 
+#> Coefficients:
+#>             Estimate Std. Error t value Pr(>|t|)    
+#> (Intercept)  0.00549    0.04433    0.12      0.9    
+#> lag_mood     0.56743    0.05880    9.65   <2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Residual standard error: 0.625 on 197 degrees of freedom
+#>   (1 observation deleted due to missingness)
+#> Multiple R-squared:  0.321,  Adjusted R-squared:  0.318 
+#> F-statistic: 93.1 on 1 and 197 DF,  p-value: <2e-16
+```
+
+## Compositional Outcomes
+
+Outcomes can also be generated on ILR coordinates and returned as
+composition parts. Here the parts sum to 24 for each row.
+
+``` r
+
+comp_formula <- mvbind(comp_ilr_1, comp_ilr_2) ~ stress
+comp_parts <- c("sleep", "active", "sedentary")
+
+comp_template <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    stress = gen_normal(
+      "stress",
+      mean = 0,
+      sd = 1
+    ),
+    time_use_template = outcome_template(
+      comp_formula,
+      compositional = TRUE,
+      parts = comp_parts,
+      total = 24
+    )
+  )
+)$generator_metadata$time_use_template
+
+comp_coef <- comp_template$coefficients
+comp_coef["(Intercept)", ] <- c(-0.30, 0.20)
+comp_coef["stress", ] <- c(-0.05, 0.04)
+
+comp_residual_cov <- comp_template$residual_cov
+comp_residual_cov[,] <- matrix(
+  c(0.12, 0.02,
+    0.02, 0.10),
+  nrow = 2
+)
+
+comp_sim <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    stress = gen_normal(
+      "stress",
+      mean = 0,
+      sd = 1
+    ),
+    time_use = gen_outcome(
+      comp_formula,
+      coefficients = comp_coef,
+      residual_cov = comp_residual_cov,
+      compositional = TRUE,
+      parts = comp_parts,
+      total = 24
+    )
+  )
+)
+
+kable(comp_sim$data)
+```
+
+| obs_id | stress | comp_ilr_1 | comp_ilr_2 | sleep | active | sedentary |
+|-------:|-------:|-----------:|-----------:|------:|-------:|----------:|
+|      1 |  0.521 |     -0.251 |      0.382 |  6.28 |  11.19 |      6.52 |
+|      2 | -1.080 |     -0.046 |      0.338 |  7.56 |  10.15 |      6.29 |
+|      3 |  0.139 |     -0.455 |      0.598 |  4.99 |  13.30 |      5.71 |
+|      4 | -0.085 |      0.002 |     -0.129 |  7.99 |   7.27 |      8.73 |
+|      5 | -0.667 |      0.529 |      0.648 | 11.12 |   9.20 |      3.68 |
+|      6 | -2.516 |     -0.294 |     -0.639 |  5.76 |   5.26 |     12.98 |
+|      7 | -0.735 |     -0.185 |     -0.383 |  6.67 |   6.37 |     10.96 |
+|      8 | -1.020 |     -0.307 |      0.103 |  6.12 |   9.59 |      8.29 |
+|      9 |  0.114 |      0.044 |      0.196 |  8.24 |   8.97 |      6.80 |
+|     10 | -0.474 |     -0.221 |     -0.385 |  6.45 |   6.44 |     11.11 |
+
+## Location-Scale Outcomes
+
+For outcomes, `scale_formula` models the log residual SD. Residual
+correlations are supplied separately through `residual_cor`.
+
+``` r
+
+scale_formula <- sigma ~ treatment + (1 | p | participant_id)
+scale_outcome_formula <- wellbeing ~ treatment + stress + (1 | p | participant_id)
+
+scale_template <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "participant_id",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing_template = outcome_template(
+      scale_outcome_formula,
+      scale_formula = scale_formula
+    )
+  )
+)$generator_metadata$wellbeing_template
+
+scale_coef <- scale_template$coefficients
+scale_coef["(Intercept)", "wellbeing"] <- 50
+scale_coef["treatment", "wellbeing"] <- 2
+scale_coef["stress", "wellbeing"] <- -1
+
+scale_sd_coef <- scale_template$scale_coefficients
+scale_sd_coef["(Intercept)", "wellbeing"] <- log(1.0)
+scale_sd_coef["treatment", "wellbeing"] <- log(1.4)
+
+cov_coef <- scale_template$random_cov
+cov_coef[["participant_id::p"]][, ] <- diag(c(3.0, 0.30))
+
+scale_sim <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "participant_id",
+  seed = 2026,
+  generators = list(
+    treatment = gen_categorical(
+      "treatment",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    wellbeing = gen_outcome(
+      scale_outcome_formula,
+      coefficients = scale_coef,
+      scale_formula = scale_formula,
+      scale_coefficients = scale_sd_coef,
+      random_cov = cov_coef,
+      residual_cor = matrix(
+        1,
+        nrow = 1,
+        dimnames = list("wellbeing", "wellbeing")
+      )
+    )
+  )
+)
+
+scale_sim$data
+#>     participant_id obs_id treatment stress wellbeing
+#>              <int>  <int>     <int>  <num>     <num>
+#>  1:              1      1         1 -0.595      49.9
+#>  2:              1      2         1 -0.850      52.0
+#>  3:              1      3         1  0.164      49.9
+#>  4:              1      4         1 -0.362      47.7
+#>  5:              1      5         1 -0.303      50.4
+#>  6:              2      1         1 -0.691      51.5
+#>  7:              2      2         1 -0.236      50.7
+#>  8:              2      3         1 -0.240      53.1
+#>  9:              2      4         1 -2.316      52.7
+#> 10:              2      5         1  1.167      51.1
+#> 11:              3      1         0  0.253      47.7
+#> 12:              3      2         0 -0.104      50.6
+#> 13:              3      3         0 -1.018      50.7
+#> 14:              3      4         0  0.319      48.1
+#> 15:              3      5         0 -0.592      50.4
+#> 16:              4      1         0 -1.273      48.6
+#> 17:              4      2         0 -2.370      48.4
+#> 18:              4      3         0  0.186      46.7
+#> 19:              4      4         0 -1.082      47.3
+#> 20:              4      5         0  0.581      46.8
+#>     participant_id obs_id treatment stress wellbeing
+#>              <int>  <int>     <int>  <num>     <num>
+```
+
+## Preparing Simulated Outcomes for Later Fitting
+
+[`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
+does not fit a model. It prepares the simulated data, formula, helper
+columns, and term maps for a later fitting workflow.
+
+``` r
+
+fit_prep <- prepare_outcome_fit(helper_sim, outcome = "wellbeing")
+
+str(fit_prep)
+#> List of 12
+#>  $ target              : chr "generic"
+#>  $ outcome             : chr "wellbeing"
+#>  $ data                :Classes 'data.table' and 'data.frame':   80 obs. of  9 variables:
+#>   ..$ id            : int [1:80] 1 1 1 1 2 2 2 2 3 3 ...
+#>   ..$ obs_id        : int [1:80] 2 3 4 5 2 3 4 5 2 3 ...
+#>   ..$ day           : int [1:80] 2 3 4 5 2 3 4 5 2 3 ...
+#>   ..$ treatment     : int [1:80] 1 1 1 1 1 1 1 1 0 0 ...
+#>   ..$ stress        : num [1:80] -0.0337 -0.4104 0.1151 -0.0194 0.2042 ...
+#>   ..$ wellbeing     : num [1:80] 51.7 53.6 51.7 52.3 44.8 ...
+#>   ..$ stress_between: num [1:80] -0.201 -0.201 -0.201 -0.201 -0.216 ...
+#>   ..$ stress_within : num [1:80] 0.167 -0.21 0.316 0.181 0.42 ...
+#>   ..$ lag_stress    : num [1:80] -0.6557 -0.0337 -0.4104 0.1151 0.715 ...
+#>   ..- attr(*, ".internal.selfref")=<pointer: 0x55d4fa2c19d0> 
+#>  $ formula             :Class 'formula'  language wellbeing ~ treatment + stress_between + stress_within + lag_stress + (1 +      stress_within | p | id)
+#>   .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+#>  $ fixed_formula       :Class 'formula'  language wellbeing ~ treatment + stress_between + stress_within + lag_stress
+#>   .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+#>  $ term_map            :'data.frame':    5 obs. of  3 variables:
+#>   ..$ component: chr [1:5] "fixed" "fixed" "fixed" "fixed" ...
+#>   ..$ sim_term : chr [1:5] "(Intercept)" "treatment" "between(stress)" "within(stress)" ...
+#>   ..$ fit_term : chr [1:5] "(Intercept)" "treatment" "stress_between" "stress_within" ...
+#>  $ helper_columns      : chr [1:3] "stress_between" "stress_within" "lag_stress"
+#>  $ scale_formula       : NULL
+#>  $ scale_term_map      : NULL
+#>  $ scale_helper_columns: chr(0) 
+#>  $ residual_cor        : NULL
+#>  $ complete_rows       : logi [1:100] FALSE TRUE TRUE TRUE TRUE FALSE ...
+#>  - attr(*, "class")= chr "mlsim_fit_prep"
+```
+
+For compositional outcomes,
+[`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
+automatically targets the `multilevelcoda` preparation path.
+
+## Multilevel Dynamic Compositional Outcomes
+
+Now we will look at a much more complicated example. We have a 3 part
+compositional outcome of physical activity: MVPA, light PA, and
+sedentary time. It is a dynamic, so a time series. Imagine multiple
+participants measured with accelerometry for multiple days. Participants
+also are part of an intervention or control group, and stress was
+measured daily. We want to simulate data that reflects the following
+model:
+
+``` r
+
+pa_formula <- mvbind(pa_ilr_1, pa_ilr_2) ~
+  intervention + stress + ar1() * intervention +
+  (1 + stress + ar1() | p | id)
+```
+
+### Build a Template
+
+We can build a template with the formula to get the correctly named
+coefficient and covariance objects.
+
+``` r
+
+template_sim <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  group_id = "id",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    intervention = gen_categorical(
+      "intervention",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    pa_template = outcome_template(
+      pa_formula,
+      compositional = TRUE,
+      parts = c("mvpa", "light_pa", "sedentary")
+    )
+  )
+)
+
+pa_template <- template_sim$generator_metadata$pa_template
+
+kable(pa_template$coefficients)
+```
+
+|                            | pa_ilr_1 | pa_ilr_2 |
+|:---------------------------|---------:|---------:|
+| (Intercept)                |        0 |        0 |
+| intervention               |        0 |        0 |
+| stress                     |        0 |        0 |
+| ar1(pa_ilr_1)              |        0 |        0 |
+| ar1(pa_ilr_2)              |        0 |        0 |
+| intervention:ar1(pa_ilr_1) |        0 |        0 |
+| intervention:ar1(pa_ilr_2) |        0 |        0 |
+
+There are multiple random effects. The random effects are all
+correlated, so we need a full covariance matrix for the participant
+random effects. The row names of the covariance matrix show the correct
+naming structure for the random effects.
+
+``` r
+
+rownames(pa_template$random_cov[["id::p"]])
+#> [1] "pa_ilr_1:(Intercept)"   "pa_ilr_1:stress"        "pa_ilr_1:ar1(pa_ilr_1)"
+#> [4] "pa_ilr_1:ar1(pa_ilr_2)" "pa_ilr_2:(Intercept)"   "pa_ilr_2:stress"       
+#> [7] "pa_ilr_2:ar1(pa_ilr_1)" "pa_ilr_2:ar1(pa_ilr_2)"
+```
+
+### Fill in Plausible Values
+
+The fixed coefficients below encode a modest intervention shift, a small
+stress effect, and positive autocorrelation. The interaction rows make
+autocorrelation weaker in the intervention group.
+
+``` r
+
+pa_coef <- pa_template$coefficients
+pa_coef["(Intercept)", ] <- c(-0.30, 0.20)
+pa_coef["intervention", ] <- c(0.15, -0.10)
+pa_coef["stress", ] <- c(-0.08, 0.05)
+
+pa_coef["ar1(pa_ilr_1)", ] <- c(0.35, 0.08)
+pa_coef["ar1(pa_ilr_2)", ] <- c(0.04, 0.30)
+pa_coef["intervention:ar1(pa_ilr_1)", ] <- c(-0.15, -0.02)
+pa_coef["intervention:ar1(pa_ilr_2)", ] <- c(-0.01, -0.12)
+
+kable(pa_coef)
+```
+
+|                            | pa_ilr_1 | pa_ilr_2 |
+|:---------------------------|---------:|---------:|
+| (Intercept)                |    -0.30 |     0.20 |
+| intervention               |     0.15 |    -0.10 |
+| stress                     |    -0.08 |     0.05 |
+| ar1(pa_ilr_1)              |     0.35 |     0.08 |
+| ar1(pa_ilr_2)              |     0.04 |     0.30 |
+| intervention:ar1(pa_ilr_1) |    -0.15 |    -0.02 |
+| intervention:ar1(pa_ilr_2) |    -0.01 |    -0.12 |
+
+There are several covariances. The residuals can also covary. We allow a
+small residual covariance.
+
+``` r
+
+pa_residual_cov <- pa_template$residual_cov
+pa_residual_cov[,] <- matrix(
+  c(0.22, 0.04,
+    0.04, 0.18),
+  nrow = 2
+)
+
+kable(pa_residual_cov)
+```
+
+|          | pa_ilr_1 | pa_ilr_2 |
+|:---------|---------:|---------:|
+| pa_ilr_1 |     0.22 |     0.04 |
+| pa_ilr_2 |     0.04 |     0.18 |
+
+For simplicity, we start with all the random effects being uncorrelated,
+which we accomplish using [`diag()`](https://rdrr.io/r/base/diag.html)
+to set the covariance matrix. We then edit in a few selected non zero
+covariances we want.
+
+``` r
+
+pa_random_cov <- pa_template$random_cov
+participant_cov <- pa_random_cov[["id::p"]]
+
+diag(participant_cov) <- c(
+  0.080, # pa_ilr_1 random intercept
+  0.015, # pa_ilr_1 stress slope
+  0.001, # pa_ilr_1 ar1(pa_ilr_1) slope
+  0.001, # pa_ilr_1 ar1(pa_ilr_2) slope
+  0.060, # pa_ilr_2 random intercept
+  0.012, # pa_ilr_2 stress slope
+  0.001, # pa_ilr_2 ar1(pa_ilr_1) slope
+  0.001  # pa_ilr_2 ar1(pa_ilr_2) slope
+)
+
+participant_cov["pa_ilr_1:(Intercept)", "pa_ilr_2:(Intercept)"] <- 0.025
+participant_cov["pa_ilr_2:(Intercept)", "pa_ilr_1:(Intercept)"] <- 0.025
+participant_cov["pa_ilr_1:stress", "pa_ilr_2:stress"] <- 0.004
+participant_cov["pa_ilr_2:stress", "pa_ilr_1:stress"] <- 0.004
+
+pa_random_cov[["id::p"]] <- participant_cov
+
+kable(participant_cov)
+```
+
+|  | pa_ilr_1:(Intercept) | pa_ilr_1:stress | pa_ilr_1:ar1(pa_ilr_1) | pa_ilr_1:ar1(pa_ilr_2) | pa_ilr_2:(Intercept) | pa_ilr_2:stress | pa_ilr_2:ar1(pa_ilr_1) | pa_ilr_2:ar1(pa_ilr_2) |
+|:---|---:|---:|---:|---:|---:|---:|---:|---:|
+| pa_ilr_1:(Intercept) | 0.080 | 0.000 | 0.000 | 0.000 | 0.025 | 0.000 | 0.000 | 0.000 |
+| pa_ilr_1:stress | 0.000 | 0.015 | 0.000 | 0.000 | 0.000 | 0.004 | 0.000 | 0.000 |
+| pa_ilr_1:ar1(pa_ilr_1) | 0.000 | 0.000 | 0.001 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| pa_ilr_1:ar1(pa_ilr_2) | 0.000 | 0.000 | 0.000 | 0.001 | 0.000 | 0.000 | 0.000 | 0.000 |
+| pa_ilr_2:(Intercept) | 0.025 | 0.000 | 0.000 | 0.000 | 0.060 | 0.000 | 0.000 | 0.000 |
+| pa_ilr_2:stress | 0.000 | 0.004 | 0.000 | 0.000 | 0.000 | 0.012 | 0.000 | 0.000 |
+| pa_ilr_2:ar1(pa_ilr_1) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.001 | 0.000 |
+| pa_ilr_2:ar1(pa_ilr_2) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.001 |
+
+### Simulate the Outcome
+
+The outcome generator uses the same formula as the template and receives
+the edited coefficient and covariance objects. The ILR coordinates are
+kept, and the composition parts are back-transformed to sum to 16 hours
+of waking time. The burnin get’s used for autoregressive outcomes to
+avoid starting values driving the results.
+
+``` r
+
+pa_sim <- simulate_data(
+  n_groups = 100,
+  n_per_group = 14,
+  group_id = "id",
+  time_id = "day",
+  seed = 2027,
+  generators = list(
+    intervention = gen_categorical(
+      "intervention",
+      level = "level2",
+      prob = 0.5,
+      output = "integer"
+    ),
+    stress = gen_normal(
+      "stress",
+      level = "multilevel",
+      fixed_intercept = 0,
+      random_cov = 0.20,
+      residual_var = 0.80
+    ),
+    pa = gen_outcome(
+      pa_formula,
+      coefficients = pa_coef,
+      residual_cov = pa_residual_cov,
+      random_cov = pa_random_cov,
+      compositional = TRUE,
+      total = 16,
+      parts = c("mvpa", "light_pa", "sedentary"),
+      burnin = 50
+    )
+  )
+)
+
+kable(head(pa_sim$data, 10))
+```
+
+| id | obs_id | day | intervention | stress | pa_ilr_1 | pa_ilr_2 | mvpa | light_pa | sedentary | lag_pa_ilr_1 | lag_pa_ilr_2 |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 1 | 1 | 0 | -1.054 | -0.561 | 0.482 | 3.07 | 8.59 | 4.34 | NA | NA |
+| 1 | 2 | 2 | 0 | -1.193 | -0.454 | 0.857 | 3.11 | 9.94 | 2.96 | -0.561 | 0.482 |
+| 1 | 3 | 3 | 0 | 1.003 | -0.714 | -0.119 | 2.75 | 6.07 | 7.18 | -0.454 | 0.857 |
+| 1 | 4 | 4 | 0 | -0.626 | 0.033 | -0.366 | 5.36 | 3.98 | 6.67 | -0.714 | -0.119 |
+| 1 | 5 | 5 | 0 | 0.358 | -0.395 | -0.314 | 3.70 | 4.81 | 7.49 | 0.033 | -0.366 |
+| 1 | 6 | 6 | 0 | -0.058 | -0.610 | 0.191 | 3.04 | 7.35 | 5.61 | -0.395 | -0.314 |
+| 1 | 7 | 7 | 0 | -0.166 | -1.102 | 0.062 | 1.83 | 7.39 | 6.77 | -0.610 | 0.191 |
+| 1 | 8 | 8 | 0 | -0.237 | -0.853 | 0.918 | 2.02 | 10.98 | 3.00 | -1.102 | 0.062 |
+| 1 | 9 | 9 | 0 | -1.007 | -0.579 | -0.788 | 2.80 | 3.26 | 9.94 | -0.853 | 0.918 |
+| 1 | 10 | 10 | 0 | -2.685 | -1.003 | 0.478 | 1.95 | 9.32 | 4.74 | -0.579 | -0.788 |
+
+### Prepare a `multilevelcoda` Object
+
+The simulator already kept the ILR coordinates used to generate the
+outcome, but
+[`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md)
+fits the ILR variables created by
+[`multilevelcoda::complr()`](https://florale.github.io/multilevelcoda/reference/complr.md).
+[`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
+creates that object, adds the formula-required lagged ILR columns, and
+drops the first row per participant where lagged outcomes are undefined.
+In this example, the model ILR variables are named `z1_1` and `z2_1`.
+
+``` r
+
+pa_fit_prep <- prepare_outcome_fit(pa_sim, outcome = "pa")
+pa_complr_model <- pa_fit_prep$complr
+
+pa_fit_prep$formula
+#> mvbind(z1_1, z2_1) ~ intervention + stress + (lag_z1_1 + lag_z2_1) * 
+#>     intervention + (1 + stress + (lag_z1_1 + lag_z2_1) | p | 
+#>     id)
+get_variables(pa_complr_model)
+#> $composition_1
+#> $composition_1$X
+#> [1] "tmvpa"      "tlight_pa"  "tsedentary"
+#> 
+#> $composition_1$bX
+#> [1] "bmvpa"      "blight_pa"  "bsedentary"
+#> 
+#> $composition_1$wX
+#> [1] "wmvpa"      "wlight_pa"  "wsedentary"
+#> 
+#> $composition_1$Z
+#> [1] "z1_1" "z2_1"
+#> 
+#> $composition_1$bZ
+#> [1] "bz1_1" "bz2_1"
+#> 
+#> $composition_1$wZ
+#> [1] "wz1_1" "wz2_1"
+head(pa_fit_prep$data)
+#>       id obs_id   day intervention  stress pa_ilr_1 pa_ilr_2  mvpa light_pa
+#>    <int>  <int> <int>        <int>   <num>    <num>    <num> <num>    <num>
+#> 1:     1      2     2            0 -1.1934  -0.4545    0.857  3.11     9.94
+#> 2:     1      3     3            0  1.0030  -0.7141   -0.119  2.75     6.07
+#> 3:     1      4     4            0 -0.6262   0.0327   -0.366  5.36     3.98
+#> 4:     1      5     5            0  0.3581  -0.3951   -0.314  3.70     4.81
+#> 5:     1      6     6            0 -0.0581  -0.6102    0.191  3.04     7.35
+#> 6:     1      7     7            0 -0.1657  -1.1022    0.062  1.83     7.39
+#>    sedentary lag_pa_ilr_1 lag_pa_ilr_2 tmvpa tlight_pa tsedentary bmvpa
+#>        <num>        <num>        <num> <num>     <num>      <num> <num>
+#> 1:      2.96      -0.5611        0.482  3.11      9.94       2.96  3.39
+#> 2:      7.18      -0.4545        0.857  2.75      6.07       7.18  3.39
+#> 3:      6.67      -0.7141       -0.119  5.36      3.98       6.67  3.39
+#> 4:      7.49       0.0327       -0.366  3.70      4.81       7.49  3.39
+#> 5:      5.61      -0.3951       -0.314  3.04      7.35       5.61  3.39
+#> 6:      6.77      -0.6102        0.191  1.83      7.39       6.77  3.39
+#>    blight_pa bsedentary wmvpa wlight_pa wsedentary    z1_1   z2_1  bz1_1 bz2_1
+#>        <num>      <num> <num>     <num>      <num>   <num>  <num>  <num> <num>
+#> 1:      6.96       5.65 0.319     0.498      0.182 -0.4545  0.857 -0.502 0.147
+#> 2:      6.96       5.65 0.275     0.295      0.430 -0.7141 -0.119 -0.502 0.147
+#> 3:      6.96       5.65 0.474     0.172      0.354  0.0327 -0.366 -0.502 0.147
+#> 4:      6.96       5.65 0.351     0.222      0.427 -0.3951 -0.314 -0.502 0.147
+#> 5:      6.96       5.65 0.304     0.359      0.337 -0.6102  0.191 -0.502 0.147
+#> 6:      6.96       5.65 0.193     0.379      0.428 -1.1022  0.062 -0.502 0.147
+#>      wz1_1   wz2_1 lag_z1_1 lag_z2_1
+#>      <num>   <num>    <num>    <num>
+#> 1:  0.0474  0.7104  -0.5611    0.482
+#> 2: -0.2122 -0.2657  -0.4545    0.857
+#> 3:  0.5346 -0.5125  -0.7141   -0.119
+#> 4:  0.1068 -0.4604   0.0327   -0.366
+#> 5: -0.1083  0.0445  -0.3951   -0.314
+#> 6: -0.6003 -0.0848  -0.6102    0.191
+```
+
+### Fit With `brms` Through `multilevelcoda`
+
+The prepared formula mirrors the simulation formula using the concrete
+ILR names created by
+[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md).
+The shared random-effect ID `p` allows the random intercepts, stress
+slopes, and all AR slopes to correlate across both ILR outcomes,
+matching the simulation structure.
+
+This chunk compiles and samples a Stan model, so it is intentionally the
+slow part of the vignette. The model uses the `cmdstanr` backend. The
+`meanfield` algorithm is used to speed up sampling, but it is less
+accurate than full HMC. Adjust the algorithm and sampling parameters as
+needed for your use case. We only used `meanfield` here to keep the
+vignette fast and illustrate analysis.
+
+``` r
+
+
+pa_fit <- brmcoda(
+  complr = pa_complr_model,
+  formula = brms::bf(pa_fit_prep$formula) + brms::set_rescor(TRUE),
+  backend = "cmdstanr",
+  algorithm = "meanfield",
+  iter = 2000,
+  seed = 2028
+)
+#> Start sampling
+#> ------------------------------------------------------------ 
+#> EXPERIMENTAL ALGORITHM: 
+#>   This procedure has not been thoroughly tested and may be unstable 
+#>   or buggy. The interface is subject to change. 
+#> ------------------------------------------------------------ 
+#> Gradient evaluation took 0.000779 seconds 
+#> 1000 transitions using 10 leapfrog steps per transition would take 7.79 seconds. 
+#> Adjust your expectations accordingly! 
+#> Begin eta adaptation. 
+#> Iteration:   1 / 250 [  0%]  (Adaptation) 
+#> Iteration:  50 / 250 [ 20%]  (Adaptation) 
+#> Iteration: 100 / 250 [ 40%]  (Adaptation) 
+#> Iteration: 150 / 250 [ 60%]  (Adaptation) 
+#> Iteration: 200 / 250 [ 80%]  (Adaptation) 
+#> Iteration: 250 / 250 [100%]  (Adaptation) 
+#> Success! Found best value [eta = 0.1]. 
+#> Begin stochastic gradient ascent. 
+#>   iter             ELBO   delta_ELBO_mean   delta_ELBO_med   notes  
+#>    100     -1118856.826             1.000            1.000 
+#>    200      -562024.992             0.995            1.000 
+#>    300      -120516.538             2.327            3.663 
+#>    400       -71520.188             2.174            3.663 
+#>    500       -15366.487             2.170            3.654 
+#>    600        -8533.643             2.227            3.654 
+#>    700        -6585.525             0.548            0.801 
+#>    800        -5091.785             0.295            0.296 
+#>    900        -4596.913             0.201            0.293 
+#>   1000        -3872.725             0.147            0.187 
+#>   1100        -3508.609             0.145            0.187 
+#>   1200        -3178.075             0.104            0.104 
+#>   1300        -2936.816             0.093            0.104 
+#>   1400        -2731.047             0.079            0.082 
+#>   1500        -2578.067             0.067            0.075 
+#>   1600        -2458.585             0.054            0.059 
+#>   1700        -2362.959             0.045            0.049 
+#>   1800        -2282.281             0.038            0.040 
+#>   1900        -2215.249             0.033            0.035 
+#>   2000        -2166.098             0.026            0.030 
+#> Informational Message: The maximum number of iterations is reached! The algorithm may not have converged. 
+#> This variational approximation is not guaranteed to be meaningful. 
+#> Drawing a sample of size 1000 from the approximate posterior...  
+#> COMPLETED. 
+#> Finished in  1.6 seconds.
+
+summary(pa_fit)
+#>  Family: MV(gaussian, gaussian) 
+#>   Links: mu = identity
+#>          mu = identity 
+#> Formula: z1_1 ~ intervention + stress + (lag_z1_1 + lag_z2_1) * intervention + (1 + stress + (lag_z1_1 + lag_z2_1) | p | id) 
+#>          z2_1 ~ intervention + stress + (lag_z1_1 + lag_z2_1) * intervention + (1 + stress + (lag_z1_1 + lag_z2_1) | p | id) 
+#>    Data: complr$dataout (Number of observations: 1300) 
+#>   Draws: 1 chains, each with iter = 1000; warmup = 0; thin = 1;
+#>          total post-warmup draws = 1000
+#> 
+#> Multilevel Hyperparameters:
+#> ~id (Number of levels: 100) 
+#>                                  Estimate Est.Error l-95% CI u-95% CI Rhat
+#> sd(z11_Intercept)                    0.09      0.03     0.05     0.16 1.00
+#> sd(z11_stress)                       0.19      0.04     0.12     0.28 1.00
+#> sd(z11_lag_z1_1)                     0.11      0.03     0.07     0.18 1.00
+#> sd(z11_lag_z2_1)                     0.13      0.03     0.08     0.18 1.00
+#> sd(z21_Intercept)                    0.05      0.01     0.03     0.08 1.00
+#> sd(z21_stress)                       0.04      0.02     0.02     0.09 1.00
+#> sd(z21_lag_z1_1)                     0.05      0.02     0.02     0.10 1.00
+#> sd(z21_lag_z2_1)                     0.06      0.03     0.02     0.14 1.00
+#> cor(z11_Intercept,z11_stress)        0.48      0.14     0.17     0.71 1.00
+#> cor(z11_Intercept,z11_lag_z1_1)      0.44      0.24    -0.12     0.80 1.00
+#> cor(z11_stress,z11_lag_z1_1)         0.36      0.27    -0.24     0.78 1.00
+#> cor(z11_Intercept,z11_lag_z2_1)      0.17      0.28    -0.40     0.65 1.00
+#> cor(z11_stress,z11_lag_z2_1)         0.68      0.18     0.25     0.92 1.00
+#> cor(z11_lag_z1_1,z11_lag_z2_1)      -0.03      0.32    -0.63     0.58 1.01
+#> cor(z11_Intercept,z21_Intercept)     0.18      0.42    -0.66     0.83 1.00
+#> cor(z11_stress,z21_Intercept)        0.11      0.41    -0.68     0.78 1.00
+#> cor(z11_lag_z1_1,z21_Intercept)      0.27      0.32    -0.40     0.78 1.00
+#> cor(z11_lag_z2_1,z21_Intercept)     -0.10      0.37    -0.77     0.60 1.00
+#> cor(z11_Intercept,z21_stress)        0.19      0.52    -0.81     0.94 1.00
+#> cor(z11_stress,z21_stress)          -0.06      0.42    -0.82     0.74 1.00
+#> cor(z11_lag_z1_1,z21_stress)         0.07      0.38    -0.68     0.74 1.00
+#> cor(z11_lag_z2_1,z21_stress)        -0.10      0.37    -0.75     0.60 1.00
+#> cor(z21_Intercept,z21_stress)        0.07      0.36    -0.64     0.70 1.00
+#> cor(z11_Intercept,z21_lag_z1_1)     -0.32      0.36    -0.85     0.48 1.00
+#> cor(z11_stress,z21_lag_z1_1)        -0.12      0.39    -0.81     0.64 1.00
+#> cor(z11_lag_z1_1,z21_lag_z1_1)      -0.29      0.31    -0.81     0.34 1.00
+#> cor(z11_lag_z2_1,z21_lag_z1_1)       0.10      0.35    -0.58     0.75 1.00
+#> cor(z21_Intercept,z21_lag_z1_1)     -0.14      0.34    -0.76     0.53 1.00
+#> cor(z21_stress,z21_lag_z1_1)        -0.09      0.37    -0.75     0.66 1.00
+#> cor(z11_Intercept,z21_lag_z2_1)      0.11      0.41    -0.65     0.79 1.00
+#> cor(z11_stress,z21_lag_z2_1)        -0.19      0.40    -0.84     0.61 1.00
+#> cor(z11_lag_z1_1,z21_lag_z2_1)      -0.23      0.35    -0.81     0.51 1.00
+#> cor(z11_lag_z2_1,z21_lag_z2_1)      -0.04      0.38    -0.69     0.70 1.00
+#> cor(z21_Intercept,z21_lag_z2_1)     -0.14      0.36    -0.77     0.60 1.00
+#> cor(z21_stress,z21_lag_z2_1)         0.06      0.37    -0.64     0.74 1.01
+#> cor(z21_lag_z1_1,z21_lag_z2_1)       0.03      0.36    -0.65     0.72 1.00
+#>                                  Bulk_ESS Tail_ESS
+#> sd(z11_Intercept)                     976      972
+#> sd(z11_stress)                        995      978
+#> sd(z11_lag_z1_1)                      834      904
+#> sd(z11_lag_z2_1)                      837      908
+#> sd(z21_Intercept)                    1042     1058
+#> sd(z21_stress)                        995     1023
+#> sd(z21_lag_z1_1)                     1060      682
+#> sd(z21_lag_z2_1)                      886      932
+#> cor(z11_Intercept,z11_stress)         933     1061
+#> cor(z11_Intercept,z11_lag_z1_1)      1009      939
+#> cor(z11_stress,z11_lag_z1_1)          942      952
+#> cor(z11_Intercept,z11_lag_z2_1)      1116      878
+#> cor(z11_stress,z11_lag_z2_1)         1104      978
+#> cor(z11_lag_z1_1,z11_lag_z2_1)       1098      955
+#> cor(z11_Intercept,z21_Intercept)      903      949
+#> cor(z11_stress,z21_Intercept)         973      906
+#> cor(z11_lag_z1_1,z21_Intercept)      1127     1025
+#> cor(z11_lag_z2_1,z21_Intercept)      1008      918
+#> cor(z11_Intercept,z21_stress)         886      943
+#> cor(z11_stress,z21_stress)           1024     1026
+#> cor(z11_lag_z1_1,z21_stress)          744      975
+#> cor(z11_lag_z2_1,z21_stress)          940      983
+#> cor(z21_Intercept,z21_stress)         999      978
+#> cor(z11_Intercept,z21_lag_z1_1)       939      905
+#> cor(z11_stress,z21_lag_z1_1)         1073     1110
+#> cor(z11_lag_z1_1,z21_lag_z1_1)       1117      983
+#> cor(z11_lag_z2_1,z21_lag_z1_1)       1068      872
+#> cor(z21_Intercept,z21_lag_z1_1)       766      937
+#> cor(z21_stress,z21_lag_z1_1)          879     1033
+#> cor(z11_Intercept,z21_lag_z2_1)      1072      988
+#> cor(z11_stress,z21_lag_z2_1)         1023      963
+#> cor(z11_lag_z1_1,z21_lag_z2_1)        973      728
+#> cor(z11_lag_z2_1,z21_lag_z2_1)       1132      960
+#> cor(z21_Intercept,z21_lag_z2_1)      1098      901
+#> cor(z21_stress,z21_lag_z2_1)          965      979
+#> cor(z21_lag_z1_1,z21_lag_z2_1)        893      934
+#> 
+#> Regression Coefficients:
+#>                           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+#> z11_Intercept                -0.21      0.07    -0.36    -0.06 1.00      884
+#> z21_Intercept                 0.21      0.11    -0.01     0.43 1.00      983
+#> z11_intervention              0.11      0.07    -0.02     0.24 1.00      997
+#> z11_stress                   -0.07      0.06    -0.18     0.04 1.00      895
+#> z11_lag_z1_1                  0.53      0.08     0.37     0.69 1.00      963
+#> z11_lag_z2_1                  0.11      0.09    -0.06     0.28 1.00      876
+#> z11_intervention:lag_z1_1    -0.14      0.12    -0.38     0.09 1.00     1065
+#> z11_intervention:lag_z2_1    -0.04      0.11    -0.26     0.17 1.00      871
+#> z21_intervention             -0.18      0.08    -0.34    -0.01 1.00      948
+#> z21_stress                    0.03      0.05    -0.07     0.13 1.00     1089
+#> z21_lag_z1_1                  0.17      0.10    -0.02     0.36 1.00      890
+#> z21_lag_z2_1                  0.52      0.09     0.35     0.69 1.00     1045
+#> z21_intervention:lag_z1_1    -0.10      0.13    -0.35     0.16 1.00     1094
+#> z21_intervention:lag_z2_1    -0.08      0.10    -0.28     0.12 1.00     1146
+#>                           Tail_ESS
+#> z11_Intercept                  873
+#> z21_Intercept                  856
+#> z11_intervention              1011
+#> z11_stress                     936
+#> z11_lag_z1_1                   944
+#> z11_lag_z2_1                   982
+#> z11_intervention:lag_z1_1      921
+#> z11_intervention:lag_z2_1      820
+#> z21_intervention               883
+#> z21_stress                     907
+#> z21_lag_z1_1                  1039
+#> z21_lag_z2_1                   942
+#> z21_intervention:lag_z1_1      962
+#> z21_intervention:lag_z2_1      944
+#> 
+#> Further Distributional Parameters:
+#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sigma_z11     0.54      0.05     0.45     0.65 1.00      916      772
+#> sigma_z21     0.53      0.04     0.46     0.60 1.00      987      967
+#> 
+#> Residual Correlations: 
+#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> rescor(z11,z21)     0.19      0.08     0.04     0.33 1.00     1023      983
+#> 
+#> Draws were sampled using variational(meanfield).
+```
