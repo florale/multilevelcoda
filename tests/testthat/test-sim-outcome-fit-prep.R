@@ -30,7 +30,7 @@ test_that("brmcoda prep returns scale helper columns in data namespace", {
     n_per_group = 4,
     seed = 122,
     generators = list(
-      x = gen_normal("x"),
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
       y_template = outcome_template(
         cbind(y1, y2) ~ x + (1 | group_id),
         compositional = TRUE,
@@ -45,7 +45,7 @@ test_that("brmcoda prep returns scale helper columns in data namespace", {
     n_per_group = 4,
     seed = 123,
     generators = list(
-      x = gen_normal("x"),
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
       y = gen_outcome(
         cbind(y1, y2) ~ x + (1 | group_id),
         compositional = TRUE,
@@ -70,7 +70,7 @@ test_that("outcome random effects require explicit random_cov", {
       n_groups = 2,
       n_per_group = 3,
       generators = list(
-        x = gen_normal("x"),
+        x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
         y = gen_outcome(y ~ x + (1 | group_id))
       )
     ),
@@ -82,7 +82,7 @@ test_that("outcome random effects require explicit random_cov", {
       n_groups = 2,
       n_per_group = 3,
       generators = list(
-        x = gen_normal("x"),
+        x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
         y_template = outcome_template(y ~ x + (1 | group_id))
       )
     )
@@ -95,7 +95,7 @@ test_that("random_cov block lists are normalized to template order", {
     n_per_group = 2,
     seed = 124,
     generators = list(
-      x = gen_normal("x"),
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
       y_template = outcome_template(cbind(y1, y2) ~ x + (1 | group_id))
     )
   )$generator_metadata$y_template
@@ -106,7 +106,7 @@ test_that("random_cov block lists are normalized to template order", {
     n_per_group = 2,
     seed = 125,
     generators = list(
-      x = gen_normal("x"),
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
       y = gen_outcome(
         cbind(y1, y2) ~ x + (1 | group_id),
         coefficients = template$coefficients,
@@ -128,7 +128,7 @@ test_that("random_cov block lists still require exact names", {
     n_per_group = 2,
     seed = 126,
     generators = list(
-      x = gen_normal("x"),
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
       y_template = outcome_template(cbind(y1, y2) ~ x + (1 | group_id))
     )
   )$generator_metadata$y_template
@@ -138,7 +138,7 @@ test_that("random_cov block lists still require exact names", {
       n_groups = 3,
       n_per_group = 2,
       generators = list(
-        x = gen_normal("x"),
+        x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
         y = gen_outcome(
           cbind(y1, y2) ~ x + (1 | group_id),
           random_cov = template$random_cov[-1L]
@@ -155,7 +155,7 @@ test_that("random_cov block lists still require exact names", {
       n_groups = 3,
       n_per_group = 2,
       generators = list(
-        x = gen_normal("x"),
+        x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
         y = gen_outcome(
           cbind(y1, y2) ~ x + (1 | group_id),
           random_cov = extra_random_cov
@@ -172,7 +172,7 @@ test_that("random_cov block lists still require exact names", {
       n_groups = 3,
       n_per_group = 2,
       generators = list(
-        x = gen_normal("x"),
+        x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
         y = gen_outcome(
           cbind(y1, y2) ~ x + (1 | group_id),
           random_cov = duplicated_random_cov
@@ -188,7 +188,7 @@ test_that("random_cov block lists still require exact names", {
       n_groups = 3,
       n_per_group = 2,
       generators = list(
-        x = gen_normal("x"),
+        x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
         y = gen_outcome(
           cbind(y1, y2) ~ x + (1 | group_id),
           random_cov = unnamed_random_cov

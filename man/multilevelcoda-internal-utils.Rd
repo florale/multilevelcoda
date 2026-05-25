@@ -18,7 +18,6 @@
 \alias{.mlsim_check_categorical_ordered}
 \alias{.mlsim_check_categorical_logits}
 \alias{.mlsim_check_categorical_random_cov}
-\alias{.mlsim_uniform_category_prob}
 \alias{.mlsim_resolve_category_prob}
 \alias{.mlsim_check_category_prob_matrix}
 \alias{.mlsim_baseline_category_prob}
@@ -43,9 +42,18 @@
 \alias{.mlsim_expand_level2}
 \alias{.mlsim_expand_level2_vector}
 \alias{.mlsim_check_multilevel_only_args}
+\alias{.mlsim_generator_contract}
+\alias{.mlsim_warn_direct_precedence}
 \alias{.mlsim_random_intercept_names}
 \alias{.mlsim_check_position_cov}
 \alias{.mlsim_joint_random_intercepts}
+\alias{.mlsim_internal_name_piece}
+\alias{.mlsim_internal_random_intercept_names}
+\alias{.mlsim_internal_scale_random_intercept_names}
+\alias{.mlsim_internal_categorical_random_intercept_names}
+\alias{.mlsim_row_random_intercept_columns}
+\alias{.mlsim_multilevel_random_columns}
+\alias{.mlsim_categorical_random_columns}
 \alias{.mlsim_check_scale_fixed_intercept}
 \alias{.mlsim_random_eta}
 \alias{.mlsim_check_simple_residual_cor}
@@ -95,8 +103,6 @@
 .mlsim_check_categorical_logits(logits, nonreference, arg)
 
 .mlsim_check_categorical_random_cov(random_cov, nonreference)
-
-.mlsim_uniform_category_prob(n, labels)
 
 .mlsim_resolve_category_prob(prob, n, labels, arg = "prob")
 
@@ -153,11 +159,40 @@
 
 .mlsim_check_multilevel_only_args(level, supplied)
 
+.mlsim_generator_contract(
+  generator,
+  vars,
+  level,
+  vars_n = 1L,
+  direct_supplied = NULL,
+  multilevel_only = NULL,
+  multilevel_required = NULL,
+  multilevel_use = NULL,
+  scale_arg = NULL,
+  scale_fixed_intercept = NULL
+)
+
+.mlsim_warn_direct_precedence(level, generator, used, ignored)
+
 .mlsim_random_intercept_names(vars, scale = FALSE)
 
 .mlsim_check_position_cov(cov, names, arg = "random_cov")
 
 .mlsim_joint_random_intercepts(vars, random_cov, context, scale = FALSE)
+
+.mlsim_internal_name_piece(x)
+
+.mlsim_internal_random_intercept_names(vars)
+
+.mlsim_internal_scale_random_intercept_names(vars)
+
+.mlsim_internal_categorical_random_intercept_names(var, categories)
+
+.mlsim_row_random_intercept_columns(random_intercepts, context, names)
+
+.mlsim_multilevel_random_columns(random, context, vars)
+
+.mlsim_categorical_random_columns(random_intercepts, context, var)
 
 .mlsim_check_scale_fixed_intercept(
   scale_fixed_intercept,
@@ -187,8 +222,7 @@
 .mlsim_simple_random_metadata(
   fixed_intercept,
   random,
-  scale_fixed_intercept = NULL,
-  scale_linear_predictor = NULL
+  scale_fixed_intercept = NULL
 )
 
 .mlsim_validate_scale_multilevel_args(
@@ -204,7 +238,7 @@
 
 .mlsim_resolve_size(size, n, context)
 
-.mlsim_result(values, names, metadata)
+.mlsim_result(values, names, metadata, internal = NULL)
 
 .mlsim_custom_result(result, vars, level, context, wrapper_metadata)
 
@@ -219,13 +253,12 @@ x \%||\% y
 
 \item{call.}{Logical flag passed to \code{\link[=stop]{stop()}}.}
 
-\item{args, used, ignored, supplied, use}{Character vectors or named logicals
-used to build diagnostics.}
+\item{args, used, ignored, supplied, use, direct_supplied, multilevel_only}{Character vectors or named logicals used to build diagnostics.}
 
 \item{generator}{Generator label used in diagnostic messages.}
 
-\item{vars, n, names, arg, arg_name}{Variable names, target lengths, or argument
-labels.}
+\item{vars, var, n, vars_n, names, arg, arg_name}{Variable names, target lengths,
+or argument labels.}
 
 \item{allow_empty}{Logical flag allowing an empty name vector.}
 
@@ -261,19 +294,23 @@ matrices.}
 
 \item{values, result}{Generated values or raw custom-generator result.}
 
+\item{multilevel_required, multilevel_use, scale_arg}{Multilevel constructor
+contract declarations.}
+
 \item{scale}{Logical flag for joint location/scale random effects.}
+
+\item{random, random_intercepts}{Random-effect draw metadata.}
 
 \item{type}{Distribution type.}
 
 \item{fixed_intercept, scale_fixed_intercept}{Location and scale intercepts.}
 
-\item{random}{Random-effect draw metadata.}
-
-\item{scale_linear_predictor}{Row-level scale linear predictor.}
-
 \item{size}{Count-distribution size specification.}
 
 \item{metadata, wrapper_metadata}{Metadata lists.}
+
+\item{internal}{Optional internal data columns to append to a generator
+result.}
 
 \item{spec}{Count-distribution specification list.}
 }

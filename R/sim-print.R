@@ -13,7 +13,7 @@
 #'
 #' @examples
 #' multilevelcoda:::.mlsim_na_character(NULL)
-#' sim <- simulate_data(n = 2, generators = list(x = gen_normal("x")))
+#' sim <- simulate_data(n = 2, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
 #' multilevelcoda:::.mlsim_generated_columns(sim)
 #'
 #' @keywords internal
@@ -88,9 +88,9 @@ NULL
     has_random_cov = .mlsim_has_metadata(metadata$random_cov),
     has_random_effects = .mlsim_has_metadata(metadata$random_effects) ||
       .mlsim_has_metadata(metadata$random_intercepts) ||
-      .mlsim_has_metadata(metadata$scale_random_intercepts),
-    has_residuals = .mlsim_has_metadata(metadata$residual_var) ||
-      .mlsim_has_metadata(metadata$residual_sd) ||
+      .mlsim_has_metadata(metadata$scale_random_intercepts) ||
+      .mlsim_has_metadata(metadata$random_cov),
+    has_residuals = .mlsim_has_metadata(metadata$residual_sd) ||
       .mlsim_has_metadata(metadata$residual_cov) ||
       .mlsim_has_metadata(metadata$residual_cor),
     has_scale_model = .mlsim_has_metadata(metadata$scale_fixed_intercept) ||
@@ -131,7 +131,7 @@ NULL
 #' @return A `summary.mlsim_data` object with `design` and `generators` tables.
 #'
 #' @examples
-#' sim <- simulate_data(n = 3, generators = list(x = gen_normal("x")))
+#' sim <- simulate_data(n = 3, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
 #' summary(sim)
 #'
 #' @method summary mlsim_data
@@ -156,7 +156,7 @@ summary.mlsim_data <- function(object, ...) {
 #' @return `x`, invisibly.
 #'
 #' @examples
-#' sim <- simulate_data(n = 3, generators = list(x = gen_normal("x")))
+#' sim <- simulate_data(n = 3, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
 #' print(sim)
 #'
 #' @method print mlsim_data

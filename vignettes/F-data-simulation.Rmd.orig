@@ -86,8 +86,7 @@ Current predictor generators are listed below.
 
 | Generator | Role |
 |---|---|
-| `gen_normal()` | Univariate Gaussian predictors or outcomes on the identity scale. |
-| `gen_mvn()` | Correlated Gaussian blocks, including ILR compositional back-transforms. |
+| `gen_mvn()` | Univariate and multivariate Gaussian predictors, including ILR compositional back-transforms. |
 | `gen_categorical()` | Binary, unordered categorical, and ordered categorical variables. |
 | `gen_binomial()` | Binomial counts with logit-scale multilevel support. |
 | `gen_poisson()` | Poisson counts with log-scale multilevel support. |
@@ -104,9 +103,9 @@ predictor generators and outcome generation.
 | Feature | Use |
 |---|---|
 | `level` | Choose row-level, group-level, or multilevel generation. |
-| `fixed_intercept` | Set the fixed location or link-scale intercept in multilevel generators. |
+| `fixed_intercept` | Set the fixed location or link-scale intercept in any predictor generator. |
 | `random_cov` | Add group-specific random intercepts, and sometimes scale random effects. |
-| `residual_var` / `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
+| `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
 | `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
 | `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
 | Outcome formula | Generate Gaussian outcomes from fixed, random, lagged, and helper terms. |
@@ -125,10 +124,10 @@ single <- simulate_data(
   n = 20,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", mean = 0, sd = 1),
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
     edu = gen_categorical("edu", categories = c("< Bachelor", "Bachelor", "> Bachelor"),
-      prob = c(.3, .3, .4)),
-    tx = gen_categorical("tx", categories = c("control", "treatment"), prob = .5)
+      fixed_intercept = c("Bachelor" = 0, "> Bachelor" = log(4 / 3))),
+    tx = gen_categorical("tx", categories = c("control", "treatment"), fixed_intercept = stats::qlogis(.5))
   )
 )
 
@@ -157,19 +156,19 @@ balanced <- simulate_data(
   n_per_group = 4,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", mean = 0, sd = 1)
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
 kable(balanced$data)
 ```
 
-However, this was still effectively single level, normal data.
+However, this was still effectively single level, Gaussian data.
 We can improve that. Here we give essentially the parameters of 
 a random intercept only multilevel model, which is used to generate
 matching data. The `fixed_intercept` is the overall mean,
 `random_cov` is the group-level variance, and
-`residual_var` is the residual variance. The same approach broadly applies to 
+`residual_cov` is the residual variance. The same approach broadly applies to
 other generator families when level = "multilevel".
 We can generator a level 2 variable as well, which is constant within groups
 but varies between groups.
@@ -180,9 +179,9 @@ balanced2 <- simulate_data(
   n_per_group = 4,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
@@ -198,9 +197,9 @@ unbalanced <- simulate_data(
   n_per_group = c(3, 5, 4, 2),
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
@@ -218,9 +217,9 @@ drawn_sizes <- simulate_data(
   ),
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
@@ -241,9 +240,9 @@ dated <- simulate_data(
   time_values = as.Date("2026-01-01") + 0:4,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
@@ -261,14 +260,14 @@ levels_demo <- simulate_data(
   n_per_group = 4,
   seed = 2026,
   generators = list(
-    row_x = gen_normal("row_x", mean = 0, sd = 1),
-    group_x = gen_normal("group_x", level = "level2", mean = 10, sd = 1),
-    mixed_x = gen_normal(
+    row_x = gen_mvn("row_x", fixed_intercept = 0, residual_cov = 1),
+    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 10, residual_cov = 1),
+    mixed_x = gen_mvn(
       "mixed_x",
       level = "multilevel",
       fixed_intercept = 5,
       random_cov = 0.50,
-      residual_var = 1
+      residual_cov = 1
     )
   )
 )
@@ -278,8 +277,8 @@ levels_demo
 
 # Distribution Families
 
-Single-level generators use direct distribution parameters. Their multilevel
-forms use link-scale intercepts and random covariance terms.
+All predictor generator levels use fixed location or link-scale intercepts.
+Multilevel forms add random covariance terms.
 Here is a quick demonstration of various distribution families with single level data.
 
 ```{r, results = "asis"}
@@ -287,12 +286,12 @@ families <- simulate_data(
   n = 10,
   seed = 2026,
   generators = list(
-    normal = gen_normal("normal", mean = 5, sd = 1),
-    successes = gen_binomial("successes", size = 5, prob = 0.40),
-    visits = gen_poisson("visits", lambda = 2),
-    events = gen_negbin("events", size = 3, mu = 2),
-    cost = gen_gamma("cost", shape = 4, mean = 20),
-    adherence = gen_beta("adherence", mean = 0.70, precision = 12)
+    normal = gen_mvn("normal", fixed_intercept = 5, residual_cov = 1),
+    successes = gen_binomial("successes", size = 5, fixed_intercept = stats::qlogis(0.40)),
+    visits = gen_poisson("visits", fixed_intercept = log(2)),
+    events = gen_negbin("events", fixed_intercept = log(2), scale_fixed_intercept = log(3)),
+    cost = gen_gamma("cost", fixed_intercept = log(20), scale_fixed_intercept = log(4)),
+    adherence = gen_beta("adherence", fixed_intercept = stats::qlogis(0.70), scale_fixed_intercept = log(12))
   )
 )
 
@@ -330,17 +329,17 @@ categorical <- simulate_data(
   n = 12,
   seed = 2026,
   generators = list(
-    binary_factor = gen_categorical("binary_factor", prob = 0.35),
+    binary_factor = gen_categorical("binary_factor", fixed_intercept = stats::qlogis(0.35)),
     education = gen_categorical(
       "education",
       categories = c("< bachelor", "bachelor", "> bachelor"),
-      prob = c(0.45, 0.35, 0.20),
+      fixed_intercept = c("bachelor" = log(0.35 / 0.45), "> bachelor" = log(0.20 / 0.45)),
       ordered = TRUE
     ),
     education_code = gen_categorical(
       "education_code",
       categories = c("arts", "science", "psychology"),
-      prob = c(0.45, 0.35, 0.20),
+      fixed_intercept = c("science" = log(0.35 / 0.45), "psychology" = log(0.20 / 0.45)),
       output = "integer"
     )
   )
@@ -388,13 +387,13 @@ correlated_comp <- simulate_data(
   generators = list(
     affect_block = gen_mvn(
       c("affect", "energy"),
-      mean = c(0, 1),
-      cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
+      fixed_intercept = c(0, 1),
+      residual_cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
     ),
     time_use = gen_mvn(
       c("ilr_1", "ilr_2"),
-      mean = c(0, 0),
-      cov = diag(c(0.30, 0.20)),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(c(0.30, 0.20)),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -420,8 +419,8 @@ parts_only <- simulate_data(
   generators = list(
     time_use = gen_mvn(
       c("z1", "z2"),
-      mean = c(0, 0),
-      cov = diag(2),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(2),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -436,7 +435,7 @@ kable(parts_only$data)
 # Location-Scale Predictors
 
 For multilevel predictors, `scale_fixed_intercept` adds group-varying scale
-parameters. For a normal generator this means log residual SD; for negative
+parameters. For a univariate `gen_mvn()` generator this means log residual SD; for negative
 binomial, gamma, and beta generators it controls size, shape, and precision.
 
 Here you can see in the metadata the group specific parameters 
@@ -448,7 +447,7 @@ location_scale <- simulate_data(
   n_per_group = 5,
   seed = 2026,
   generators = list(
-    symptom = gen_normal(
+    symptom = gen_mvn(
       "symptom",
       level = "multilevel",
       fixed_intercept = 10,
@@ -543,7 +542,7 @@ simple_outcome <- simulate_data(
   n = 200,
   seed = 2026,
   generators = list(
-    dose = gen_normal("dose", mean = 0, sd = 1),
+    dose = gen_mvn("dose", fixed_intercept = 0, residual_cov = 1),
     score = gen_outcome(
       score ~ dose,
       coefficients = c("(Intercept)" = 10, dose = 2),
@@ -575,14 +574,27 @@ and covariance objects that we can edit before generating the outcome.
 
 A range of helper functions exist:
 
-- `between()`: group means of a predictor.
-- `within()`: row values minus group means.
-- `lag1()`: previous row value within groups.
+- `between()`: the group component of a predictor.
+- `within()`: the realised row value minus the group component.
+- `lag1()`: previous within-predictor value within groups.
 
 These are used in formulae to specify further data management that
 should occur on the predictors before they are used to generate the outcome.
-For example, `between(stress)` creates a helper column with group means of stress,
-and `within(stress)` creates a helper column with row values minus group means.
+When a predictor was generated by a supported multilevel generator,
+`between()` uses the retained random-intercept column and the fixed intercept
+to create the model-implied group expected value. For normal predictors this is
+the fixed intercept plus the random intercept. For non-normal numeric
+predictors this is back-transformed to the realised predictor scale, so Poisson,
+negative binomial, gamma, and beta predictors use inverse-link means, and
+binomial predictors use expected counts. Binary categorical predictors use the
+non-reference category probability, and their `within()` helper is the realised
+non-reference indicator minus that probability. If no supported model-based
+component is available, numeric predictors fall back to observed group means.
+For grouped predictor terms, `lag1()` lags this same within-predictor component,
+not the total realised predictor value.
+For example, `between(stress)` creates a helper column with the group component
+of stress, and `within(stress)` creates a helper column with row values minus
+that group component.
 These helper columns are then used in the outcome formula and have their own coefficients.
 
 ```{r}
@@ -603,15 +615,15 @@ helper_template_sim <- simulate_data(
     treatment = gen_categorical(
       "treatment",
       level = "level2",
-      prob = 0.5,
+      fixed_intercept = stats::qlogis(0.5),
       output = "integer"
     ),
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
       level = "multilevel",
       fixed_intercept = 0,
       random_cov = 0.20,
-      residual_var = 0.80
+      residual_cov = 0.80
     ),
     wellbeing_template = outcome_template(f)
   )
@@ -661,15 +673,15 @@ helper_sim <- simulate_data(
     treatment = gen_categorical(
       "treatment",
       level = "level2",
-      prob = 0.5,
+      fixed_intercept = stats::qlogis(0.5),
       output = "integer"
     ),
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
       level = "multilevel",
       fixed_intercept = 0,
       random_cov = 0.20,
-      residual_var = 0.80
+      residual_cov = 0.80
     ),
     wellbeing = gen_outcome(
       f,
@@ -747,10 +759,10 @@ comp_template <- simulate_data(
   n = 10,
   seed = 2026,
   generators = list(
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
-      mean = 0,
-      sd = 1
+      fixed_intercept = 0,
+      residual_cov = 1
     ),
     time_use_template = outcome_template(
       comp_formula,
@@ -776,10 +788,10 @@ comp_sim <- simulate_data(
   n = 10,
   seed = 2026,
   generators = list(
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
-      mean = 0,
-      sd = 1
+      fixed_intercept = 0,
+      residual_cov = 1
     ),
     time_use = gen_outcome(
       comp_formula,
@@ -814,15 +826,15 @@ scale_template <- simulate_data(
     treatment = gen_categorical(
       "treatment",
       level = "level2",
-      prob = 0.5,
+      fixed_intercept = stats::qlogis(0.5),
       output = "integer"
     ),
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
       level = "multilevel",
       fixed_intercept = 0,
       random_cov = 0.20,
-      residual_var = 0.80
+      residual_cov = 0.80
     ),
     wellbeing_template = outcome_template(
       scale_outcome_formula,
@@ -852,15 +864,15 @@ scale_sim <- simulate_data(
     treatment = gen_categorical(
       "treatment",
       level = "level2",
-      prob = 0.5,
+      fixed_intercept = stats::qlogis(0.5),
       output = "integer"
     ),
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
       level = "multilevel",
       fixed_intercept = 0,
       random_cov = 0.20,
-      residual_var = 0.80
+      residual_cov = 0.80
     ),
     wellbeing = gen_outcome(
       scale_outcome_formula,
@@ -924,15 +936,15 @@ template_sim <- simulate_data(
     intervention = gen_categorical(
       "intervention",
       level = "level2",
-      prob = 0.5,
+      fixed_intercept = stats::qlogis(0.5),
       output = "integer"
     ),
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
       level = "multilevel",
       fixed_intercept = 0,
       random_cov = 0.20,
-      residual_var = 0.80
+      residual_cov = 0.80
     ),
     pa_template = outcome_template(
       pa_formula,
@@ -1036,15 +1048,15 @@ pa_sim <- simulate_data(
     intervention = gen_categorical(
       "intervention",
       level = "level2",
-      prob = 0.5,
+      fixed_intercept = stats::qlogis(0.5),
       output = "integer"
     ),
-    stress = gen_normal(
+    stress = gen_mvn(
       "stress",
       level = "multilevel",
       fixed_intercept = 0,
       random_cov = 0.20,
-      residual_var = 0.80
+      residual_cov = 0.80
     ),
     pa = gen_outcome(
       pa_formula,

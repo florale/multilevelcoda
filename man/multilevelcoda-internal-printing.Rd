@@ -48,7 +48,7 @@ conversions used by print methods.
 }
 \examples{
 multilevelcoda:::.mlsim_na_character(NULL)
-sim <- simulate_data(n = 2, generators = list(x = gen_normal("x")))
+sim <- simulate_data(n = 2, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
 multilevelcoda:::.mlsim_generated_columns(sim)
 
 }
