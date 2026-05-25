@@ -47,8 +47,8 @@
 #'   n_per_group = 2,
 #'   seed = 10,
 #'   generators = list(
-#'     group_x = gen_normal("group_x", level = "level2", mean = 0, sd = 1),
-#'     y = gen_poisson("y", lambda = 2)
+#'     group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 0, residual_cov = 1),
+#'     y = gen_poisson("y", fixed_intercept = log(2))
 #'   )
 #' )
 #' sim$data
@@ -58,7 +58,7 @@
 #'   n_groups = 2,
 #'   n_per_group = 3,
 #'   time_id = "visit",
-#'   generators = list(x = gen_normal("x"))
+#'   generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1))
 #' )
 #' longitudinal$metadata$index
 #'
@@ -82,6 +82,9 @@ simulate_data <- function(generators, n = NULL, n_groups = NULL, n_per_group = N
     }
     used_names <- names(data)
     generator_metadata <- list()
+    completed_generator_specs <- list()
+    completed_generator_metadata <- list()
+    column_generators <- character()
 
     context <- list(
       n_rows = nrow(data),
@@ -94,7 +97,10 @@ simulate_data <- function(generators, n = NULL, n_groups = NULL, n_per_group = N
       design_data = design_data,
       group_data = group_data,
       data = data.table::copy(data),
-      index = design$index
+      index = design$index,
+      generator_specs = completed_generator_specs,
+      generator_metadata = completed_generator_metadata,
+      column_generators = column_generators
     )
 
     for (generator_name in names(generators)) {
@@ -123,6 +129,14 @@ simulate_data <- function(generators, n = NULL, n_groups = NULL, n_per_group = N
       context$data <- data.table::copy(data)
       used_names <- c(used_names, simulated$names)
       generator_metadata[[generator_name]] <- simulated$metadata
+      completed_generator_specs[[generator_name]] <- .mlsim_drop_simulators(
+        generators[generator_name]
+      )[[1L]]
+      completed_generator_metadata[[generator_name]] <- simulated$metadata
+      column_generators[simulated$names] <- generator_name
+      context$generator_specs <- completed_generator_specs
+      context$generator_metadata <- completed_generator_metadata
+      context$column_generators <- column_generators
     }
 
     structure(

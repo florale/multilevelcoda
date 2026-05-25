@@ -9,23 +9,19 @@
 gen_gamma(
   vars,
   level = c("single", "level2", "multilevel"),
-  shape = NULL,
-  mean = NULL,
-  rate = NULL,
-  scale = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
-  scale_fixed_intercept = NULL
+  ...,
+  scale_fixed_intercept = NULL,
+  random_cov = NULL
 )
 
 gen_beta(
   vars,
   level = c("single", "level2", "multilevel"),
-  mean = NULL,
-  precision = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
-  scale_fixed_intercept = NULL
+  ...,
+  scale_fixed_intercept = NULL,
+  random_cov = NULL
 )
 }
 \arguments{
@@ -35,24 +31,16 @@ gen_beta(
 \code{"level2"} generates group-level values, and \code{"multilevel"} uses a
 random-intercept model.}
 
-\item{shape}{Gamma shape parameter.}
+\item{fixed_intercept}{Link-scale intercept. Gamma uses the log link and
+beta uses the logit link.}
 
-\item{mean}{Mean parameter. For gamma variables this must be positive; for
-beta variables it must be in \verb{(0, 1)}.}
+\item{...}{Removed direct distribution parameters are rejected.}
 
-\item{rate, scale}{Alternative gamma parameterizations for \code{"single"} and
-\code{"level2"} generators. Supply at most one of \code{rate} or \code{scale}.}
-
-\item{fixed_intercept}{Link-scale intercept. Gamma uses the log link; beta
-uses the logit link.}
+\item{scale_fixed_intercept}{Log shape intercept for gamma variables or log
+precision intercept for beta variables.}
 
 \item{random_cov}{Group-level random-intercept covariance for multilevel
 generators.}
-
-\item{scale_fixed_intercept}{Optional log shape or log precision intercept
-for multilevel generators.}
-
-\item{precision}{Beta precision parameter.}
 }
 \value{
 An \code{mlsim_generator_spec} object for use in \code{\link[=simulate_data]{simulate_data()}}.
@@ -65,8 +53,8 @@ sim <- simulate_data(
   n = 5,
   seed = 5,
   generators = list(
-    positive = gen_gamma("positive", shape = 2, mean = 1.5),
-    proportion = gen_beta("proportion", mean = 0.4, precision = 10)
+    positive = gen_gamma("positive", fixed_intercept = log(1.5), scale_fixed_intercept = log(2)),
+    proportion = gen_beta("proportion", fixed_intercept = stats::qlogis(0.4), scale_fixed_intercept = log(10))
   )
 )
 sim$data
@@ -77,7 +65,6 @@ Other predictor generators:
 \code{\link{count-generators}},
 \code{\link[=gen_categorical]{gen_categorical()}},
 \code{\link[=gen_custom]{gen_custom()}},
-\code{\link[=gen_mvn]{gen_mvn()}},
-\code{\link[=gen_normal]{gen_normal()}}
+\code{\link[=gen_mvn]{gen_mvn()}}
 }
 \concept{predictor generators}

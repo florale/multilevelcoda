@@ -18,7 +18,7 @@ A \code{summary.mlsim_data} object with \code{design} and \code{generators} tabl
 Build a compact summary of an \code{mlsim_data} object.
 }
 \examples{
-sim <- simulate_data(n = 3, generators = list(x = gen_normal("x")))
+sim <- simulate_data(n = 3, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
 summary(sim)
 
 }

@@ -8,7 +8,6 @@ gen_categorical(
   vars,
   level = c("single", "level2", "multilevel"),
   categories = NULL,
-  prob = NULL,
   fixed_intercept = NULL,
   random_cov = NULL,
   reference = NULL,
@@ -24,11 +23,6 @@ gen_categorical(
 baseline-category logit random-intercept model.}
 
 \item{categories}{Vector of category values. Defaults to \code{c(0L, 1L)}.}
-
-\item{prob}{Category probabilities for \code{"single"} and \code{"level2"}
-generators. For binary variables a scalar is interpreted as the success
-probability for the second category. Multicategory probabilities may be a
-vector or row-wise matrix.}
 
 \item{fixed_intercept}{Baseline-category logits. For \code{k} categories this has
 length \code{k - 1} and is named or ordered by non-reference category.}
@@ -60,7 +54,7 @@ sim <- simulate_data(
     arm = gen_categorical(
       "arm",
       categories = c("control", "treatment"),
-      prob = 0.5
+      fixed_intercept = stats::qlogis(0.5)
     )
   )
 )
@@ -72,7 +66,6 @@ Other predictor generators:
 \code{\link{continuous-generators}},
 \code{\link{count-generators}},
 \code{\link[=gen_custom]{gen_custom()}},
-\code{\link[=gen_mvn]{gen_mvn()}},
-\code{\link[=gen_normal]{gen_normal()}}
+\code{\link[=gen_mvn]{gen_mvn()}}
 }
 \concept{predictor generators}

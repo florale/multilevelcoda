@@ -25,3 +25,4 @@ vignettes/fit_centered
 *.pdf
 .codex
 R/optimise.R
+AGENTS.md

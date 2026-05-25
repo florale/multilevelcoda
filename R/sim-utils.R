@@ -7,11 +7,11 @@
 #' @param level Simulation level.
 #' @param ... Values passed to formatting or error helpers.
 #' @param call. Logical flag passed to [stop()].
-#' @param args,used,ignored,supplied,use Character vectors or named logicals
-#'   used to build diagnostics.
+#' @param args,used,ignored,supplied,use,direct_supplied,multilevel_only
+#'   Character vectors or named logicals used to build diagnostics.
 #' @param generator Generator label used in diagnostic messages.
-#' @param vars,n,names,arg,arg_name Variable names, target lengths, or argument
-#'   labels.
+#' @param vars,var,n,vars_n,names,arg,arg_name Variable names, target lengths,
+#'   or argument labels.
 #' @param allow_empty Logical flag allowing an empty name vector.
 #' @param new,existing Candidate and existing generated names.
 #' @param x,y Generic vectors, matrices, formulas, or fallback values.
@@ -26,12 +26,15 @@
 #' @param size Count-distribution size specification.
 #' @param context Simulation context supplied by [simulate_data()].
 #' @param values,result Generated values or raw custom-generator result.
+#' @param internal Optional internal data columns to append to a generator
+#'   result.
 #' @param scale Logical flag for joint location/scale random effects.
+#' @param multilevel_required,multilevel_use,scale_arg Multilevel constructor
+#'   contract declarations.
 #' @param fixed_intercept,scale_fixed_intercept Location and scale intercepts.
 #' @param expected_names Optional names used to align named vector and matrix
 #'   inputs.
-#' @param random Random-effect draw metadata.
-#' @param scale_linear_predictor Row-level scale linear predictor.
+#' @param random,random_intercepts Random-effect draw metadata.
 #' @param metadata,wrapper_metadata Metadata lists.
 #' @param allow_zero Logical flag allowing positive semi-definite covariance
 #'   matrices.
@@ -265,13 +268,6 @@ NULL
     default = "zero",
     allow_scalar = FALSE
   )
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_uniform_category_prob <- function(n, labels) {
-  prob <- matrix(1 / length(labels), nrow = n, ncol = length(labels))
-  colnames(prob) <- labels
-  prob
 }
 
 #' @rdname multilevelcoda-internal-utils
@@ -595,6 +591,51 @@ NULL
 }
 
 #' @rdname multilevelcoda-internal-utils
+.mlsim_generator_contract <- function(generator, vars, level, vars_n = 1L,
+                                      direct_supplied = NULL,
+                                      multilevel_only = NULL,
+                                      multilevel_required = NULL,
+                                      multilevel_use = NULL,
+                                      scale_arg = NULL,
+                                      scale_fixed_intercept = NULL) {
+  vars <- .mlsim_check_vars(vars, vars_n)
+  level <- .mlsim_match_level(level)
+
+  if (!is.null(multilevel_only)) {
+    .mlsim_check_multilevel_only_args(level, multilevel_only)
+  }
+  if (!is.null(direct_supplied)) {
+    .mlsim_check_multilevel_unused(
+      level,
+      direct_supplied,
+      generator,
+      multilevel_use
+    )
+  }
+  if (!is.null(multilevel_required)) {
+    .mlsim_check_multilevel_required(level, multilevel_required, generator)
+  }
+  if (!is.null(scale_arg) && identical(level, "multilevel")) {
+    .mlsim_check_scale_or_arg(
+      scale_arg$value,
+      scale_arg$name,
+      scale_fixed_intercept,
+      generator
+    )
+  }
+
+  list(vars = vars, level = level)
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_warn_direct_precedence <- function(level, generator, used, ignored) {
+  if (!identical(level, "multilevel")) {
+    .mlsim_warn_ignored_args(generator, used, ignored)
+  }
+  invisible(NULL)
+}
+
+#' @rdname multilevelcoda-internal-utils
 .mlsim_random_intercept_names <- function(vars, scale = FALSE) {
   location <- paste0(vars, ":(Intercept)")
   if (!isTRUE(scale)) {
@@ -620,17 +661,26 @@ NULL
 
 #' @rdname multilevelcoda-internal-utils
 .mlsim_joint_random_intercepts <- function(vars, random_cov, context, scale = FALSE) {
-  names <- .mlsim_random_intercept_names(vars, scale)
+  location_names <- .mlsim_random_intercept_names(vars, scale = FALSE)
+  joint_names <- .mlsim_random_intercept_names(vars, scale = TRUE)
+  n_vars <- length(vars)
+
+  use_joint <- FALSE
+  if (isTRUE(scale) && !is.null(random_cov)) {
+    random_cov_dim <- dim(as.matrix(random_cov))
+    use_joint <- identical(random_cov_dim, c(length(joint_names), length(joint_names)))
+  }
+
+  names <- if (use_joint) joint_names else location_names
   random_cov <- .mlsim_check_position_cov(random_cov, names, "random_cov")
   draws <- .mlsim_rmvnorm(context$n_groups, rep(0, length(names)), random_cov)
   colnames(draws) <- names
 
-  n_vars <- length(vars)
   random_intercepts <- draws[, seq_len(n_vars), drop = FALSE]
   colnames(random_intercepts) <- vars
 
   scale_random_intercepts <- NULL
-  if (isTRUE(scale)) {
+  if (use_joint) {
     scale_random_intercepts <- draws[, n_vars + seq_len(n_vars), drop = FALSE]
     colnames(scale_random_intercepts) <- vars
   }
@@ -640,6 +690,72 @@ NULL
     random_intercepts = random_intercepts,
     scale_random_intercepts = scale_random_intercepts,
     joint_random_intercepts = draws
+  )
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_internal_name_piece <- function(x) {
+  make.names(as.character(x))
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_internal_random_intercept_names <- function(vars) {
+  paste0(".mlsim_", .mlsim_internal_name_piece(vars), "_random_intercept")
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_internal_scale_random_intercept_names <- function(vars) {
+  paste0(".mlsim_", .mlsim_internal_name_piece(vars), "_scale_random_intercept")
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_internal_categorical_random_intercept_names <- function(var, categories) {
+  paste0(
+    ".mlsim_",
+    .mlsim_internal_name_piece(var),
+    "_random_intercept_",
+    .mlsim_internal_name_piece(categories)
+  )
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_row_random_intercept_columns <- function(random_intercepts, context, names) {
+  if (is.null(random_intercepts)) {
+    return(NULL)
+  }
+  values <- random_intercepts[context$group_index, , drop = FALSE]
+  data <- data.table::as.data.table(values)
+  data.table::setnames(data, names)
+  data
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_multilevel_random_columns <- function(random, context, vars) {
+  location <- .mlsim_row_random_intercept_columns(
+    random$random_intercepts,
+    context,
+    .mlsim_internal_random_intercept_names(vars)
+  )
+  scale <- .mlsim_row_random_intercept_columns(
+    random$scale_random_intercepts,
+    context,
+    .mlsim_internal_scale_random_intercept_names(vars)
+  )
+  if (is.null(location)) {
+    return(scale)
+  }
+  if (is.null(scale)) {
+    return(location)
+  }
+  cbind(location, scale)
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_categorical_random_columns <- function(random_intercepts, context, var) {
+  .mlsim_row_random_intercept_columns(
+    random_intercepts,
+    context,
+    .mlsim_internal_categorical_random_intercept_names(var, colnames(random_intercepts))
   )
 }
 
@@ -678,23 +794,20 @@ NULL
   eta <- fixed_intercept + random$random_intercepts[context$group_index, 1L]
   metadata <- list(
     fixed_parameters = list(intercept = fixed_intercept),
-    group_parameters = list(
-      random_cov = random$random_cov,
-      random_intercepts = random$random_intercepts
-    ),
+    group_parameters = list(random_cov = random$random_cov),
     fixed_intercept = fixed_intercept,
-    random_cov = random$random_cov,
-    random_intercepts = random$random_intercepts
+    random_cov = random$random_cov
   )
 
   scale_eta <- NULL
   if (!is.null(scale_fixed_intercept)) {
-    scale_eta <- scale_fixed_intercept + random$scale_random_intercepts[context$group_index, 1L]
+    scale_eta <- if (is.null(random$scale_random_intercepts)) {
+      rep(scale_fixed_intercept, context$n_rows)
+    } else {
+      scale_fixed_intercept + random$scale_random_intercepts[context$group_index, 1L]
+    }
     metadata$fixed_parameters$scale_intercept <- scale_fixed_intercept
-    metadata$group_parameters$scale_random_intercepts <- random$scale_random_intercepts
     metadata$scale_fixed_intercept <- scale_fixed_intercept
-    metadata$scale_random_intercepts <- random$scale_random_intercepts
-    metadata$scale_linear_predictor <- scale_eta
   }
 
   list(
@@ -769,24 +882,16 @@ NULL
 
 #' @rdname multilevelcoda-internal-utils
 .mlsim_simple_random_metadata <- function(fixed_intercept, random,
-                                          scale_fixed_intercept = NULL,
-                                          scale_linear_predictor = NULL) {
+                                          scale_fixed_intercept = NULL) {
   metadata <- list(
     fixed_parameters = list(intercept = fixed_intercept),
-    group_parameters = list(
-      random_cov = random$random_cov,
-      random_intercepts = random$random_intercepts
-    ),
+    group_parameters = list(random_cov = random$random_cov),
     fixed_intercept = fixed_intercept,
-    random_cov = random$random_cov,
-    random_intercepts = random$random_intercepts
+    random_cov = random$random_cov
   )
   if (!is.null(scale_fixed_intercept)) {
     metadata$fixed_parameters$scale_intercept <- scale_fixed_intercept
-    metadata$group_parameters$scale_random_intercepts <- random$scale_random_intercepts
     metadata$scale_fixed_intercept <- scale_fixed_intercept
-    metadata$scale_random_intercepts <- random$scale_random_intercepts
-    metadata$scale_linear_predictor <- scale_linear_predictor
   }
   metadata
 }
@@ -839,10 +944,36 @@ NULL
 }
 
 #' @rdname multilevelcoda-internal-utils
-.mlsim_result <- function(values, names, metadata) {
+.mlsim_result <- function(values, names, metadata, internal = NULL) {
   data <- data.table::as.data.table(values)
   names <- .mlsim_check_vars(names, ncol(data), "generated names", allow_empty = TRUE)
   data.table::setnames(data, names)
+
+  if (!is.null(internal)) {
+    internal_data <- data.table::as.data.table(internal)
+    internal_names <- .mlsim_check_vars(
+      names(internal_data),
+      ncol(internal_data),
+      "generated internal names",
+      allow_empty = TRUE
+    )
+    if (nrow(internal_data) != nrow(data)) {
+      .mlsim_stop(
+        "Internal generated columns must have %d rows, not %d.",
+        nrow(data),
+        nrow(internal_data)
+      )
+    }
+    .mlsim_check_new_names_compatible(
+      internal_names,
+      names,
+      "generated internal names"
+    )
+    data.table::setnames(internal_data, internal_names)
+    data <- cbind(data, internal_data)
+    names <- c(names, internal_names)
+  }
+
   list(data = data, names = names, metadata = metadata)
 }
 

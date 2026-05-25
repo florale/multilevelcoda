@@ -2,16 +2,15 @@
 % Please edit documentation in R/sim-generators.R
 \name{gen_mvn}
 \alias{gen_mvn}
-\title{Generate Multivariate Normal and Compositional Variables}
+\title{Generate Normal, Multivariate Normal, and Compositional Variables}
 \usage{
 gen_mvn(
   vars,
   level = c("single", "level2", "multilevel"),
-  mean = NULL,
-  cov = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
   residual_cov = NULL,
+  random_cov = NULL,
+  ...,
   scale_fixed_intercept = NULL,
   residual_cor = NULL,
   compositional = FALSE,
@@ -29,23 +28,23 @@ compositional generators these are ILR coordinate names.}
 observation, \code{"level2"} generates one group-level vector and expands it to
 each row in the group, and \code{"multilevel"} uses a random-intercept model.}
 
-\item{mean, cov}{Direct mean vector and covariance matrix for \code{"single"} and
-\code{"level2"} generators. Defaults are zero means and identity covariance.}
+\item{fixed_intercept}{Identity-scale location intercept vector.}
 
-\item{fixed_intercept}{Location intercept vector for multilevel generators.}
+\item{residual_cov}{Residual covariance matrix for Gaussian generators
+without a row-specific scale model. For univariate generators, it may be a
+scalar residual variance.}
 
-\item{random_cov}{Group-level random-intercept covariance matrix. When
-\code{scale_fixed_intercept} is supplied this covariance spans location and
-scale intercepts jointly.}
+\item{random_cov}{Group-level random-intercept covariance matrix for
+multilevel generators. When \code{scale_fixed_intercept} is supplied this may be
+either a location-only covariance or a joint location-scale covariance.}
 
-\item{residual_cov}{Residual covariance matrix for multilevel MVN generators
-without a row-specific scale model.}
+\item{...}{Removed direct distribution parameters are rejected.}
 
 \item{scale_fixed_intercept}{Optional log residual standard-deviation
-intercepts for multilevel generators.}
+intercepts.}
 
 \item{residual_cor}{Residual correlation matrix used with
-\code{scale_fixed_intercept}.}
+\code{scale_fixed_intercept}. Defaults to an identity correlation matrix.}
 
 \item{compositional}{Logical; if \code{TRUE}, treat \code{vars} as ILR coordinates and
 back-transform to composition parts.}
@@ -65,8 +64,8 @@ rows define ILR balances using \code{-1}, \code{0}, and \code{1}.}
 An \code{mlsim_generator_spec} object for use in \code{\link[=simulate_data]{simulate_data()}}.
 }
 \description{
-Create a generator specification for multivariate Gaussian variables,
-optionally transformed from ILR coordinates to compositional parts.
+Create a generator specification for univariate or multivariate Gaussian
+variables, optionally transformed from ILR coordinates to compositional parts.
 }
 \details{
 Compositional MVN generators simulate ILR coordinates first, then use the
@@ -78,10 +77,11 @@ sim <- simulate_data(
   n = 4,
   seed = 2,
   generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
     z = gen_mvn(
       c("z1", "z2"),
-      mean = c(0, 0),
-      cov = diag(2),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(2),
       compositional = TRUE,
       parts = c("sleep", "activity", "sedentary")
     )
@@ -96,7 +96,6 @@ Other predictor generators:
 \code{\link{continuous-generators}},
 \code{\link{count-generators}},
 \code{\link[=gen_categorical]{gen_categorical()}},
-\code{\link[=gen_custom]{gen_custom()}},
-\code{\link[=gen_normal]{gen_normal()}}
+\code{\link[=gen_custom]{gen_custom()}}
 }
 \concept{predictor generators}

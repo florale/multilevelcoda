@@ -3,9 +3,37 @@
 \name{multilevelcoda-internal-generator-specs}
 \alias{multilevelcoda-internal-generator-specs}
 \alias{.mlsim_spec}
+\alias{.mlsim_check_unused_generator_dots}
+\alias{.mlsim_gen_distribution}
 \title{Internal Generator Specification Helpers}
 \usage{
 .mlsim_spec(type, vars, level, simulate, ...)
+
+.mlsim_check_unused_generator_dots(...)
+
+.mlsim_gen_distribution(
+  distribution,
+  vars,
+  level,
+  fixed_intercept = NULL,
+  random_cov = NULL,
+  residual_cov = NULL,
+  scale_fixed_intercept = NULL,
+  residual_cor = NULL,
+  compositional = FALSE,
+  parts = NULL,
+  total = 1,
+  keep_ilr = TRUE,
+  sbp = NULL,
+  categories = NULL,
+  reference = NULL,
+  output = c("factor", "character", "integer"),
+  ordered = FALSE,
+  size = NULL,
+  generator = NULL,
+  user_args = list(),
+  metadata = list()
+)
 }
 \arguments{
 \item{type}{Character scalar naming the generator type.}

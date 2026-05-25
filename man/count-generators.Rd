@@ -10,8 +10,7 @@
 gen_binomial(
   vars,
   level = c("single", "level2", "multilevel"),
-  size = 1,
-  prob = NULL,
+  size = NULL,
   fixed_intercept = NULL,
   random_cov = NULL
 )
@@ -19,7 +18,6 @@ gen_binomial(
 gen_poisson(
   vars,
   level = c("single", "level2", "multilevel"),
-  lambda = NULL,
   fixed_intercept = NULL,
   random_cov = NULL
 )
@@ -27,11 +25,10 @@ gen_poisson(
 gen_negbin(
   vars,
   level = c("single", "level2", "multilevel"),
-  size = NULL,
-  mu = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
-  scale_fixed_intercept = NULL
+  ...,
+  scale_fixed_intercept = NULL,
+  random_cov = NULL
 )
 }
 \arguments{
@@ -41,26 +38,18 @@ gen_negbin(
 \code{"level2"} generates group-level values, and \code{"multilevel"} uses a
 random-intercept model.}
 
-\item{size}{Binomial trial size or negative-binomial size/dispersion
-parameter. May be a scalar, vector, function of \code{n}, or count-distribution
-list where supported.}
+\item{size}{Binomial trial size. May be a scalar, vector, function of \code{n}, or
+count-distribution list.}
 
-\item{prob}{Binomial success probability for \code{"single"} and \code{"level2"}
-generators.}
-
-\item{fixed_intercept}{Link-scale intercept for direct-parameter defaults
-and multilevel models. Binomial uses the logit link; Poisson and negative
-binomial use the log link.}
+\item{fixed_intercept}{Link-scale intercept. Binomial uses the logit link;
+Poisson and negative binomial use the log link.}
 
 \item{random_cov}{Group-level random-intercept covariance for multilevel
 generators.}
 
-\item{lambda}{Poisson mean for \code{"single"} and \code{"level2"} generators.}
+\item{...}{Removed direct distribution parameters are rejected.}
 
-\item{mu}{Negative-binomial mean for \code{"single"} and \code{"level2"} generators.}
-
-\item{scale_fixed_intercept}{Optional log size intercept for multilevel
-negative-binomial generators.}
+\item{scale_fixed_intercept}{Log negative-binomial size intercept.}
 }
 \value{
 An \code{mlsim_generator_spec} object for use in \code{\link[=simulate_data]{simulate_data()}}.
@@ -70,18 +59,17 @@ Create generator specifications for binomial, Poisson, and negative
 binomial count variables.
 }
 \details{
-For multilevel count generators, \code{fixed_intercept} and \code{random_cov} define
-the link-scale mean. Non-multilevel generators can use direct distribution
-parameters or a link-scale \code{fixed_intercept}.
+Count generators use link-scale intercepts at every level. Negative-binomial
+size is \code{exp(scale_fixed_intercept)}.
 }
 \examples{
 sim <- simulate_data(
   n = 5,
   seed = 4,
   generators = list(
-    events = gen_poisson("events", lambda = 2),
-    successes = gen_binomial("successes", size = 4, prob = 0.5),
-    overdispersed = gen_negbin("overdispersed", size = 3, mu = 2)
+    events = gen_poisson("events", fixed_intercept = log(2)),
+    successes = gen_binomial("successes", size = 4, fixed_intercept = stats::qlogis(0.5)),
+    overdispersed = gen_negbin("overdispersed", fixed_intercept = log(2), scale_fixed_intercept = log(3))
   )
 )
 sim$data
@@ -92,7 +80,6 @@ Other predictor generators:
 \code{\link{continuous-generators}},
 \code{\link[=gen_categorical]{gen_categorical()}},
 \code{\link[=gen_custom]{gen_custom()}},
-\code{\link[=gen_mvn]{gen_mvn()}},
-\code{\link[=gen_normal]{gen_normal()}}
+\code{\link[=gen_mvn]{gen_mvn()}}
 }
 \concept{predictor generators}

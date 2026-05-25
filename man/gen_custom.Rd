@@ -51,7 +51,6 @@ Other predictor generators:
 \code{\link{continuous-generators}},
 \code{\link{count-generators}},
 \code{\link[=gen_categorical]{gen_categorical()}},
-\code{\link[=gen_mvn]{gen_mvn()}},
-\code{\link[=gen_normal]{gen_normal()}}
+\code{\link[=gen_mvn]{gen_mvn()}}
 }
 \concept{predictor generators}

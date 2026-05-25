@@ -75,8 +75,8 @@ sim <- simulate_data(
   n_per_group = 2,
   seed = 10,
   generators = list(
-    group_x = gen_normal("group_x", level = "level2", mean = 0, sd = 1),
-    y = gen_poisson("y", lambda = 2)
+    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 0, residual_cov = 1),
+    y = gen_poisson("y", fixed_intercept = log(2))
   )
 )
 sim$data
@@ -86,7 +86,7 @@ longitudinal <- simulate_data(
   n_groups = 2,
   n_per_group = 3,
   time_id = "visit",
-  generators = list(x = gen_normal("x"))
+  generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1))
 )
 longitudinal$metadata$index
 
