@@ -81,9 +81,28 @@
 <p><strong>NOTE THIS IS EXPERIMENTAL FOR NOW</strong></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://florale.github.io/multilevelcoda/">multilevelcoda</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'multilevelcoda'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     sub</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; data.table 1.18.4 using 12 threads (see ?getDTthreads).</span></span>
+<span><span class="co">#&gt; Latest news: r-datatable.com</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'data.table'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     %notin%</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/cmdstanr/" class="external-link">cmdstanr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; This is cmdstanr version 0.8.0</span></span>
+<span><span class="co">#&gt; - CmdStanR documentation and vignettes: mc-stan.org/cmdstanr</span></span>
+<span><span class="co">#&gt; - CmdStan path: /home/jwile/.cmdstan/cmdstan-2.38.0</span></span>
+<span><span class="co">#&gt; - CmdStan version: 2.38.0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; A newer version of CmdStan is available. See ?install_cmdstan() to install it.</span></span>
+<span><span class="co">#&gt; To disable this check set option or environment variable cmdstanr_no_ver_check=TRUE.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">3</span>, pillar.sigfig <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p>Data simulation is useful for multiple purposes, such as:</p>
@@ -2191,47 +2210,23 @@ in the same was as built in generators.</p>
 </h2>
 <p><code><a href="../reference/gen_outcome.html">gen_outcome()</a></code> adds a model-based outcome generator to
 the same <code><a href="../reference/simulate_data.html">simulate_data()</a></code> workflow. It is designed for
-simulation studies where predictors are generated first and outcomes are
-then generated from a known location, scale, and optional residual
-autoregressive process.</p>
+simulation studies where outcomes are generated from a known location,
+scale, and optional residual autoregressive process.</p>
 <p>The scale model is required. Use <code>scale = sigma ~ 1</code> for
 constant conditional standard deviations. When <code>ar1()</code> is
 present, the scale model controls innovation variability. When
 <code>ar1()</code> is absent, it controls ordinary residual variability.
 The AR process is applied to residual ILR states, not to lagged observed
 outcomes.</p>
-<p><code>between(x)</code> and <code>within(x)</code> resolve to
-labelled component columns created by earlier generators. For example, a
-multilevel <code>gen_mvn("stress")</code> predictor creates visible
-<code>stress_between</code> and <code>stress_within</code> columns and
-stores their roles in generator metadata.</p>
 <p><code><a href="../reference/gen_template.html">gen_template()</a></code> can be used first to ask the simulator
 for the exact parameter matrices and arrays required by a
 <code><a href="../reference/gen_outcome.html">gen_outcome()</a></code> specification. The template should be run
-with the same design, predictor generators, factor levels, formulas, and
-composition settings that will be used in the final simulation.</p>
+with the same design, formulas, and composition settings that will be
+used in the final simulation.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dynamic_outcome_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span><span class="op">)</span> <span class="op">~</span> <span class="va">treatment</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">stress</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">stress</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ar1</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="va">treatment</span><span class="op">:</span><span class="fu">ar1</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fu">ar1</span><span class="op">(</span><span class="op">)</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span></span>
-<span><span class="va">dynamic_scale_formula</span> <span class="op">&lt;-</span> <span class="va">sigma</span> <span class="op">~</span> <span class="va">treatment</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">dynamic_outcome_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/mvbind.html" class="external-link">mvbind</a></span><span class="op">(</span><span class="va">ilr1</span>, <span class="va">ilr2</span><span class="op">)</span> <span class="op">~</span> <span class="fu">ar1</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fu">ar1</span><span class="op">(</span><span class="op">)</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span></span>
+<span><span class="va">dynamic_scale_formula</span> <span class="op">&lt;-</span> <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">ID</span><span class="op">)</span></span>
 <span><span class="va">dynamic_composition</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sleep"</span>, <span class="st">"sedentary"</span>, <span class="st">"activity"</span><span class="op">)</span>, total <span class="op">=</span> <span class="fl">24</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">dynamic_predictor_generators</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  treatment <span class="op">=</span> <span class="fu"><a href="../reference/gen_categorical.html">gen_categorical</a></span><span class="op">(</span></span>
-<span>    <span class="st">"treatment"</span>,</span>
-<span>    level <span class="op">=</span> <span class="st">"level2"</span>,</span>
-<span>    categories <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"control"</span>, <span class="st">"treatment"</span><span class="op">)</span>,</span>
-<span>    fixed_intercept <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">qlogis</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>    output <span class="op">=</span> <span class="st">"factor"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  stress <span class="op">=</span> <span class="fu"><a href="../reference/gen_mvn.html">gen_mvn</a></span><span class="op">(</span></span>
-<span>    <span class="st">"stress"</span>,</span>
-<span>    level <span class="op">=</span> <span class="st">"multilevel"</span>,</span>
-<span>    fixed_intercept <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>    random_cov <span class="op">=</span> <span class="fl">0.20</span>,</span>
-<span>    residual_cov <span class="op">=</span> <span class="fl">0.80</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dynamic_template</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_data.html">simulate_data</a></span><span class="op">(</span></span>
 <span>  n_groups <span class="op">=</span> <span class="fl">4</span>,</span>
@@ -2239,26 +2234,20 @@ composition settings that will be used in the final simulation.</p>
 <span>  group_id <span class="op">=</span> <span class="st">"ID"</span>,</span>
 <span>  time_id <span class="op">=</span> <span class="st">"day"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">2026</span>,</span>
-<span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="va">dynamic_predictor_generators</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      outcome_template <span class="op">=</span> <span class="fu"><a href="../reference/gen_template.html">gen_template</a></span><span class="op">(</span></span>
-<span>        <span class="va">dynamic_outcome_formula</span>,</span>
-<span>        scale <span class="op">=</span> <span class="va">dynamic_scale_formula</span>,</span>
-<span>        composition <span class="op">=</span> <span class="va">dynamic_composition</span>,</span>
-<span>        burnin <span class="op">=</span> <span class="fl">20</span></span>
-<span>      <span class="op">)</span></span>
+<span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    outcome_template <span class="op">=</span> <span class="fu"><a href="../reference/gen_template.html">gen_template</a></span><span class="op">(</span></span>
+<span>      <span class="va">dynamic_outcome_formula</span>,</span>
+<span>      scale <span class="op">=</span> <span class="va">dynamic_scale_formula</span>,</span>
+<span>      composition <span class="op">=</span> <span class="va">dynamic_composition</span>,</span>
+<span>      burnin <span class="op">=</span> <span class="fl">20</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dynamic_params</span> <span class="op">&lt;-</span> <span class="va">dynamic_template</span><span class="op">$</span><span class="va">generator_metadata</span><span class="op">$</span><span class="va">outcome_template</span><span class="op">$</span><span class="va">params</span></span>
-<span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">location</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"between(stress)"</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.15</span>, <span class="op">-</span><span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">location</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"within(stress)"</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.03</span><span class="op">)</span></span>
+<span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">location</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"(Intercept)"</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">scale</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"(Intercept)"</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.35</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">scale</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"treatmenttreatment"</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.45</span>, <span class="fl">0.4</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">ar</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"ar1()"</span>, , <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.02</span>, <span class="op">-</span><span class="fl">0.01</span>, <span class="fl">0.20</span><span class="op">)</span>, <span class="fl">2</span>, <span class="fl">2</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">ar</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="st">"treatmenttreatment:ar1()"</span>, , <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0.03</span><span class="op">)</span>, <span class="fl">2</span>, <span class="fl">2</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dynamic_random_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">random</span><span class="op">$</span><span class="va">ID</span><span class="op">$</span><span class="va">covariance</span><span class="op">)</span></span>
 <span><span class="va">dynamic_random_sd_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -2311,32 +2300,27 @@ composition settings that will be used in the final simulation.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">dynamic_params</span><span class="op">$</span><span class="va">random</span><span class="op">$</span><span class="va">ID</span><span class="op">$</span><span class="va">covariance</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">dynamic_random_names</span>, <span class="va">dynamic_random_names</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dynamic_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_data.html">simulate_data</a></span><span class="op">(</span></span>
-<span>  n_groups <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  n_per_group <span class="op">=</span> <span class="fl">150</span>,</span>
+<span>  n_groups <span class="op">=</span> <span class="fl">400</span>,</span>
+<span>  n_per_group <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  group_id <span class="op">=</span> <span class="st">"ID"</span>,</span>
 <span>  time_id <span class="op">=</span> <span class="st">"day"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">2026</span>,</span>
-<span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="va">dynamic_predictor_generators</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      outcome <span class="op">=</span> <span class="fu"><a href="../reference/gen_outcome.html">gen_outcome</a></span><span class="op">(</span></span>
-<span>        <span class="va">dynamic_outcome_formula</span>,</span>
-<span>        scale <span class="op">=</span> <span class="va">dynamic_scale_formula</span>,</span>
-<span>        params <span class="op">=</span> <span class="va">dynamic_params</span>,</span>
-<span>        composition <span class="op">=</span> <span class="va">dynamic_composition</span>,</span>
-<span>        burnin <span class="op">=</span> <span class="fl">50</span></span>
-<span>      <span class="op">)</span></span>
+<span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    outcome <span class="op">=</span> <span class="fu"><a href="../reference/gen_outcome.html">gen_outcome</a></span><span class="op">(</span></span>
+<span>      <span class="va">dynamic_outcome_formula</span>,</span>
+<span>      scale <span class="op">=</span> <span class="va">dynamic_scale_formula</span>,</span>
+<span>      params <span class="op">=</span> <span class="va">dynamic_params</span>,</span>
+<span>      composition <span class="op">=</span> <span class="va">dynamic_composition</span>,</span>
+<span>      burnin <span class="op">=</span> <span class="fl">50</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dynamic_comp</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID"</span>, <span class="st">"day"</span>, <span class="st">"treatment"</span>, <span class="st">"stress"</span>, <span class="st">"ilr1"</span>, <span class="st">"ilr2"</span>, <span class="st">"sleep"</span>, <span class="st">"sedentary"</span>, <span class="st">"activity"</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dynamic_comp</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID"</span>, <span class="st">"day"</span>, <span class="st">"ilr1"</span>, <span class="st">"ilr2"</span>, <span class="st">"sleep"</span>, <span class="st">"sedentary"</span>, <span class="st">"activity"</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="right">ID</th>
 <th align="right">day</th>
-<th align="left">treatment</th>
-<th align="right">stress</th>
 <th align="right">ilr1</th>
 <th align="right">ilr2</th>
 <th align="right">sleep</th>
@@ -2347,82 +2331,69 @@ composition settings that will be used in the final simulation.</p>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="left">treatment</td>
-<td align="right">3.27</td>
-<td align="right">0.360</td>
-<td align="right">-0.400</td>
-<td align="right">10.26</td>
-<td align="right">4.98</td>
-<td align="right">8.76</td>
+<td align="right">-0.507</td>
+<td align="right">0.031</td>
+<td align="right">5.08</td>
+<td align="right">9.67</td>
+<td align="right">9.25</td>
 </tr>
 <tr class="even">
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="left">treatment</td>
-<td align="right">2.96</td>
-<td align="right">0.318</td>
-<td align="right">-0.512</td>
-<td align="right">9.82</td>
-<td align="right">4.63</td>
-<td align="right">9.55</td>
+<td align="right">-0.028</td>
+<td align="right">0.454</td>
+<td align="right">7.55</td>
+<td align="right">10.77</td>
+<td align="right">5.67</td>
 </tr>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">3</td>
-<td align="left">treatment</td>
-<td align="right">3.17</td>
-<td align="right">0.080</td>
-<td align="right">-0.164</td>
-<td align="right">8.49</td>
-<td align="right">6.86</td>
-<td align="right">8.65</td>
+<td align="right">0.031</td>
+<td align="right">0.090</td>
+<td align="right">8.20</td>
+<td align="right">8.40</td>
+<td align="right">7.40</td>
 </tr>
 <tr class="even">
 <td align="right">1</td>
 <td align="right">4</td>
-<td align="left">treatment</td>
-<td align="right">2.79</td>
-<td align="right">0.355</td>
-<td align="right">-0.381</td>
-<td align="right">10.24</td>
-<td align="right">5.07</td>
-<td align="right">8.69</td>
+<td align="right">-0.383</td>
+<td align="right">0.247</td>
+<td align="right">5.65</td>
+<td align="right">10.76</td>
+<td align="right">7.59</td>
 </tr>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">5</td>
-<td align="left">treatment</td>
-<td align="right">2.71</td>
-<td align="right">0.666</td>
-<td align="right">-0.115</td>
-<td align="right">12.71</td>
-<td align="right">5.19</td>
-<td align="right">6.10</td>
+<td align="right">-0.458</td>
+<td align="right">0.648</td>
+<td align="right">4.92</td>
+<td align="right">13.63</td>
+<td align="right">5.45</td>
 </tr>
 <tr class="even">
 <td align="right">1</td>
 <td align="right">6</td>
-<td align="left">treatment</td>
-<td align="right">1.46</td>
-<td align="right">0.823</td>
-<td align="right">-0.267</td>
-<td align="right">13.77</td>
-<td align="right">4.16</td>
-<td align="right">6.07</td>
+<td align="right">0.221</td>
+<td align="right">0.420</td>
+<td align="right">9.26</td>
+<td align="right">9.50</td>
+<td align="right">5.25</td>
 </tr>
 </tbody>
 </table>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dynamic_template</span><span class="op">$</span><span class="va">generator_metadata</span><span class="op">$</span><span class="va">outcome_template</span><span class="op">$</span><span class="va">expected_parameter_names</span></span>
 <span><span class="co">#&gt; $location</span></span>
-<span><span class="co">#&gt; [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   </span></span>
-<span><span class="co">#&gt; [4] "within(stress)"    </span></span>
+<span><span class="co">#&gt; [1] "(Intercept)"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $scale</span></span>
-<span><span class="co">#&gt; [1] "(Intercept)"        "treatmenttreatment"</span></span>
+<span><span class="co">#&gt; [1] "(Intercept)"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $ar</span></span>
-<span><span class="co">#&gt; [1] "ar1()"                    "treatmenttreatment:ar1()"</span></span>
+<span><span class="co">#&gt; [1] "ar1()"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $random</span></span>
 <span><span class="co">#&gt; [1] "location|outcome=ilr1|term=(Intercept)"</span></span>
@@ -2436,14 +2407,13 @@ composition settings that will be used in the final simulation.</p>
 <span></span>
 <span><span class="va">dynamic_comp</span><span class="op">$</span><span class="va">generator_metadata</span><span class="op">$</span><span class="va">outcome</span><span class="op">$</span><span class="va">expected_parameter_names</span></span>
 <span><span class="co">#&gt; $location</span></span>
-<span><span class="co">#&gt; [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   </span></span>
-<span><span class="co">#&gt; [4] "within(stress)"    </span></span>
+<span><span class="co">#&gt; [1] "(Intercept)"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $scale</span></span>
-<span><span class="co">#&gt; [1] "(Intercept)"        "treatmenttreatment"</span></span>
+<span><span class="co">#&gt; [1] "(Intercept)"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $ar</span></span>
-<span><span class="co">#&gt; [1] "ar1()"                    "treatmenttreatment:ar1()"</span></span>
+<span><span class="co">#&gt; [1] "ar1()"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $random</span></span>
 <span><span class="co">#&gt; [1] "location|outcome=ilr1|term=(Intercept)"</span></span>
@@ -2456,30 +2426,28 @@ composition settings that will be used in the final simulation.</p>
 <span><span class="co">#&gt; [8] "scale|outcome=ilr2|term=(Intercept)"</span></span>
 <span></span>
 <span><span class="va">dynamic_comp</span><span class="op">$</span><span class="va">generator_metadata</span><span class="op">$</span><span class="va">outcome</span><span class="op">$</span><span class="va">ar</span><span class="op">$</span><span class="va">stability</span><span class="op">$</span><span class="va">max_spectral_radius_overall</span></span>
-<span><span class="co">#&gt; [1] 0.67</span></span>
+<span><span class="co">#&gt; [1] 0.58</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dynamic_comp</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sleep"</span>, <span class="st">"sedentary"</span>, <span class="st">"activity"</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;    24 </span></span>
-<span><span class="co">#&gt; 75000</span></span></code></pre></div>
+<span><span class="co">#&gt; 40000</span></span></code></pre></div>
 <p>The generated data can be managed into an analysis data set and
 passed to <code><a href="../reference/brmcoda.html">brmcoda()</a></code>. <code><a href="../reference/prep_sim_analysis.html">prep_sim_analysis()</a></code>
-recomputes observed between- and within-person predictors from the total
-simulated data columns, rebuilds a <code>complr</code> object using the
-same SBP basis as the simulator, and translates <code>ar1()</code> into
-within-person centered lagged ILR predictors. The fitted model includes
-random level terms, random inertia terms through lagged ILR slopes, and
-random conditional variability through response-specific
-<code>sigma</code> models.</p>
+rebuilds a <code>complr</code> object using the same SBP basis as the
+simulator and translates <code>ar1()</code> into within-person centered
+lagged ILR predictors. The fitted model includes random level terms,
+random inertia terms through lagged ILR slopes, and random conditional
+variability through response-specific <code>sigma</code> models.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dynamic_analysis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep_sim_analysis.html">prep_sim_analysis</a></span><span class="op">(</span><span class="va">dynamic_comp</span><span class="op">)</span></span>
 <span><span class="va">dynamic_analysis</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">lag_columns</span></span>
 <span><span class="co">#&gt; [1] "lag_z1_1_within" "lag_z2_1_within"</span></span>
 <span><span class="va">dynamic_analysis</span><span class="op">$</span><span class="va">formula</span></span>
-<span><span class="co">#&gt; z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
-<span><span class="co">#&gt; sigma ~ treatment + (1 | ID)</span></span>
-<span><span class="co">#&gt; z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
-<span><span class="co">#&gt; sigma ~ treatment + (1 | ID)</span></span></code></pre></div>
+<span><span class="co">#&gt; z1_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
+<span><span class="co">#&gt; sigma ~ 1 + (1 | ID)</span></span>
+<span><span class="co">#&gt; z2_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
+<span><span class="co">#&gt; sigma ~ 1 + (1 | ID)</span></span></code></pre></div>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dynamic_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/brmcoda.html">brmcoda</a></span><span class="op">(</span></span>
 <span>  complr <span class="op">=</span> <span class="va">dynamic_analysis</span><span class="op">$</span><span class="va">complr</span>,</span>
@@ -2494,94 +2462,61 @@ random conditional variability through response-specific
 <span><span class="co">#&gt;  Family: MV(gaussian, gaussian) </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log</span></span>
 <span><span class="co">#&gt;          mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
-<span><span class="co">#&gt;          sigma ~ treatment + (1 | ID)</span></span>
-<span><span class="co">#&gt;          z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
-<span><span class="co">#&gt;          sigma ~ treatment + (1 | ID)</span></span>
-<span><span class="co">#&gt;    Data: complr$dataout (Number of observations: 74500) </span></span>
+<span><span class="co">#&gt; Formula: z1_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
+<span><span class="co">#&gt;          sigma ~ 1 + (1 | ID)</span></span>
+<span><span class="co">#&gt;          z2_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) </span></span>
+<span><span class="co">#&gt;          sigma ~ 1 + (1 | ID)</span></span>
+<span><span class="co">#&gt;    Data: complr$dataout (Number of observations: 39600) </span></span>
 <span><span class="co">#&gt;   Draws: 1 chains, each with iter = 1000; warmup = 0; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 1000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
-<span><span class="co">#&gt; ~ID (Number of levels: 500) </span></span>
+<span><span class="co">#&gt; ~ID (Number of levels: 400) </span></span>
 <span><span class="co">#&gt;                                              Estimate Est.Error l-95% CI</span></span>
-<span><span class="co">#&gt; sd(z11_Intercept)                                0.76      0.50     0.18</span></span>
-<span><span class="co">#&gt; sd(z11_lag_z1_1_within)                          0.79      1.38     0.04</span></span>
-<span><span class="co">#&gt; sd(z11_lag_z2_1_within)                          0.51      0.35     0.14</span></span>
-<span><span class="co">#&gt; sd(sigma_z11_Intercept)                          2.17      1.94     0.35</span></span>
-<span><span class="co">#&gt; sd(z21_Intercept)                                0.87      2.15     0.02</span></span>
-<span><span class="co">#&gt; sd(z21_lag_z1_1_within)                          2.60      3.90     0.23</span></span>
-<span><span class="co">#&gt; sd(z21_lag_z2_1_within)                          0.48      0.31     0.13</span></span>
-<span><span class="co">#&gt; sd(sigma_z21_Intercept)                          4.96      3.56     1.08</span></span>
-<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z1_1_within)          -0.82      0.28    -1.00</span></span>
-<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z2_1_within)          -0.38      0.48    -0.97</span></span>
-<span><span class="co">#&gt; cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.51      0.46    -0.60</span></span>
-<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z1_1_within)           0.55      0.52    -0.82</span></span>
-<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z2_1_within)           0.19      0.57    -0.89</span></span>
-<span><span class="co">#&gt; cor(z21_lag_z1_1_within,z21_lag_z2_1_within)    -0.15      0.56    -0.97</span></span>
+<span><span class="co">#&gt; sd(z11_Intercept)                                0.18      0.00     0.18</span></span>
+<span><span class="co">#&gt; sd(z11_lag_z1_1_within)                          0.11      0.00     0.10</span></span>
+<span><span class="co">#&gt; sd(z11_lag_z2_1_within)                          0.02      0.00     0.01</span></span>
+<span><span class="co">#&gt; sd(sigma_z11_Intercept)                          0.15      0.00     0.14</span></span>
+<span><span class="co">#&gt; sd(z21_Intercept)                                0.18      0.00     0.17</span></span>
+<span><span class="co">#&gt; sd(z21_lag_z1_1_within)                          0.04      0.00     0.03</span></span>
+<span><span class="co">#&gt; sd(z21_lag_z2_1_within)                          0.10      0.01     0.09</span></span>
+<span><span class="co">#&gt; sd(sigma_z21_Intercept)                          0.14      0.00     0.13</span></span>
+<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z1_1_within)           0.31      0.05     0.21</span></span>
+<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z2_1_within)           0.15      0.27    -0.40</span></span>
+<span><span class="co">#&gt; cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.69      0.23     0.02</span></span>
+<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z1_1_within)           0.22      0.12    -0.01</span></span>
+<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z2_1_within)          -0.08      0.06    -0.18</span></span>
+<span><span class="co">#&gt; cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.09      0.06    -0.02</span></span>
 <span><span class="co">#&gt;                                              u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(z11_Intercept)                                2.07 1.00      899      740</span></span>
-<span><span class="co">#&gt; sd(z11_lag_z1_1_within)                          4.77 1.00      878      842</span></span>
-<span><span class="co">#&gt; sd(z11_lag_z2_1_within)                          1.41 1.00     1055      840</span></span>
-<span><span class="co">#&gt; sd(sigma_z11_Intercept)                          6.88 1.00     1199      889</span></span>
-<span><span class="co">#&gt; sd(z21_Intercept)                                5.03 1.00      903      935</span></span>
-<span><span class="co">#&gt; sd(z21_lag_z1_1_within)                         11.52 1.00     1006      939</span></span>
-<span><span class="co">#&gt; sd(z21_lag_z2_1_within)                          1.26 1.00      898      875</span></span>
-<span><span class="co">#&gt; sd(sigma_z21_Intercept)                         14.94 1.00      955      901</span></span>
-<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z1_1_within)           0.05 1.00     1022      750</span></span>
-<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z2_1_within)           0.73 1.00     1007      877</span></span>
-<span><span class="co">#&gt; cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     1.00 1.00      995      755</span></span>
-<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z1_1_within)           1.00 1.00     1004      982</span></span>
-<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z2_1_within)           0.96 1.00      869      833</span></span>
-<span><span class="co">#&gt; cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.87 1.00      931      841</span></span>
+<span><span class="co">#&gt; sd(z11_Intercept)                                0.18 1.00      899      969</span></span>
+<span><span class="co">#&gt; sd(z11_lag_z1_1_within)                          0.12 1.00      993      972</span></span>
+<span><span class="co">#&gt; sd(z11_lag_z2_1_within)                          0.03 1.00     1062      951</span></span>
+<span><span class="co">#&gt; sd(sigma_z11_Intercept)                          0.16 1.00     1033      936</span></span>
+<span><span class="co">#&gt; sd(z21_Intercept)                                0.18 1.00      856      908</span></span>
+<span><span class="co">#&gt; sd(z21_lag_z1_1_within)                          0.05 1.00      821      922</span></span>
+<span><span class="co">#&gt; sd(z21_lag_z2_1_within)                          0.11 1.00     1077      793</span></span>
+<span><span class="co">#&gt; sd(sigma_z21_Intercept)                          0.15 1.00     1053      818</span></span>
+<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z1_1_within)           0.41 1.00     1102      880</span></span>
+<span><span class="co">#&gt; cor(z11_Intercept,z11_lag_z2_1_within)           0.63 1.00      682      715</span></span>
+<span><span class="co">#&gt; cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.96 1.00      954      981</span></span>
+<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z1_1_within)           0.43 1.00      875     1016</span></span>
+<span><span class="co">#&gt; cor(z21_Intercept,z21_lag_z2_1_within)           0.03 1.00     1029      815</span></span>
+<span><span class="co">#&gt; cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.20 1.00      836      872</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
-<span><span class="co">#&gt;                                        Estimate Est.Error l-95% CI u-95% CI</span></span>
-<span><span class="co">#&gt; z11_Intercept                              2.09      2.52    -2.78     7.00</span></span>
-<span><span class="co">#&gt; sigma_z11_Intercept                       -0.21      0.95    -2.02     1.67</span></span>
-<span><span class="co">#&gt; z21_Intercept                              3.00      6.03    -8.59    15.01</span></span>
-<span><span class="co">#&gt; sigma_z21_Intercept                       -0.89      1.65    -4.14     2.39</span></span>
-<span><span class="co">#&gt; z11_treatmenttreatment                     0.43      1.00    -1.58     2.47</span></span>
-<span><span class="co">#&gt; z11_stress_between                        -0.40      0.71    -1.76     0.96</span></span>
-<span><span class="co">#&gt; z11_stress_within                          1.31      0.89    -0.40     3.01</span></span>
-<span><span class="co">#&gt; z11_lag_z1_1_within                       -0.90      0.56    -2.02     0.14</span></span>
-<span><span class="co">#&gt; z11_lag_z2_1_within                       -1.58      0.73    -3.03    -0.18</span></span>
-<span><span class="co">#&gt; z11_treatmenttreatment:lag_z1_1_within    -0.70      0.85    -2.25     1.09</span></span>
-<span><span class="co">#&gt; z11_treatmenttreatment:lag_z2_1_within     2.01      0.97     0.09     3.89</span></span>
-<span><span class="co">#&gt; sigma_z11_treatmenttreatment              -1.34      0.95    -3.30     0.65</span></span>
-<span><span class="co">#&gt; z21_treatmenttreatment                     0.56      0.70    -0.76     1.97</span></span>
-<span><span class="co">#&gt; z21_stress_between                        -0.93      2.00    -5.06     2.90</span></span>
-<span><span class="co">#&gt; z21_stress_within                          0.84      0.57    -0.24     1.89</span></span>
-<span><span class="co">#&gt; z21_lag_z1_1_within                        0.97      1.11    -1.26     3.12</span></span>
-<span><span class="co">#&gt; z21_lag_z2_1_within                        1.22      1.21    -1.10     3.62</span></span>
-<span><span class="co">#&gt; z21_treatmenttreatment:lag_z1_1_within     0.13      0.67    -1.23     1.41</span></span>
-<span><span class="co">#&gt; z21_treatmenttreatment:lag_z2_1_within     0.68      1.10    -1.35     2.95</span></span>
-<span><span class="co">#&gt; sigma_z21_treatmenttreatment              -0.12      1.17    -2.39     2.16</span></span>
-<span><span class="co">#&gt;                                        Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; z11_Intercept                          1.00      898      820</span></span>
-<span><span class="co">#&gt; sigma_z11_Intercept                    1.00      916      988</span></span>
-<span><span class="co">#&gt; z21_Intercept                          1.00     1077     1020</span></span>
-<span><span class="co">#&gt; sigma_z21_Intercept                    1.00      846      978</span></span>
-<span><span class="co">#&gt; z11_treatmenttreatment                 1.00      913      896</span></span>
-<span><span class="co">#&gt; z11_stress_between                     1.00     1036      842</span></span>
-<span><span class="co">#&gt; z11_stress_within                      1.00      985     1026</span></span>
-<span><span class="co">#&gt; z11_lag_z1_1_within                    1.00      985      980</span></span>
-<span><span class="co">#&gt; z11_lag_z2_1_within                    1.00     1004      826</span></span>
-<span><span class="co">#&gt; z11_treatmenttreatment:lag_z1_1_within 1.00      930      983</span></span>
-<span><span class="co">#&gt; z11_treatmenttreatment:lag_z2_1_within 1.00      973      865</span></span>
-<span><span class="co">#&gt; sigma_z11_treatmenttreatment           1.00      939      799</span></span>
-<span><span class="co">#&gt; z21_treatmenttreatment                 1.00      836      937</span></span>
-<span><span class="co">#&gt; z21_stress_between                     1.00     1036      981</span></span>
-<span><span class="co">#&gt; z21_stress_within                      1.00      948      988</span></span>
-<span><span class="co">#&gt; z21_lag_z1_1_within                    1.00      957      864</span></span>
-<span><span class="co">#&gt; z21_lag_z2_1_within                    1.00      968      875</span></span>
-<span><span class="co">#&gt; z21_treatmenttreatment:lag_z1_1_within 1.00     1122      992</span></span>
-<span><span class="co">#&gt; z21_treatmenttreatment:lag_z2_1_within 1.00      922      882</span></span>
-<span><span class="co">#&gt; sigma_z21_treatmenttreatment           1.00      917      899</span></span>
+<span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; z11_Intercept           0.01      0.00     0.01     0.01 1.00     1029      707</span></span>
+<span><span class="co">#&gt; sigma_z11_Intercept    -0.91      0.00    -0.91    -0.90 1.00      930      943</span></span>
+<span><span class="co">#&gt; z21_Intercept           0.01      0.00     0.00     0.01 1.00     1029     1068</span></span>
+<span><span class="co">#&gt; sigma_z21_Intercept    -1.03      0.00    -1.04    -1.02 1.00      909      972</span></span>
+<span><span class="co">#&gt; z11_lag_z1_1_within     0.21      0.01     0.19     0.22 1.00     1143      790</span></span>
+<span><span class="co">#&gt; z11_lag_z2_1_within     0.00      0.01    -0.01     0.01 1.00      917      900</span></span>
+<span><span class="co">#&gt; z21_lag_z1_1_within    -0.02      0.01    -0.03    -0.01 1.00      833      859</span></span>
+<span><span class="co">#&gt; z21_lag_z2_1_within     0.20      0.01     0.19     0.21 1.00      910      908</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Residual Correlations: </span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; rescor(z11,z21)     0.57      0.48    -0.69     0.99 1.00      960      844</span></span>
+<span><span class="co">#&gt; rescor(z11,z21)    -0.02      0.00    -0.02    -0.01 1.00      943      941</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using variational(meanfield).</span></span></code></pre></div>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
@@ -2599,8 +2534,6 @@ random conditional variability through response-specific
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span></span>
 <span>    <span class="va">term</span>,</span>
 <span>    <span class="st">"(Intercept)"</span> <span class="op">=</span> <span class="st">"Intercept"</span>,</span>
-<span>    <span class="st">"between(stress)"</span> <span class="op">=</span> <span class="st">"stress_between"</span>,</span>
-<span>    <span class="st">"within(stress)"</span> <span class="op">=</span> <span class="st">"stress_within"</span>,</span>
 <span>    <span class="va">term</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -2742,270 +2675,162 @@ random conditional variability through response-specific
 <tr class="odd">
 <td align="left">fixed effect</td>
 <td align="left">z11_Intercept</td>
-<td align="right">2.092</td>
-<td align="right">-2.785</td>
-<td align="right">6.998</td>
+<td align="right">0.009</td>
+<td align="right">0.005</td>
+<td align="right">0.013</td>
 <td align="right">0.000</td>
-<td align="left">TRUE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="left">fixed effect</td>
 <td align="left">sigma_z11_Intercept</td>
-<td align="right">-0.212</td>
-<td align="right">-2.022</td>
-<td align="right">1.674</td>
+<td align="right">-0.907</td>
+<td align="right">-0.913</td>
+<td align="right">-0.902</td>
 <td align="right">-0.916</td>
-<td align="left">TRUE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="odd">
 <td align="left">fixed effect</td>
 <td align="left">z21_Intercept</td>
-<td align="right">3.005</td>
-<td align="right">-8.589</td>
-<td align="right">15.007</td>
+<td align="right">0.006</td>
+<td align="right">0.001</td>
+<td align="right">0.012</td>
 <td align="right">0.000</td>
-<td align="left">TRUE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="left">fixed effect</td>
 <td align="left">sigma_z21_Intercept</td>
-<td align="right">-0.886</td>
-<td align="right">-4.142</td>
-<td align="right">2.388</td>
+<td align="right">-1.028</td>
+<td align="right">-1.036</td>
+<td align="right">-1.019</td>
 <td align="right">-1.050</td>
-<td align="left">TRUE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="odd">
-<td align="left">fixed effect</td>
-<td align="left">z11_treatmenttreatment</td>
-<td align="right">0.432</td>
-<td align="right">-1.584</td>
-<td align="right">2.469</td>
-<td align="right">0.000</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="even">
-<td align="left">fixed effect</td>
-<td align="left">z11_stress_between</td>
-<td align="right">-0.397</td>
-<td align="right">-1.761</td>
-<td align="right">0.965</td>
-<td align="right">0.150</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="odd">
-<td align="left">fixed effect</td>
-<td align="left">z11_stress_within</td>
-<td align="right">1.306</td>
-<td align="right">-0.402</td>
-<td align="right">3.007</td>
-<td align="right">0.050</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="even">
 <td align="left">fixed effect</td>
 <td align="left">z11_lag_z1_1_within</td>
-<td align="right">-0.902</td>
-<td align="right">-2.022</td>
-<td align="right">0.135</td>
+<td align="right">0.205</td>
+<td align="right">0.194</td>
+<td align="right">0.217</td>
 <td align="right">0.250</td>
 <td align="left">FALSE</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">fixed effect</td>
 <td align="left">z11_lag_z2_1_within</td>
-<td align="right">-1.575</td>
-<td align="right">-3.029</td>
-<td align="right">-0.182</td>
+<td align="right">0.001</td>
+<td align="right">-0.011</td>
+<td align="right">0.014</td>
 <td align="right">0.020</td>
 <td align="left">FALSE</td>
 </tr>
-<tr class="even">
-<td align="left">fixed effect</td>
-<td align="left">z11_treatmenttreatment:lag_z1_1_within</td>
-<td align="right">-0.695</td>
-<td align="right">-2.252</td>
-<td align="right">1.086</td>
-<td align="right">0.050</td>
-<td align="left">TRUE</td>
-</tr>
 <tr class="odd">
-<td align="left">fixed effect</td>
-<td align="left">z11_treatmenttreatment:lag_z2_1_within</td>
-<td align="right">2.006</td>
-<td align="right">0.091</td>
-<td align="right">3.891</td>
-<td align="right">0.000</td>
-<td align="left">FALSE</td>
-</tr>
-<tr class="even">
-<td align="left">fixed effect</td>
-<td align="left">sigma_z11_treatmenttreatment</td>
-<td align="right">-1.338</td>
-<td align="right">-3.305</td>
-<td align="right">0.647</td>
-<td align="right">-0.799</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="odd">
-<td align="left">fixed effect</td>
-<td align="left">z21_treatmenttreatment</td>
-<td align="right">0.562</td>
-<td align="right">-0.759</td>
-<td align="right">1.975</td>
-<td align="right">0.000</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="even">
-<td align="left">fixed effect</td>
-<td align="left">z21_stress_between</td>
-<td align="right">-0.932</td>
-<td align="right">-5.064</td>
-<td align="right">2.897</td>
-<td align="right">-0.050</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="odd">
-<td align="left">fixed effect</td>
-<td align="left">z21_stress_within</td>
-<td align="right">0.841</td>
-<td align="right">-0.239</td>
-<td align="right">1.895</td>
-<td align="right">0.030</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="even">
 <td align="left">fixed effect</td>
 <td align="left">z21_lag_z1_1_within</td>
-<td align="right">0.970</td>
-<td align="right">-1.262</td>
-<td align="right">3.118</td>
+<td align="right">-0.017</td>
+<td align="right">-0.027</td>
+<td align="right">-0.007</td>
 <td align="right">-0.010</td>
 <td align="left">TRUE</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">fixed effect</td>
 <td align="left">z21_lag_z2_1_within</td>
-<td align="right">1.217</td>
-<td align="right">-1.097</td>
-<td align="right">3.617</td>
+<td align="right">0.201</td>
+<td align="right">0.190</td>
+<td align="right">0.212</td>
 <td align="right">0.200</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="even">
-<td align="left">fixed effect</td>
-<td align="left">z21_treatmenttreatment:lag_z1_1_within</td>
-<td align="right">0.131</td>
-<td align="right">-1.228</td>
-<td align="right">1.410</td>
-<td align="right">0.000</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="odd">
-<td align="left">fixed effect</td>
-<td align="left">z21_treatmenttreatment:lag_z2_1_within</td>
-<td align="right">0.685</td>
-<td align="right">-1.354</td>
-<td align="right">2.949</td>
-<td align="right">0.030</td>
-<td align="left">TRUE</td>
-</tr>
-<tr class="even">
-<td align="left">fixed effect</td>
-<td align="left">sigma_z21_treatmenttreatment</td>
-<td align="right">-0.117</td>
-<td align="right">-2.390</td>
-<td align="right">2.158</td>
-<td align="right">-0.916</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="odd">
 <td align="left">random variance</td>
 <td align="left">var(z11_Intercept)</td>
-<td align="right">0.574</td>
+<td align="right">0.032</td>
 <td align="right">0.031</td>
-<td align="right">4.282</td>
+<td align="right">0.034</td>
 <td align="right">0.040</td>
-<td align="left">TRUE</td>
+<td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="left">random variance</td>
 <td align="left">var(z11_lag_z1_1_within)</td>
-<td align="right">0.627</td>
-<td align="right">0.001</td>
-<td align="right">22.784</td>
+<td align="right">0.013</td>
+<td align="right">0.011</td>
+<td align="right">0.015</td>
 <td align="right">0.014</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="odd">
 <td align="left">random variance</td>
 <td align="left">var(z11_lag_z2_1_within)</td>
-<td align="right">0.260</td>
-<td align="right">0.019</td>
-<td align="right">1.976</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.001</td>
 <td align="right">0.004</td>
 <td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="left">random variance</td>
 <td align="left">var(sigma_z11_Intercept)</td>
-<td align="right">4.689</td>
-<td align="right">0.124</td>
-<td align="right">47.321</td>
+<td align="right">0.023</td>
+<td align="right">0.021</td>
+<td align="right">0.025</td>
 <td align="right">0.026</td>
 <td align="left">FALSE</td>
 </tr>
 <tr class="odd">
 <td align="left">random variance</td>
 <td align="left">var(z21_Intercept)</td>
-<td align="right">0.750</td>
-<td align="right">0.001</td>
-<td align="right">25.347</td>
+<td align="right">0.032</td>
+<td align="right">0.031</td>
+<td align="right">0.033</td>
 <td align="right">0.032</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="even">
 <td align="left">random variance</td>
 <td align="left">var(z21_lag_z1_1_within)</td>
-<td align="right">6.742</td>
-<td align="right">0.055</td>
-<td align="right">132.653</td>
+<td align="right">0.002</td>
+<td align="right">0.001</td>
+<td align="right">0.002</td>
 <td align="right">0.004</td>
 <td align="left">FALSE</td>
 </tr>
 <tr class="odd">
 <td align="left">random variance</td>
 <td align="left">var(z21_lag_z2_1_within)</td>
-<td align="right">0.230</td>
-<td align="right">0.018</td>
-<td align="right">1.598</td>
+<td align="right">0.011</td>
+<td align="right">0.009</td>
+<td align="right">0.013</td>
 <td align="right">0.014</td>
 <td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="left">random variance</td>
 <td align="left">var(sigma_z21_Intercept)</td>
-<td align="right">24.623</td>
-<td align="right">1.177</td>
-<td align="right">223.318</td>
 <td align="right">0.020</td>
-<td align="left">FALSE</td>
+<td align="right">0.018</td>
+<td align="right">0.022</td>
+<td align="right">0.020</td>
+<td align="left">TRUE</td>
 </tr>
 <tr class="odd">
 <td align="left">random correlation</td>
 <td align="left">cor(z11_lag_z1_1_within, z11_Intercept)</td>
-<td align="right">-0.817</td>
-<td align="right">-0.998</td>
-<td align="right">0.046</td>
+<td align="right">0.314</td>
+<td align="right">0.209</td>
+<td align="right">0.410</td>
 <td align="right">0.200</td>
 <td align="left">FALSE</td>
 </tr>
 <tr class="even">
 <td align="left">random correlation</td>
 <td align="left">cor(z11_lag_z2_1_within, z11_Intercept)</td>
-<td align="right">-0.380</td>
-<td align="right">-0.968</td>
-<td align="right">0.727</td>
+<td align="right">0.151</td>
+<td align="right">-0.402</td>
+<td align="right">0.632</td>
 <td align="right">0.000</td>
 <td align="left">TRUE</td>
 </tr>
@@ -3057,9 +2882,9 @@ random conditional variability through response-specific
 <tr class="even">
 <td align="left">random correlation</td>
 <td align="left">cor(z11_lag_z2_1_within, z11_lag_z1_1_within)</td>
-<td align="right">0.514</td>
-<td align="right">-0.599</td>
-<td align="right">0.997</td>
+<td align="right">0.690</td>
+<td align="right">0.016</td>
+<td align="right">0.955</td>
 <td align="right">0.150</td>
 <td align="left">TRUE</td>
 </tr>
@@ -3192,18 +3017,18 @@ random conditional variability through response-specific
 <tr class="odd">
 <td align="left">random correlation</td>
 <td align="left">cor(z21_lag_z1_1_within, z21_Intercept)</td>
-<td align="right">0.548</td>
-<td align="right">-0.824</td>
-<td align="right">0.996</td>
+<td align="right">0.218</td>
+<td align="right">-0.014</td>
+<td align="right">0.433</td>
 <td align="right">0.200</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="even">
 <td align="left">random correlation</td>
 <td align="left">cor(z21_lag_z2_1_within, z21_Intercept)</td>
-<td align="right">0.191</td>
-<td align="right">-0.890</td>
-<td align="right">0.955</td>
+<td align="right">-0.078</td>
+<td align="right">-0.184</td>
+<td align="right">0.031</td>
 <td align="right">0.000</td>
 <td align="left">TRUE</td>
 </tr>
@@ -3219,9 +3044,9 @@ random conditional variability through response-specific
 <tr class="even">
 <td align="left">random correlation</td>
 <td align="left">cor(z21_lag_z2_1_within, z21_lag_z1_1_within)</td>
-<td align="right">-0.151</td>
-<td align="right">-0.975</td>
-<td align="right">0.874</td>
+<td align="right">0.086</td>
+<td align="right">-0.022</td>
+<td align="right">0.197</td>
 <td align="right">0.150</td>
 <td align="left">TRUE</td>
 </tr>
