@@ -94,15 +94,7 @@ NULL
       .mlsim_has_metadata(metadata$residual_cov) ||
       .mlsim_has_metadata(metadata$residual_cor),
     has_scale_model = .mlsim_has_metadata(metadata$scale_fixed_intercept) ||
-      .mlsim_has_metadata(metadata$scale_formula) ||
-      .mlsim_has_metadata(metadata$scale_coefficients) ||
-      .mlsim_has_metadata(metadata$scale_linear_predictor) ||
       .mlsim_has_metadata(metadata$scale_random_intercepts),
-    has_formula = .mlsim_has_metadata(metadata$formula) ||
-      .mlsim_has_metadata(metadata$brms_formula) ||
-      .mlsim_has_metadata(metadata$fit_formula) ||
-      .mlsim_has_metadata(metadata$fit_fixed_formula),
-    has_ar_terms = .mlsim_has_metadata(metadata$ar_terms),
     has_composition = isTRUE(metadata$compositional) ||
       .mlsim_has_metadata(metadata$parts) ||
       .mlsim_has_metadata(metadata$sbp),
