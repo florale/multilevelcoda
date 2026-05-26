@@ -57,23 +57,19 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gen_gamma</span><span class="op">(</span></span>
 <span>  <span class="va">vars</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"level2"</span>, <span class="st">"multilevel"</span><span class="op">)</span>,</span>
-<span>  shape <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">gen_beta</span><span class="op">(</span></span>
 <span>  <span class="va">vars</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"level2"</span>, <span class="st">"multilevel"</span><span class="op">)</span>,</span>
-<span>  mean <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  precision <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,37 +87,23 @@
 random-intercept model.</p></dd>
 
 
-<dt id="arg-shape">shape<a class="anchor" aria-label="anchor" href="#arg-shape"></a></dt>
-<dd><p>Gamma shape parameter.</p></dd>
-
-
-<dt id="arg-mean">mean<a class="anchor" aria-label="anchor" href="#arg-mean"></a></dt>
-<dd><p>Mean parameter. For gamma variables this must be positive; for
-beta variables it must be in <code>(0, 1)</code>.</p></dd>
-
-
-<dt id="arg-rate-scale">rate, scale<a class="anchor" aria-label="anchor" href="#arg-rate-scale"></a></dt>
-<dd><p>Alternative gamma parameterizations for <code>"single"</code> and
-<code>"level2"</code> generators. Supply at most one of <code>rate</code> or <code>scale</code>.</p></dd>
-
-
 <dt id="arg-fixed-intercept">fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-fixed-intercept"></a></dt>
-<dd><p>Link-scale intercept. Gamma uses the log link; beta
-uses the logit link.</p></dd>
+<dd><p>Link-scale intercept. Gamma uses the log link and
+beta uses the logit link.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Removed direct distribution parameters are rejected.</p></dd>
+
+
+<dt id="arg-scale-fixed-intercept">scale_fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-scale-fixed-intercept"></a></dt>
+<dd><p>Log shape intercept for gamma variables or log
+precision intercept for beta variables.</p></dd>
 
 
 <dt id="arg-random-cov">random_cov<a class="anchor" aria-label="anchor" href="#arg-random-cov"></a></dt>
 <dd><p>Group-level random-intercept covariance for multilevel
 generators.</p></dd>
-
-
-<dt id="arg-scale-fixed-intercept">scale_fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-scale-fixed-intercept"></a></dt>
-<dd><p>Optional log shape or log precision intercept
-for multilevel generators.</p></dd>
-
-
-<dt id="arg-precision">precision<a class="anchor" aria-label="anchor" href="#arg-precision"></a></dt>
-<dd><p>Beta precision parameter.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -135,7 +117,8 @@ for multilevel generators.</p></dd>
 <code><a href="gen_categorical.html">gen_categorical()</a></code>,
 <code><a href="gen_custom.html">gen_custom()</a></code>,
 <code><a href="gen_mvn.html">gen_mvn()</a></code>,
-<code><a href="gen_normal.html">gen_normal()</a></code></p></div>
+<code><a href="gen_outcome.html">gen_outcome()</a></code>,
+<code><a href="gen_template.html">gen_template()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -144,8 +127,16 @@ for multilevel generators.</p></dd>
 <span class="r-in"><span>  n <span class="op">=</span> <span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    positive <span class="op">=</span> <span class="fu">gen_gamma</span><span class="op">(</span><span class="st">"positive"</span>, shape <span class="op">=</span> <span class="fl">2</span>, mean <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    proportion <span class="op">=</span> <span class="fu">gen_beta</span><span class="op">(</span><span class="st">"proportion"</span>, mean <span class="op">=</span> <span class="fl">0.4</span>, precision <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    positive <span class="op">=</span> <span class="fu">gen_gamma</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"positive"</span>,</span></span>
+<span class="r-in"><span>      fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      scale_fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    proportion <span class="op">=</span> <span class="fu">gen_beta</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"proportion"</span>,</span></span>
+<span class="r-in"><span>      fixed_intercept <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">qlogis</a></span><span class="op">(</span><span class="fl">0.4</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      scale_fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim</span><span class="op">$</span><span class="va">data</span></span></span>

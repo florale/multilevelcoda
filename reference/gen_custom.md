@@ -53,7 +53,8 @@ Other predictor generators:
 [`count-generators`](https://florale.github.io/multilevelcoda/reference/count-generators.md),
 [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md),
 [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md),
-[`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md),
+[`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
 
 ## Examples
 

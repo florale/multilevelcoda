@@ -7,13 +7,7 @@
 library(multilevelcoda)
 library(knitr)
 library(data.table)
-#> data.table 1.18.4 using 12 threads (see ?getDTthreads).  Latest news: r-datatable.com
-#> 
-#> Attaching package: 'data.table'
-#> 
-#> The following object is masked from 'package:base':
-#> 
-#>     %notin%
+library(cmdstanr)
 
 options(digits = 3, pillar.sigfig = 3)
 ```
@@ -65,18 +59,13 @@ Design options cover the highest level structure.
 ### Generator families
 
 Generators are used to add simulated data columns. They are independent
-of each other. Any generated column can be used as well to later
-generate an “outcome” column with
-[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md).
-Outcomes differ from the rest of the generators because outcomes can
-depend on any previously generated predictor.
+of each other.
 
 Current predictor generators are listed below.
 
 | Generator | Role |
 |----|----|
-| [`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md) | Univariate Gaussian predictors or outcomes on the identity scale. |
-| [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md) | Correlated Gaussian blocks, including ILR compositional back-transforms. |
+| [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md) | Univariate and multivariate Gaussian predictors, including ILR compositional back-transforms. |
 | [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md) | Binary, unordered categorical, and ordered categorical variables. |
 | [`gen_binomial()`](https://florale.github.io/multilevelcoda/reference/count-generators.md) | Binomial counts with logit-scale multilevel support. |
 | [`gen_poisson()`](https://florale.github.io/multilevelcoda/reference/count-generators.md) | Poisson counts with log-scale multilevel support. |
@@ -84,29 +73,27 @@ Current predictor generators are listed below.
 | [`gen_gamma()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md) | Positive continuous variables with optional location-scale multilevel support. |
 | [`gen_beta()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md) | Bounded (0, 1) continuous variables with optional location-scale support. |
 | [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md) | User-supplied generators that receive the active simulation context. |
+| [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md) | Gaussian, dynamic VAR(1), and ILR compositional outcomes generated from prior predictors. |
 
 ### Advanced simulation options
 
 These are a sampling of more advanced simulation features and apply to
-predictor generators and outcome generation.
+predictor generators.
 
 | Feature | Use |
 |----|----|
 | `level` | Choose row-level, group-level, or multilevel generation. |
-| `fixed_intercept` | Set the fixed location or link-scale intercept in multilevel generators. |
+| `fixed_intercept` | Set the fixed location or link-scale intercept in any predictor generator. |
 | `random_cov` | Add group-specific random intercepts, and sometimes scale random effects. |
-| `residual_var` / `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
+| `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
 | `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
 | `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
-| Outcome formula | Generate Gaussian outcomes from fixed, random, lagged, and helper terms. |
-| `lag1()`, [`within()`](https://rdrr.io/r/base/with.html), [`between()`](https://rdrr.io/pkg/data.table/man/between.html), `ar1()` | Create time-lag, within-group, between-group, and autoregressive terms. |
-| `scale_formula` | Simulate location-scale outcomes through a log residual SD model. |
-| [`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md) | Prepare simulated outcomes and helper columns for downstream fitting. |
+| [`between()`](https://rdrr.io/pkg/data.table/man/between.html), [`within()`](https://rdrr.io/r/base/with.html), `ar1()` | Build dynamic outcome models from labelled predictor components and residual VAR(1) dynamics. |
 
 ## Study Designs and Indexing
 
-Here is a simple single level example. Here no outcome is generated, so
-each variable will be generated independently of other variables.
+Here is a simple single level example. Each variable in this first
+example is generated independently of the others.
 
 ``` r
 
@@ -114,10 +101,10 @@ single <- simulate_data(
   n = 20,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", mean = 0, sd = 1),
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
     edu = gen_categorical("edu", categories = c("< Bachelor", "Bachelor", "> Bachelor"),
-      prob = c(.3, .3, .4)),
-    tx = gen_categorical("tx", categories = c("control", "treatment"), prob = .5)
+      fixed_intercept = c("Bachelor" = 0, "> Bachelor" = log(4 / 3))),
+    tx = gen_categorical("tx", categories = c("control", "treatment"), fixed_intercept = stats::qlogis(.5))
   )
 )
 
@@ -159,7 +146,7 @@ single
 #> 
 #> Generators:
 #>  generator distribution  level vars
-#>          x       normal single    x
+#>          x          mvn single    x
 #>        edu  categorical single  edu
 #>         tx  categorical single   tx
 ```
@@ -180,24 +167,24 @@ summary(single)$design
 summary(single)$generators
 #>    generator distribution  level   vars n_vars parameter_level parameter_count
 #>       <char>       <char> <char> <char>  <int>          <char>           <int>
-#> 1:         x       normal single      x      1             row              20
+#> 1:         x          mvn single      x      1             row              20
 #> 2:       edu  categorical single    edu      1             row              20
 #> 3:        tx  categorical single     tx      1             row              20
 #>    has_row_parameters has_group_parameters has_fixed_parameters has_random_cov
 #>                <lgcl>               <lgcl>               <lgcl>         <lgcl>
-#> 1:               TRUE                FALSE                FALSE          FALSE
-#> 2:               TRUE                FALSE                FALSE          FALSE
-#> 3:               TRUE                FALSE                FALSE          FALSE
-#>    has_random_effects has_residuals has_scale_model has_formula has_ar_terms
-#>                <lgcl>        <lgcl>          <lgcl>      <lgcl>       <lgcl>
-#> 1:              FALSE         FALSE           FALSE       FALSE        FALSE
-#> 2:              FALSE         FALSE           FALSE       FALSE        FALSE
-#> 3:              FALSE         FALSE           FALSE       FALSE        FALSE
-#>    has_composition has_custom_output
-#>             <lgcl>            <lgcl>
-#> 1:           FALSE             FALSE
-#> 2:           FALSE             FALSE
-#> 3:           FALSE             FALSE
+#> 1:               TRUE                FALSE                 TRUE          FALSE
+#> 2:               TRUE                FALSE                 TRUE          FALSE
+#> 3:               TRUE                FALSE                 TRUE          FALSE
+#>    has_random_effects has_residuals has_scale_model has_composition
+#>                <lgcl>        <lgcl>          <lgcl>          <lgcl>
+#> 1:              FALSE          TRUE           FALSE           FALSE
+#> 2:              FALSE         FALSE           FALSE           FALSE
+#> 3:              FALSE         FALSE           FALSE           FALSE
+#>    has_custom_output
+#>               <lgcl>
+#> 1:             FALSE
+#> 2:             FALSE
+#> 3:             FALSE
 ```
 
 We can generate multilevel structures as well. A single scalar
@@ -211,7 +198,7 @@ balanced <- simulate_data(
   n_per_group = 4,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", mean = 0, sd = 1)
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
@@ -233,11 +220,11 @@ kable(balanced$data)
 |        3 |      3 | -0.408 |
 |        3 |      4 | -0.730 |
 
-However, this was still effectively single level, normal data. We can
+However, this was still effectively single level, Gaussian data. We can
 improve that. Here we give essentially the parameters of a random
 intercept only multilevel model, which is used to generate matching
 data. The `fixed_intercept` is the overall mean, `random_cov` is the
-group-level variance, and `residual_var` is the residual variance. The
+group-level variance, and `residual_cov` is the residual variance. The
 same approach broadly applies to other generator families when level =
 “multilevel”. We can generator a level 2 variable as well, which is
 constant within groups but varies between groups.
@@ -249,29 +236,29 @@ balanced2 <- simulate_data(
   n_per_group = 4,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
 kable(balanced2$data)
 ```
 
-| group_id | obs_id |      x |     y |
-|---------:|-------:|-------:|------:|
-|        1 |      1 |  0.512 | 1.347 |
-|        1 |      2 |  0.454 | 1.347 |
-|        1 |      3 |  0.269 | 1.347 |
-|        1 |      4 |  0.447 | 1.347 |
-|        2 |      1 | -1.182 | 0.616 |
-|        2 |      2 | -1.068 | 0.616 |
-|        2 |      3 | -1.127 | 0.616 |
-|        2 |      4 | -1.121 | 0.616 |
-|        3 |      1 |  0.066 | 0.218 |
-|        3 |      2 |  0.117 | 0.218 |
-|        3 |      3 |  0.117 | 0.218 |
-|        3 |      4 | -0.115 | 0.218 |
+| group_id | obs_id |      x | x_between | x_within | .mlsim_x_random_intercept |     y |
+|---------:|-------:|-------:|----------:|---------:|--------------------------:|------:|
+|        1 |      1 |  0.512 |     0.521 |   -0.008 |                     0.521 | 1.347 |
+|        1 |      2 |  0.454 |     0.521 |   -0.067 |                     0.521 | 1.347 |
+|        1 |      3 |  0.269 |     0.521 |   -0.252 |                     0.521 | 1.347 |
+|        1 |      4 |  0.447 |     0.521 |   -0.074 |                     0.521 | 1.347 |
+|        2 |      1 | -1.182 |    -1.080 |   -0.102 |                    -1.080 | 0.616 |
+|        2 |      2 | -1.068 |    -1.080 |    0.011 |                    -1.080 | 0.616 |
+|        2 |      3 | -1.127 |    -1.080 |   -0.047 |                    -1.080 | 0.616 |
+|        2 |      4 | -1.121 |    -1.080 |   -0.041 |                    -1.080 | 0.616 |
+|        3 |      1 |  0.066 |     0.139 |   -0.073 |                     0.139 | 0.218 |
+|        3 |      2 |  0.117 |     0.139 |   -0.022 |                     0.139 | 0.218 |
+|        3 |      3 |  0.117 |     0.139 |   -0.023 |                     0.139 | 0.218 |
+|        3 |      4 | -0.115 |     0.139 |   -0.255 |                     0.139 | 0.218 |
 
 Vectors specs create unbalanced designs.
 
@@ -282,31 +269,31 @@ unbalanced <- simulate_data(
   n_per_group = c(3, 5, 4, 2),
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
 kable(unbalanced$data)
 ```
 
-| group_id | obs_id |      x |      y |
-|---------:|-------:|-------:|-------:|
-|        1 |      1 |  0.454 | -0.805 |
-|        1 |      2 |  0.269 | -0.805 |
-|        1 |      3 |  0.447 | -0.805 |
-|        2 |      1 | -1.182 |  0.690 |
-|        2 |      2 | -1.068 |  0.690 |
-|        2 |      3 | -1.127 |  0.690 |
-|        2 |      4 | -1.121 |  0.690 |
-|        2 |      5 | -1.153 |  0.690 |
-|        3 |      1 |  0.117 | -0.329 |
-|        3 |      2 |  0.117 | -0.329 |
-|        3 |      3 | -0.115 | -0.329 |
-|        3 |      4 |  0.274 | -0.329 |
-|        4 |      1 | -0.023 | -0.165 |
-|        4 |      2 | -0.063 | -0.165 |
+| group_id | obs_id |      x | x_between | x_within | .mlsim_x_random_intercept |      y |
+|---------:|-------:|-------:|----------:|---------:|--------------------------:|-------:|
+|        1 |      1 |  0.454 |     0.521 |   -0.067 |                     0.521 | -0.805 |
+|        1 |      2 |  0.269 |     0.521 |   -0.252 |                     0.521 | -0.805 |
+|        1 |      3 |  0.447 |     0.521 |   -0.074 |                     0.521 | -0.805 |
+|        2 |      1 | -1.182 |    -1.080 |   -0.102 |                    -1.080 |  0.690 |
+|        2 |      2 | -1.068 |    -1.080 |    0.011 |                    -1.080 |  0.690 |
+|        2 |      3 | -1.127 |    -1.080 |   -0.047 |                    -1.080 |  0.690 |
+|        2 |      4 | -1.121 |    -1.080 |   -0.041 |                    -1.080 |  0.690 |
+|        2 |      5 | -1.153 |    -1.080 |   -0.073 |                    -1.080 |  0.690 |
+|        3 |      1 |  0.117 |     0.139 |   -0.022 |                     0.139 | -0.329 |
+|        3 |      2 |  0.117 |     0.139 |   -0.023 |                     0.139 | -0.329 |
+|        3 |      3 | -0.115 |     0.139 |   -0.255 |                     0.139 | -0.329 |
+|        3 |      4 |  0.274 |     0.139 |    0.135 |                     0.139 | -0.329 |
+|        4 |      1 | -0.023 |    -0.085 |    0.062 |                    -0.085 | -0.165 |
+|        4 |      2 | -0.063 |    -0.085 |    0.022 |                    -0.085 | -0.165 |
 
 ``` r
 
@@ -320,35 +307,35 @@ drawn_sizes <- simulate_data(
   ),
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
 kable(drawn_sizes$data)
 ```
 
-| group_id | obs_id |      x |      y |
-|---------:|-------:|-------:|-------:|
-|        1 |      1 | -1.994 |  0.339 |
-|        1 |      2 | -2.261 |  0.339 |
-|        1 |      3 | -2.169 |  0.339 |
-|        1 |      4 | -1.998 |  0.339 |
-|        1 |      5 | -2.112 |  0.339 |
-|        2 |      1 |  0.995 |  1.207 |
-|        2 |      2 |  0.977 |  1.207 |
-|        2 |      3 |  1.111 |  1.207 |
-|        2 |      4 |  0.992 |  1.207 |
-|        3 |      1 | -0.010 |  0.571 |
-|        3 |      2 |  0.185 |  0.571 |
-|        4 |      1 |  0.495 | -1.686 |
-|        4 |      2 |  0.488 | -1.686 |
-|        4 |      3 |  0.616 | -1.686 |
-|        5 |      1 |  1.015 | -0.838 |
-|        5 |      2 |  0.848 | -0.838 |
-|        5 |      3 |  0.976 | -0.838 |
-|        5 |      4 |  0.958 | -0.838 |
+| group_id | obs_id |      x | x_between | x_within | .mlsim_x_random_intercept |      y |
+|---------:|-------:|-------:|----------:|---------:|--------------------------:|-------:|
+|        1 |      1 | -1.994 |    -1.958 |   -0.037 |                    -1.958 |  0.339 |
+|        1 |      2 | -2.261 |    -1.958 |   -0.304 |                    -1.958 |  0.339 |
+|        1 |      3 | -2.169 |    -1.958 |   -0.211 |                    -1.958 |  0.339 |
+|        1 |      4 | -1.998 |    -1.958 |   -0.040 |                    -1.958 |  0.339 |
+|        1 |      5 | -2.112 |    -1.958 |   -0.154 |                    -1.958 |  0.339 |
+|        2 |      1 |  0.995 |     1.085 |   -0.089 |                     1.085 |  1.207 |
+|        2 |      2 |  0.977 |     1.085 |   -0.108 |                     1.085 |  1.207 |
+|        2 |      3 |  1.111 |     1.085 |    0.026 |                     1.085 |  1.207 |
+|        2 |      4 |  0.992 |     1.085 |   -0.093 |                     1.085 |  1.207 |
+|        3 |      1 | -0.010 |     0.204 |   -0.214 |                     0.204 |  0.571 |
+|        3 |      2 |  0.185 |     0.204 |   -0.019 |                     0.204 |  0.571 |
+|        4 |      1 |  0.495 |     0.501 |   -0.006 |                     0.501 | -1.686 |
+|        4 |      2 |  0.488 |     0.501 |   -0.013 |                     0.501 | -1.686 |
+|        4 |      3 |  0.616 |     0.501 |    0.115 |                     0.501 | -1.686 |
+|        5 |      1 |  1.015 |     1.030 |   -0.015 |                     1.030 | -0.838 |
+|        5 |      2 |  0.848 |     1.030 |   -0.182 |                     1.030 | -0.838 |
+|        5 |      3 |  0.976 |     1.030 |   -0.054 |                     1.030 | -0.838 |
+|        5 |      4 |  0.958 |     1.030 |   -0.072 |                     1.030 | -0.838 |
 
 Longitudinal designs can add a time index. When groups have different
 lengths, `time_truncate = TRUE` uses the first values for shorter
@@ -364,29 +351,29 @@ dated <- simulate_data(
   time_values = as.Date("2026-01-01") + 0:4,
   seed = 2026,
   generators = list(
-    x = gen_normal("x", level = "multilevel",
-      fixed_intercept = 0, random_cov = 1, residual_var = .01),
-    y = gen_normal("y", level = "level2", mean = 0, sd = 1)
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
   )
 )
 
 kable(dated$data)
 ```
 
-| group_id | obs_id | date       |      x |     y |
-|---------:|-------:|:-----------|-------:|------:|
-|        1 |      1 | 2026-01-01 |  0.512 | 1.347 |
-|        1 |      2 | 2026-01-02 |  0.454 | 1.347 |
-|        1 |      3 | 2026-01-03 |  0.269 | 1.347 |
-|        1 |      4 | 2026-01-04 |  0.447 | 1.347 |
-|        1 |      5 | 2026-01-05 |  0.419 | 1.347 |
-|        2 |      1 | 2026-01-01 | -1.068 | 0.616 |
-|        2 |      2 | 2026-01-02 | -1.127 | 0.616 |
-|        2 |      3 | 2026-01-03 | -1.121 | 0.616 |
-|        3 |      1 | 2026-01-01 |  0.066 | 0.218 |
-|        3 |      2 | 2026-01-02 |  0.117 | 0.218 |
-|        3 |      3 | 2026-01-03 |  0.117 | 0.218 |
-|        3 |      4 | 2026-01-04 | -0.115 | 0.218 |
+| group_id | obs_id | date | x | x_between | x_within | .mlsim_x_random_intercept | y |
+|---:|---:|:---|---:|---:|---:|---:|---:|
+| 1 | 1 | 2026-01-01 | 0.512 | 0.521 | -0.008 | 0.521 | 1.347 |
+| 1 | 2 | 2026-01-02 | 0.454 | 0.521 | -0.067 | 0.521 | 1.347 |
+| 1 | 3 | 2026-01-03 | 0.269 | 0.521 | -0.252 | 0.521 | 1.347 |
+| 1 | 4 | 2026-01-04 | 0.447 | 0.521 | -0.074 | 0.521 | 1.347 |
+| 1 | 5 | 2026-01-05 | 0.419 | 0.521 | -0.102 | 0.521 | 1.347 |
+| 2 | 1 | 2026-01-01 | -1.068 | -1.080 | 0.011 | -1.080 | 0.616 |
+| 2 | 2 | 2026-01-02 | -1.127 | -1.080 | -0.047 | -1.080 | 0.616 |
+| 2 | 3 | 2026-01-03 | -1.121 | -1.080 | -0.041 | -1.080 | 0.616 |
+| 3 | 1 | 2026-01-01 | 0.066 | 0.139 | -0.073 | 0.139 | 0.218 |
+| 3 | 2 | 2026-01-02 | 0.117 | 0.139 | -0.022 | 0.139 | 0.218 |
+| 3 | 3 | 2026-01-03 | 0.117 | 0.139 | -0.023 | 0.139 | 0.218 |
+| 3 | 4 | 2026-01-04 | -0.115 | 0.139 | -0.255 | 0.139 | 0.218 |
 
 ## Single-Level, Group-Level, and Multilevel Predictors
 
@@ -400,14 +387,14 @@ levels_demo <- simulate_data(
   n_per_group = 4,
   seed = 2026,
   generators = list(
-    row_x = gen_normal("row_x", mean = 0, sd = 1),
-    group_x = gen_normal("group_x", level = "level2", mean = 10, sd = 1),
-    mixed_x = gen_normal(
+    row_x = gen_mvn("row_x", fixed_intercept = 0, residual_cov = 1),
+    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 10, residual_cov = 1),
+    mixed_x = gen_mvn(
       "mixed_x",
       level = "multilevel",
       fixed_intercept = 5,
       random_cov = 0.50,
-      residual_var = 1
+      residual_cov = 1
     )
   )
 )
@@ -415,24 +402,24 @@ levels_demo <- simulate_data(
 levels_demo
 #> <mlsim_data>
 #>   rows: 16
-#>   columns: 5 (generated: 3)
+#>   columns: 8 (generated: 6)
 #>   seed: 2026
 #>   grouping: group_id (4 groups; size min/median/max: 4/4/4)
 #>   generators: 3
 #> 
 #> Generators:
 #>  generator distribution      level    vars
-#>      row_x       normal     single   row_x
-#>    group_x       normal     level2 group_x
-#>    mixed_x       normal multilevel mixed_x
+#>      row_x          mvn     single   row_x
+#>    group_x          mvn     level2 group_x
+#>    mixed_x          mvn multilevel mixed_x
 ```
 
 ## Distribution Families
 
-Single-level generators use direct distribution parameters. Their
-multilevel forms use link-scale intercepts and random covariance terms.
-Here is a quick demonstration of various distribution families with
-single level data.
+All predictor generator levels use fixed location or link-scale
+intercepts. Multilevel forms add random covariance terms. Here is a
+quick demonstration of various distribution families with single level
+data.
 
 ``` r
 
@@ -440,12 +427,12 @@ families <- simulate_data(
   n = 10,
   seed = 2026,
   generators = list(
-    normal = gen_normal("normal", mean = 5, sd = 1),
-    successes = gen_binomial("successes", size = 5, prob = 0.40),
-    visits = gen_poisson("visits", lambda = 2),
-    events = gen_negbin("events", size = 3, mu = 2),
-    cost = gen_gamma("cost", shape = 4, mean = 20),
-    adherence = gen_beta("adherence", mean = 0.70, precision = 12)
+    normal = gen_mvn("normal", fixed_intercept = 5, residual_cov = 1),
+    successes = gen_binomial("successes", size = 5, fixed_intercept = stats::qlogis(0.40)),
+    visits = gen_poisson("visits", fixed_intercept = log(2)),
+    events = gen_negbin("events", fixed_intercept = log(2), scale_fixed_intercept = log(3)),
+    cost = gen_gamma("cost", fixed_intercept = log(20), scale_fixed_intercept = log(4)),
+    adherence = gen_beta("adherence", fixed_intercept = stats::qlogis(0.70), scale_fixed_intercept = log(12))
   )
 )
 
@@ -486,7 +473,7 @@ link_scale_counts <- simulate_data(
 link_scale_counts
 #> <mlsim_data>
 #>   rows: 15
-#>   columns: 3 (generated: 1)
+#>   columns: 4 (generated: 2)
 #>   seed: 2026
 #>   grouping: group_id (3 groups; size min/median/max: 5/5/5)
 #>   generators: 1
@@ -508,17 +495,17 @@ categorical <- simulate_data(
   n = 12,
   seed = 2026,
   generators = list(
-    binary_factor = gen_categorical("binary_factor", prob = 0.35),
+    binary_factor = gen_categorical("binary_factor", fixed_intercept = stats::qlogis(0.35)),
     education = gen_categorical(
       "education",
       categories = c("< bachelor", "bachelor", "> bachelor"),
-      prob = c(0.45, 0.35, 0.20),
+      fixed_intercept = c("bachelor" = log(0.35 / 0.45), "> bachelor" = log(0.20 / 0.45)),
       ordered = TRUE
     ),
     education_code = gen_categorical(
       "education_code",
       categories = c("arts", "science", "psychology"),
-      prob = c(0.45, 0.35, 0.20),
+      fixed_intercept = c("science" = log(0.35 / 0.45), "psychology" = log(0.20 / 0.45)),
       output = "integer"
     )
   )
@@ -571,24 +558,24 @@ categorical_ml <- simulate_data(
 kable(categorical_ml$data)
 ```
 
-| group_id | obs_id | education   |
-|---------:|-------:|:------------|
-|        1 |      1 | bachelor    |
-|        1 |      2 | \< bachelor |
-|        1 |      3 | \< bachelor |
-|        1 |      4 | \< bachelor |
-|        2 |      1 | bachelor    |
-|        2 |      2 | bachelor    |
-|        2 |      3 | \< bachelor |
-|        2 |      4 | \< bachelor |
-|        3 |      1 | bachelor    |
-|        3 |      2 | \< bachelor |
-|        3 |      3 | bachelor    |
-|        3 |      4 | \< bachelor |
-|        4 |      1 | \< bachelor |
-|        4 |      2 | bachelor    |
-|        4 |      3 | \> bachelor |
-|        4 |      4 | \< bachelor |
+| group_id | obs_id | education | .mlsim_education_random_intercept_bachelor | .mlsim_education_random_intercept_X..bachelor |
+|---:|---:|:---|---:|---:|
+| 1 | 1 | bachelor | -0.306 | 0.105 |
+| 1 | 2 | \< bachelor | -0.306 | 0.105 |
+| 1 | 3 | \< bachelor | -0.306 | 0.105 |
+| 1 | 4 | \< bachelor | -0.306 | 0.105 |
+| 2 | 1 | bachelor | 0.155 | 0.940 |
+| 2 | 2 | bachelor | 0.155 | 0.940 |
+| 2 | 3 | \< bachelor | 0.155 | 0.940 |
+| 2 | 4 | \< bachelor | 0.155 | 0.940 |
+| 3 | 1 | bachelor | -0.150 | 0.194 |
+| 3 | 2 | \< bachelor | -0.150 | 0.194 |
+| 3 | 3 | bachelor | -0.150 | 0.194 |
+| 3 | 4 | \< bachelor | -0.150 | 0.194 |
+| 4 | 1 | \< bachelor | -0.089 | 0.318 |
+| 4 | 2 | bachelor | -0.089 | 0.318 |
+| 4 | 3 | \> bachelor | -0.089 | 0.318 |
+| 4 | 4 | \< bachelor | -0.089 | 0.318 |
 
 ## Correlated and Compositional Predictors
 
@@ -605,13 +592,13 @@ correlated_comp <- simulate_data(
   generators = list(
     affect_block = gen_mvn(
       c("affect", "energy"),
-      mean = c(0, 1),
-      cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
+      fixed_intercept = c(0, 1),
+      residual_cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
     ),
     time_use = gen_mvn(
       c("ilr_1", "ilr_2"),
-      mean = c(0, 0),
-      cov = diag(c(0.30, 0.20)),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(c(0.30, 0.20)),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -658,8 +645,8 @@ parts_only <- simulate_data(
   generators = list(
     time_use = gen_mvn(
       c("z1", "z2"),
-      mean = c(0, 0),
-      cov = diag(2),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(2),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -682,9 +669,10 @@ kable(parts_only$data)
 ## Location-Scale Predictors
 
 For multilevel predictors, `scale_fixed_intercept` adds group-varying
-scale parameters. For a normal generator this means log residual SD; for
-negative binomial, gamma, and beta generators it controls size, shape,
-and precision.
+scale parameters. For a univariate
+[`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md)
+generator this means log residual SD; for negative binomial, gamma, and
+beta generators it controls size, shape, and precision.
 
 Here you can see in the metadata the group specific parameters that were
 generated.
@@ -696,7 +684,7 @@ location_scale <- simulate_data(
   n_per_group = 5,
   seed = 2026,
   generators = list(
-    symptom = gen_normal(
+    symptom = gen_mvn(
       "symptom",
       level = "multilevel",
       fixed_intercept = 10,
@@ -728,28 +716,28 @@ kable(data.table(
 ))
 ```
 
-| group_id | symptom_residual_sd | event_count_size |
-|---------:|--------------------:|-----------------:|
-|        1 |                1.29 |             5.99 |
-|        1 |                1.29 |             5.99 |
-|        1 |                1.29 |             5.99 |
-|        1 |                1.29 |             5.99 |
-|        1 |                1.29 |             5.99 |
-|        2 |                2.57 |             4.75 |
-|        2 |                2.57 |             4.75 |
-|        2 |                2.57 |             4.75 |
-|        2 |                2.57 |             4.75 |
-|        2 |                2.57 |             4.75 |
-|        3 |                1.39 |             6.04 |
-|        3 |                1.39 |             6.04 |
-|        3 |                1.39 |             6.04 |
-|        3 |                1.39 |             6.04 |
-|        3 |                1.39 |             6.04 |
-|        4 |                1.54 |             4.54 |
-|        4 |                1.54 |             4.54 |
-|        4 |                1.54 |             4.54 |
-|        4 |                1.54 |             4.54 |
-|        4 |                1.54 |             4.54 |
+| group_id | symptom_residual_sd.symptom | event_count_size |
+|---------:|----------------------------:|-----------------:|
+|        1 |                        1.29 |             5.99 |
+|        1 |                        1.29 |             5.99 |
+|        1 |                        1.29 |             5.99 |
+|        1 |                        1.29 |             5.99 |
+|        1 |                        1.29 |             5.99 |
+|        2 |                        2.57 |             4.75 |
+|        2 |                        2.57 |             4.75 |
+|        2 |                        2.57 |             4.75 |
+|        2 |                        2.57 |             4.75 |
+|        2 |                        2.57 |             4.75 |
+|        3 |                        1.39 |             6.04 |
+|        3 |                        1.39 |             6.04 |
+|        3 |                        1.39 |             6.04 |
+|        3 |                        1.39 |             6.04 |
+|        3 |                        1.39 |             6.04 |
+|        4 |                        1.54 |             4.54 |
+|        4 |                        1.54 |             4.54 |
+|        4 |                        1.54 |             4.54 |
+|        4 |                        1.54 |             4.54 |
+|        4 |                        1.54 |             4.54 |
 
 ## Custom Generators
 
@@ -818,1047 +806,549 @@ kable(custom$data)
 |        3 |      3 |     1.4 | high        |
 |        3 |      4 |     1.8 | high        |
 
-## Simple Outcomes
+## Dynamic Outcome Simulation
 
-[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
-appends Gaussian outcomes after earlier generators have added
-predictors. This example uses a fixed intercept and slope. The formula
-specifies how the outcome depends on predictors. You can see from
-fitting a linear regression afterwards that the simulated coefficients
-are well recovered.
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
+adds a model-based outcome generator to the same
+[`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
+workflow. It is designed for simulation studies where predictors are
+generated first and outcomes are then generated from a known location,
+scale, and optional residual autoregressive process.
+
+The scale model is required. Use `scale = sigma ~ 1` for constant
+conditional standard deviations. When `ar1()` is present, the scale
+model controls innovation variability. When `ar1()` is absent, it
+controls ordinary residual variability. The AR process is applied to
+residual ILR states, not to lagged observed outcomes.
+
+`between(x)` and `within(x)` resolve to labelled component columns
+created by earlier generators. For example, a multilevel
+`gen_mvn("stress")` predictor creates visible `stress_between` and
+`stress_within` columns and stores their roles in generator metadata.
+
+[`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
+can be used first to ask the simulator for the exact parameter matrices
+and arrays required by a
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
+specification. The template should be run with the same design,
+predictor generators, factor levels, formulas, and composition settings
+that will be used in the final simulation.
 
 ``` r
 
-simple_outcome <- simulate_data(
-  n = 200,
-  seed = 2026,
-  generators = list(
-    dose = gen_normal("dose", mean = 0, sd = 1),
-    score = gen_outcome(
-      score ~ dose,
-      coefficients = c("(Intercept)" = 10, dose = 2),
-      residual_cov = 4
-    )
+dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ treatment + between(stress) +
+  within(stress) + ar1() + treatment:ar1() + (1 + ar1() | ID)
+dynamic_scale_formula <- sigma ~ treatment + (1 | ID)
+dynamic_composition <- list(parts = c("sleep", "sedentary", "activity"), total = 24)
+
+dynamic_predictor_generators <- list(
+  treatment = gen_categorical(
+    "treatment",
+    level = "level2",
+    categories = c("control", "treatment"),
+    fixed_intercept = stats::qlogis(0.5),
+    output = "factor"
+  ),
+  stress = gen_mvn(
+    "stress",
+    level = "multilevel",
+    fixed_intercept = 3,
+    random_cov = 0.20,
+    residual_cov = 0.80
   )
 )
 
-summary(lm(score ~ dose, data = simple_outcome$data))
-#> 
-#> Call:
-#> lm(formula = score ~ dose, data = simple_outcome$data)
-#> 
-#> Residuals:
-#>    Min     1Q Median     3Q    Max 
-#> -5.092 -1.299 -0.012  1.233  4.288 
-#> 
-#> Coefficients:
-#>             Estimate Std. Error t value Pr(>|t|)    
-#> (Intercept)   10.025      0.138    72.6   <2e-16 ***
-#> dose           2.015      0.141    14.3   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Residual standard error: 1.95 on 198 degrees of freedom
-#> Multiple R-squared:  0.509,  Adjusted R-squared:  0.507 
-#> F-statistic:  205 on 1 and 198 DF,  p-value: <2e-16
-```
-
-## Outcome Templates and Formula Helpers
-
-[`outcome_template()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
-runs through the same formula parsing as
-[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
-without adding outcome columns. It gives named coefficient and
-covariance objects that can be edited safely.
-
-This is important because as outcome models become more complicated,
-correctly specifying and naming all the necessary parameters becomes
-more difficult. The template approach allows you to first specify the
-model in a formula, then edit the parameters in a structured way, and
-finally generate the outcome with the edited parameters.
-
-Here we will consider a much more complicated data simulation. We will
-generate two predictors, a level2 only treatment and a multilevel stress
-variable. We will then use an outcome template to specify a complicated
-outcome model with fixed effects, random effects, and lagged terms. The
-template will give us the correctly named coefficient and covariance
-objects that we can edit before generating the outcome.
-
-A range of helper functions exist:
-
-- [`between()`](https://rdrr.io/pkg/data.table/man/between.html): group
-  means of a predictor.
-- [`within()`](https://rdrr.io/r/base/with.html): row values minus group
-  means.
-- `lag1()`: previous row value within groups.
-
-These are used in formulae to specify further data management that
-should occur on the predictors before they are used to generate the
-outcome. For example, `between(stress)` creates a helper column with
-group means of stress, and `within(stress)` creates a helper column with
-row values minus group means. These helper columns are then used in the
-outcome formula and have their own coefficients.
-
-``` r
-
-f <- wellbeing ~
-  treatment +
-  between(stress) +
-  within(stress) +
-  lag1(stress) +
-  (1 + within(stress) | p | id)
-
-helper_template_sim <- simulate_data(
+dynamic_template <- simulate_data(
   n_groups = 4,
   n_per_group = 5,
-  group_id = "id",
+  group_id = "ID",
   time_id = "day",
   seed = 2026,
-  generators = list(
-    treatment = gen_categorical(
-      "treatment",
-      level = "level2",
-      prob = 0.5,
-      output = "integer"
-    ),
-    stress = gen_normal(
-      "stress",
-      level = "multilevel",
-      fixed_intercept = 0,
-      random_cov = 0.20,
-      residual_var = 0.80
-    ),
-    wellbeing_template = outcome_template(f)
-  )
-)
-
-helper_template <- helper_template_sim$generator_metadata$wellbeing_template
-helper_template$coefficients
-#>                 wellbeing
-#> (Intercept)             0
-#> treatment               0
-#> between(stress)         0
-#> within(stress)          0
-#> lag1(stress)            0
-rownames(helper_template$random_cov[["id::p"]])
-#> [1] "wellbeing:(Intercept)"    "wellbeing:within(stress)"
-helper_template$fit_helpers
-#>                          type source              internal         column
-#> .mlsim_between_stress between stress .mlsim_between_stress stress_between
-#> .mlsim_within_stress   within stress  .mlsim_within_stress  stress_within
-#> .mlsim_lag1_stress       lag1 stress    .mlsim_lag1_stress     lag_stress
-#>                              sim_term response_derived
-#> .mlsim_between_stress between(stress)            FALSE
-#> .mlsim_within_stress   within(stress)            FALSE
-#> .mlsim_lag1_stress       lag1(stress)            FALSE
-```
-
-Now we can use these objects and enter our desired parameter values with
-confidence that they are correctly named and structured.
-
-``` r
-
-helper_coef <- helper_template$coefficients
-helper_coef["(Intercept)", "wellbeing"] <- 50
-helper_coef["treatment", "wellbeing"] <- 2.0
-helper_coef["between(stress)", "wellbeing"] <- -1.5
-helper_coef["within(stress)", "wellbeing"] <- -0.8
-helper_coef["lag1(stress)", "wellbeing"] <- -0.4
-
-helper_residual_cov <- helper_template$residual_cov
-helper_residual_cov[,] <- 1.5
-
-helper_random_cov <- helper_template$random_cov
-helper_block <- helper_random_cov[["id::p"]]
-diag(helper_block) <- c(3.0, 0.30)
-helper_random_cov[["id::p"]] <- helper_block
-```
-
-The edited template objects can then be supplied to
-[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md).
-Note how with a lag specified, there are missing values for the outcome.
-This is because the lags are missing for the first row of each group.
-
-``` r
-
-
-helper_sim <- simulate_data(
-  n_groups = 20,
-  n_per_group = 5,
-  group_id = "id",
-  time_id = "day",
-  seed = 2026,
-  generators = list(
-    treatment = gen_categorical(
-      "treatment",
-      level = "level2",
-      prob = 0.5,
-      output = "integer"
-    ),
-    stress = gen_normal(
-      "stress",
-      level = "multilevel",
-      fixed_intercept = 0,
-      random_cov = 0.20,
-      residual_var = 0.80
-    ),
-    wellbeing = gen_outcome(
-      f,
-      coefficients = helper_coef,
-      residual_cov = helper_residual_cov,
-      random_cov = helper_random_cov
-    )
-  )
-)
-
-kable(head(helper_sim$data, 20))
-```
-
-| id | obs_id | day | treatment | stress | wellbeing | stress_between | stress_within | lag_stress |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 1 | 1 | 1 | -0.656 | NA | -0.201 | -0.455 | NA |
-| 1 | 2 | 2 | 1 | -0.034 | 51.7 | -0.201 | 0.167 | -0.656 |
-| 1 | 3 | 3 | 1 | -0.410 | 53.6 | -0.201 | -0.210 | -0.034 |
-| 1 | 4 | 4 | 1 | 0.115 | 51.7 | -0.201 | 0.316 | -0.410 |
-| 1 | 5 | 5 | 1 | -0.019 | 52.3 | -0.201 | 0.181 | 0.115 |
-| 2 | 1 | 1 | 1 | 0.715 | NA | -0.216 | 0.931 | NA |
-| 2 | 2 | 2 | 1 | 0.204 | 44.8 | -0.216 | 0.420 | 0.715 |
-| 2 | 3 | 3 | 1 | -1.124 | 49.0 | -0.216 | -0.908 | 0.204 |
-| 2 | 4 | 4 | 1 | 0.190 | 49.6 | -0.216 | 0.406 | -1.124 |
-| 2 | 5 | 5 | 1 | -1.064 | 48.5 | -0.216 | -0.848 | 0.190 |
-| 3 | 1 | 1 | 0 | -1.134 | NA | -0.477 | -0.658 | NA |
-| 3 | 2 | 2 | 0 | 0.597 | 50.3 | -0.477 | 1.073 | -1.134 |
-| 3 | 3 | 3 | 0 | -1.176 | 50.7 | -0.477 | -0.700 | 0.597 |
-| 3 | 4 | 4 | 0 | 0.175 | 50.5 | -0.477 | 0.652 | -1.176 |
-| 3 | 5 | 5 | 0 | -0.845 | 50.4 | -0.477 | -0.368 | 0.175 |
-| 4 | 1 | 1 | 0 | 1.167 | NA | 0.427 | 0.740 | NA |
-| 4 | 2 | 2 | 0 | 0.536 | 50.9 | 0.427 | 0.108 | 1.167 |
-| 4 | 3 | 3 | 0 | -0.461 | 51.3 | 0.427 | -0.888 | 0.536 |
-| 4 | 4 | 4 | 0 | 0.614 | 50.2 | 0.427 | 0.187 | -0.461 |
-| 4 | 5 | 5 | 0 | 0.280 | 48.8 | 0.427 | -0.147 | 0.614 |
-
-## Autoregressive Outcomes
-
-In order to support time series and dynamics models, we support
-autoregressive effects in outcome generation.
-
-Use `ar1()` inside an outcome formula to refer to the previous generated
-value of the outcome, within each group. Using autoregression, it is
-possible to generate only an outcome, with no independent preditors
-generated. We will use an outcome template again to help us specify the
-correct names and structure of parameters.
-
-``` r
-
-ar_template <- simulate_data(
-  n = 5,
-  time_id = "day",
-  seed = 2026,
-  generators = list(
-    mood_template = outcome_template(mood ~ ar1(), burnin = 5)
-  )
-)$generator_metadata$mood_template
-
-ar_coef <- ar_template$coefficients
-ar_coef["(Intercept)", "mood"] <- 0
-ar_coef["ar1(mood)", "mood"] <- 0.55
-
-ar_residual_cov <- ar_template$residual_cov
-ar_residual_cov[,] <- 0.40
-
-ar_sim <- simulate_data(
-  n = 200,
-  time_id = "day",
-  seed = 2026,
-  generators = list(
-    mood = gen_outcome(
-      mood ~ ar1(),
-      coefficients = ar_coef,
-      residual_cov = ar_residual_cov,
-      burnin = 5
-    )
-  )
-)
-
-kable(head(ar_sim$data, 10))
-```
-
-| obs_id | day |   mood | lag_mood |
-|-------:|----:|-------:|---------:|
-|      1 |   1 | -0.138 |       NA |
-|      2 |   2 | -0.759 |   -0.138 |
-|      3 |   3 | -0.329 |   -0.759 |
-|      4 |   4 | -0.235 |   -0.329 |
-|      5 |   5 | -0.551 |   -0.235 |
-|      6 |   6 | -1.894 |   -0.551 |
-|      7 |   7 | -1.507 |   -1.894 |
-|      8 |   8 | -1.474 |   -1.507 |
-|      9 |   9 | -0.739 |   -1.474 |
-|     10 |  10 | -0.706 |   -0.739 |
-
-Fitting a model to the simulated data shows that the autoregressive
-coefficient is well recovered.
-
-``` r
-
-summary(lm(mood ~ lag_mood, data = ar_sim$data))
-#> 
-#> Call:
-#> lm(formula = mood ~ lag_mood, data = ar_sim$data)
-#> 
-#> Residuals:
-#>     Min      1Q  Median      3Q     Max 
-#> -1.6081 -0.4578 -0.0056  0.3828  1.6566 
-#> 
-#> Coefficients:
-#>             Estimate Std. Error t value Pr(>|t|)    
-#> (Intercept)  0.00549    0.04433    0.12      0.9    
-#> lag_mood     0.56743    0.05880    9.65   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Residual standard error: 0.625 on 197 degrees of freedom
-#>   (1 observation deleted due to missingness)
-#> Multiple R-squared:  0.321,  Adjusted R-squared:  0.318 
-#> F-statistic: 93.1 on 1 and 197 DF,  p-value: <2e-16
-```
-
-## Compositional Outcomes
-
-Outcomes can also be generated on ILR coordinates and returned as
-composition parts. Here the parts sum to 24 for each row.
-
-``` r
-
-comp_formula <- mvbind(comp_ilr_1, comp_ilr_2) ~ stress
-comp_parts <- c("sleep", "active", "sedentary")
-
-comp_template <- simulate_data(
-  n = 10,
-  seed = 2026,
-  generators = list(
-    stress = gen_normal(
-      "stress",
-      mean = 0,
-      sd = 1
-    ),
-    time_use_template = outcome_template(
-      comp_formula,
-      compositional = TRUE,
-      parts = comp_parts,
-      total = 24
-    )
-  )
-)$generator_metadata$time_use_template
-
-comp_coef <- comp_template$coefficients
-comp_coef["(Intercept)", ] <- c(-0.30, 0.20)
-comp_coef["stress", ] <- c(-0.05, 0.04)
-
-comp_residual_cov <- comp_template$residual_cov
-comp_residual_cov[,] <- matrix(
-  c(0.12, 0.02,
-    0.02, 0.10),
-  nrow = 2
-)
-
-comp_sim <- simulate_data(
-  n = 10,
-  seed = 2026,
-  generators = list(
-    stress = gen_normal(
-      "stress",
-      mean = 0,
-      sd = 1
-    ),
-    time_use = gen_outcome(
-      comp_formula,
-      coefficients = comp_coef,
-      residual_cov = comp_residual_cov,
-      compositional = TRUE,
-      parts = comp_parts,
-      total = 24
-    )
-  )
-)
-
-kable(comp_sim$data)
-```
-
-| obs_id | stress | comp_ilr_1 | comp_ilr_2 | sleep | active | sedentary |
-|-------:|-------:|-----------:|-----------:|------:|-------:|----------:|
-|      1 |  0.521 |     -0.251 |      0.382 |  6.28 |  11.19 |      6.52 |
-|      2 | -1.080 |     -0.046 |      0.338 |  7.56 |  10.15 |      6.29 |
-|      3 |  0.139 |     -0.455 |      0.598 |  4.99 |  13.30 |      5.71 |
-|      4 | -0.085 |      0.002 |     -0.129 |  7.99 |   7.27 |      8.73 |
-|      5 | -0.667 |      0.529 |      0.648 | 11.12 |   9.20 |      3.68 |
-|      6 | -2.516 |     -0.294 |     -0.639 |  5.76 |   5.26 |     12.98 |
-|      7 | -0.735 |     -0.185 |     -0.383 |  6.67 |   6.37 |     10.96 |
-|      8 | -1.020 |     -0.307 |      0.103 |  6.12 |   9.59 |      8.29 |
-|      9 |  0.114 |      0.044 |      0.196 |  8.24 |   8.97 |      6.80 |
-|     10 | -0.474 |     -0.221 |     -0.385 |  6.45 |   6.44 |     11.11 |
-
-## Location-Scale Outcomes
-
-For outcomes, `scale_formula` models the log residual SD. Residual
-correlations are supplied separately through `residual_cor`.
-
-``` r
-
-scale_formula <- sigma ~ treatment + (1 | p | participant_id)
-scale_outcome_formula <- wellbeing ~ treatment + stress + (1 | p | participant_id)
-
-scale_template <- simulate_data(
-  n_groups = 4,
-  n_per_group = 5,
-  group_id = "participant_id",
-  seed = 2026,
-  generators = list(
-    treatment = gen_categorical(
-      "treatment",
-      level = "level2",
-      prob = 0.5,
-      output = "integer"
-    ),
-    stress = gen_normal(
-      "stress",
-      level = "multilevel",
-      fixed_intercept = 0,
-      random_cov = 0.20,
-      residual_var = 0.80
-    ),
-    wellbeing_template = outcome_template(
-      scale_outcome_formula,
-      scale_formula = scale_formula
-    )
-  )
-)$generator_metadata$wellbeing_template
-
-scale_coef <- scale_template$coefficients
-scale_coef["(Intercept)", "wellbeing"] <- 50
-scale_coef["treatment", "wellbeing"] <- 2
-scale_coef["stress", "wellbeing"] <- -1
-
-scale_sd_coef <- scale_template$scale_coefficients
-scale_sd_coef["(Intercept)", "wellbeing"] <- log(1.0)
-scale_sd_coef["treatment", "wellbeing"] <- log(1.4)
-
-cov_coef <- scale_template$random_cov
-cov_coef[["participant_id::p"]][, ] <- diag(c(3.0, 0.30))
-
-scale_sim <- simulate_data(
-  n_groups = 4,
-  n_per_group = 5,
-  group_id = "participant_id",
-  seed = 2026,
-  generators = list(
-    treatment = gen_categorical(
-      "treatment",
-      level = "level2",
-      prob = 0.5,
-      output = "integer"
-    ),
-    stress = gen_normal(
-      "stress",
-      level = "multilevel",
-      fixed_intercept = 0,
-      random_cov = 0.20,
-      residual_var = 0.80
-    ),
-    wellbeing = gen_outcome(
-      scale_outcome_formula,
-      coefficients = scale_coef,
-      scale_formula = scale_formula,
-      scale_coefficients = scale_sd_coef,
-      random_cov = cov_coef,
-      residual_cor = matrix(
-        1,
-        nrow = 1,
-        dimnames = list("wellbeing", "wellbeing")
+  generators = c(
+    dynamic_predictor_generators,
+    list(
+      outcome_template = gen_template(
+        dynamic_outcome_formula,
+        scale = dynamic_scale_formula,
+        composition = dynamic_composition,
+        burnin = 20
       )
     )
   )
 )
 
-scale_sim$data
-#>     participant_id obs_id treatment stress wellbeing
-#>              <int>  <int>     <int>  <num>     <num>
-#>  1:              1      1         1 -0.595      49.9
-#>  2:              1      2         1 -0.850      52.0
-#>  3:              1      3         1  0.164      49.9
-#>  4:              1      4         1 -0.362      47.7
-#>  5:              1      5         1 -0.303      50.4
-#>  6:              2      1         1 -0.691      51.5
-#>  7:              2      2         1 -0.236      50.7
-#>  8:              2      3         1 -0.240      53.1
-#>  9:              2      4         1 -2.316      52.7
-#> 10:              2      5         1  1.167      51.1
-#> 11:              3      1         0  0.253      47.7
-#> 12:              3      2         0 -0.104      50.6
-#> 13:              3      3         0 -1.018      50.7
-#> 14:              3      4         0  0.319      48.1
-#> 15:              3      5         0 -0.592      50.4
-#> 16:              4      1         0 -1.273      48.6
-#> 17:              4      2         0 -2.370      48.4
-#> 18:              4      3         0  0.186      46.7
-#> 19:              4      4         0 -1.082      47.3
-#> 20:              4      5         0  0.581      46.8
-#>     participant_id obs_id treatment stress wellbeing
-#>              <int>  <int>     <int>  <num>     <num>
+dynamic_params <- dynamic_template$generator_metadata$outcome_template$params
+dynamic_params$location$beta["between(stress)", ] <- c(0.15, -0.05)
+dynamic_params$location$beta["within(stress)", ] <- c(0.05, 0.03)
+dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.4, 0.35))
+dynamic_params$scale$beta["treatmenttreatment", ] <- log(c(0.45, 0.4))
+dynamic_params$ar$beta["ar1()", , ] <- matrix(c(0.25, 0.02, -0.01, 0.20), 2, 2, byrow = TRUE)
+dynamic_params$ar$beta["treatmenttreatment:ar1()", , ] <- matrix(c(0.05, 0, 0, 0.03), 2, 2, byrow = TRUE)
+
+dynamic_random_names <- rownames(dynamic_params$random$ID$covariance)
+dynamic_random_sd_values <- c(
+  "location|outcome=ilr1|term=(Intercept)" = 0.20,
+  "location|outcome=ilr2|term=(Intercept)" = 0.18,
+  "ar|term=ar1()|to=ilr1|from=ilr1" = 0.12,
+  "ar|term=ar1()|to=ilr1|from=ilr2" = 0.06,
+  "ar|term=ar1()|to=ilr2|from=ilr1" = 0.06,
+  "ar|term=ar1()|to=ilr2|from=ilr2" = 0.12,
+  "scale|outcome=ilr1|term=(Intercept)" = 0.16,
+  "scale|outcome=ilr2|term=(Intercept)" = 0.14
+)
+dynamic_random_sd <- dynamic_random_sd_values[dynamic_random_names]
+
+dynamic_random_cor <- diag(length(dynamic_random_names))
+dimnames(dynamic_random_cor) <- list(dynamic_random_names, dynamic_random_names)
+set_dynamic_random_cor <- function(x, y, value) {
+  dynamic_random_cor[x, y] <<- value
+  dynamic_random_cor[y, x] <<- value
+}
+set_dynamic_random_cor(
+  "location|outcome=ilr1|term=(Intercept)",
+  "ar|term=ar1()|to=ilr1|from=ilr1",
+  0.20
+)
+set_dynamic_random_cor(
+  "ar|term=ar1()|to=ilr1|from=ilr1",
+  "ar|term=ar1()|to=ilr1|from=ilr2",
+  0.15
+)
+set_dynamic_random_cor(
+  "location|outcome=ilr2|term=(Intercept)",
+  "ar|term=ar1()|to=ilr2|from=ilr1",
+  0.20
+)
+set_dynamic_random_cor(
+  "ar|term=ar1()|to=ilr2|from=ilr1",
+  "ar|term=ar1()|to=ilr2|from=ilr2",
+  0.15
+)
+
+if (anyNA(dynamic_random_sd) ||
+    min(eigen(dynamic_random_cor, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+  stop("The dynamic outcome random-effect covariance is not valid.")
+}
+
+dynamic_params$random$ID$covariance <- diag(dynamic_random_sd) %*%
+  dynamic_random_cor %*%
+  diag(dynamic_random_sd)
+dimnames(dynamic_params$random$ID$covariance) <- list(dynamic_random_names, dynamic_random_names)
 ```
-
-## Preparing Simulated Outcomes for Later Fitting
-
-[`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
-does not fit a model. It prepares the simulated data, formula, helper
-columns, and term maps for a later fitting workflow.
 
 ``` r
 
-fit_prep <- prepare_outcome_fit(helper_sim, outcome = "wellbeing")
-
-str(fit_prep)
-#> List of 12
-#>  $ target              : chr "generic"
-#>  $ outcome             : chr "wellbeing"
-#>  $ data                :Classes 'data.table' and 'data.frame':   80 obs. of  9 variables:
-#>   ..$ id            : int [1:80] 1 1 1 1 2 2 2 2 3 3 ...
-#>   ..$ obs_id        : int [1:80] 2 3 4 5 2 3 4 5 2 3 ...
-#>   ..$ day           : int [1:80] 2 3 4 5 2 3 4 5 2 3 ...
-#>   ..$ treatment     : int [1:80] 1 1 1 1 1 1 1 1 0 0 ...
-#>   ..$ stress        : num [1:80] -0.0337 -0.4104 0.1151 -0.0194 0.2042 ...
-#>   ..$ wellbeing     : num [1:80] 51.7 53.6 51.7 52.3 44.8 ...
-#>   ..$ stress_between: num [1:80] -0.201 -0.201 -0.201 -0.201 -0.216 ...
-#>   ..$ stress_within : num [1:80] 0.167 -0.21 0.316 0.181 0.42 ...
-#>   ..$ lag_stress    : num [1:80] -0.6557 -0.0337 -0.4104 0.1151 0.715 ...
-#>   ..- attr(*, ".internal.selfref")=<pointer: 0x55d4fa2c19d0> 
-#>  $ formula             :Class 'formula'  language wellbeing ~ treatment + stress_between + stress_within + lag_stress + (1 +      stress_within | p | id)
-#>   .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
-#>  $ fixed_formula       :Class 'formula'  language wellbeing ~ treatment + stress_between + stress_within + lag_stress
-#>   .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
-#>  $ term_map            :'data.frame':    5 obs. of  3 variables:
-#>   ..$ component: chr [1:5] "fixed" "fixed" "fixed" "fixed" ...
-#>   ..$ sim_term : chr [1:5] "(Intercept)" "treatment" "between(stress)" "within(stress)" ...
-#>   ..$ fit_term : chr [1:5] "(Intercept)" "treatment" "stress_between" "stress_within" ...
-#>  $ helper_columns      : chr [1:3] "stress_between" "stress_within" "lag_stress"
-#>  $ scale_formula       : NULL
-#>  $ scale_term_map      : NULL
-#>  $ scale_helper_columns: chr(0) 
-#>  $ residual_cor        : NULL
-#>  $ complete_rows       : logi [1:100] FALSE TRUE TRUE TRUE TRUE FALSE ...
-#>  - attr(*, "class")= chr "mlsim_fit_prep"
-```
-
-For compositional outcomes,
-[`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
-automatically targets the `multilevelcoda` preparation path.
-
-## Multilevel Dynamic Compositional Outcomes
-
-Now we will look at a much more complicated example. We have a 3 part
-compositional outcome of physical activity: MVPA, light PA, and
-sedentary time. It is a dynamic, so a time series. Imagine multiple
-participants measured with accelerometry for multiple days. Participants
-also are part of an intervention or control group, and stress was
-measured daily. We want to simulate data that reflects the following
-model:
-
-``` r
-
-pa_formula <- mvbind(pa_ilr_1, pa_ilr_2) ~
-  intervention + stress + ar1() * intervention +
-  (1 + stress + ar1() | p | id)
-```
-
-### Build a Template
-
-We can build a template with the formula to get the correctly named
-coefficient and covariance objects.
-
-``` r
-
-template_sim <- simulate_data(
-  n_groups = 4,
-  n_per_group = 4,
-  group_id = "id",
+dynamic_comp <- simulate_data(
+  n_groups = 500,
+  n_per_group = 150,
+  group_id = "ID",
   time_id = "day",
   seed = 2026,
-  generators = list(
-    intervention = gen_categorical(
-      "intervention",
-      level = "level2",
-      prob = 0.5,
-      output = "integer"
-    ),
-    stress = gen_normal(
-      "stress",
-      level = "multilevel",
-      fixed_intercept = 0,
-      random_cov = 0.20,
-      residual_var = 0.80
-    ),
-    pa_template = outcome_template(
-      pa_formula,
-      compositional = TRUE,
-      parts = c("mvpa", "light_pa", "sedentary")
+  generators = c(
+    dynamic_predictor_generators,
+    list(
+      outcome = gen_outcome(
+        dynamic_outcome_formula,
+        scale = dynamic_scale_formula,
+        params = dynamic_params,
+        composition = dynamic_composition,
+        burnin = 50
+      )
     )
   )
 )
 
-pa_template <- template_sim$generator_metadata$pa_template
-
-kable(pa_template$coefficients)
+kable(head(dynamic_comp$data[, c("ID", "day", "treatment", "stress", "ilr1", "ilr2", "sleep", "sedentary", "activity"), with = FALSE]))
 ```
 
-|                            | pa_ilr_1 | pa_ilr_2 |
-|:---------------------------|---------:|---------:|
-| (Intercept)                |        0 |        0 |
-| intervention               |        0 |        0 |
-| stress                     |        0 |        0 |
-| ar1(pa_ilr_1)              |        0 |        0 |
-| ar1(pa_ilr_2)              |        0 |        0 |
-| intervention:ar1(pa_ilr_1) |        0 |        0 |
-| intervention:ar1(pa_ilr_2) |        0 |        0 |
-
-There are multiple random effects. The random effects are all
-correlated, so we need a full covariance matrix for the participant
-random effects. The row names of the covariance matrix show the correct
-naming structure for the random effects.
+|  ID | day | treatment | stress |  ilr1 |   ilr2 | sleep | sedentary | activity |
+|----:|----:|:----------|-------:|------:|-------:|------:|----------:|---------:|
+|   1 |   1 | treatment |   3.27 | 0.360 | -0.400 | 10.26 |      4.98 |     8.76 |
+|   1 |   2 | treatment |   2.96 | 0.318 | -0.512 |  9.82 |      4.63 |     9.55 |
+|   1 |   3 | treatment |   3.17 | 0.080 | -0.164 |  8.49 |      6.86 |     8.65 |
+|   1 |   4 | treatment |   2.79 | 0.355 | -0.381 | 10.24 |      5.07 |     8.69 |
+|   1 |   5 | treatment |   2.71 | 0.666 | -0.115 | 12.71 |      5.19 |     6.10 |
+|   1 |   6 | treatment |   1.46 | 0.823 | -0.267 | 13.77 |      4.16 |     6.07 |
 
 ``` r
 
-rownames(pa_template$random_cov[["id::p"]])
-#> [1] "pa_ilr_1:(Intercept)"   "pa_ilr_1:stress"        "pa_ilr_1:ar1(pa_ilr_1)"
-#> [4] "pa_ilr_1:ar1(pa_ilr_2)" "pa_ilr_2:(Intercept)"   "pa_ilr_2:stress"       
-#> [7] "pa_ilr_2:ar1(pa_ilr_1)" "pa_ilr_2:ar1(pa_ilr_2)"
-```
-
-### Fill in Plausible Values
-
-The fixed coefficients below encode a modest intervention shift, a small
-stress effect, and positive autocorrelation. The interaction rows make
-autocorrelation weaker in the intervention group.
-
-``` r
-
-pa_coef <- pa_template$coefficients
-pa_coef["(Intercept)", ] <- c(-0.30, 0.20)
-pa_coef["intervention", ] <- c(0.15, -0.10)
-pa_coef["stress", ] <- c(-0.08, 0.05)
-
-pa_coef["ar1(pa_ilr_1)", ] <- c(0.35, 0.08)
-pa_coef["ar1(pa_ilr_2)", ] <- c(0.04, 0.30)
-pa_coef["intervention:ar1(pa_ilr_1)", ] <- c(-0.15, -0.02)
-pa_coef["intervention:ar1(pa_ilr_2)", ] <- c(-0.01, -0.12)
-
-kable(pa_coef)
-```
-
-|                            | pa_ilr_1 | pa_ilr_2 |
-|:---------------------------|---------:|---------:|
-| (Intercept)                |    -0.30 |     0.20 |
-| intervention               |     0.15 |    -0.10 |
-| stress                     |    -0.08 |     0.05 |
-| ar1(pa_ilr_1)              |     0.35 |     0.08 |
-| ar1(pa_ilr_2)              |     0.04 |     0.30 |
-| intervention:ar1(pa_ilr_1) |    -0.15 |    -0.02 |
-| intervention:ar1(pa_ilr_2) |    -0.01 |    -0.12 |
-
-There are several covariances. The residuals can also covary. We allow a
-small residual covariance.
-
-``` r
-
-pa_residual_cov <- pa_template$residual_cov
-pa_residual_cov[,] <- matrix(
-  c(0.22, 0.04,
-    0.04, 0.18),
-  nrow = 2
-)
-
-kable(pa_residual_cov)
-```
-
-|          | pa_ilr_1 | pa_ilr_2 |
-|:---------|---------:|---------:|
-| pa_ilr_1 |     0.22 |     0.04 |
-| pa_ilr_2 |     0.04 |     0.18 |
-
-For simplicity, we start with all the random effects being uncorrelated,
-which we accomplish using [`diag()`](https://rdrr.io/r/base/diag.html)
-to set the covariance matrix. We then edit in a few selected non zero
-covariances we want.
-
-``` r
-
-pa_random_cov <- pa_template$random_cov
-participant_cov <- pa_random_cov[["id::p"]]
-
-diag(participant_cov) <- c(
-  0.080, # pa_ilr_1 random intercept
-  0.015, # pa_ilr_1 stress slope
-  0.001, # pa_ilr_1 ar1(pa_ilr_1) slope
-  0.001, # pa_ilr_1 ar1(pa_ilr_2) slope
-  0.060, # pa_ilr_2 random intercept
-  0.012, # pa_ilr_2 stress slope
-  0.001, # pa_ilr_2 ar1(pa_ilr_1) slope
-  0.001  # pa_ilr_2 ar1(pa_ilr_2) slope
-)
-
-participant_cov["pa_ilr_1:(Intercept)", "pa_ilr_2:(Intercept)"] <- 0.025
-participant_cov["pa_ilr_2:(Intercept)", "pa_ilr_1:(Intercept)"] <- 0.025
-participant_cov["pa_ilr_1:stress", "pa_ilr_2:stress"] <- 0.004
-participant_cov["pa_ilr_2:stress", "pa_ilr_1:stress"] <- 0.004
-
-pa_random_cov[["id::p"]] <- participant_cov
-
-kable(participant_cov)
-```
-
-|  | pa_ilr_1:(Intercept) | pa_ilr_1:stress | pa_ilr_1:ar1(pa_ilr_1) | pa_ilr_1:ar1(pa_ilr_2) | pa_ilr_2:(Intercept) | pa_ilr_2:stress | pa_ilr_2:ar1(pa_ilr_1) | pa_ilr_2:ar1(pa_ilr_2) |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| pa_ilr_1:(Intercept) | 0.080 | 0.000 | 0.000 | 0.000 | 0.025 | 0.000 | 0.000 | 0.000 |
-| pa_ilr_1:stress | 0.000 | 0.015 | 0.000 | 0.000 | 0.000 | 0.004 | 0.000 | 0.000 |
-| pa_ilr_1:ar1(pa_ilr_1) | 0.000 | 0.000 | 0.001 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
-| pa_ilr_1:ar1(pa_ilr_2) | 0.000 | 0.000 | 0.000 | 0.001 | 0.000 | 0.000 | 0.000 | 0.000 |
-| pa_ilr_2:(Intercept) | 0.025 | 0.000 | 0.000 | 0.000 | 0.060 | 0.000 | 0.000 | 0.000 |
-| pa_ilr_2:stress | 0.000 | 0.004 | 0.000 | 0.000 | 0.000 | 0.012 | 0.000 | 0.000 |
-| pa_ilr_2:ar1(pa_ilr_1) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.001 | 0.000 |
-| pa_ilr_2:ar1(pa_ilr_2) | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.001 |
-
-### Simulate the Outcome
-
-The outcome generator uses the same formula as the template and receives
-the edited coefficient and covariance objects. The ILR coordinates are
-kept, and the composition parts are back-transformed to sum to 16 hours
-of waking time. The burnin get’s used for autoregressive outcomes to
-avoid starting values driving the results.
-
-``` r
-
-pa_sim <- simulate_data(
-  n_groups = 100,
-  n_per_group = 14,
-  group_id = "id",
-  time_id = "day",
-  seed = 2027,
-  generators = list(
-    intervention = gen_categorical(
-      "intervention",
-      level = "level2",
-      prob = 0.5,
-      output = "integer"
-    ),
-    stress = gen_normal(
-      "stress",
-      level = "multilevel",
-      fixed_intercept = 0,
-      random_cov = 0.20,
-      residual_var = 0.80
-    ),
-    pa = gen_outcome(
-      pa_formula,
-      coefficients = pa_coef,
-      residual_cov = pa_residual_cov,
-      random_cov = pa_random_cov,
-      compositional = TRUE,
-      total = 16,
-      parts = c("mvpa", "light_pa", "sedentary"),
-      burnin = 50
-    )
-  )
-)
-
-kable(head(pa_sim$data, 10))
-```
-
-| id | obs_id | day | intervention | stress | pa_ilr_1 | pa_ilr_2 | mvpa | light_pa | sedentary | lag_pa_ilr_1 | lag_pa_ilr_2 |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 1 | 1 | 0 | -1.054 | -0.561 | 0.482 | 3.07 | 8.59 | 4.34 | NA | NA |
-| 1 | 2 | 2 | 0 | -1.193 | -0.454 | 0.857 | 3.11 | 9.94 | 2.96 | -0.561 | 0.482 |
-| 1 | 3 | 3 | 0 | 1.003 | -0.714 | -0.119 | 2.75 | 6.07 | 7.18 | -0.454 | 0.857 |
-| 1 | 4 | 4 | 0 | -0.626 | 0.033 | -0.366 | 5.36 | 3.98 | 6.67 | -0.714 | -0.119 |
-| 1 | 5 | 5 | 0 | 0.358 | -0.395 | -0.314 | 3.70 | 4.81 | 7.49 | 0.033 | -0.366 |
-| 1 | 6 | 6 | 0 | -0.058 | -0.610 | 0.191 | 3.04 | 7.35 | 5.61 | -0.395 | -0.314 |
-| 1 | 7 | 7 | 0 | -0.166 | -1.102 | 0.062 | 1.83 | 7.39 | 6.77 | -0.610 | 0.191 |
-| 1 | 8 | 8 | 0 | -0.237 | -0.853 | 0.918 | 2.02 | 10.98 | 3.00 | -1.102 | 0.062 |
-| 1 | 9 | 9 | 0 | -1.007 | -0.579 | -0.788 | 2.80 | 3.26 | 9.94 | -0.853 | 0.918 |
-| 1 | 10 | 10 | 0 | -2.685 | -1.003 | 0.478 | 1.95 | 9.32 | 4.74 | -0.579 | -0.788 |
-
-### Prepare a `multilevelcoda` Object
-
-The simulator already kept the ILR coordinates used to generate the
-outcome, but
-[`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md)
-fits the ILR variables created by
-[`multilevelcoda::complr()`](https://florale.github.io/multilevelcoda/reference/complr.md).
-[`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
-creates that object, adds the formula-required lagged ILR columns, and
-drops the first row per participant where lagged outcomes are undefined.
-In this example, the model ILR variables are named `z1_1` and `z2_1`.
-
-``` r
-
-pa_fit_prep <- prepare_outcome_fit(pa_sim, outcome = "pa")
-pa_complr_model <- pa_fit_prep$complr
-
-pa_fit_prep$formula
-#> mvbind(z1_1, z2_1) ~ intervention + stress + (lag_z1_1 + lag_z2_1) * 
-#>     intervention + (1 + stress + (lag_z1_1 + lag_z2_1) | p | 
-#>     id)
-get_variables(pa_complr_model)
-#> $composition_1
-#> $composition_1$X
-#> [1] "tmvpa"      "tlight_pa"  "tsedentary"
+dynamic_template$generator_metadata$outcome_template$expected_parameter_names
+#> $location
+#> [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   
+#> [4] "within(stress)"    
 #> 
-#> $composition_1$bX
-#> [1] "bmvpa"      "blight_pa"  "bsedentary"
+#> $scale
+#> [1] "(Intercept)"        "treatmenttreatment"
 #> 
-#> $composition_1$wX
-#> [1] "wmvpa"      "wlight_pa"  "wsedentary"
+#> $ar
+#> [1] "ar1()"                    "treatmenttreatment:ar1()"
 #> 
-#> $composition_1$Z
-#> [1] "z1_1" "z2_1"
+#> $random
+#> [1] "location|outcome=ilr1|term=(Intercept)"
+#> [2] "location|outcome=ilr2|term=(Intercept)"
+#> [3] "ar|term=ar1()|to=ilr1|from=ilr1"       
+#> [4] "ar|term=ar1()|to=ilr1|from=ilr2"       
+#> [5] "ar|term=ar1()|to=ilr2|from=ilr1"       
+#> [6] "ar|term=ar1()|to=ilr2|from=ilr2"       
+#> [7] "scale|outcome=ilr1|term=(Intercept)"   
+#> [8] "scale|outcome=ilr2|term=(Intercept)"
+
+dynamic_comp$generator_metadata$outcome$expected_parameter_names
+#> $location
+#> [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   
+#> [4] "within(stress)"    
 #> 
-#> $composition_1$bZ
-#> [1] "bz1_1" "bz2_1"
+#> $scale
+#> [1] "(Intercept)"        "treatmenttreatment"
 #> 
-#> $composition_1$wZ
-#> [1] "wz1_1" "wz2_1"
-head(pa_fit_prep$data)
-#>       id obs_id   day intervention  stress pa_ilr_1 pa_ilr_2  mvpa light_pa
-#>    <int>  <int> <int>        <int>   <num>    <num>    <num> <num>    <num>
-#> 1:     1      2     2            0 -1.1934  -0.4545    0.857  3.11     9.94
-#> 2:     1      3     3            0  1.0030  -0.7141   -0.119  2.75     6.07
-#> 3:     1      4     4            0 -0.6262   0.0327   -0.366  5.36     3.98
-#> 4:     1      5     5            0  0.3581  -0.3951   -0.314  3.70     4.81
-#> 5:     1      6     6            0 -0.0581  -0.6102    0.191  3.04     7.35
-#> 6:     1      7     7            0 -0.1657  -1.1022    0.062  1.83     7.39
-#>    sedentary lag_pa_ilr_1 lag_pa_ilr_2 tmvpa tlight_pa tsedentary bmvpa
-#>        <num>        <num>        <num> <num>     <num>      <num> <num>
-#> 1:      2.96      -0.5611        0.482  3.11      9.94       2.96  3.39
-#> 2:      7.18      -0.4545        0.857  2.75      6.07       7.18  3.39
-#> 3:      6.67      -0.7141       -0.119  5.36      3.98       6.67  3.39
-#> 4:      7.49       0.0327       -0.366  3.70      4.81       7.49  3.39
-#> 5:      5.61      -0.3951       -0.314  3.04      7.35       5.61  3.39
-#> 6:      6.77      -0.6102        0.191  1.83      7.39       6.77  3.39
-#>    blight_pa bsedentary wmvpa wlight_pa wsedentary    z1_1   z2_1  bz1_1 bz2_1
-#>        <num>      <num> <num>     <num>      <num>   <num>  <num>  <num> <num>
-#> 1:      6.96       5.65 0.319     0.498      0.182 -0.4545  0.857 -0.502 0.147
-#> 2:      6.96       5.65 0.275     0.295      0.430 -0.7141 -0.119 -0.502 0.147
-#> 3:      6.96       5.65 0.474     0.172      0.354  0.0327 -0.366 -0.502 0.147
-#> 4:      6.96       5.65 0.351     0.222      0.427 -0.3951 -0.314 -0.502 0.147
-#> 5:      6.96       5.65 0.304     0.359      0.337 -0.6102  0.191 -0.502 0.147
-#> 6:      6.96       5.65 0.193     0.379      0.428 -1.1022  0.062 -0.502 0.147
-#>      wz1_1   wz2_1 lag_z1_1 lag_z2_1
-#>      <num>   <num>    <num>    <num>
-#> 1:  0.0474  0.7104  -0.5611    0.482
-#> 2: -0.2122 -0.2657  -0.4545    0.857
-#> 3:  0.5346 -0.5125  -0.7141   -0.119
-#> 4:  0.1068 -0.4604   0.0327   -0.366
-#> 5: -0.1083  0.0445  -0.3951   -0.314
-#> 6: -0.6003 -0.0848  -0.6102    0.191
+#> $ar
+#> [1] "ar1()"                    "treatmenttreatment:ar1()"
+#> 
+#> $random
+#> [1] "location|outcome=ilr1|term=(Intercept)"
+#> [2] "location|outcome=ilr2|term=(Intercept)"
+#> [3] "ar|term=ar1()|to=ilr1|from=ilr1"       
+#> [4] "ar|term=ar1()|to=ilr1|from=ilr2"       
+#> [5] "ar|term=ar1()|to=ilr2|from=ilr1"       
+#> [6] "ar|term=ar1()|to=ilr2|from=ilr2"       
+#> [7] "scale|outcome=ilr1|term=(Intercept)"   
+#> [8] "scale|outcome=ilr2|term=(Intercept)"
+
+dynamic_comp$generator_metadata$outcome$ar$stability$max_spectral_radius_overall
+#> [1] 0.67
+
+table(rowSums(as.matrix(dynamic_comp$data[, c("sleep", "sedentary", "activity"), with = FALSE])))
+#> 
+#>    24 
+#> 75000
 ```
 
-### Fit With `brms` Through `multilevelcoda`
-
-The prepared formula mirrors the simulation formula using the concrete
-ILR names created by
-[`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md).
-The shared random-effect ID `p` allows the random intercepts, stress
-slopes, and all AR slopes to correlate across both ILR outcomes,
-matching the simulation structure.
-
-This chunk compiles and samples a Stan model, so it is intentionally the
-slow part of the vignette. The model uses the `cmdstanr` backend. The
-`meanfield` algorithm is used to speed up sampling, but it is less
-accurate than full HMC. Adjust the algorithm and sampling parameters as
-needed for your use case. We only used `meanfield` here to keep the
-vignette fast and illustrate analysis.
+The generated data can be managed into an analysis data set and passed
+to
+[`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md).
+[`prep_sim_analysis()`](https://florale.github.io/multilevelcoda/reference/prep_sim_analysis.md)
+recomputes observed between- and within-person predictors from the total
+simulated data columns, rebuilds a `complr` object using the same SBP
+basis as the simulator, and translates `ar1()` into within-person
+centered lagged ILR predictors. The fitted model includes random level
+terms, random inertia terms through lagged ILR slopes, and random
+conditional variability through response-specific `sigma` models.
 
 ``` r
 
+dynamic_analysis <- prep_sim_analysis(dynamic_comp)
+dynamic_analysis$metadata$lag_columns
+#> [1] "lag_z1_1_within" "lag_z2_1_within"
+dynamic_analysis$formula
+#> z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#> sigma ~ treatment + (1 | ID)
+#> z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#> sigma ~ treatment + (1 | ID)
+```
 
-pa_fit <- brmcoda(
-  complr = pa_complr_model,
-  formula = brms::bf(pa_fit_prep$formula) + brms::set_rescor(TRUE),
+``` r
+
+dynamic_fit <- brmcoda(
+  complr = dynamic_analysis$complr,
+  formula = dynamic_analysis$formula,
   backend = "cmdstanr",
-  algorithm = "meanfield",
-  iter = 2000,
-  seed = 2028
+  seed = 2026,
+  algorithm = "meanfield", 
+  iter = 2000
 )
-#> Start sampling
-#> ------------------------------------------------------------ 
-#> EXPERIMENTAL ALGORITHM: 
-#>   This procedure has not been thoroughly tested and may be unstable 
-#>   or buggy. The interface is subject to change. 
-#> ------------------------------------------------------------ 
-#> Gradient evaluation took 0.000779 seconds 
-#> 1000 transitions using 10 leapfrog steps per transition would take 7.79 seconds. 
-#> Adjust your expectations accordingly! 
-#> Begin eta adaptation. 
-#> Iteration:   1 / 250 [  0%]  (Adaptation) 
-#> Iteration:  50 / 250 [ 20%]  (Adaptation) 
-#> Iteration: 100 / 250 [ 40%]  (Adaptation) 
-#> Iteration: 150 / 250 [ 60%]  (Adaptation) 
-#> Iteration: 200 / 250 [ 80%]  (Adaptation) 
-#> Iteration: 250 / 250 [100%]  (Adaptation) 
-#> Success! Found best value [eta = 0.1]. 
-#> Begin stochastic gradient ascent. 
-#>   iter             ELBO   delta_ELBO_mean   delta_ELBO_med   notes  
-#>    100     -1118856.826             1.000            1.000 
-#>    200      -562024.992             0.995            1.000 
-#>    300      -120516.538             2.327            3.663 
-#>    400       -71520.188             2.174            3.663 
-#>    500       -15366.487             2.170            3.654 
-#>    600        -8533.643             2.227            3.654 
-#>    700        -6585.525             0.548            0.801 
-#>    800        -5091.785             0.295            0.296 
-#>    900        -4596.913             0.201            0.293 
-#>   1000        -3872.725             0.147            0.187 
-#>   1100        -3508.609             0.145            0.187 
-#>   1200        -3178.075             0.104            0.104 
-#>   1300        -2936.816             0.093            0.104 
-#>   1400        -2731.047             0.079            0.082 
-#>   1500        -2578.067             0.067            0.075 
-#>   1600        -2458.585             0.054            0.059 
-#>   1700        -2362.959             0.045            0.049 
-#>   1800        -2282.281             0.038            0.040 
-#>   1900        -2215.249             0.033            0.035 
-#>   2000        -2166.098             0.026            0.030 
-#> Informational Message: The maximum number of iterations is reached! The algorithm may not have converged. 
-#> This variational approximation is not guaranteed to be meaningful. 
-#> Drawing a sample of size 1000 from the approximate posterior...  
-#> COMPLETED. 
-#> Finished in  1.6 seconds.
+```
 
-summary(pa_fit)
+``` r
+
+summary(dynamic_fit)
 #>  Family: MV(gaussian, gaussian) 
-#>   Links: mu = identity
-#>          mu = identity 
-#> Formula: z1_1 ~ intervention + stress + (lag_z1_1 + lag_z2_1) * intervention + (1 + stress + (lag_z1_1 + lag_z2_1) | p | id) 
-#>          z2_1 ~ intervention + stress + (lag_z1_1 + lag_z2_1) * intervention + (1 + stress + (lag_z1_1 + lag_z2_1) | p | id) 
-#>    Data: complr$dataout (Number of observations: 1300) 
+#>   Links: mu = identity; sigma = log
+#>          mu = identity; sigma = log 
+#> Formula: z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#>          sigma ~ treatment + (1 | ID)
+#>          z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#>          sigma ~ treatment + (1 | ID)
+#>    Data: complr$dataout (Number of observations: 74500) 
 #>   Draws: 1 chains, each with iter = 1000; warmup = 0; thin = 1;
 #>          total post-warmup draws = 1000
 #> 
 #> Multilevel Hyperparameters:
-#> ~id (Number of levels: 100) 
-#>                                  Estimate Est.Error l-95% CI u-95% CI Rhat
-#> sd(z11_Intercept)                    0.09      0.03     0.05     0.16 1.00
-#> sd(z11_stress)                       0.19      0.04     0.12     0.28 1.00
-#> sd(z11_lag_z1_1)                     0.11      0.03     0.07     0.18 1.00
-#> sd(z11_lag_z2_1)                     0.13      0.03     0.08     0.18 1.00
-#> sd(z21_Intercept)                    0.05      0.01     0.03     0.08 1.00
-#> sd(z21_stress)                       0.04      0.02     0.02     0.09 1.00
-#> sd(z21_lag_z1_1)                     0.05      0.02     0.02     0.10 1.00
-#> sd(z21_lag_z2_1)                     0.06      0.03     0.02     0.14 1.00
-#> cor(z11_Intercept,z11_stress)        0.48      0.14     0.17     0.71 1.00
-#> cor(z11_Intercept,z11_lag_z1_1)      0.44      0.24    -0.12     0.80 1.00
-#> cor(z11_stress,z11_lag_z1_1)         0.36      0.27    -0.24     0.78 1.00
-#> cor(z11_Intercept,z11_lag_z2_1)      0.17      0.28    -0.40     0.65 1.00
-#> cor(z11_stress,z11_lag_z2_1)         0.68      0.18     0.25     0.92 1.00
-#> cor(z11_lag_z1_1,z11_lag_z2_1)      -0.03      0.32    -0.63     0.58 1.01
-#> cor(z11_Intercept,z21_Intercept)     0.18      0.42    -0.66     0.83 1.00
-#> cor(z11_stress,z21_Intercept)        0.11      0.41    -0.68     0.78 1.00
-#> cor(z11_lag_z1_1,z21_Intercept)      0.27      0.32    -0.40     0.78 1.00
-#> cor(z11_lag_z2_1,z21_Intercept)     -0.10      0.37    -0.77     0.60 1.00
-#> cor(z11_Intercept,z21_stress)        0.19      0.52    -0.81     0.94 1.00
-#> cor(z11_stress,z21_stress)          -0.06      0.42    -0.82     0.74 1.00
-#> cor(z11_lag_z1_1,z21_stress)         0.07      0.38    -0.68     0.74 1.00
-#> cor(z11_lag_z2_1,z21_stress)        -0.10      0.37    -0.75     0.60 1.00
-#> cor(z21_Intercept,z21_stress)        0.07      0.36    -0.64     0.70 1.00
-#> cor(z11_Intercept,z21_lag_z1_1)     -0.32      0.36    -0.85     0.48 1.00
-#> cor(z11_stress,z21_lag_z1_1)        -0.12      0.39    -0.81     0.64 1.00
-#> cor(z11_lag_z1_1,z21_lag_z1_1)      -0.29      0.31    -0.81     0.34 1.00
-#> cor(z11_lag_z2_1,z21_lag_z1_1)       0.10      0.35    -0.58     0.75 1.00
-#> cor(z21_Intercept,z21_lag_z1_1)     -0.14      0.34    -0.76     0.53 1.00
-#> cor(z21_stress,z21_lag_z1_1)        -0.09      0.37    -0.75     0.66 1.00
-#> cor(z11_Intercept,z21_lag_z2_1)      0.11      0.41    -0.65     0.79 1.00
-#> cor(z11_stress,z21_lag_z2_1)        -0.19      0.40    -0.84     0.61 1.00
-#> cor(z11_lag_z1_1,z21_lag_z2_1)      -0.23      0.35    -0.81     0.51 1.00
-#> cor(z11_lag_z2_1,z21_lag_z2_1)      -0.04      0.38    -0.69     0.70 1.00
-#> cor(z21_Intercept,z21_lag_z2_1)     -0.14      0.36    -0.77     0.60 1.00
-#> cor(z21_stress,z21_lag_z2_1)         0.06      0.37    -0.64     0.74 1.01
-#> cor(z21_lag_z1_1,z21_lag_z2_1)       0.03      0.36    -0.65     0.72 1.00
-#>                                  Bulk_ESS Tail_ESS
-#> sd(z11_Intercept)                     976      972
-#> sd(z11_stress)                        995      978
-#> sd(z11_lag_z1_1)                      834      904
-#> sd(z11_lag_z2_1)                      837      908
-#> sd(z21_Intercept)                    1042     1058
-#> sd(z21_stress)                        995     1023
-#> sd(z21_lag_z1_1)                     1060      682
-#> sd(z21_lag_z2_1)                      886      932
-#> cor(z11_Intercept,z11_stress)         933     1061
-#> cor(z11_Intercept,z11_lag_z1_1)      1009      939
-#> cor(z11_stress,z11_lag_z1_1)          942      952
-#> cor(z11_Intercept,z11_lag_z2_1)      1116      878
-#> cor(z11_stress,z11_lag_z2_1)         1104      978
-#> cor(z11_lag_z1_1,z11_lag_z2_1)       1098      955
-#> cor(z11_Intercept,z21_Intercept)      903      949
-#> cor(z11_stress,z21_Intercept)         973      906
-#> cor(z11_lag_z1_1,z21_Intercept)      1127     1025
-#> cor(z11_lag_z2_1,z21_Intercept)      1008      918
-#> cor(z11_Intercept,z21_stress)         886      943
-#> cor(z11_stress,z21_stress)           1024     1026
-#> cor(z11_lag_z1_1,z21_stress)          744      975
-#> cor(z11_lag_z2_1,z21_stress)          940      983
-#> cor(z21_Intercept,z21_stress)         999      978
-#> cor(z11_Intercept,z21_lag_z1_1)       939      905
-#> cor(z11_stress,z21_lag_z1_1)         1073     1110
-#> cor(z11_lag_z1_1,z21_lag_z1_1)       1117      983
-#> cor(z11_lag_z2_1,z21_lag_z1_1)       1068      872
-#> cor(z21_Intercept,z21_lag_z1_1)       766      937
-#> cor(z21_stress,z21_lag_z1_1)          879     1033
-#> cor(z11_Intercept,z21_lag_z2_1)      1072      988
-#> cor(z11_stress,z21_lag_z2_1)         1023      963
-#> cor(z11_lag_z1_1,z21_lag_z2_1)        973      728
-#> cor(z11_lag_z2_1,z21_lag_z2_1)       1132      960
-#> cor(z21_Intercept,z21_lag_z2_1)      1098      901
-#> cor(z21_stress,z21_lag_z2_1)          965      979
-#> cor(z21_lag_z1_1,z21_lag_z2_1)        893      934
+#> ~ID (Number of levels: 500) 
+#>                                              Estimate Est.Error l-95% CI
+#> sd(z11_Intercept)                                0.76      0.50     0.18
+#> sd(z11_lag_z1_1_within)                          0.79      1.38     0.04
+#> sd(z11_lag_z2_1_within)                          0.51      0.35     0.14
+#> sd(sigma_z11_Intercept)                          2.17      1.94     0.35
+#> sd(z21_Intercept)                                0.87      2.15     0.02
+#> sd(z21_lag_z1_1_within)                          2.60      3.90     0.23
+#> sd(z21_lag_z2_1_within)                          0.48      0.31     0.13
+#> sd(sigma_z21_Intercept)                          4.96      3.56     1.08
+#> cor(z11_Intercept,z11_lag_z1_1_within)          -0.82      0.28    -1.00
+#> cor(z11_Intercept,z11_lag_z2_1_within)          -0.38      0.48    -0.97
+#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.51      0.46    -0.60
+#> cor(z21_Intercept,z21_lag_z1_1_within)           0.55      0.52    -0.82
+#> cor(z21_Intercept,z21_lag_z2_1_within)           0.19      0.57    -0.89
+#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)    -0.15      0.56    -0.97
+#>                                              u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(z11_Intercept)                                2.07 1.00      899      740
+#> sd(z11_lag_z1_1_within)                          4.77 1.00      878      842
+#> sd(z11_lag_z2_1_within)                          1.41 1.00     1055      840
+#> sd(sigma_z11_Intercept)                          6.88 1.00     1199      889
+#> sd(z21_Intercept)                                5.03 1.00      903      935
+#> sd(z21_lag_z1_1_within)                         11.52 1.00     1006      939
+#> sd(z21_lag_z2_1_within)                          1.26 1.00      898      875
+#> sd(sigma_z21_Intercept)                         14.94 1.00      955      901
+#> cor(z11_Intercept,z11_lag_z1_1_within)           0.05 1.00     1022      750
+#> cor(z11_Intercept,z11_lag_z2_1_within)           0.73 1.00     1007      877
+#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     1.00 1.00      995      755
+#> cor(z21_Intercept,z21_lag_z1_1_within)           1.00 1.00     1004      982
+#> cor(z21_Intercept,z21_lag_z2_1_within)           0.96 1.00      869      833
+#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.87 1.00      931      841
 #> 
 #> Regression Coefficients:
-#>                           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-#> z11_Intercept                -0.21      0.07    -0.36    -0.06 1.00      884
-#> z21_Intercept                 0.21      0.11    -0.01     0.43 1.00      983
-#> z11_intervention              0.11      0.07    -0.02     0.24 1.00      997
-#> z11_stress                   -0.07      0.06    -0.18     0.04 1.00      895
-#> z11_lag_z1_1                  0.53      0.08     0.37     0.69 1.00      963
-#> z11_lag_z2_1                  0.11      0.09    -0.06     0.28 1.00      876
-#> z11_intervention:lag_z1_1    -0.14      0.12    -0.38     0.09 1.00     1065
-#> z11_intervention:lag_z2_1    -0.04      0.11    -0.26     0.17 1.00      871
-#> z21_intervention             -0.18      0.08    -0.34    -0.01 1.00      948
-#> z21_stress                    0.03      0.05    -0.07     0.13 1.00     1089
-#> z21_lag_z1_1                  0.17      0.10    -0.02     0.36 1.00      890
-#> z21_lag_z2_1                  0.52      0.09     0.35     0.69 1.00     1045
-#> z21_intervention:lag_z1_1    -0.10      0.13    -0.35     0.16 1.00     1094
-#> z21_intervention:lag_z2_1    -0.08      0.10    -0.28     0.12 1.00     1146
-#>                           Tail_ESS
-#> z11_Intercept                  873
-#> z21_Intercept                  856
-#> z11_intervention              1011
-#> z11_stress                     936
-#> z11_lag_z1_1                   944
-#> z11_lag_z2_1                   982
-#> z11_intervention:lag_z1_1      921
-#> z11_intervention:lag_z2_1      820
-#> z21_intervention               883
-#> z21_stress                     907
-#> z21_lag_z1_1                  1039
-#> z21_lag_z2_1                   942
-#> z21_intervention:lag_z1_1      962
-#> z21_intervention:lag_z2_1      944
-#> 
-#> Further Distributional Parameters:
-#>           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sigma_z11     0.54      0.05     0.45     0.65 1.00      916      772
-#> sigma_z21     0.53      0.04     0.46     0.60 1.00      987      967
+#>                                        Estimate Est.Error l-95% CI u-95% CI
+#> z11_Intercept                              2.09      2.52    -2.78     7.00
+#> sigma_z11_Intercept                       -0.21      0.95    -2.02     1.67
+#> z21_Intercept                              3.00      6.03    -8.59    15.01
+#> sigma_z21_Intercept                       -0.89      1.65    -4.14     2.39
+#> z11_treatmenttreatment                     0.43      1.00    -1.58     2.47
+#> z11_stress_between                        -0.40      0.71    -1.76     0.96
+#> z11_stress_within                          1.31      0.89    -0.40     3.01
+#> z11_lag_z1_1_within                       -0.90      0.56    -2.02     0.14
+#> z11_lag_z2_1_within                       -1.58      0.73    -3.03    -0.18
+#> z11_treatmenttreatment:lag_z1_1_within    -0.70      0.85    -2.25     1.09
+#> z11_treatmenttreatment:lag_z2_1_within     2.01      0.97     0.09     3.89
+#> sigma_z11_treatmenttreatment              -1.34      0.95    -3.30     0.65
+#> z21_treatmenttreatment                     0.56      0.70    -0.76     1.97
+#> z21_stress_between                        -0.93      2.00    -5.06     2.90
+#> z21_stress_within                          0.84      0.57    -0.24     1.89
+#> z21_lag_z1_1_within                        0.97      1.11    -1.26     3.12
+#> z21_lag_z2_1_within                        1.22      1.21    -1.10     3.62
+#> z21_treatmenttreatment:lag_z1_1_within     0.13      0.67    -1.23     1.41
+#> z21_treatmenttreatment:lag_z2_1_within     0.68      1.10    -1.35     2.95
+#> sigma_z21_treatmenttreatment              -0.12      1.17    -2.39     2.16
+#>                                        Rhat Bulk_ESS Tail_ESS
+#> z11_Intercept                          1.00      898      820
+#> sigma_z11_Intercept                    1.00      916      988
+#> z21_Intercept                          1.00     1077     1020
+#> sigma_z21_Intercept                    1.00      846      978
+#> z11_treatmenttreatment                 1.00      913      896
+#> z11_stress_between                     1.00     1036      842
+#> z11_stress_within                      1.00      985     1026
+#> z11_lag_z1_1_within                    1.00      985      980
+#> z11_lag_z2_1_within                    1.00     1004      826
+#> z11_treatmenttreatment:lag_z1_1_within 1.00      930      983
+#> z11_treatmenttreatment:lag_z2_1_within 1.00      973      865
+#> sigma_z11_treatmenttreatment           1.00      939      799
+#> z21_treatmenttreatment                 1.00      836      937
+#> z21_stress_between                     1.00     1036      981
+#> z21_stress_within                      1.00      948      988
+#> z21_lag_z1_1_within                    1.00      957      864
+#> z21_lag_z2_1_within                    1.00      968      875
+#> z21_treatmenttreatment:lag_z1_1_within 1.00     1122      992
+#> z21_treatmenttreatment:lag_z2_1_within 1.00      922      882
+#> sigma_z21_treatmenttreatment           1.00      917      899
 #> 
 #> Residual Correlations: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> rescor(z11,z21)     0.19      0.08     0.04     0.33 1.00     1023      983
+#> rescor(z11,z21)     0.57      0.48    -0.69     0.99 1.00      960      844
 #> 
 #> Draws were sampled using variational(meanfield).
 ```
+
+``` r
+
+dynamic_response_map <- dynamic_analysis$metadata$response_map
+dynamic_response_prefix <- setNames(
+  gsub("_", "", unname(dynamic_response_map), fixed = TRUE),
+  names(dynamic_response_map)
+)
+dynamic_lag_columns <- setNames(
+  dynamic_analysis$metadata$lag_columns,
+  names(dynamic_response_map)
+)
+
+dynamic_model_term <- function(term) {
+  switch(
+    term,
+    "(Intercept)" = "Intercept",
+    "between(stress)" = "stress_between",
+    "within(stress)" = "stress_within",
+    term
+  )
+}
+
+dynamic_fixed_truth <- numeric()
+for (outcome in names(dynamic_response_map)) {
+  response_prefix <- dynamic_response_prefix[[outcome]]
+
+  for (term in rownames(dynamic_params$location$beta)) {
+    dynamic_fixed_truth[paste(response_prefix, dynamic_model_term(term), sep = "_")] <-
+      dynamic_params$location$beta[term, outcome]
+  }
+  for (term in rownames(dynamic_params$scale$beta)) {
+    dynamic_fixed_truth[paste("sigma", response_prefix, dynamic_model_term(term), sep = "_")] <-
+      dynamic_params$scale$beta[term, outcome]
+  }
+}
+for (ar_term in dimnames(dynamic_params$ar$beta)[[1]]) {
+  ar_interaction <- base::sub(":?ar1\\(\\)", "", ar_term)
+  for (to in names(dynamic_response_map)) {
+    for (from in names(dynamic_response_map)) {
+      lag_term <- dynamic_lag_columns[[from]]
+      model_term <- if (nzchar(ar_interaction)) {
+        paste(ar_interaction, lag_term, sep = ":")
+      } else {
+        lag_term
+      }
+      dynamic_fixed_truth[paste(dynamic_response_prefix[[to]], model_term, sep = "_")] <-
+        dynamic_params$ar$beta[ar_term, to, from]
+    }
+  }
+}
+
+dynamic_fixed_summary <- as.data.table(fixef(dynamic_fit), keep.rownames = "parameter")
+dynamic_fixed_recovery <- dynamic_fixed_summary[, .(
+  type = "fixed effect",
+  parameter = parameter,
+  estimate = Estimate,
+  lower_95 = Q2.5,
+  upper_95 = Q97.5,
+  true_value = dynamic_fixed_truth[parameter]
+)]
+
+dynamic_random_model_name <- function(parameter) {
+  if (startsWith(parameter, "location|")) {
+    outcome <- base::sub("^location\\|outcome=([^|]+)\\|term=.*$", "\\1", parameter)
+    term <- base::sub("^location\\|outcome=[^|]+\\|term=(.*)$", "\\1", parameter)
+    return(paste(dynamic_response_prefix[[outcome]], dynamic_model_term(term), sep = "_"))
+  }
+  if (startsWith(parameter, "scale|")) {
+    outcome <- base::sub("^scale\\|outcome=([^|]+)\\|term=.*$", "\\1", parameter)
+    term <- base::sub("^scale\\|outcome=[^|]+\\|term=(.*)$", "\\1", parameter)
+    return(paste("sigma", dynamic_response_prefix[[outcome]], dynamic_model_term(term), sep = "_"))
+  }
+  if (startsWith(parameter, "ar|")) {
+    to <- base::sub("^ar\\|term=[^|]+\\|to=([^|]+)\\|from=([^|]+)$", "\\1", parameter)
+    from <- base::sub("^ar\\|term=[^|]+\\|to=([^|]+)\\|from=([^|]+)$", "\\2", parameter)
+    return(paste(dynamic_response_prefix[[to]], dynamic_lag_columns[[from]], sep = "_"))
+  }
+  stop(sprintf("Unknown random-effect parameter: %s", parameter))
+}
+
+dynamic_random_cov_truth <- dynamic_params$random$ID$covariance
+dynamic_random_model_names <- vapply(
+  rownames(dynamic_random_cov_truth),
+  dynamic_random_model_name,
+  character(1)
+)
+dimnames(dynamic_random_cov_truth) <- list(dynamic_random_model_names, dynamic_random_model_names)
+dynamic_random_cor_truth <- cov2cor(dynamic_random_cov_truth)
+
+dynamic_varcorr_id <- VarCorr(dynamic_fit)$ID
+dynamic_random_sd_summary <- as.data.table(dynamic_varcorr_id$sd, keep.rownames = "parameter")
+dynamic_random_sd_summary[, random_effect := parameter]
+dynamic_random_variance_recovery <- dynamic_random_sd_summary[, .(
+  type = "random variance",
+  parameter = paste0("var(", random_effect, ")"),
+  estimate = Estimate^2,
+  lower_95 = Q2.5^2,
+  upper_95 = Q97.5^2,
+  true_value = diag(dynamic_random_cov_truth)[random_effect]
+)]
+
+dynamic_random_correlation_recovery <- data.table()
+if (!is.null(dynamic_varcorr_id$cor)) {
+  dynamic_cor_summary <- dynamic_varcorr_id$cor
+  dynamic_cor_names <- dimnames(dynamic_cor_summary)[[1]]
+  dynamic_cor_pairs <- which(
+    lower.tri(matrix(FALSE, length(dynamic_cor_names), length(dynamic_cor_names))),
+    arr.ind = TRUE
+  )
+  dynamic_random_correlation_recovery <- rbindlist(lapply(seq_len(nrow(dynamic_cor_pairs)), function(i) {
+    row <- dynamic_cor_pairs[i, "row"]
+    col <- dynamic_cor_pairs[i, "col"]
+    summary <- dynamic_cor_summary[row, , col]
+    data.table(
+      type = "random correlation",
+      parameter = sprintf("cor(%s, %s)", dynamic_cor_names[row], dynamic_cor_names[col]),
+      estimate = summary[["Estimate"]],
+      lower_95 = summary[["Q2.5"]],
+      upper_95 = summary[["Q97.5"]],
+      true_value = dynamic_random_cor_truth[dynamic_cor_names[row], dynamic_cor_names[col]]
+    )
+  }))
+}
+
+dynamic_recovery_table <- rbindlist(list(
+  dynamic_fixed_recovery,
+  dynamic_random_variance_recovery,
+  dynamic_random_correlation_recovery
+), use.names = TRUE)
+dynamic_recovery_table[, covered_by_95_ci := true_value >= lower_95 & true_value <= upper_95]
+
+if (anyNA(dynamic_recovery_table$true_value)) {
+  stop("Some fitted parameters could not be matched to simulation truth.")
+}
+
+kable(dynamic_recovery_table, digits = 3)
+```
+
+| type | parameter | estimate | lower_95 | upper_95 | true_value | covered_by_95_ci |
+|:---|:---|---:|---:|---:|---:|:---|
+| fixed effect | z11_Intercept | 2.092 | -2.785 | 6.998 | 0.000 | TRUE |
+| fixed effect | sigma_z11_Intercept | -0.212 | -2.022 | 1.674 | -0.916 | TRUE |
+| fixed effect | z21_Intercept | 3.005 | -8.589 | 15.007 | 0.000 | TRUE |
+| fixed effect | sigma_z21_Intercept | -0.886 | -4.142 | 2.388 | -1.050 | TRUE |
+| fixed effect | z11_treatmenttreatment | 0.432 | -1.584 | 2.469 | 0.000 | TRUE |
+| fixed effect | z11_stress_between | -0.397 | -1.761 | 0.965 | 0.150 | TRUE |
+| fixed effect | z11_stress_within | 1.306 | -0.402 | 3.007 | 0.050 | TRUE |
+| fixed effect | z11_lag_z1_1_within | -0.902 | -2.022 | 0.135 | 0.250 | FALSE |
+| fixed effect | z11_lag_z2_1_within | -1.575 | -3.029 | -0.182 | 0.020 | FALSE |
+| fixed effect | z11_treatmenttreatment:lag_z1_1_within | -0.695 | -2.252 | 1.086 | 0.050 | TRUE |
+| fixed effect | z11_treatmenttreatment:lag_z2_1_within | 2.006 | 0.091 | 3.891 | 0.000 | FALSE |
+| fixed effect | sigma_z11_treatmenttreatment | -1.338 | -3.305 | 0.647 | -0.799 | TRUE |
+| fixed effect | z21_treatmenttreatment | 0.562 | -0.759 | 1.975 | 0.000 | TRUE |
+| fixed effect | z21_stress_between | -0.932 | -5.064 | 2.897 | -0.050 | TRUE |
+| fixed effect | z21_stress_within | 0.841 | -0.239 | 1.895 | 0.030 | TRUE |
+| fixed effect | z21_lag_z1_1_within | 0.970 | -1.262 | 3.118 | -0.010 | TRUE |
+| fixed effect | z21_lag_z2_1_within | 1.217 | -1.097 | 3.617 | 0.200 | TRUE |
+| fixed effect | z21_treatmenttreatment:lag_z1_1_within | 0.131 | -1.228 | 1.410 | 0.000 | TRUE |
+| fixed effect | z21_treatmenttreatment:lag_z2_1_within | 0.685 | -1.354 | 2.949 | 0.030 | TRUE |
+| fixed effect | sigma_z21_treatmenttreatment | -0.117 | -2.390 | 2.158 | -0.916 | TRUE |
+| random variance | var(z11_Intercept) | 0.574 | 0.031 | 4.282 | 0.040 | TRUE |
+| random variance | var(z11_lag_z1_1_within) | 0.627 | 0.001 | 22.784 | 0.014 | TRUE |
+| random variance | var(z11_lag_z2_1_within) | 0.260 | 0.019 | 1.976 | 0.004 | FALSE |
+| random variance | var(sigma_z11_Intercept) | 4.689 | 0.124 | 47.321 | 0.026 | FALSE |
+| random variance | var(z21_Intercept) | 0.750 | 0.001 | 25.347 | 0.032 | TRUE |
+| random variance | var(z21_lag_z1_1_within) | 6.742 | 0.055 | 132.653 | 0.004 | FALSE |
+| random variance | var(z21_lag_z2_1_within) | 0.230 | 0.018 | 1.598 | 0.014 | FALSE |
+| random variance | var(sigma_z21_Intercept) | 24.623 | 1.177 | 223.318 | 0.020 | FALSE |
+| random correlation | cor(z11_lag_z1_1_within, z11_Intercept) | -0.817 | -0.998 | 0.046 | 0.200 | FALSE |
+| random correlation | cor(z11_lag_z2_1_within, z11_Intercept) | -0.380 | -0.968 | 0.727 | 0.000 | TRUE |
+| random correlation | cor(sigma_z11_Intercept, z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_Intercept, z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z1_1_within, z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z2_1_within, z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z11_lag_z2_1_within, z11_lag_z1_1_within) | 0.514 | -0.599 | 0.997 | 0.150 | TRUE |
+| random correlation | cor(sigma_z11_Intercept, z11_lag_z1_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_Intercept, z11_lag_z1_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z1_1_within, z11_lag_z1_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z2_1_within, z11_lag_z1_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, z11_lag_z1_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(sigma_z11_Intercept, z11_lag_z2_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_Intercept, z11_lag_z2_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z1_1_within, z11_lag_z2_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z2_1_within, z11_lag_z2_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, z11_lag_z2_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_Intercept, sigma_z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z1_1_within, sigma_z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z2_1_within, sigma_z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, sigma_z11_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z1_1_within, z21_Intercept) | 0.548 | -0.824 | 0.996 | 0.200 | TRUE |
+| random correlation | cor(z21_lag_z2_1_within, z21_Intercept) | 0.191 | -0.890 | 0.955 | 0.000 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, z21_Intercept) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(z21_lag_z2_1_within, z21_lag_z1_1_within) | -0.151 | -0.975 | 0.874 | 0.150 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, z21_lag_z1_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |
+| random correlation | cor(sigma_z21_Intercept, z21_lag_z2_1_within) | 0.000 | 0.000 | 0.000 | 0.000 | TRUE |

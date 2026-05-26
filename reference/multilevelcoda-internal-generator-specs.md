@@ -9,6 +9,32 @@ These helpers are internal implementation details for the public
 
 ``` r
 .mlsim_spec(type, vars, level, simulate, ...)
+
+.mlsim_check_unused_generator_dots(...)
+
+.mlsim_gen_distribution(
+  distribution,
+  vars,
+  level,
+  fixed_intercept = NULL,
+  random_cov = NULL,
+  residual_cov = NULL,
+  scale_fixed_intercept = NULL,
+  residual_cor = NULL,
+  compositional = FALSE,
+  parts = NULL,
+  total = 1,
+  keep_ilr = TRUE,
+  sbp = NULL,
+  categories = NULL,
+  reference = NULL,
+  output = c("factor", "character", "integer"),
+  ordered = FALSE,
+  size = NULL,
+  generator = NULL,
+  user_args = list(),
+  metadata = list()
+)
 ```
 
 ## Arguments

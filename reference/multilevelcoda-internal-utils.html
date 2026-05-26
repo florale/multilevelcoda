@@ -92,8 +92,6 @@ generator implementations.</p>
 <span></span>
 <span><span class="fu">.mlsim_check_categorical_random_cov</span><span class="op">(</span><span class="va">random_cov</span>, <span class="va">nonreference</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">.mlsim_uniform_category_prob</span><span class="op">(</span><span class="va">n</span>, <span class="va">labels</span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu">.mlsim_resolve_category_prob</span><span class="op">(</span><span class="va">prob</span>, <span class="va">n</span>, <span class="va">labels</span>, arg <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_category_prob_matrix</span><span class="op">(</span><span class="va">prob</span>, arg <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
@@ -149,11 +147,40 @@ generator implementations.</p>
 <span></span>
 <span><span class="fu">.mlsim_check_multilevel_only_args</span><span class="op">(</span><span class="va">level</span>, <span class="va">supplied</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">.mlsim_generator_contract</span><span class="op">(</span></span>
+<span>  <span class="va">generator</span>,</span>
+<span>  <span class="va">vars</span>,</span>
+<span>  <span class="va">level</span>,</span>
+<span>  vars_n <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  direct_supplied <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  multilevel_only <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  multilevel_required <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  multilevel_use <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_warn_direct_precedence</span><span class="op">(</span><span class="va">level</span>, <span class="va">generator</span>, <span class="va">used</span>, <span class="va">ignored</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">.mlsim_random_intercept_names</span><span class="op">(</span><span class="va">vars</span>, scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_position_cov</span><span class="op">(</span><span class="va">cov</span>, <span class="va">names</span>, arg <span class="op">=</span> <span class="st">"random_cov"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_joint_random_intercepts</span><span class="op">(</span><span class="va">vars</span>, <span class="va">random_cov</span>, <span class="va">context</span>, scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_internal_name_piece</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_internal_random_intercept_names</span><span class="op">(</span><span class="va">vars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_internal_scale_random_intercept_names</span><span class="op">(</span><span class="va">vars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_internal_categorical_random_intercept_names</span><span class="op">(</span><span class="va">var</span>, <span class="va">categories</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_row_random_intercept_columns</span><span class="op">(</span><span class="va">random_intercepts</span>, <span class="va">context</span>, <span class="va">names</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_multilevel_random_columns</span><span class="op">(</span><span class="va">random</span>, <span class="va">context</span>, <span class="va">vars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_categorical_random_columns</span><span class="op">(</span><span class="va">random_intercepts</span>, <span class="va">context</span>, <span class="va">var</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_scale_fixed_intercept</span><span class="op">(</span></span>
 <span>  <span class="va">scale_fixed_intercept</span>,</span>
@@ -183,8 +210,7 @@ generator implementations.</p>
 <span><span class="fu">.mlsim_simple_random_metadata</span><span class="op">(</span></span>
 <span>  <span class="va">fixed_intercept</span>,</span>
 <span>  <span class="va">random</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale_linear_predictor <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_validate_scale_multilevel_args</span><span class="op">(</span></span>
@@ -198,9 +224,15 @@ generator implementations.</p>
 <span></span>
 <span><span class="fu">.mlsim_parameter_metadata</span><span class="op">(</span><span class="va">level</span>, <span class="va">context</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">.mlsim_column_roles</span><span class="op">(</span><span class="va">column</span>, <span class="va">variable</span>, <span class="va">component</span>, level <span class="op">=</span> <span class="st">"row"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_validate_column_roles</span><span class="op">(</span><span class="va">roles</span>, <span class="va">available_columns</span>, arg <span class="op">=</span> <span class="st">"column_roles"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">.mlsim_collect_column_roles</span><span class="op">(</span><span class="va">generator_metadata</span>, data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">.mlsim_resolve_size</span><span class="op">(</span><span class="va">size</span>, <span class="va">n</span>, <span class="va">context</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">.mlsim_result</span><span class="op">(</span><span class="va">values</span>, <span class="va">names</span>, <span class="va">metadata</span><span class="op">)</span></span>
+<span><span class="fu">.mlsim_result</span><span class="op">(</span><span class="va">values</span>, <span class="va">names</span>, <span class="va">metadata</span>, internal <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_custom_result</span><span class="op">(</span><span class="va">result</span>, <span class="va">vars</span>, <span class="va">level</span>, <span class="va">context</span>, <span class="va">wrapper_metadata</span><span class="op">)</span></span>
 <span></span>
@@ -225,18 +257,17 @@ generator implementations.</p>
 <dd><p>Logical flag passed to <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>.</p></dd>
 
 
-<dt id="arg-args-used-ignored-supplied-use">args, used, ignored, supplied, use<a class="anchor" aria-label="anchor" href="#arg-args-used-ignored-supplied-use"></a></dt>
-<dd><p>Character vectors or named logicals
-used to build diagnostics.</p></dd>
+<dt id="arg-args-used-ignored-supplied-use-direct-supplied-multilevel-only">args, used, ignored, supplied, use, direct_supplied, multilevel_only<a class="anchor" aria-label="anchor" href="#arg-args-used-ignored-supplied-use-direct-supplied-multilevel-only"></a></dt>
+<dd><p>Character vectors or named logicals used to build diagnostics.</p></dd>
 
 
 <dt id="arg-generator">generator<a class="anchor" aria-label="anchor" href="#arg-generator"></a></dt>
 <dd><p>Generator label used in diagnostic messages.</p></dd>
 
 
-<dt id="arg-vars-n-names-arg-arg-name">vars, n, names, arg, arg_name<a class="anchor" aria-label="anchor" href="#arg-vars-n-names-arg-arg-name"></a></dt>
-<dd><p>Variable names, target lengths, or argument
-labels.</p></dd>
+<dt id="arg-vars-var-n-vars-n-names-arg-arg-name">vars, var, n, vars_n, names, arg, arg_name<a class="anchor" aria-label="anchor" href="#arg-vars-var-n-vars-n-names-arg-arg-name"></a></dt>
+<dd><p>Variable names, target lengths,
+or argument labels.</p></dd>
 
 
 <dt id="arg-allow-empty">allow_empty<a class="anchor" aria-label="anchor" href="#arg-allow-empty"></a></dt>
@@ -303,8 +334,17 @@ matrices.</p></dd>
 <dd><p>Generated values or raw custom-generator result.</p></dd>
 
 
+<dt id="arg-multilevel-required-multilevel-use-scale-arg">multilevel_required, multilevel_use, scale_arg<a class="anchor" aria-label="anchor" href="#arg-multilevel-required-multilevel-use-scale-arg"></a></dt>
+<dd><p>Multilevel constructor
+contract declarations.</p></dd>
+
+
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>Logical flag for joint location/scale random effects.</p></dd>
+
+
+<dt id="arg-random-random-intercepts">random, random_intercepts<a class="anchor" aria-label="anchor" href="#arg-random-random-intercepts"></a></dt>
+<dd><p>Random-effect draw metadata.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
@@ -315,20 +355,17 @@ matrices.</p></dd>
 <dd><p>Location and scale intercepts.</p></dd>
 
 
-<dt id="arg-random">random<a class="anchor" aria-label="anchor" href="#arg-random"></a></dt>
-<dd><p>Random-effect draw metadata.</p></dd>
-
-
-<dt id="arg-scale-linear-predictor">scale_linear_predictor<a class="anchor" aria-label="anchor" href="#arg-scale-linear-predictor"></a></dt>
-<dd><p>Row-level scale linear predictor.</p></dd>
-
-
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
 <dd><p>Count-distribution size specification.</p></dd>
 
 
 <dt id="arg-metadata-wrapper-metadata">metadata, wrapper_metadata<a class="anchor" aria-label="anchor" href="#arg-metadata-wrapper-metadata"></a></dt>
 <dd><p>Metadata lists.</p></dd>
+
+
+<dt id="arg-internal">internal<a class="anchor" aria-label="anchor" href="#arg-internal"></a></dt>
+<dd><p>Optional internal data columns to append to a generator
+result.</p></dd>
 
 
 <dt id="arg-spec">spec<a class="anchor" aria-label="anchor" href="#arg-spec"></a></dt>

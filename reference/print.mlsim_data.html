@@ -77,7 +77,12 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_data.html">simulate_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">3</span>, generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="gen_normal.html">gen_normal</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_data.html">simulate_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    x <span class="op">=</span> <span class="fu"><a href="gen_mvn.html">gen_mvn</a></span><span class="op">(</span><span class="st">"x"</span>, fixed_intercept <span class="op">=</span> <span class="fl">0</span>, residual_cov <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mlsim_data&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   rows: 3</span>
@@ -88,7 +93,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Generators:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  generator distribution  level vars</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          x       normal single    x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          x          mvn single    x</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

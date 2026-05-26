@@ -60,8 +60,7 @@ binomial count variables.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gen_binomial</span><span class="op">(</span></span>
 <span>  <span class="va">vars</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"level2"</span>, <span class="st">"multilevel"</span><span class="op">)</span>,</span>
-<span>  size <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  prob <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  random_cov <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -69,7 +68,6 @@ binomial count variables.</p>
 <span><span class="fu">gen_poisson</span><span class="op">(</span></span>
 <span>  <span class="va">vars</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"level2"</span>, <span class="st">"multilevel"</span><span class="op">)</span>,</span>
-<span>  lambda <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  random_cov <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -77,11 +75,10 @@ binomial count variables.</p>
 <span><span class="fu">gen_negbin</span><span class="op">(</span></span>
 <span>  <span class="va">vars</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"level2"</span>, <span class="st">"multilevel"</span><span class="op">)</span>,</span>
-<span>  size <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mu <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,20 +97,13 @@ random-intercept model.</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>Binomial trial size or negative-binomial size/dispersion
-parameter. May be a scalar, vector, function of <code>n</code>, or count-distribution
-list where supported.</p></dd>
-
-
-<dt id="arg-prob">prob<a class="anchor" aria-label="anchor" href="#arg-prob"></a></dt>
-<dd><p>Binomial success probability for <code>"single"</code> and <code>"level2"</code>
-generators.</p></dd>
+<dd><p>Binomial trial size. May be a scalar, vector, function of <code>n</code>, or
+count-distribution list.</p></dd>
 
 
 <dt id="arg-fixed-intercept">fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-fixed-intercept"></a></dt>
-<dd><p>Link-scale intercept for direct-parameter defaults
-and multilevel models. Binomial uses the logit link; Poisson and negative
-binomial use the log link.</p></dd>
+<dd><p>Link-scale intercept. Binomial uses the logit link;
+Poisson and negative binomial use the log link.</p></dd>
 
 
 <dt id="arg-random-cov">random_cov<a class="anchor" aria-label="anchor" href="#arg-random-cov"></a></dt>
@@ -121,17 +111,12 @@ binomial use the log link.</p></dd>
 generators.</p></dd>
 
 
-<dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
-<dd><p>Poisson mean for <code>"single"</code> and <code>"level2"</code> generators.</p></dd>
-
-
-<dt id="arg-mu">mu<a class="anchor" aria-label="anchor" href="#arg-mu"></a></dt>
-<dd><p>Negative-binomial mean for <code>"single"</code> and <code>"level2"</code> generators.</p></dd>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Removed direct distribution parameters are rejected.</p></dd>
 
 
 <dt id="arg-scale-fixed-intercept">scale_fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-scale-fixed-intercept"></a></dt>
-<dd><p>Optional log size intercept for multilevel
-negative-binomial generators.</p></dd>
+<dd><p>Log negative-binomial size intercept.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -140,9 +125,8 @@ negative-binomial generators.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>For multilevel count generators, <code>fixed_intercept</code> and <code>random_cov</code> define
-the link-scale mean. Non-multilevel generators can use direct distribution
-parameters or a link-scale <code>fixed_intercept</code>.</p>
+    <p>Count generators use link-scale intercepts at every level. Negative-binomial
+size is <code>exp(scale_fixed_intercept)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -151,7 +135,8 @@ parameters or a link-scale <code>fixed_intercept</code>.</p>
 <code><a href="gen_categorical.html">gen_categorical()</a></code>,
 <code><a href="gen_custom.html">gen_custom()</a></code>,
 <code><a href="gen_mvn.html">gen_mvn()</a></code>,
-<code><a href="gen_normal.html">gen_normal()</a></code></p></div>
+<code><a href="gen_outcome.html">gen_outcome()</a></code>,
+<code><a href="gen_template.html">gen_template()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -160,9 +145,17 @@ parameters or a link-scale <code>fixed_intercept</code>.</p>
 <span class="r-in"><span>  n <span class="op">=</span> <span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">4</span>,</span></span>
 <span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    events <span class="op">=</span> <span class="fu">gen_poisson</span><span class="op">(</span><span class="st">"events"</span>, lambda <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    successes <span class="op">=</span> <span class="fu">gen_binomial</span><span class="op">(</span><span class="st">"successes"</span>, size <span class="op">=</span> <span class="fl">4</span>, prob <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    overdispersed <span class="op">=</span> <span class="fu">gen_negbin</span><span class="op">(</span><span class="st">"overdispersed"</span>, size <span class="op">=</span> <span class="fl">3</span>, mu <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    events <span class="op">=</span> <span class="fu">gen_poisson</span><span class="op">(</span><span class="st">"events"</span>, fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    successes <span class="op">=</span> <span class="fu">gen_binomial</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"successes"</span>,</span></span>
+<span class="r-in"><span>      size <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>      fixed_intercept <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">qlogis</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    overdispersed <span class="op">=</span> <span class="fu">gen_negbin</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"overdispersed"</span>,</span></span>
+<span class="r-in"><span>      fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      scale_fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim</span><span class="op">$</span><span class="va">data</span></span></span>

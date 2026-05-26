@@ -63,7 +63,8 @@
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>An <code>mlsim_data</code> object returned by <code><a href="simulate_data.html">simulate_data()</a></code>.</p></dd>
+<dd><p>An <code>mlsim_data</code> object returned by
+<code><a href="simulate_data.html">simulate_data()</a></code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -77,7 +78,12 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_data.html">simulate_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">3</span>, generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="gen_normal.html">gen_normal</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_data.html">simulate_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  n <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    x <span class="op">=</span> <span class="fu"><a href="gen_mvn.html">gen_mvn</a></span><span class="op">(</span><span class="st">"x"</span>, fixed_intercept <span class="op">=</span> <span class="fl">0</span>, residual_cov <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;summary.mlsim_data&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -92,16 +98,16 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> Generators:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  generator distribution  level   vars n_vars parameter_level parameter_count</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;       &lt;char&gt; &lt;char&gt; &lt;char&gt;  &lt;int&gt;          &lt;char&gt;           &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          x       normal single      x      1             row               3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          x          mvn single      x      1             row               3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  has_row_parameters has_group_parameters has_fixed_parameters has_random_cov</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;lgcl&gt;               &lt;lgcl&gt;               &lt;lgcl&gt;         &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                TRUE                FALSE                FALSE          FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  has_random_effects has_residuals has_scale_model has_formula has_ar_terms</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;lgcl&gt;        &lt;lgcl&gt;          &lt;lgcl&gt;      &lt;lgcl&gt;       &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE         FALSE           FALSE       FALSE        FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  has_composition has_custom_output</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;lgcl&gt;            &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            FALSE             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                TRUE                FALSE                 TRUE          FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  has_random_effects has_residuals has_scale_model has_composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;lgcl&gt;        &lt;lgcl&gt;          &lt;lgcl&gt;          &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE          TRUE           FALSE           FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  has_custom_output</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              FALSE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

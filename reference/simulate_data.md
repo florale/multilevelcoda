@@ -104,8 +104,8 @@ sim <- simulate_data(
   n_per_group = 2,
   seed = 10,
   generators = list(
-    group_x = gen_normal("group_x", level = "level2", mean = 0, sd = 1),
-    y = gen_poisson("y", lambda = 2)
+    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 0, residual_cov = 1),
+    y = gen_poisson("y", fixed_intercept = log(2))
   )
 )
 sim$data
@@ -131,26 +131,26 @@ summary(sim)
 #> Generators:
 #>  generator distribution  level    vars n_vars parameter_level parameter_count
 #>     <char>       <char> <char>  <char>  <int>          <char>           <int>
-#>    group_x       normal level2 group_x      1           group               3
+#>    group_x          mvn level2 group_x      1           group               3
 #>          y      poisson single       y      1             row               6
 #>  has_row_parameters has_group_parameters has_fixed_parameters has_random_cov
 #>              <lgcl>               <lgcl>               <lgcl>         <lgcl>
-#>               FALSE                 TRUE                FALSE          FALSE
-#>                TRUE                FALSE                FALSE          FALSE
-#>  has_random_effects has_residuals has_scale_model has_formula has_ar_terms
-#>              <lgcl>        <lgcl>          <lgcl>      <lgcl>       <lgcl>
-#>               FALSE         FALSE           FALSE       FALSE        FALSE
-#>               FALSE         FALSE           FALSE       FALSE        FALSE
-#>  has_composition has_custom_output
-#>           <lgcl>            <lgcl>
-#>            FALSE             FALSE
-#>            FALSE             FALSE
+#>               FALSE                 TRUE                 TRUE          FALSE
+#>                TRUE                FALSE                 TRUE          FALSE
+#>  has_random_effects has_residuals has_scale_model has_composition
+#>              <lgcl>        <lgcl>          <lgcl>          <lgcl>
+#>               FALSE          TRUE           FALSE           FALSE
+#>               FALSE         FALSE           FALSE           FALSE
+#>  has_custom_output
+#>             <lgcl>
+#>              FALSE
+#>              FALSE
 
 longitudinal <- simulate_data(
   n_groups = 2,
   n_per_group = 3,
   time_id = "visit",
-  generators = list(x = gen_normal("x"))
+  generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1))
 )
 longitudinal$metadata$index
 #> $longitudinal

@@ -8,23 +8,19 @@ Create generator specifications for gamma and beta variables.
 gen_gamma(
   vars,
   level = c("single", "level2", "multilevel"),
-  shape = NULL,
-  mean = NULL,
-  rate = NULL,
-  scale = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
-  scale_fixed_intercept = NULL
+  ...,
+  scale_fixed_intercept = NULL,
+  random_cov = NULL
 )
 
 gen_beta(
   vars,
   level = c("single", "level2", "multilevel"),
-  mean = NULL,
-  precision = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
-  scale_fixed_intercept = NULL
+  ...,
+  scale_fixed_intercept = NULL,
+  random_cov = NULL
 )
 ```
 
@@ -40,37 +36,23 @@ gen_beta(
   generates group-level values, and `"multilevel"` uses a
   random-intercept model.
 
-- shape:
-
-  Gamma shape parameter.
-
-- mean:
-
-  Mean parameter. For gamma variables this must be positive; for beta
-  variables it must be in `(0, 1)`.
-
-- rate, scale:
-
-  Alternative gamma parameterizations for `"single"` and `"level2"`
-  generators. Supply at most one of `rate` or `scale`.
-
 - fixed_intercept:
 
-  Link-scale intercept. Gamma uses the log link; beta uses the logit
+  Link-scale intercept. Gamma uses the log link and beta uses the logit
   link.
+
+- ...:
+
+  Removed direct distribution parameters are rejected.
+
+- scale_fixed_intercept:
+
+  Log shape intercept for gamma variables or log precision intercept for
+  beta variables.
 
 - random_cov:
 
   Group-level random-intercept covariance for multilevel generators.
-
-- scale_fixed_intercept:
-
-  Optional log shape or log precision intercept for multilevel
-  generators.
-
-- precision:
-
-  Beta precision parameter.
 
 ## Value
 
@@ -84,7 +66,8 @@ Other predictor generators:
 [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md),
 [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md),
 [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md),
-[`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md),
+[`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
 
 ## Examples
 
@@ -93,8 +76,16 @@ sim <- simulate_data(
   n = 5,
   seed = 5,
   generators = list(
-    positive = gen_gamma("positive", shape = 2, mean = 1.5),
-    proportion = gen_beta("proportion", mean = 0.4, precision = 10)
+    positive = gen_gamma(
+      "positive",
+      fixed_intercept = log(1.5),
+      scale_fixed_intercept = log(2)
+    ),
+    proportion = gen_beta(
+      "proportion",
+      fixed_intercept = stats::qlogis(0.4),
+      scale_fixed_intercept = log(10)
+    )
   )
 )
 sim$data

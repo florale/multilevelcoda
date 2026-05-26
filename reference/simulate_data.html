@@ -156,8 +156,8 @@ column names must be unique and must not collide after <code><a href="https://rd
 <span class="r-in"><span>  n_per_group <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">10</span>,</span></span>
 <span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    group_x <span class="op">=</span> <span class="fu"><a href="gen_normal.html">gen_normal</a></span><span class="op">(</span><span class="st">"group_x"</span>, level <span class="op">=</span> <span class="st">"level2"</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    y <span class="op">=</span> <span class="fu"><a href="count-generators.html">gen_poisson</a></span><span class="op">(</span><span class="st">"y"</span>, lambda <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    group_x <span class="op">=</span> <span class="fu"><a href="gen_mvn.html">gen_mvn</a></span><span class="op">(</span><span class="st">"group_x"</span>, level <span class="op">=</span> <span class="st">"level2"</span>, fixed_intercept <span class="op">=</span> <span class="fl">0</span>, residual_cov <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    y <span class="op">=</span> <span class="fu"><a href="count-generators.html">gen_poisson</a></span><span class="op">(</span><span class="st">"y"</span>, fixed_intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim</span><span class="op">$</span><span class="va">data</span></span></span>
@@ -183,26 +183,26 @@ column names must be unique and must not collide after <code><a href="https://rd
 <span class="r-out co"><span class="r-pr">#&gt;</span> Generators:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  generator distribution  level    vars n_vars parameter_level parameter_count</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;       &lt;char&gt; &lt;char&gt;  &lt;char&gt;  &lt;int&gt;          &lt;char&gt;           &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    group_x       normal level2 group_x      1           group               3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    group_x          mvn level2 group_x      1           group               3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          y      poisson single       y      1             row               6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  has_row_parameters has_group_parameters has_fixed_parameters has_random_cov</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;lgcl&gt;               &lt;lgcl&gt;               &lt;lgcl&gt;         &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE                 TRUE                FALSE          FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                TRUE                FALSE                FALSE          FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  has_random_effects has_residuals has_scale_model has_formula has_ar_terms</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;lgcl&gt;        &lt;lgcl&gt;          &lt;lgcl&gt;      &lt;lgcl&gt;       &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE         FALSE           FALSE       FALSE        FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE         FALSE           FALSE       FALSE        FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  has_composition has_custom_output</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;lgcl&gt;            &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            FALSE             FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            FALSE             FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE                 TRUE                 TRUE          FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                TRUE                FALSE                 TRUE          FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  has_random_effects has_residuals has_scale_model has_composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;lgcl&gt;        &lt;lgcl&gt;          &lt;lgcl&gt;          &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE          TRUE           FALSE           FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               FALSE         FALSE           FALSE           FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  has_custom_output</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">longitudinal</span> <span class="op">&lt;-</span> <span class="fu">simulate_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  n_groups <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>  n_per_group <span class="op">=</span> <span class="fl">3</span>,</span></span>
 <span class="r-in"><span>  time_id <span class="op">=</span> <span class="st">"visit"</span>,</span></span>
-<span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="gen_normal.html">gen_normal</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  generators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="gen_mvn.html">gen_mvn</a></span><span class="op">(</span><span class="st">"x"</span>, fixed_intercept <span class="op">=</span> <span class="fl">0</span>, residual_cov <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">longitudinal</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">index</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $longitudinal</span>

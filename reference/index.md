@@ -107,10 +107,16 @@
   : Generate Variables with a User-Supplied Function
 
 - [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md)
-  : Generate Multivariate Normal and Compositional Variables
+  : Generate Normal, Multivariate Normal, and Compositional Variables
 
-- [`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
-  : Generate Normal Variables
+- [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
+  : Generate Dynamic Gaussian and Compositional Outcomes
+
+- [`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
+  :
+
+  Create a Parameter Template for
+  [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
 
 - [`get-substitution`](https://florale.github.io/multilevelcoda/reference/get-substitution.md)
   : Substitution analysis helper functions
@@ -177,10 +183,6 @@
 
   Extract Number of Observations from `brmcoda` object
 
-- [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
-  [`outcome_template()`](https://florale.github.io/multilevelcoda/reference/outcome-generators.md)
-  : Generate Gaussian Outcomes from a Formula
-
 - [`pairs(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/pairs.brmcoda.md)
   :
 
@@ -215,8 +217,8 @@
 - [`predict(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/predict.brmcoda.md)
   : Draws from the Posterior Predictive Distribution
 
-- [`prepare_outcome_fit()`](https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.md)
-  : Prepare Simulated Outcomes for Model Fitting
+- [`prep_sim_analysis()`](https://florale.github.io/multilevelcoda/reference/prep_sim_analysis.md)
+  : Prepare Simulated Outcome Data for Analysis
 
 - [`print(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/print.brmcoda.md)
   :
@@ -230,9 +232,6 @@
 
 - [`print(`*`<mlsim_data>`*`)`](https://florale.github.io/multilevelcoda/reference/print.mlsim_data.md)
   : Print Simulated Data
-
-- [`print(`*`<mlsim_fit_prep>`*`)`](https://florale.github.io/multilevelcoda/reference/print.mlsim_fit_prep.md)
-  : Print an Outcome Fit Preparation Object
 
 - [`print(`*`<substitution>`*`)`](https://florale.github.io/multilevelcoda/reference/print.substitution.md)
   :

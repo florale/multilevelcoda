@@ -1,7 +1,8 @@
-# Generate Multivariate Normal and Compositional Variables
+# Generate Normal, Multivariate Normal, and Compositional Variables
 
-Create a generator specification for multivariate Gaussian variables,
-optionally transformed from ILR coordinates to compositional parts.
+Create a generator specification for univariate or multivariate Gaussian
+variables, optionally transformed from ILR coordinates to compositional
+parts.
 
 ## Usage
 
@@ -9,11 +10,10 @@ optionally transformed from ILR coordinates to compositional parts.
 gen_mvn(
   vars,
   level = c("single", "level2", "multilevel"),
-  mean = NULL,
-  cov = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
   residual_cov = NULL,
+  random_cov = NULL,
+  ...,
   scale_fixed_intercept = NULL,
   residual_cor = NULL,
   compositional = FALSE,
@@ -38,34 +38,35 @@ gen_mvn(
   it to each row in the group, and `"multilevel"` uses a
   random-intercept model.
 
-- mean, cov:
-
-  Direct mean vector and covariance matrix for `"single"` and `"level2"`
-  generators. Defaults are zero means and identity covariance.
-
 - fixed_intercept:
 
-  Location intercept vector for multilevel generators.
-
-- random_cov:
-
-  Group-level random-intercept covariance matrix. When
-  `scale_fixed_intercept` is supplied this covariance spans location and
-  scale intercepts jointly.
+  Identity-scale location intercept vector.
 
 - residual_cov:
 
-  Residual covariance matrix for multilevel MVN generators without a
-  row-specific scale model.
+  Residual covariance matrix for Gaussian generators without a
+  row-specific scale model. For univariate generators, it may be a
+  scalar residual variance.
+
+- random_cov:
+
+  Group-level random-intercept covariance matrix for multilevel
+  generators. When `scale_fixed_intercept` is supplied this may be
+  either a location-only covariance or a joint location-scale
+  covariance.
+
+- ...:
+
+  Removed direct distribution parameters are rejected.
 
 - scale_fixed_intercept:
 
-  Optional log residual standard-deviation intercepts for multilevel
-  generators.
+  Optional log residual standard-deviation intercepts.
 
 - residual_cor:
 
   Residual correlation matrix used with `scale_fixed_intercept`.
+  Defaults to an identity correlation matrix.
 
 - compositional:
 
@@ -109,7 +110,8 @@ Other predictor generators:
 [`count-generators`](https://florale.github.io/multilevelcoda/reference/count-generators.md),
 [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md),
 [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md),
-[`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md),
+[`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
 
 ## Examples
 
@@ -118,22 +120,23 @@ sim <- simulate_data(
   n = 4,
   seed = 2,
   generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
     z = gen_mvn(
       c("z1", "z2"),
-      mean = c(0, 0),
-      cov = diag(2),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(2),
       compositional = TRUE,
       parts = c("sleep", "activity", "sedentary")
     )
   )
 )
 sim$data
-#>    obs_id          z1         z2     sleep  activity  sedentary
-#>     <int>       <num>      <num>     <num>     <num>      <num>
-#> 1:      1  0.08025176 -0.8969145 0.3135056 0.1507036 0.53579077
-#> 2:      2 -0.13242028  0.1848492 0.2965364 0.3974460 0.30601766
-#> 3:      3 -0.70795473  1.5878453 0.1100264 0.8047731 0.08520055
-#> 4:      4  0.23969802 -1.1303757 0.3340632 0.1119962 0.55394063
+#>    obs_id          x         z1          z2      sleep  activity sedentary
+#>     <int>      <num>      <num>       <num>      <num>     <num>     <num>
+#> 1:      1 -0.8969145 -1.9844739 -0.08025176 0.04207843 0.4518105 0.5061110
+#> 2:      2  0.1848492  0.1387870  0.13242028 0.37108945 0.3438136 0.2850969
+#> 3:      3  1.5878453 -0.4176508  0.70795473 0.20997858 0.5777381 0.2122833
+#> 4:      4 -1.1303757 -0.9817528 -0.23969802 0.12899890 0.3623855 0.5086157
 rowSums(as.matrix(sim$data[, c("sleep", "activity", "sedentary"), with = FALSE]))
 #> [1] 1 1 1 1
 ```

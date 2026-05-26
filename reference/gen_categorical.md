@@ -10,7 +10,6 @@ gen_categorical(
   vars,
   level = c("single", "level2", "multilevel"),
   categories = NULL,
-  prob = NULL,
   fixed_intercept = NULL,
   random_cov = NULL,
   reference = NULL,
@@ -34,13 +33,6 @@ gen_categorical(
 - categories:
 
   Vector of category values. Defaults to `c(0L, 1L)`.
-
-- prob:
-
-  Category probabilities for `"single"` and `"level2"` generators. For
-  binary variables a scalar is interpreted as the success probability
-  for the second category. Multicategory probabilities may be a vector
-  or row-wise matrix.
 
 - fixed_intercept:
 
@@ -78,7 +70,8 @@ Other predictor generators:
 [`count-generators`](https://florale.github.io/multilevelcoda/reference/count-generators.md),
 [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md),
 [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md),
-[`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md),
+[`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
 
 ## Examples
 
@@ -90,7 +83,7 @@ sim <- simulate_data(
     arm = gen_categorical(
       "arm",
       categories = c("control", "treatment"),
-      prob = 0.5
+      fixed_intercept = stats::qlogis(0.5)
     )
   )
 )

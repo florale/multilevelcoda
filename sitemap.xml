@@ -37,7 +37,8 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/gen_categorical.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/gen_custom.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/gen_mvn.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/gen_normal.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/gen_outcome.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/gen_template.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/get-substitution.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/get_sbp.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/get_variables.html</loc></url>
@@ -54,14 +55,11 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/model.frame.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-composition.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-design.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-fit-prep.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-generator-specs.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-outcome.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-printing.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda-internal-utils.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/multilevelcoda_sim.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/nobs.brmcoda.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/outcome-generators.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/pairs.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/pivot_coord.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/pivot_coord_refit.html</loc></url>
@@ -71,11 +69,10 @@
 <url><loc>https://florale.github.io/multilevelcoda/reference/plot.substitution.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/pp_check.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/predict.brmcoda.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/prepare_outcome_fit.html</loc></url>
+<url><loc>https://florale.github.io/multilevelcoda/reference/prep_sim_analysis.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/print.brmcoda.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/print.complr.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/print.mlsim_data.html</loc></url>
-<url><loc>https://florale.github.io/multilevelcoda/reference/print.mlsim_fit_prep.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/print.substitution.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/print.summary.mlsim_data.html</loc></url>
 <url><loc>https://florale.github.io/multilevelcoda/reference/prior_summary.brmcoda.html</loc></url>

@@ -9,8 +9,7 @@ binomial count variables.
 gen_binomial(
   vars,
   level = c("single", "level2", "multilevel"),
-  size = 1,
-  prob = NULL,
+  size = NULL,
   fixed_intercept = NULL,
   random_cov = NULL
 )
@@ -18,7 +17,6 @@ gen_binomial(
 gen_poisson(
   vars,
   level = c("single", "level2", "multilevel"),
-  lambda = NULL,
   fixed_intercept = NULL,
   random_cov = NULL
 )
@@ -26,11 +24,10 @@ gen_poisson(
 gen_negbin(
   vars,
   level = c("single", "level2", "multilevel"),
-  size = NULL,
-  mu = NULL,
   fixed_intercept = NULL,
-  random_cov = NULL,
-  scale_fixed_intercept = NULL
+  ...,
+  scale_fixed_intercept = NULL,
+  random_cov = NULL
 )
 ```
 
@@ -48,36 +45,25 @@ gen_negbin(
 
 - size:
 
-  Binomial trial size or negative-binomial size/dispersion parameter.
-  May be a scalar, vector, function of `n`, or count-distribution list
-  where supported.
-
-- prob:
-
-  Binomial success probability for `"single"` and `"level2"` generators.
+  Binomial trial size. May be a scalar, vector, function of `n`, or
+  count-distribution list.
 
 - fixed_intercept:
 
-  Link-scale intercept for direct-parameter defaults and multilevel
-  models. Binomial uses the logit link; Poisson and negative binomial
-  use the log link.
+  Link-scale intercept. Binomial uses the logit link; Poisson and
+  negative binomial use the log link.
 
 - random_cov:
 
   Group-level random-intercept covariance for multilevel generators.
 
-- lambda:
+- ...:
 
-  Poisson mean for `"single"` and `"level2"` generators.
-
-- mu:
-
-  Negative-binomial mean for `"single"` and `"level2"` generators.
+  Removed direct distribution parameters are rejected.
 
 - scale_fixed_intercept:
 
-  Optional log size intercept for multilevel negative-binomial
-  generators.
+  Log negative-binomial size intercept.
 
 ## Value
 
@@ -86,9 +72,8 @@ An `mlsim_generator_spec` object for use in
 
 ## Details
 
-For multilevel count generators, `fixed_intercept` and `random_cov`
-define the link-scale mean. Non-multilevel generators can use direct
-distribution parameters or a link-scale `fixed_intercept`.
+Count generators use link-scale intercepts at every level.
+Negative-binomial size is `exp(scale_fixed_intercept)`.
 
 ## See also
 
@@ -97,7 +82,8 @@ Other predictor generators:
 [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md),
 [`gen_custom()`](https://florale.github.io/multilevelcoda/reference/gen_custom.md),
 [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md),
-[`gen_normal()`](https://florale.github.io/multilevelcoda/reference/gen_normal.md)
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md),
+[`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
 
 ## Examples
 
@@ -106,9 +92,17 @@ sim <- simulate_data(
   n = 5,
   seed = 4,
   generators = list(
-    events = gen_poisson("events", lambda = 2),
-    successes = gen_binomial("successes", size = 4, prob = 0.5),
-    overdispersed = gen_negbin("overdispersed", size = 3, mu = 2)
+    events = gen_poisson("events", fixed_intercept = log(2)),
+    successes = gen_binomial(
+      "successes",
+      size = 4,
+      fixed_intercept = stats::qlogis(0.5)
+    ),
+    overdispersed = gen_negbin(
+      "overdispersed",
+      fixed_intercept = log(2),
+      scale_fixed_intercept = log(3)
+    )
   )
 )
 sim$data

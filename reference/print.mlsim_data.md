@@ -27,7 +27,12 @@ print(x, ...)
 ## Examples
 
 ``` r
-sim <- simulate_data(n = 3, generators = list(x = gen_normal("x")))
+sim <- simulate_data(
+  n = 3,
+  generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+  )
+)
 print(sim)
 #> <mlsim_data>
 #>   rows: 3
@@ -38,5 +43,5 @@ print(sim)
 #> 
 #> Generators:
 #>  generator distribution  level vars
-#>          x       normal single    x
+#>          x          mvn single    x
 ```

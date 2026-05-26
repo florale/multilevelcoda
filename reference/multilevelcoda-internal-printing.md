@@ -54,7 +54,12 @@ Internal helper outputs used by print and summary methods.
 ``` r
 multilevelcoda:::.mlsim_na_character(NULL)
 #> [1] NA
-sim <- simulate_data(n = 2, generators = list(x = gen_normal("x")))
+sim <- simulate_data(
+  n = 2,
+  generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+  )
+)
 multilevelcoda:::.mlsim_generated_columns(sim)
 #> [1] "x"
 ```

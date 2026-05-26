@@ -27,7 +27,12 @@ A `summary.mlsim_data` object with `design` and `generators` tables.
 ## Examples
 
 ``` r
-sim <- simulate_data(n = 3, generators = list(x = gen_normal("x")))
+sim <- simulate_data(
+  n = 3,
+  generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+  )
+)
 summary(sim)
 #> <summary.mlsim_data>
 #> 
@@ -42,14 +47,14 @@ summary(sim)
 #> Generators:
 #>  generator distribution  level   vars n_vars parameter_level parameter_count
 #>     <char>       <char> <char> <char>  <int>          <char>           <int>
-#>          x       normal single      x      1             row               3
+#>          x          mvn single      x      1             row               3
 #>  has_row_parameters has_group_parameters has_fixed_parameters has_random_cov
 #>              <lgcl>               <lgcl>               <lgcl>         <lgcl>
-#>                TRUE                FALSE                FALSE          FALSE
-#>  has_random_effects has_residuals has_scale_model has_formula has_ar_terms
-#>              <lgcl>        <lgcl>          <lgcl>      <lgcl>       <lgcl>
-#>               FALSE         FALSE           FALSE       FALSE        FALSE
-#>  has_composition has_custom_output
-#>           <lgcl>            <lgcl>
-#>            FALSE             FALSE
+#>                TRUE                FALSE                 TRUE          FALSE
+#>  has_random_effects has_residuals has_scale_model has_composition
+#>              <lgcl>        <lgcl>          <lgcl>          <lgcl>
+#>               FALSE          TRUE           FALSE           FALSE
+#>  has_custom_output
+#>             <lgcl>
+#>              FALSE
 ```
