@@ -68,8 +68,16 @@ sim <- simulate_data(
   seed = 4,
   generators = list(
     events = gen_poisson("events", fixed_intercept = log(2)),
-    successes = gen_binomial("successes", size = 4, fixed_intercept = stats::qlogis(0.5)),
-    overdispersed = gen_negbin("overdispersed", fixed_intercept = log(2), scale_fixed_intercept = log(3))
+    successes = gen_binomial(
+      "successes",
+      size = 4,
+      fixed_intercept = stats::qlogis(0.5)
+    ),
+    overdispersed = gen_negbin(
+      "overdispersed",
+      fixed_intercept = log(2),
+      scale_fixed_intercept = log(3)
+    )
   )
 )
 sim$data

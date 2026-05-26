@@ -171,6 +171,122 @@ test_that("gen_outcome validates dynamic formula restrictions", {
     ),
     "Population-level AR matrix is unstable"
   )
+
+  expect_error(
+    simulate_data(
+      n = 5,
+      time_id = "time",
+      generators = list(
+        outcome_template = gen_template(
+          y ~ ar1():ar1(),
+          scale = sigma ~ 1,
+          burnin = 0
+        )
+      )
+    ),
+    "Terms containing more than one `ar1\\(\\)` are not supported"
+  )
+
+  expect_error(
+    simulate_data(
+      n_groups = 2,
+      n_per_group = 3,
+      group_id = "ID",
+      time_id = "time",
+      generators = list(
+        treatment = gen_categorical(
+          "treatment",
+          level = "level2",
+          categories = c("control", "treatment"),
+          fixed_intercept = stats::qlogis(0.5),
+          output = "factor"
+        ),
+        outcome_template = gen_template(
+          y ~ treatment:ar1():ar1(),
+          scale = sigma ~ 1,
+          burnin = 0
+        )
+      )
+    ),
+    "Terms containing more than one `ar1\\(\\)` are not supported"
+  )
+
+  valid_interaction <- simulate_data(
+    n_groups = 2,
+    n_per_group = 3,
+    group_id = "ID",
+    time_id = "time",
+    generators = list(
+      treatment = gen_categorical(
+        "treatment",
+        level = "level2",
+        categories = c("control", "treatment"),
+        fixed_intercept = stats::qlogis(0.5),
+        output = "factor"
+      ),
+      outcome_template = gen_template(
+        y ~ treatment * ar1(),
+        scale = sigma ~ 1,
+        burnin = 0
+      )
+    )
+  )
+  expect_equal(
+    valid_interaction$generator_metadata$outcome_template$expected_parameter_names$ar,
+    c("ar1()", "treatmenttreatment:ar1()")
+  )
+})
+
+test_that("gen_outcome records high-persistence warnings without random effects", {
+  make_params <- function(phi) {
+    list(
+      location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+      scale = list(beta = matrix(log(0.1), nrow = 1, dimnames = list("(Intercept)", "y"))),
+      ar = list(beta = array(phi, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+    )
+  }
+
+  high_persistence <- NULL
+  expect_warning(
+    high_persistence <- simulate_data(
+      n = 8,
+      time_id = "time",
+      seed = 144,
+      generators = list(
+        outcome = gen_outcome(
+          y ~ ar1(),
+          scale = sigma ~ 1,
+          params = make_params(0.96),
+          burnin = 2
+        )
+      )
+    ),
+    "spectral radius above 0.95"
+  )
+  high_stability <- high_persistence$generator_metadata$outcome$ar$stability
+  expect_true(high_stability$high_persistence_warning)
+  expect_equal(high_stability$max_spectral_radius_overall, 0.96)
+
+  low_persistence <- NULL
+  expect_warning(
+    low_persistence <- simulate_data(
+      n = 8,
+      time_id = "time",
+      seed = 145,
+      generators = list(
+        outcome = gen_outcome(
+          y ~ ar1(),
+          scale = sigma ~ 1,
+          params = make_params(0.2),
+          burnin = 2
+        )
+      )
+    ),
+    NA
+  )
+  low_stability <- low_persistence$generator_metadata$outcome$ar$stability
+  expect_false(low_stability$high_persistence_warning)
+  expect_equal(low_stability$max_spectral_radius_overall, 0.2)
 })
 
 test_that("gen_outcome validates AR time indices before simulation", {

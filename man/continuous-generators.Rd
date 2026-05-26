@@ -53,8 +53,16 @@ sim <- simulate_data(
   n = 5,
   seed = 5,
   generators = list(
-    positive = gen_gamma("positive", fixed_intercept = log(1.5), scale_fixed_intercept = log(2)),
-    proportion = gen_beta("proportion", fixed_intercept = stats::qlogis(0.4), scale_fixed_intercept = log(10))
+    positive = gen_gamma(
+      "positive",
+      fixed_intercept = log(1.5),
+      scale_fixed_intercept = log(2)
+    ),
+    proportion = gen_beta(
+      "proportion",
+      fixed_intercept = stats::qlogis(0.4),
+      scale_fixed_intercept = log(10)
+    )
   )
 )
 sim$data

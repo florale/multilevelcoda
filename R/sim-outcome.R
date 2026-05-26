@@ -552,6 +552,7 @@ gen_template <- function(formula, scale, burnin,
     return(expr)
   }
   op <- as.character(expr[[1L]])
+  .mlsim_reject_multiple_ar_calls(expr)
   if (identical(op, "(")) {
     return(call("(", .mlsim_transform_specials(expr[[2L]], env, allow_ar, component)))
   }
@@ -593,6 +594,32 @@ gen_template <- function(formula, scale, burnin,
     return(TRUE)
   }
   any(vapply(as.list(expr[-1L]), .mlsim_expr_has_ar, logical(1)))
+}
+
+.mlsim_count_ar_calls <- function(expr) {
+  if (!is.call(expr)) {
+    return(0L)
+  }
+  count <- if (identical(as.character(expr[[1L]]), "ar1")) 1L else 0L
+  count + sum(vapply(as.list(expr[-1L]), .mlsim_count_ar_calls, integer(1)))
+}
+
+.mlsim_reject_multiple_ar_calls <- function(expr) {
+  if (!is.call(expr)) {
+    return(invisible(TRUE))
+  }
+  op <- as.character(expr[[1L]])
+  if (identical(op, "(")) {
+    return(.mlsim_reject_multiple_ar_calls(expr[[2L]]))
+  }
+  if (identical(op, "+")) {
+    lapply(as.list(expr[-1L]), .mlsim_reject_multiple_ar_calls)
+    return(invisible(TRUE))
+  }
+  if (.mlsim_count_ar_calls(expr) > 1L) {
+    .mlsim_stop("Terms containing more than one `ar1()` are not supported.")
+  }
+  invisible(TRUE)
 }
 
 .mlsim_resolve_special_role <- function(variable, component, env) {
@@ -1096,6 +1123,7 @@ gen_template <- function(formula, scale, burnin,
     fixed <- .mlsim_outcome_phi(spec, checked, NULL)
     .mlsim_check_fixed_phi_stability(spec, fixed$fixed_phi)
     stability <- .mlsim_make_stability_metadata(spec, fixed$phi, NULL, ar_stability)
+    stability <- .mlsim_finalize_stability_metadata(spec, stability)
     return(list(
       draws = NULL,
       proposal_covariance = NULL,
@@ -1172,18 +1200,24 @@ gen_template <- function(formula, scale, burnin,
   stability$shrink_factor_by_group_level <- if (identical(ar_stability, "shrink")) shrink_factor else NULL
   stability$spectral_radius_before_shrinkage <- if (identical(ar_stability, "shrink")) before else NULL
   stability$spectral_radius_after_shrinkage <- if (identical(ar_stability, "shrink")) after else NULL
-  if (spec$has_ar && max(stability$max_spectral_radius_by_group_level, na.rm = TRUE) > 0.95) {
-    warning("Accepted AR matrices have spectral radius above 0.95; consider a longer burn-in or a sensitivity check.", call. = FALSE)
-    stability$high_persistence_warning <- TRUE
-  } else {
-    stability$high_persistence_warning <- FALSE
-  }
+  stability <- .mlsim_finalize_stability_metadata(spec, stability)
   list(
     draws = draws,
     proposal_covariance = covariance,
     realised_covariance = realised_cov,
     stability = stability
   )
+}
+
+.mlsim_finalize_stability_metadata <- function(spec, stability) {
+  if (isTRUE(spec$has_ar) &&
+      max(stability$max_spectral_radius_by_group_level, na.rm = TRUE) > 0.95) {
+    warning("Accepted AR matrices have spectral radius above 0.95; consider a longer burn-in or a sensitivity check.", call. = FALSE)
+    stability$high_persistence_warning <- TRUE
+  } else {
+    stability$high_persistence_warning <- FALSE
+  }
+  stability
 }
 
 .mlsim_check_fixed_phi_stability <- function(spec, fixed_phi) {

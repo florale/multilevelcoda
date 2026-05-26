@@ -13,7 +13,12 @@
 #'
 #' @examples
 #' multilevelcoda:::.mlsim_na_character(NULL)
-#' sim <- simulate_data(n = 2, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
+#' sim <- simulate_data(
+#'   n = 2,
+#'   generators = list(
+#'     x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+#'   )
+#' )
 #' multilevelcoda:::.mlsim_generated_columns(sim)
 #'
 #' @keywords internal
@@ -117,13 +122,19 @@ NULL
 #'
 #' Build a compact summary of an `mlsim_data` object.
 #'
-#' @param object An `mlsim_data` object returned by [simulate_data()].
+#' @param object An `mlsim_data` object returned by
+#'   [simulate_data()].
 #' @param ... Ignored.
 #'
 #' @return A `summary.mlsim_data` object with `design` and `generators` tables.
 #'
 #' @examples
-#' sim <- simulate_data(n = 3, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
+#' sim <- simulate_data(
+#'   n = 3,
+#'   generators = list(
+#'     x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+#'   )
+#' )
 #' summary(sim)
 #'
 #' @method summary mlsim_data
@@ -148,7 +159,12 @@ summary.mlsim_data <- function(object, ...) {
 #' @return `x`, invisibly.
 #'
 #' @examples
-#' sim <- simulate_data(n = 3, generators = list(x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)))
+#' sim <- simulate_data(
+#'   n = 3,
+#'   generators = list(
+#'     x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+#'   )
+#' )
 #' print(sim)
 #'
 #' @method print mlsim_data

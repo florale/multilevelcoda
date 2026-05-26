@@ -775,8 +775,16 @@ gen_categorical <- function(vars, level = c("single", "level2", "multilevel"),
 #'   seed = 4,
 #'   generators = list(
 #'     events = gen_poisson("events", fixed_intercept = log(2)),
-#'     successes = gen_binomial("successes", size = 4, fixed_intercept = stats::qlogis(0.5)),
-#'     overdispersed = gen_negbin("overdispersed", fixed_intercept = log(2), scale_fixed_intercept = log(3))
+#'     successes = gen_binomial(
+#'       "successes",
+#'       size = 4,
+#'       fixed_intercept = stats::qlogis(0.5)
+#'     ),
+#'     overdispersed = gen_negbin(
+#'       "overdispersed",
+#'       fixed_intercept = log(2),
+#'       scale_fixed_intercept = log(3)
+#'     )
 #'   )
 #' )
 #' sim$data
@@ -852,8 +860,16 @@ gen_negbin <- function(vars, level = c("single", "level2", "multilevel"),
 #'   n = 5,
 #'   seed = 5,
 #'   generators = list(
-#'     positive = gen_gamma("positive", fixed_intercept = log(1.5), scale_fixed_intercept = log(2)),
-#'     proportion = gen_beta("proportion", fixed_intercept = stats::qlogis(0.4), scale_fixed_intercept = log(10))
+#'     positive = gen_gamma(
+#'       "positive",
+#'       fixed_intercept = log(1.5),
+#'       scale_fixed_intercept = log(2)
+#'     ),
+#'     proportion = gen_beta(
+#'       "proportion",
+#'       fixed_intercept = stats::qlogis(0.4),
+#'       scale_fixed_intercept = log(10)
+#'     )
 #'   )
 #' )
 #' sim$data
