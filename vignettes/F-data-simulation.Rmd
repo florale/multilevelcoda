@@ -24,9 +24,28 @@ vignette: >
 
 ``` r
 library(multilevelcoda)
+#> 
+#> Attaching package: 'multilevelcoda'
+#> The following object is masked from 'package:base':
+#> 
+#>     sub
 library(knitr)
 library(data.table)
+#> data.table 1.18.4 using 12 threads (see ?getDTthreads).
+#> Latest news: r-datatable.com
+#> 
+#> Attaching package: 'data.table'
+#> The following object is masked from 'package:base':
+#> 
+#>     %notin%
 library(cmdstanr)
+#> This is cmdstanr version 0.8.0
+#> - CmdStanR documentation and vignettes: mc-stan.org/cmdstanr
+#> - CmdStan path: /home/jwile/.cmdstan/cmdstan-2.38.0
+#> - CmdStan version: 2.38.0
+#> 
+#> A newer version of CmdStan is available. See ?install_cmdstan() to install it.
+#> To disable this check set option or environment variable cmdstanr_no_ver_check=TRUE.
 
 options(digits = 3, pillar.sigfig = 3)
 ```
@@ -869,8 +888,8 @@ kable(custom$data)
 
 `gen_outcome()` adds a model-based outcome generator to the same
 `simulate_data()` workflow. It is designed for simulation studies where
-predictors are generated first and outcomes are then generated from a known
-location, scale, and optional residual autoregressive process.
+outcomes are generated from a known location, scale, and optional residual
+autoregressive process.
 
 The scale model is required. Use `scale = sigma ~ 1` for constant conditional
 standard deviations. When `ar1()` is present, the scale model controls
@@ -878,39 +897,16 @@ innovation variability. When `ar1()` is absent, it controls ordinary residual
 variability. The AR process is applied to residual ILR states, not to lagged
 observed outcomes.
 
-`between(x)` and `within(x)` resolve to labelled component columns created by
-earlier generators. For example, a multilevel `gen_mvn("stress")` predictor
-creates visible `stress_between` and `stress_within` columns and stores their
-roles in generator metadata.
-
 `gen_template()` can be used first to ask the simulator for the exact parameter
 matrices and arrays required by a `gen_outcome()` specification. The template
-should be run with the same design, predictor generators, factor levels,
-formulas, and composition settings that will be used in the final simulation.
+should be run with the same design, formulas, and composition settings that
+will be used in the final simulation.
 
 
 ``` r
-dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ treatment + between(stress) +
-  within(stress) + ar1() + treatment:ar1() + (1 + ar1() | ID)
-dynamic_scale_formula <- sigma ~ treatment + (1 | ID)
+dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ ar1() + (1 + ar1() | ID)
+dynamic_scale_formula <- sigma ~ 1 + (1 | ID)
 dynamic_composition <- list(parts = c("sleep", "sedentary", "activity"), total = 24)
-
-dynamic_predictor_generators <- list(
-  treatment = gen_categorical(
-    "treatment",
-    level = "level2",
-    categories = c("control", "treatment"),
-    fixed_intercept = stats::qlogis(0.5),
-    output = "factor"
-  ),
-  stress = gen_mvn(
-    "stress",
-    level = "multilevel",
-    fixed_intercept = 3,
-    random_cov = 0.20,
-    residual_cov = 0.80
-  )
-)
 
 dynamic_template <- simulate_data(
   n_groups = 4,
@@ -918,26 +914,20 @@ dynamic_template <- simulate_data(
   group_id = "ID",
   time_id = "day",
   seed = 2026,
-  generators = c(
-    dynamic_predictor_generators,
-    list(
-      outcome_template = gen_template(
-        dynamic_outcome_formula,
-        scale = dynamic_scale_formula,
-        composition = dynamic_composition,
-        burnin = 20
-      )
+  generators = list(
+    outcome_template = gen_template(
+      dynamic_outcome_formula,
+      scale = dynamic_scale_formula,
+      composition = dynamic_composition,
+      burnin = 20
     )
   )
 )
 
 dynamic_params <- dynamic_template$generator_metadata$outcome_template$params
-dynamic_params$location$beta["between(stress)", ] <- c(0.15, -0.05)
-dynamic_params$location$beta["within(stress)", ] <- c(0.05, 0.03)
+dynamic_params$location$beta["(Intercept)", ] <- c(0, 0)
 dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.4, 0.35))
-dynamic_params$scale$beta["treatmenttreatment", ] <- log(c(0.45, 0.4))
 dynamic_params$ar$beta["ar1()", , ] <- matrix(c(0.25, 0.02, -0.01, 0.20), 2, 2, byrow = TRUE)
-dynamic_params$ar$beta["treatmenttreatment:ar1()", , ] <- matrix(c(0.05, 0, 0, 0.03), 2, 2, byrow = TRUE)
 
 dynamic_random_names <- rownames(dynamic_params$random$ID$covariance)
 dynamic_random_sd_values <- c(
@@ -993,38 +983,35 @@ dimnames(dynamic_params$random$ID$covariance) <- list(dynamic_random_names, dyna
 
 ``` r
 dynamic_comp <- simulate_data(
-  n_groups = 500,
-  n_per_group = 150,
+  n_groups = 400,
+  n_per_group = 100,
   group_id = "ID",
   time_id = "day",
   seed = 2026,
-  generators = c(
-    dynamic_predictor_generators,
-    list(
-      outcome = gen_outcome(
-        dynamic_outcome_formula,
-        scale = dynamic_scale_formula,
-        params = dynamic_params,
-        composition = dynamic_composition,
-        burnin = 50
-      )
+  generators = list(
+    outcome = gen_outcome(
+      dynamic_outcome_formula,
+      scale = dynamic_scale_formula,
+      params = dynamic_params,
+      composition = dynamic_composition,
+      burnin = 50
     )
   )
 )
 
-kable(head(dynamic_comp$data[, c("ID", "day", "treatment", "stress", "ilr1", "ilr2", "sleep", "sedentary", "activity"), with = FALSE]))
+kable(head(dynamic_comp$data[, c("ID", "day", "ilr1", "ilr2", "sleep", "sedentary", "activity"), with = FALSE]))
 ```
 
 
 
-| ID| day|treatment | stress|  ilr1|   ilr2| sleep| sedentary| activity|
-|--:|---:|:---------|------:|-----:|------:|-----:|---------:|--------:|
-|  1|   1|treatment |   3.27| 0.360| -0.400| 10.26|      4.98|     8.76|
-|  1|   2|treatment |   2.96| 0.318| -0.512|  9.82|      4.63|     9.55|
-|  1|   3|treatment |   3.17| 0.080| -0.164|  8.49|      6.86|     8.65|
-|  1|   4|treatment |   2.79| 0.355| -0.381| 10.24|      5.07|     8.69|
-|  1|   5|treatment |   2.71| 0.666| -0.115| 12.71|      5.19|     6.10|
-|  1|   6|treatment |   1.46| 0.823| -0.267| 13.77|      4.16|     6.07|
+| ID| day|   ilr1|  ilr2| sleep| sedentary| activity|
+|--:|---:|------:|-----:|-----:|---------:|--------:|
+|  1|   1| -0.507| 0.031|  5.08|      9.67|     9.25|
+|  1|   2| -0.028| 0.454|  7.55|     10.77|     5.67|
+|  1|   3|  0.031| 0.090|  8.20|      8.40|     7.40|
+|  1|   4| -0.383| 0.247|  5.65|     10.76|     7.59|
+|  1|   5| -0.458| 0.648|  4.92|     13.63|     5.45|
+|  1|   6|  0.221| 0.420|  9.26|      9.50|     5.25|
 
 
 
@@ -1032,14 +1019,13 @@ kable(head(dynamic_comp$data[, c("ID", "day", "treatment", "stress", "ilr1", "il
 ``` r
 dynamic_template$generator_metadata$outcome_template$expected_parameter_names
 #> $location
-#> [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   
-#> [4] "within(stress)"    
+#> [1] "(Intercept)"
 #> 
 #> $scale
-#> [1] "(Intercept)"        "treatmenttreatment"
+#> [1] "(Intercept)"
 #> 
 #> $ar
-#> [1] "ar1()"                    "treatmenttreatment:ar1()"
+#> [1] "ar1()"
 #> 
 #> $random
 #> [1] "location|outcome=ilr1|term=(Intercept)"
@@ -1053,14 +1039,13 @@ dynamic_template$generator_metadata$outcome_template$expected_parameter_names
 
 dynamic_comp$generator_metadata$outcome$expected_parameter_names
 #> $location
-#> [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   
-#> [4] "within(stress)"    
+#> [1] "(Intercept)"
 #> 
 #> $scale
-#> [1] "(Intercept)"        "treatmenttreatment"
+#> [1] "(Intercept)"
 #> 
 #> $ar
-#> [1] "ar1()"                    "treatmenttreatment:ar1()"
+#> [1] "ar1()"
 #> 
 #> $random
 #> [1] "location|outcome=ilr1|term=(Intercept)"
@@ -1073,21 +1058,20 @@ dynamic_comp$generator_metadata$outcome$expected_parameter_names
 #> [8] "scale|outcome=ilr2|term=(Intercept)"
 
 dynamic_comp$generator_metadata$outcome$ar$stability$max_spectral_radius_overall
-#> [1] 0.67
+#> [1] 0.58
 
 table(rowSums(as.matrix(dynamic_comp$data[, c("sleep", "sedentary", "activity"), with = FALSE])))
 #> 
 #>    24 
-#> 75000
+#> 40000
 ```
 
 The generated data can be managed into an analysis data set and passed to
-`brmcoda()`. `prep_sim_analysis()` recomputes observed between- and within-person
-predictors from the total simulated data columns, rebuilds a `complr` object
-using the same SBP basis as the simulator, and translates `ar1()` into
-within-person centered lagged ILR predictors. The fitted model includes random
-level terms, random inertia terms through lagged ILR slopes, and random
-conditional variability through response-specific `sigma` models.
+`brmcoda()`. `prep_sim_analysis()` rebuilds a `complr` object using the same SBP
+basis as the simulator and translates `ar1()` into within-person centered lagged
+ILR predictors. The fitted model includes random level terms, random inertia
+terms through lagged ILR slopes, and random conditional variability through
+response-specific `sigma` models.
 
 
 ``` r
@@ -1095,10 +1079,10 @@ dynamic_analysis <- prep_sim_analysis(dynamic_comp)
 dynamic_analysis$metadata$lag_columns
 #> [1] "lag_z1_1_within" "lag_z2_1_within"
 dynamic_analysis$formula
-#> z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
-#> sigma ~ treatment + (1 | ID)
-#> z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
-#> sigma ~ treatment + (1 | ID)
+#> z1_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#> sigma ~ 1 + (1 | ID)
+#> z2_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#> sigma ~ 1 + (1 | ID)
 ```
 
 
@@ -1111,6 +1095,7 @@ dynamic_fit <- brmcoda(
   algorithm = "meanfield", 
   iter = 2000
 )
+
 ```
 
 
@@ -1119,94 +1104,61 @@ summary(dynamic_fit)
 #>  Family: MV(gaussian, gaussian) 
 #>   Links: mu = identity; sigma = log
 #>          mu = identity; sigma = log 
-#> Formula: z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
-#>          sigma ~ treatment + (1 | ID)
-#>          z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
-#>          sigma ~ treatment + (1 | ID)
-#>    Data: complr$dataout (Number of observations: 74500) 
+#> Formula: z1_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#>          sigma ~ 1 + (1 | ID)
+#>          z2_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#>          sigma ~ 1 + (1 | ID)
+#>    Data: complr$dataout (Number of observations: 39600) 
 #>   Draws: 1 chains, each with iter = 1000; warmup = 0; thin = 1;
 #>          total post-warmup draws = 1000
 #> 
 #> Multilevel Hyperparameters:
-#> ~ID (Number of levels: 500) 
+#> ~ID (Number of levels: 400) 
 #>                                              Estimate Est.Error l-95% CI
-#> sd(z11_Intercept)                                0.76      0.50     0.18
-#> sd(z11_lag_z1_1_within)                          0.79      1.38     0.04
-#> sd(z11_lag_z2_1_within)                          0.51      0.35     0.14
-#> sd(sigma_z11_Intercept)                          2.17      1.94     0.35
-#> sd(z21_Intercept)                                0.87      2.15     0.02
-#> sd(z21_lag_z1_1_within)                          2.60      3.90     0.23
-#> sd(z21_lag_z2_1_within)                          0.48      0.31     0.13
-#> sd(sigma_z21_Intercept)                          4.96      3.56     1.08
-#> cor(z11_Intercept,z11_lag_z1_1_within)          -0.82      0.28    -1.00
-#> cor(z11_Intercept,z11_lag_z2_1_within)          -0.38      0.48    -0.97
-#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.51      0.46    -0.60
-#> cor(z21_Intercept,z21_lag_z1_1_within)           0.55      0.52    -0.82
-#> cor(z21_Intercept,z21_lag_z2_1_within)           0.19      0.57    -0.89
-#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)    -0.15      0.56    -0.97
+#> sd(z11_Intercept)                                0.18      0.00     0.18
+#> sd(z11_lag_z1_1_within)                          0.11      0.00     0.10
+#> sd(z11_lag_z2_1_within)                          0.02      0.00     0.01
+#> sd(sigma_z11_Intercept)                          0.15      0.00     0.14
+#> sd(z21_Intercept)                                0.18      0.00     0.17
+#> sd(z21_lag_z1_1_within)                          0.04      0.00     0.03
+#> sd(z21_lag_z2_1_within)                          0.10      0.01     0.09
+#> sd(sigma_z21_Intercept)                          0.14      0.00     0.13
+#> cor(z11_Intercept,z11_lag_z1_1_within)           0.31      0.05     0.21
+#> cor(z11_Intercept,z11_lag_z2_1_within)           0.15      0.27    -0.40
+#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.69      0.23     0.02
+#> cor(z21_Intercept,z21_lag_z1_1_within)           0.22      0.12    -0.01
+#> cor(z21_Intercept,z21_lag_z2_1_within)          -0.08      0.06    -0.18
+#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.09      0.06    -0.02
 #>                                              u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(z11_Intercept)                                2.07 1.00      899      740
-#> sd(z11_lag_z1_1_within)                          4.77 1.00      878      842
-#> sd(z11_lag_z2_1_within)                          1.41 1.00     1055      840
-#> sd(sigma_z11_Intercept)                          6.88 1.00     1199      889
-#> sd(z21_Intercept)                                5.03 1.00      903      935
-#> sd(z21_lag_z1_1_within)                         11.52 1.00     1006      939
-#> sd(z21_lag_z2_1_within)                          1.26 1.00      898      875
-#> sd(sigma_z21_Intercept)                         14.94 1.00      955      901
-#> cor(z11_Intercept,z11_lag_z1_1_within)           0.05 1.00     1022      750
-#> cor(z11_Intercept,z11_lag_z2_1_within)           0.73 1.00     1007      877
-#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     1.00 1.00      995      755
-#> cor(z21_Intercept,z21_lag_z1_1_within)           1.00 1.00     1004      982
-#> cor(z21_Intercept,z21_lag_z2_1_within)           0.96 1.00      869      833
-#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.87 1.00      931      841
+#> sd(z11_Intercept)                                0.18 1.00      899      969
+#> sd(z11_lag_z1_1_within)                          0.12 1.00      993      972
+#> sd(z11_lag_z2_1_within)                          0.03 1.00     1062      951
+#> sd(sigma_z11_Intercept)                          0.16 1.00     1033      936
+#> sd(z21_Intercept)                                0.18 1.00      856      908
+#> sd(z21_lag_z1_1_within)                          0.05 1.00      821      922
+#> sd(z21_lag_z2_1_within)                          0.11 1.00     1077      793
+#> sd(sigma_z21_Intercept)                          0.15 1.00     1053      818
+#> cor(z11_Intercept,z11_lag_z1_1_within)           0.41 1.00     1102      880
+#> cor(z11_Intercept,z11_lag_z2_1_within)           0.63 1.00      682      715
+#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.96 1.00      954      981
+#> cor(z21_Intercept,z21_lag_z1_1_within)           0.43 1.00      875     1016
+#> cor(z21_Intercept,z21_lag_z2_1_within)           0.03 1.00     1029      815
+#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.20 1.00      836      872
 #> 
 #> Regression Coefficients:
-#>                                        Estimate Est.Error l-95% CI u-95% CI
-#> z11_Intercept                              2.09      2.52    -2.78     7.00
-#> sigma_z11_Intercept                       -0.21      0.95    -2.02     1.67
-#> z21_Intercept                              3.00      6.03    -8.59    15.01
-#> sigma_z21_Intercept                       -0.89      1.65    -4.14     2.39
-#> z11_treatmenttreatment                     0.43      1.00    -1.58     2.47
-#> z11_stress_between                        -0.40      0.71    -1.76     0.96
-#> z11_stress_within                          1.31      0.89    -0.40     3.01
-#> z11_lag_z1_1_within                       -0.90      0.56    -2.02     0.14
-#> z11_lag_z2_1_within                       -1.58      0.73    -3.03    -0.18
-#> z11_treatmenttreatment:lag_z1_1_within    -0.70      0.85    -2.25     1.09
-#> z11_treatmenttreatment:lag_z2_1_within     2.01      0.97     0.09     3.89
-#> sigma_z11_treatmenttreatment              -1.34      0.95    -3.30     0.65
-#> z21_treatmenttreatment                     0.56      0.70    -0.76     1.97
-#> z21_stress_between                        -0.93      2.00    -5.06     2.90
-#> z21_stress_within                          0.84      0.57    -0.24     1.89
-#> z21_lag_z1_1_within                        0.97      1.11    -1.26     3.12
-#> z21_lag_z2_1_within                        1.22      1.21    -1.10     3.62
-#> z21_treatmenttreatment:lag_z1_1_within     0.13      0.67    -1.23     1.41
-#> z21_treatmenttreatment:lag_z2_1_within     0.68      1.10    -1.35     2.95
-#> sigma_z21_treatmenttreatment              -0.12      1.17    -2.39     2.16
-#>                                        Rhat Bulk_ESS Tail_ESS
-#> z11_Intercept                          1.00      898      820
-#> sigma_z11_Intercept                    1.00      916      988
-#> z21_Intercept                          1.00     1077     1020
-#> sigma_z21_Intercept                    1.00      846      978
-#> z11_treatmenttreatment                 1.00      913      896
-#> z11_stress_between                     1.00     1036      842
-#> z11_stress_within                      1.00      985     1026
-#> z11_lag_z1_1_within                    1.00      985      980
-#> z11_lag_z2_1_within                    1.00     1004      826
-#> z11_treatmenttreatment:lag_z1_1_within 1.00      930      983
-#> z11_treatmenttreatment:lag_z2_1_within 1.00      973      865
-#> sigma_z11_treatmenttreatment           1.00      939      799
-#> z21_treatmenttreatment                 1.00      836      937
-#> z21_stress_between                     1.00     1036      981
-#> z21_stress_within                      1.00      948      988
-#> z21_lag_z1_1_within                    1.00      957      864
-#> z21_lag_z2_1_within                    1.00      968      875
-#> z21_treatmenttreatment:lag_z1_1_within 1.00     1122      992
-#> z21_treatmenttreatment:lag_z2_1_within 1.00      922      882
-#> sigma_z21_treatmenttreatment           1.00      917      899
+#>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> z11_Intercept           0.01      0.00     0.01     0.01 1.00     1029      707
+#> sigma_z11_Intercept    -0.91      0.00    -0.91    -0.90 1.00      930      943
+#> z21_Intercept           0.01      0.00     0.00     0.01 1.00     1029     1068
+#> sigma_z21_Intercept    -1.03      0.00    -1.04    -1.02 1.00      909      972
+#> z11_lag_z1_1_within     0.21      0.01     0.19     0.22 1.00     1143      790
+#> z11_lag_z2_1_within     0.00      0.01    -0.01     0.01 1.00      917      900
+#> z21_lag_z1_1_within    -0.02      0.01    -0.03    -0.01 1.00      833      859
+#> z21_lag_z2_1_within     0.20      0.01     0.19     0.21 1.00      910      908
 #> 
 #> Residual Correlations: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> rescor(z11,z21)     0.57      0.48    -0.69     0.99 1.00      960      844
+#> rescor(z11,z21)    -0.02      0.00    -0.02    -0.01 1.00      943      941
 #> 
 #> Draws were sampled using variational(meanfield).
 ```
@@ -1228,8 +1180,6 @@ dynamic_model_term <- function(term) {
   switch(
     term,
     "(Intercept)" = "Intercept",
-    "between(stress)" = "stress_between",
-    "within(stress)" = "stress_within",
     term
   )
 }
@@ -1354,42 +1304,30 @@ kable(dynamic_recovery_table, digits = 3)
 
 |type               |parameter                                     | estimate| lower_95| upper_95| true_value|covered_by_95_ci |
 |:------------------|:---------------------------------------------|--------:|--------:|--------:|----------:|:----------------|
-|fixed effect       |z11_Intercept                                 |    2.092|   -2.785|    6.998|      0.000|TRUE             |
-|fixed effect       |sigma_z11_Intercept                           |   -0.212|   -2.022|    1.674|     -0.916|TRUE             |
-|fixed effect       |z21_Intercept                                 |    3.005|   -8.589|   15.007|      0.000|TRUE             |
-|fixed effect       |sigma_z21_Intercept                           |   -0.886|   -4.142|    2.388|     -1.050|TRUE             |
-|fixed effect       |z11_treatmenttreatment                        |    0.432|   -1.584|    2.469|      0.000|TRUE             |
-|fixed effect       |z11_stress_between                            |   -0.397|   -1.761|    0.965|      0.150|TRUE             |
-|fixed effect       |z11_stress_within                             |    1.306|   -0.402|    3.007|      0.050|TRUE             |
-|fixed effect       |z11_lag_z1_1_within                           |   -0.902|   -2.022|    0.135|      0.250|FALSE            |
-|fixed effect       |z11_lag_z2_1_within                           |   -1.575|   -3.029|   -0.182|      0.020|FALSE            |
-|fixed effect       |z11_treatmenttreatment:lag_z1_1_within        |   -0.695|   -2.252|    1.086|      0.050|TRUE             |
-|fixed effect       |z11_treatmenttreatment:lag_z2_1_within        |    2.006|    0.091|    3.891|      0.000|FALSE            |
-|fixed effect       |sigma_z11_treatmenttreatment                  |   -1.338|   -3.305|    0.647|     -0.799|TRUE             |
-|fixed effect       |z21_treatmenttreatment                        |    0.562|   -0.759|    1.975|      0.000|TRUE             |
-|fixed effect       |z21_stress_between                            |   -0.932|   -5.064|    2.897|     -0.050|TRUE             |
-|fixed effect       |z21_stress_within                             |    0.841|   -0.239|    1.895|      0.030|TRUE             |
-|fixed effect       |z21_lag_z1_1_within                           |    0.970|   -1.262|    3.118|     -0.010|TRUE             |
-|fixed effect       |z21_lag_z2_1_within                           |    1.217|   -1.097|    3.617|      0.200|TRUE             |
-|fixed effect       |z21_treatmenttreatment:lag_z1_1_within        |    0.131|   -1.228|    1.410|      0.000|TRUE             |
-|fixed effect       |z21_treatmenttreatment:lag_z2_1_within        |    0.685|   -1.354|    2.949|      0.030|TRUE             |
-|fixed effect       |sigma_z21_treatmenttreatment                  |   -0.117|   -2.390|    2.158|     -0.916|TRUE             |
-|random variance    |var(z11_Intercept)                            |    0.574|    0.031|    4.282|      0.040|TRUE             |
-|random variance    |var(z11_lag_z1_1_within)                      |    0.627|    0.001|   22.784|      0.014|TRUE             |
-|random variance    |var(z11_lag_z2_1_within)                      |    0.260|    0.019|    1.976|      0.004|FALSE            |
-|random variance    |var(sigma_z11_Intercept)                      |    4.689|    0.124|   47.321|      0.026|FALSE            |
-|random variance    |var(z21_Intercept)                            |    0.750|    0.001|   25.347|      0.032|TRUE             |
-|random variance    |var(z21_lag_z1_1_within)                      |    6.742|    0.055|  132.653|      0.004|FALSE            |
-|random variance    |var(z21_lag_z2_1_within)                      |    0.230|    0.018|    1.598|      0.014|FALSE            |
-|random variance    |var(sigma_z21_Intercept)                      |   24.623|    1.177|  223.318|      0.020|FALSE            |
-|random correlation |cor(z11_lag_z1_1_within, z11_Intercept)       |   -0.817|   -0.998|    0.046|      0.200|FALSE            |
-|random correlation |cor(z11_lag_z2_1_within, z11_Intercept)       |   -0.380|   -0.968|    0.727|      0.000|TRUE             |
+|fixed effect       |z11_Intercept                                 |    0.009|    0.005|    0.013|      0.000|FALSE            |
+|fixed effect       |sigma_z11_Intercept                           |   -0.907|   -0.913|   -0.902|     -0.916|FALSE            |
+|fixed effect       |z21_Intercept                                 |    0.006|    0.001|    0.012|      0.000|FALSE            |
+|fixed effect       |sigma_z21_Intercept                           |   -1.028|   -1.036|   -1.019|     -1.050|FALSE            |
+|fixed effect       |z11_lag_z1_1_within                           |    0.205|    0.194|    0.217|      0.250|FALSE            |
+|fixed effect       |z11_lag_z2_1_within                           |    0.001|   -0.011|    0.014|      0.020|FALSE            |
+|fixed effect       |z21_lag_z1_1_within                           |   -0.017|   -0.027|   -0.007|     -0.010|TRUE             |
+|fixed effect       |z21_lag_z2_1_within                           |    0.201|    0.190|    0.212|      0.200|TRUE             |
+|random variance    |var(z11_Intercept)                            |    0.032|    0.031|    0.034|      0.040|FALSE            |
+|random variance    |var(z11_lag_z1_1_within)                      |    0.013|    0.011|    0.015|      0.014|TRUE             |
+|random variance    |var(z11_lag_z2_1_within)                      |    0.000|    0.000|    0.001|      0.004|FALSE            |
+|random variance    |var(sigma_z11_Intercept)                      |    0.023|    0.021|    0.025|      0.026|FALSE            |
+|random variance    |var(z21_Intercept)                            |    0.032|    0.031|    0.033|      0.032|TRUE             |
+|random variance    |var(z21_lag_z1_1_within)                      |    0.002|    0.001|    0.002|      0.004|FALSE            |
+|random variance    |var(z21_lag_z2_1_within)                      |    0.011|    0.009|    0.013|      0.014|FALSE            |
+|random variance    |var(sigma_z21_Intercept)                      |    0.020|    0.018|    0.022|      0.020|TRUE             |
+|random correlation |cor(z11_lag_z1_1_within, z11_Intercept)       |    0.314|    0.209|    0.410|      0.200|FALSE            |
+|random correlation |cor(z11_lag_z2_1_within, z11_Intercept)       |    0.151|   -0.402|    0.632|      0.000|TRUE             |
 |random correlation |cor(sigma_z11_Intercept, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(z21_Intercept, z11_Intercept)             |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(z21_lag_z1_1_within, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(z21_lag_z2_1_within, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(sigma_z21_Intercept, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
-|random correlation |cor(z11_lag_z2_1_within, z11_lag_z1_1_within) |    0.514|   -0.599|    0.997|      0.150|TRUE             |
+|random correlation |cor(z11_lag_z2_1_within, z11_lag_z1_1_within) |    0.690|    0.016|    0.955|      0.150|TRUE             |
 |random correlation |cor(sigma_z11_Intercept, z11_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(z21_Intercept, z11_lag_z1_1_within)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(z21_lag_z1_1_within, z11_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
@@ -1404,10 +1342,10 @@ kable(dynamic_recovery_table, digits = 3)
 |random correlation |cor(z21_lag_z1_1_within, sigma_z11_Intercept) |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(z21_lag_z2_1_within, sigma_z11_Intercept) |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(sigma_z21_Intercept, sigma_z11_Intercept) |    0.000|    0.000|    0.000|      0.000|TRUE             |
-|random correlation |cor(z21_lag_z1_1_within, z21_Intercept)       |    0.548|   -0.824|    0.996|      0.200|TRUE             |
-|random correlation |cor(z21_lag_z2_1_within, z21_Intercept)       |    0.191|   -0.890|    0.955|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z1_1_within, z21_Intercept)       |    0.218|   -0.014|    0.433|      0.200|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z21_Intercept)       |   -0.078|   -0.184|    0.031|      0.000|TRUE             |
 |random correlation |cor(sigma_z21_Intercept, z21_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
-|random correlation |cor(z21_lag_z2_1_within, z21_lag_z1_1_within) |   -0.151|   -0.975|    0.874|      0.150|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z21_lag_z1_1_within) |    0.086|   -0.022|    0.197|      0.150|TRUE             |
 |random correlation |cor(sigma_z21_Intercept, z21_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
 |random correlation |cor(sigma_z21_Intercept, z21_lag_z2_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
 
