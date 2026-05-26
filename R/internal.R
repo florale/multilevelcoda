@@ -8,7 +8,8 @@ utils::globalVariables(c("i",  "..cols", ".", "To", "t", "head",  "fitted",
                          "est", "lower", "upper", "JI", "N", "K", "D", "Stat", "Estimates", "MCSE",
                          "sigma", "OnTarget",
                          "multisession", "sequential",
-                         "%->%", "%<-%", ".wgt.", "Estimate", "ida", "minutes", "wgt_at"
+                         "%->%", "%<-%", ".wgt.", "Estimate", "ida", "minutes", "wgt_at",
+                         "generator"
 ))
 
 #' expand grid data frame

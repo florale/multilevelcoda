@@ -17,7 +17,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r}
+#| label: global-options
+#| include: false
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -28,10 +31,13 @@ knitr::opts_chunk$set(
 
 **NOTE THIS IS EXPERIMENTAL FOR NOW**
 
-```{r setup}
+```{r}
+#| label: setup
+
 library(multilevelcoda)
 library(knitr)
 library(data.table)
+library(cmdstanr)
 
 options(digits = 3, pillar.sigfig = 3)
 ```
@@ -91,6 +97,7 @@ Current predictor generators are listed below.
 | `gen_gamma()` | Positive continuous variables with optional location-scale multilevel support. |
 | `gen_beta()` | Bounded (0, 1) continuous variables with optional location-scale support. |
 | `gen_custom()` | User-supplied generators that receive the active simulation context. |
+| `gen_outcome()` | Gaussian, dynamic VAR(1), and ILR compositional outcomes generated from prior predictors. |
 
 ## Advanced simulation options
 
@@ -105,13 +112,17 @@ predictor generators.
 | `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
 | `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
 | `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
+| `between()`, `within()`, `ar1()` | Build dynamic outcome models from labelled predictor components and residual VAR(1) dynamics. |
 
 # Study Designs and Indexing
 
 Here is a simple single level example.
 Each variable in this first example is generated independently of the others.
 
-```{r, results = "asis"}
+```{r}
+#| label: single-level-data
+#| results: asis
+
 single <- simulate_data(
   n = 20,
   seed = 2026,
@@ -127,6 +138,8 @@ kable(single$data)
 ```
 
 ```{r}
+#| label: print-single-simulation
+
 single
 ```
 
@@ -134,6 +147,8 @@ The `mlsim_data` print method gives a compact console overview. Use `summary()`
 when you want design and generator metadata as `data.table` objects.
 
 ```{r}
+#| label: summarize-single-simulation
+
 summary(single)$design
 summary(single)$generators
 ```
@@ -142,7 +157,10 @@ We can generate multilevel structures as well.
 A single scalar `n_per_group` creates a balanced grouped design with the 
 exact same number of observations per group.
 
-```{r, results = "asis"}
+```{r}
+#| label: balanced-grouped-design
+#| results: asis
+
 balanced <- simulate_data(
   n_groups = 3,
   n_per_group = 4,
@@ -165,7 +183,10 @@ other generator families when level = "multilevel".
 We can generator a level 2 variable as well, which is constant within groups
 but varies between groups.
 
-```{r, results = "asis"}
+```{r}
+#| label: balanced-multilevel-design
+#| results: asis
+
 balanced2 <- simulate_data(
   n_groups = 3,
   n_per_group = 4,
@@ -183,7 +204,10 @@ kable(balanced2$data)
 
 Vectors specs create unbalanced designs.
 
-```{r, results = "asis"}
+```{r}
+#| label: unbalanced-vector-design
+#| results: asis
+
 unbalanced <- simulate_data(
   n_groups = 4,
   n_per_group = c(3, 5, 4, 2),
@@ -199,6 +223,8 @@ kable(unbalanced$data)
 ```
 
 ```{r}
+#| label: sampled-group-sizes
+
 drawn_sizes <- simulate_data(
   n_groups = 5,
   n_per_group = list(
@@ -225,6 +251,8 @@ Add a time index may not matter, but it can be used for
 creating lags, etc.
 
 ```{r}
+#| label: longitudinal-dated-design
+
 dated <- simulate_data(
   n_groups = 3,
   n_per_group = c(5, 3, 4),
@@ -247,6 +275,8 @@ The `level` argument controls whether values vary by row, by group, or by row
 with group-specific random effects.
 
 ```{r}
+#| label: predictor-levels-demo
+
 levels_demo <- simulate_data(
   n_groups = 4,
   n_per_group = 4,
@@ -273,7 +303,10 @@ All predictor generator levels use fixed location or link-scale intercepts.
 Multilevel forms add random covariance terms.
 Here is a quick demonstration of various distribution families with single level data.
 
-```{r, results = "asis"}
+```{r}
+#| label: distribution-families
+#| results: asis
+
 families <- simulate_data(
   n = 10,
   seed = 2026,
@@ -294,6 +327,8 @@ kable(families$data)
 Here is an example of a multilevel count generator.
 
 ```{r}
+#| label: multilevel-counts
+
 link_scale_counts <- simulate_data(
   n_groups = 3,
   n_per_group = 5,
@@ -316,7 +351,10 @@ link_scale_counts
 `gen_categorical()` supports binary variables, labeled categories, ordered
 factors, character output, and integer codes.
 
-```{r, results = "asis"}
+```{r}
+#| label: categorical-generators
+#| results: asis
+
 categorical <- simulate_data(
   n = 12,
   seed = 2026,
@@ -347,6 +385,8 @@ The random intercepts can have their own variances and covariances. A full rando
 covariance matrix must be specified. Use 0s on the off diagonal for uncorrelated random intercepts.
 
 ```{r}
+#| label: multilevel-categorical
+
 categorical_ml <- simulate_data(
   n_groups = 4,
   n_per_group = 4,
@@ -372,7 +412,10 @@ kable(categorical_ml$data)
 columns are interpreted as ILR coordinates and back-transformed into parts.
 Here we are back to single level data.
 
-```{r, results = "asis"}
+```{r}
+#| label: correlated-composition
+#| results: asis
+
 correlated_comp <- simulate_data(
   n = 8,
   seed = 2026,
@@ -398,13 +441,18 @@ kable(correlated_comp$data)
 ```
 
 ```{r}
+#| label: composition-metadata
+
 correlated_comp$generator_metadata$time_use$sbp
 correlated_comp$generator_metadata$time_use$ilr_coordinate_map
 ```
 
 Use `keep_ilr = FALSE` when you only want the original parts in the output.
 
-```{r, results = "asis"}
+```{r}
+#| label: parts-only-composition
+#| results: asis
+
 parts_only <- simulate_data(
   n = 5,
   seed = 2026,
@@ -424,6 +472,7 @@ parts_only <- simulate_data(
 kable(parts_only$data)
 ```
 
+
 # Location-Scale Predictors
 
 For multilevel predictors, `scale_fixed_intercept` adds group-varying scale
@@ -433,7 +482,10 @@ binomial, gamma, and beta generators it controls size, shape, and precision.
 Here you can see in the metadata the group specific parameters 
 that were generated.
 
-```{r, results = "asis"}
+```{r}
+#| label: location-scale-predictors
+#| results: asis
+
 location_scale <- simulate_data(
   n_groups = 4,
   n_per_group = 5,
@@ -480,6 +532,8 @@ previously generated variables, and any extra arguments supplied to
 same was as built in generators.
 
 ```{r}
+#| label: custom-generators
+
 pilot_sampler <- function(context, vars, level, pilot_values) {
   values <- sample(pilot_values, context$n_rows, replace = TRUE)
 
@@ -519,4 +573,313 @@ custom <- simulate_data(
 )
 
 kable(custom$data)
+```
+
+# Dynamic Outcome Simulation
+
+`gen_outcome()` adds a model-based outcome generator to the same
+`simulate_data()` workflow. It is designed for simulation studies where
+outcomes are generated from a known location, scale, and optional residual
+autoregressive process.
+
+The scale model is required. Use `scale = sigma ~ 1` for constant conditional
+standard deviations. When `ar1()` is present, the scale model controls
+innovation variability. When `ar1()` is absent, it controls ordinary residual
+variability. The AR process is applied to residual ILR states, not to lagged
+observed outcomes.
+
+`gen_template()` can be used first to ask the simulator for the exact parameter
+matrices and arrays required by a `gen_outcome()` specification. The template
+should be run with the same design, formulas, and composition settings that
+will be used in the final simulation.
+
+```{r}
+#| label: dynamic-outcome-setup
+
+dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ ar1() + (1 + ar1() | ID)
+dynamic_scale_formula <- sigma ~ 1 + (1 | ID)
+dynamic_composition <- list(parts = c("sleep", "sedentary", "activity"), total = 24)
+
+dynamic_template <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "ID",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    outcome_template = gen_template(
+      dynamic_outcome_formula,
+      scale = dynamic_scale_formula,
+      composition = dynamic_composition,
+      burnin = 20
+    )
+  )
+)
+
+dynamic_params <- dynamic_template$generator_metadata$outcome_template$params
+dynamic_params$location$beta["(Intercept)", ] <- c(0, 0)
+dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.4, 0.35))
+dynamic_params$ar$beta["ar1()", , ] <- matrix(c(0.25, 0.02, -0.01, 0.20), 2, 2, byrow = TRUE)
+
+dynamic_random_names <- rownames(dynamic_params$random$ID$covariance)
+dynamic_random_sd_values <- c(
+  "location|outcome=ilr1|term=(Intercept)" = 0.20,
+  "location|outcome=ilr2|term=(Intercept)" = 0.18,
+  "ar|term=ar1()|to=ilr1|from=ilr1" = 0.12,
+  "ar|term=ar1()|to=ilr1|from=ilr2" = 0.06,
+  "ar|term=ar1()|to=ilr2|from=ilr1" = 0.06,
+  "ar|term=ar1()|to=ilr2|from=ilr2" = 0.12,
+  "scale|outcome=ilr1|term=(Intercept)" = 0.16,
+  "scale|outcome=ilr2|term=(Intercept)" = 0.14
+)
+dynamic_random_sd <- dynamic_random_sd_values[dynamic_random_names]
+
+dynamic_random_cor <- diag(length(dynamic_random_names))
+dimnames(dynamic_random_cor) <- list(dynamic_random_names, dynamic_random_names)
+set_dynamic_random_cor <- function(x, y, value) {
+  dynamic_random_cor[x, y] <<- value
+  dynamic_random_cor[y, x] <<- value
+}
+set_dynamic_random_cor(
+  "location|outcome=ilr1|term=(Intercept)",
+  "ar|term=ar1()|to=ilr1|from=ilr1",
+  0.20
+)
+set_dynamic_random_cor(
+  "ar|term=ar1()|to=ilr1|from=ilr1",
+  "ar|term=ar1()|to=ilr1|from=ilr2",
+  0.15
+)
+set_dynamic_random_cor(
+  "location|outcome=ilr2|term=(Intercept)",
+  "ar|term=ar1()|to=ilr2|from=ilr1",
+  0.20
+)
+set_dynamic_random_cor(
+  "ar|term=ar1()|to=ilr2|from=ilr1",
+  "ar|term=ar1()|to=ilr2|from=ilr2",
+  0.15
+)
+
+if (anyNA(dynamic_random_sd) ||
+    min(eigen(dynamic_random_cor, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+  stop("The dynamic outcome random-effect covariance is not valid.")
+}
+
+dynamic_params$random$ID$covariance <- diag(dynamic_random_sd) %*%
+  dynamic_random_cor %*%
+  diag(dynamic_random_sd)
+dimnames(dynamic_params$random$ID$covariance) <- list(dynamic_random_names, dynamic_random_names)
+```
+
+```{r}
+#| label: dynamic-outcome-simulation
+#| results: asis
+
+dynamic_comp <- simulate_data(
+  n_groups = 400,
+  n_per_group = 100,
+  group_id = "ID",
+  time_id = "day",
+  seed = 2026,
+  generators = list(
+    outcome = gen_outcome(
+      dynamic_outcome_formula,
+      scale = dynamic_scale_formula,
+      params = dynamic_params,
+      composition = dynamic_composition,
+      burnin = 50
+    )
+  )
+)
+
+kable(head(dynamic_comp$data[, c("ID", "day", "ilr1", "ilr2", "sleep", "sedentary", "activity"), with = FALSE]))
+```
+
+```{r}
+#| label: dynamic-outcome-diagnostics
+
+dynamic_template$generator_metadata$outcome_template$expected_parameter_names
+
+dynamic_comp$generator_metadata$outcome$expected_parameter_names
+
+dynamic_comp$generator_metadata$outcome$ar$stability$max_spectral_radius_overall
+
+table(rowSums(as.matrix(dynamic_comp$data[, c("sleep", "sedentary", "activity"), with = FALSE])))
+```
+
+The generated data can be managed into an analysis data set and passed to
+`brmcoda()`. `prep_sim_analysis()` rebuilds a `complr` object using the same SBP
+basis as the simulator and translates `ar1()` into within-person centered lagged
+ILR predictors. The fitted model includes random level terms, random inertia
+terms through lagged ILR slopes, and random conditional variability through
+response-specific `sigma` models.
+
+```{r}
+#| label: dynamic-analysis-prep
+
+dynamic_analysis <- prep_sim_analysis(dynamic_comp)
+dynamic_analysis$metadata$lag_columns
+dynamic_analysis$formula
+```
+
+```{r}
+#| label: dynamic-fit
+#| results: hide
+#| message: false
+#| warning: false
+
+dynamic_fit <- brmcoda(
+  complr = dynamic_analysis$complr,
+  formula = dynamic_analysis$formula,
+  backend = "cmdstanr",
+  seed = 2026,
+  algorithm = "meanfield", 
+  iter = 2000
+)
+
+```
+
+```{r}
+#| label: dynamic-fit-summary
+
+summary(dynamic_fit)
+```
+
+
+```{r}
+#| label: dynamic-recovery-table
+
+dynamic_response_map <- dynamic_analysis$metadata$response_map
+dynamic_response_prefix <- setNames(
+  gsub("_", "", unname(dynamic_response_map), fixed = TRUE),
+  names(dynamic_response_map)
+)
+dynamic_lag_columns <- setNames(
+  dynamic_analysis$metadata$lag_columns,
+  names(dynamic_response_map)
+)
+
+dynamic_model_term <- function(term) {
+  switch(
+    term,
+    "(Intercept)" = "Intercept",
+    term
+  )
+}
+
+dynamic_fixed_truth <- numeric()
+for (outcome in names(dynamic_response_map)) {
+  response_prefix <- dynamic_response_prefix[[outcome]]
+
+  for (term in rownames(dynamic_params$location$beta)) {
+    dynamic_fixed_truth[paste(response_prefix, dynamic_model_term(term), sep = "_")] <-
+      dynamic_params$location$beta[term, outcome]
+  }
+  for (term in rownames(dynamic_params$scale$beta)) {
+    dynamic_fixed_truth[paste("sigma", response_prefix, dynamic_model_term(term), sep = "_")] <-
+      dynamic_params$scale$beta[term, outcome]
+  }
+}
+for (ar_term in dimnames(dynamic_params$ar$beta)[[1]]) {
+  ar_interaction <- base::sub(":?ar1\\(\\)", "", ar_term)
+  for (to in names(dynamic_response_map)) {
+    for (from in names(dynamic_response_map)) {
+      lag_term <- dynamic_lag_columns[[from]]
+      model_term <- if (nzchar(ar_interaction)) {
+        paste(ar_interaction, lag_term, sep = ":")
+      } else {
+        lag_term
+      }
+      dynamic_fixed_truth[paste(dynamic_response_prefix[[to]], model_term, sep = "_")] <-
+        dynamic_params$ar$beta[ar_term, to, from]
+    }
+  }
+}
+
+dynamic_fixed_summary <- as.data.table(fixef(dynamic_fit), keep.rownames = "parameter")
+dynamic_fixed_recovery <- dynamic_fixed_summary[, .(
+  type = "fixed effect",
+  parameter = parameter,
+  estimate = Estimate,
+  lower_95 = Q2.5,
+  upper_95 = Q97.5,
+  true_value = dynamic_fixed_truth[parameter]
+)]
+
+dynamic_random_model_name <- function(parameter) {
+  if (startsWith(parameter, "location|")) {
+    outcome <- base::sub("^location\\|outcome=([^|]+)\\|term=.*$", "\\1", parameter)
+    term <- base::sub("^location\\|outcome=[^|]+\\|term=(.*)$", "\\1", parameter)
+    return(paste(dynamic_response_prefix[[outcome]], dynamic_model_term(term), sep = "_"))
+  }
+  if (startsWith(parameter, "scale|")) {
+    outcome <- base::sub("^scale\\|outcome=([^|]+)\\|term=.*$", "\\1", parameter)
+    term <- base::sub("^scale\\|outcome=[^|]+\\|term=(.*)$", "\\1", parameter)
+    return(paste("sigma", dynamic_response_prefix[[outcome]], dynamic_model_term(term), sep = "_"))
+  }
+  if (startsWith(parameter, "ar|")) {
+    to <- base::sub("^ar\\|term=[^|]+\\|to=([^|]+)\\|from=([^|]+)$", "\\1", parameter)
+    from <- base::sub("^ar\\|term=[^|]+\\|to=([^|]+)\\|from=([^|]+)$", "\\2", parameter)
+    return(paste(dynamic_response_prefix[[to]], dynamic_lag_columns[[from]], sep = "_"))
+  }
+  stop(sprintf("Unknown random-effect parameter: %s", parameter))
+}
+
+dynamic_random_cov_truth <- dynamic_params$random$ID$covariance
+dynamic_random_model_names <- vapply(
+  rownames(dynamic_random_cov_truth),
+  dynamic_random_model_name,
+  character(1)
+)
+dimnames(dynamic_random_cov_truth) <- list(dynamic_random_model_names, dynamic_random_model_names)
+dynamic_random_cor_truth <- cov2cor(dynamic_random_cov_truth)
+
+dynamic_varcorr_id <- VarCorr(dynamic_fit)$ID
+dynamic_random_sd_summary <- as.data.table(dynamic_varcorr_id$sd, keep.rownames = "parameter")
+dynamic_random_sd_summary[, random_effect := parameter]
+dynamic_random_variance_recovery <- dynamic_random_sd_summary[, .(
+  type = "random variance",
+  parameter = paste0("var(", random_effect, ")"),
+  estimate = Estimate^2,
+  lower_95 = Q2.5^2,
+  upper_95 = Q97.5^2,
+  true_value = diag(dynamic_random_cov_truth)[random_effect]
+)]
+
+dynamic_random_correlation_recovery <- data.table()
+if (!is.null(dynamic_varcorr_id$cor)) {
+  dynamic_cor_summary <- dynamic_varcorr_id$cor
+  dynamic_cor_names <- dimnames(dynamic_cor_summary)[[1]]
+  dynamic_cor_pairs <- which(
+    lower.tri(matrix(FALSE, length(dynamic_cor_names), length(dynamic_cor_names))),
+    arr.ind = TRUE
+  )
+  dynamic_random_correlation_recovery <- rbindlist(lapply(seq_len(nrow(dynamic_cor_pairs)), function(i) {
+    row <- dynamic_cor_pairs[i, "row"]
+    col <- dynamic_cor_pairs[i, "col"]
+    summary <- dynamic_cor_summary[row, , col]
+    data.table(
+      type = "random correlation",
+      parameter = sprintf("cor(%s, %s)", dynamic_cor_names[row], dynamic_cor_names[col]),
+      estimate = summary[["Estimate"]],
+      lower_95 = summary[["Q2.5"]],
+      upper_95 = summary[["Q97.5"]],
+      true_value = dynamic_random_cor_truth[dynamic_cor_names[row], dynamic_cor_names[col]]
+    )
+  }))
+}
+
+dynamic_recovery_table <- rbindlist(list(
+  dynamic_fixed_recovery,
+  dynamic_random_variance_recovery,
+  dynamic_random_correlation_recovery
+), use.names = TRUE)
+dynamic_recovery_table[, covered_by_95_ci := true_value >= lower_95 & true_value <= upper_95]
+
+if (anyNA(dynamic_recovery_table$true_value)) {
+  stop("Some fitted parameters could not be matched to simulation truth.")
+}
+
+kable(dynamic_recovery_table, digits = 3)
 ```

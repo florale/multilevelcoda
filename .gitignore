@@ -5,6 +5,7 @@ desktop.ini
 .Rhistory
 R/.Rhistory
 .RData
+.Renviron
 *.Rprof.out
 *.Rproj
 *~

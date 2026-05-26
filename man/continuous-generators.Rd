@@ -65,6 +65,8 @@ Other predictor generators:
 \code{\link{count-generators}},
 \code{\link[=gen_categorical]{gen_categorical()}},
 \code{\link[=gen_custom]{gen_custom()}},
-\code{\link[=gen_mvn]{gen_mvn()}}
+\code{\link[=gen_mvn]{gen_mvn()}},
+\code{\link[=gen_outcome]{gen_outcome()}},
+\code{\link[=gen_template]{gen_template()}}
 }
 \concept{predictor generators}

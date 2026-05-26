@@ -147,6 +147,30 @@ test_that("univariate MVN level2 output is constant within group", {
   expect_identical(sim$generator_metadata$x$distribution, "mvn")
 })
 
+test_that("MVN generators record column roles at single and level2 designs", {
+  single <- simulate_data(
+    n = 3,
+    seed = 200,
+    generators = list(x = gen_mvn("x", fixed_intercept = 1, residual_cov = 0))
+  )
+  level2 <- simulate_data(
+    n_groups = 3,
+    n_per_group = c(1, 2, 3),
+    seed = 201,
+    generators = list(x = gen_mvn("x", level = "level2", fixed_intercept = 2, residual_cov = 0))
+  )
+
+  expect_equal(
+    as.data.frame(single$generator_metadata$x$column_roles),
+    data.frame(column = "x", variable = "x", component = "observed", level = "row")
+  )
+  expect_equal(
+    as.data.frame(level2$generator_metadata$x$column_roles),
+    data.frame(column = "x", variable = "x", component = "between", level = "group")
+  )
+  expect_group_constant(level2$data, "x")
+})
+
 test_that("univariate MVN rejects removed normal variance aliases", {
   expect_error(gen_mvn("x", sd = 1), "unused argument")
   expect_error(
@@ -363,5 +387,78 @@ test_that("internal random column names cannot collide with existing columns", {
       )
     ),
     "would overwrite existing columns"
+  )
+})
+
+test_that("custom generator column roles are validated and preserved", {
+  custom_with_roles <- function(context, vars, level) {
+    list(
+      data = data.frame(x = seq_len(context$n_rows)),
+      names = vars,
+      metadata = list(
+        column_roles = data.frame(
+          column = vars,
+          variable = vars,
+          component = "observed",
+          level = "row"
+        )
+      )
+    )
+  }
+
+  sim <- simulate_data(
+    n = 3,
+    generators = list(x = gen_custom("x", custom_with_roles))
+  )
+
+  expect_equal(
+    as.data.frame(sim$generator_metadata$x$column_roles),
+    data.frame(column = "x", variable = "x", component = "observed", level = "row")
+  )
+
+  expect_error(
+    simulate_data(
+      n = 3,
+      generators = list(
+        x = gen_custom("x", function(context, vars, level) {
+          list(
+            data = data.frame(x = seq_len(context$n_rows)),
+            names = vars,
+            metadata = list(
+              column_roles = data.frame(
+                column = "missing",
+                variable = vars,
+                component = "observed",
+                level = "row"
+              )
+            )
+          )
+        })
+      )
+    ),
+    "must refer to generated columns"
+  )
+
+  expect_error(
+    simulate_data(
+      n = 3,
+      generators = list(
+        x = gen_custom("x", function(context, vars, level) {
+          list(
+            data = data.frame(x = seq_len(context$n_rows)),
+            names = vars,
+            metadata = list(
+              column_roles = data.frame(
+                column = c(vars, vars),
+                variable = c(vars, vars),
+                component = c("observed", "observed"),
+                level = c("row", "row")
+              )
+            )
+          )
+        })
+      )
+    ),
+    "duplicate variable/component"
   )
 })

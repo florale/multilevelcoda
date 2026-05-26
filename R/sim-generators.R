@@ -247,6 +247,14 @@ NULL
         }
 
         values <- lp$eta + residual
+        between_values <- NULL
+        within_values <- NULL
+        if (identical(level, "multilevel") && !isTRUE(compositional)) {
+          between_values <- lp$eta
+          within_values <- residual
+          colnames(between_values) <- paste0(vars, "_between")
+          colnames(within_values) <- paste0(vars, "_within")
+        }
         if (identical(level, "level2")) {
           values <- values[context$group_index, , drop = FALSE]
         }
@@ -293,6 +301,29 @@ NULL
           metadata$vars <- colnames(out_values)
         } else {
           metadata$compositional <- FALSE
+          if (!is.null(between_values)) {
+            out_values <- cbind(out_values, between_values, within_values)
+            metadata$column_roles <- .mlsim_column_roles(
+              column = c(vars, colnames(between_values), colnames(within_values)),
+              variable = rep(vars, times = 3L),
+              component = rep(c("observed", "between", "within"), each = length(vars)),
+              level = rep(c("row", "group", "row"), each = length(vars))
+            )
+          } else if (identical(level, "level2")) {
+            metadata$column_roles <- .mlsim_column_roles(
+              column = vars,
+              variable = vars,
+              component = rep("between", length(vars)),
+              level = rep("group", length(vars))
+            )
+          } else {
+            metadata$column_roles <- .mlsim_column_roles(
+              column = vars,
+              variable = vars,
+              component = rep("observed", length(vars)),
+              level = rep("row", length(vars))
+            )
+          }
         }
 
         .mlsim_result(out_values, colnames(out_values), metadata, internal = lp$internal)

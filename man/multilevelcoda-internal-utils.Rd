@@ -65,6 +65,9 @@
 \alias{.mlsim_validate_scale_multilevel_args}
 \alias{.mlsim_mean_from_eta}
 \alias{.mlsim_parameter_metadata}
+\alias{.mlsim_column_roles}
+\alias{.mlsim_validate_column_roles}
+\alias{.mlsim_collect_column_roles}
 \alias{.mlsim_resolve_size}
 \alias{.mlsim_result}
 \alias{.mlsim_custom_result}
@@ -235,6 +238,12 @@
 .mlsim_mean_from_eta(type, eta)
 
 .mlsim_parameter_metadata(level, context, ...)
+
+.mlsim_column_roles(column, variable, component, level = "row")
+
+.mlsim_validate_column_roles(roles, available_columns, arg = "column_roles")
+
+.mlsim_collect_column_roles(generator_metadata, data = NULL)
 
 .mlsim_resolve_size(size, n, context)
 

@@ -1,0 +1,1414 @@
+---
+title: "Data Simulation"
+output: 
+  html_document:
+    theme: spacelab
+    highlight: kate
+    toc: yes
+    toc_float: yes
+    collapsed: no
+    smooth_scroll: no
+    toc_depth: 4
+    fig_caption: yes
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Data Simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+**NOTE THIS IS EXPERIMENTAL FOR NOW**
+
+
+``` r
+library(multilevelcoda)
+library(knitr)
+library(data.table)
+library(cmdstanr)
+
+options(digits = 3, pillar.sigfig = 3)
+```
+
+Data simulation is useful for multiple purposes, such as:
+
+- Power analysis and sample size planning.
+- Method development and testing.
+- Generating synthetic data to test models, write code before data collection finishes, etc.
+
+Simulating data, especially if multilevel and/or compositional, can be complex.
+The `simulate_data()` function is designed to support these efforts.
+
+Broadly, `simulate_data()` builds an indexed design, runs named generators in order, and
+returns an `mlsim_data` object with four main pieces:
+
+- `data`: the generated `data.table`.
+- `metadata`: design metadata such as group sizes, time indexing, and generator
+  order.
+- `generator_specs`: the generator settings
+- `generator_metadata`: e.g., parameters, random effects, covariance
+  matrices, helper columns.
+
+# Summary Tables
+
+These tables give a high level summary of current features.
+
+## Design options
+
+Design options cover the highest level structure.
+
+| Option | Use |
+|---|---|
+| `n` | Total rows for a single-level design, or total rows to divide across groups. |
+| `n_groups` | Number of groups in a grouped or multilevel design. |
+| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list. |
+| `group_id` | Name of the grouping column. |
+| `obs_id` | Name of the within-design observation index. |
+| `time_id` | Optional time column name. |
+| `time_values` | Optional time vector or function, including Date/POSIXct values. |
+| `time_truncate` | Whether shared time values are truncated for shorter groups. |
+| `seed` | Reproducible simulation seed that restores the caller RNG state. |
+
+## Generator families
+
+Generators are used to add simulated data columns. They are independent of each other.
+
+Current predictor generators are listed below.
+
+| Generator | Role |
+|---|---|
+| `gen_mvn()` | Univariate and multivariate Gaussian predictors, including ILR compositional back-transforms. |
+| `gen_categorical()` | Binary, unordered categorical, and ordered categorical variables. |
+| `gen_binomial()` | Binomial counts with logit-scale multilevel support. |
+| `gen_poisson()` | Poisson counts with log-scale multilevel support. |
+| `gen_negbin()` | Negative-binomial counts with optional location-scale multilevel support. |
+| `gen_gamma()` | Positive continuous variables with optional location-scale multilevel support. |
+| `gen_beta()` | Bounded (0, 1) continuous variables with optional location-scale support. |
+| `gen_custom()` | User-supplied generators that receive the active simulation context. |
+| `gen_outcome()` | Gaussian, dynamic VAR(1), and ILR compositional outcomes generated from prior predictors. |
+
+## Advanced simulation options
+
+These are a sampling of more advanced simulation features and apply to 
+predictor generators.
+
+| Feature | Use |
+|---|---|
+| `level` | Choose row-level, group-level, or multilevel generation. |
+| `fixed_intercept` | Set the fixed location or link-scale intercept in any predictor generator. |
+| `random_cov` | Add group-specific random intercepts, and sometimes scale random effects. |
+| `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
+| `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
+| `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
+| `between()`, `within()`, `ar1()` | Build dynamic outcome models from labelled predictor components and residual VAR(1) dynamics. |
+
+# Study Designs and Indexing
+
+Here is a simple single level example.
+Each variable in this first example is generated independently of the others.
+
+
+``` r
+single <- simulate_data(
+  n = 20,
+  seed = 2026,
+  generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
+    edu = gen_categorical("edu", categories = c("< Bachelor", "Bachelor", "> Bachelor"),
+      fixed_intercept = c("Bachelor" = 0, "> Bachelor" = log(4 / 3))),
+    tx = gen_categorical("tx", categories = c("control", "treatment"), fixed_intercept = stats::qlogis(.5))
+  )
+)
+
+kable(single$data)
+```
+
+
+
+| obs_id|      x|edu        |tx        |
+|------:|------:|:----------|:---------|
+|      1|  0.521|Bachelor   |control   |
+|      2| -1.080|> Bachelor |treatment |
+|      3|  0.139|Bachelor   |treatment |
+|      4| -0.085|Bachelor   |control   |
+|      5| -0.667|< Bachelor |control   |
+|      6| -2.516|< Bachelor |control   |
+|      7| -0.735|> Bachelor |treatment |
+|      8| -1.020|< Bachelor |control   |
+|      9|  0.114|Bachelor   |treatment |
+|     10| -0.474|< Bachelor |treatment |
+|     11| -0.408|> Bachelor |treatment |
+|     12| -0.730|> Bachelor |control   |
+|     13| -0.221|> Bachelor |treatment |
+|     14| -0.226|> Bachelor |treatment |
+|     15| -2.547|Bachelor   |control   |
+|     16|  1.347|> Bachelor |treatment |
+|     17|  0.616|> Bachelor |treatment |
+|     18|  0.218|< Bachelor |treatment |
+|     19| -0.805|> Bachelor |control   |
+|     20|  0.690|< Bachelor |treatment |
+
+
+
+
+``` r
+single
+#> <mlsim_data>
+#>   rows: 20
+#>   columns: 4 (generated: 3)
+#>   seed: 2026
+#>   grouping: none
+#>   generators: 3
+#> 
+#> Generators:
+#>  generator distribution  level vars
+#>          x          mvn single    x
+#>        edu  categorical single  edu
+#>         tx  categorical single   tx
+```
+
+The `mlsim_data` print method gives a compact console overview. Use `summary()`
+when you want design and generator metadata as `data.table` objects.
+
+
+``` r
+summary(single)$design
+#>        n n_cols n_generated_cols n_groups group_id group_size_min
+#>    <int>  <int>            <int>    <int>   <char>          <int>
+#> 1:    20      4                3       NA     <NA>             NA
+#>    group_size_median group_size_max obs_id time_id  seed n_generators
+#>                <num>          <int> <char>  <char> <int>        <int>
+#> 1:                NA             NA obs_id    <NA>  2026            3
+summary(single)$generators
+#>    generator distribution  level   vars n_vars parameter_level parameter_count
+#>       <char>       <char> <char> <char>  <int>          <char>           <int>
+#> 1:         x          mvn single      x      1             row              20
+#> 2:       edu  categorical single    edu      1             row              20
+#> 3:        tx  categorical single     tx      1             row              20
+#>    has_row_parameters has_group_parameters has_fixed_parameters has_random_cov
+#>                <lgcl>               <lgcl>               <lgcl>         <lgcl>
+#> 1:               TRUE                FALSE                 TRUE          FALSE
+#> 2:               TRUE                FALSE                 TRUE          FALSE
+#> 3:               TRUE                FALSE                 TRUE          FALSE
+#>    has_random_effects has_residuals has_scale_model has_composition
+#>                <lgcl>        <lgcl>          <lgcl>          <lgcl>
+#> 1:              FALSE          TRUE           FALSE           FALSE
+#> 2:              FALSE         FALSE           FALSE           FALSE
+#> 3:              FALSE         FALSE           FALSE           FALSE
+#>    has_custom_output
+#>               <lgcl>
+#> 1:             FALSE
+#> 2:             FALSE
+#> 3:             FALSE
+```
+
+We can generate multilevel structures as well.
+A single scalar `n_per_group` creates a balanced grouped design with the 
+exact same number of observations per group.
+
+
+``` r
+balanced <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1)
+  )
+)
+
+kable(balanced$data)
+```
+
+
+
+| group_id| obs_id|      x|
+|--------:|------:|------:|
+|        1|      1|  0.521|
+|        1|      2| -1.080|
+|        1|      3|  0.139|
+|        1|      4| -0.085|
+|        2|      1| -0.667|
+|        2|      2| -2.516|
+|        2|      3| -0.735|
+|        2|      4| -1.020|
+|        3|      1|  0.114|
+|        3|      2| -0.474|
+|        3|      3| -0.408|
+|        3|      4| -0.730|
+
+
+
+However, this was still effectively single level, Gaussian data.
+We can improve that. Here we give essentially the parameters of 
+a random intercept only multilevel model, which is used to generate
+matching data. The `fixed_intercept` is the overall mean,
+`random_cov` is the group-level variance, and
+`residual_cov` is the residual variance. The same approach broadly applies to
+other generator families when level = "multilevel".
+We can generator a level 2 variable as well, which is constant within groups
+but varies between groups.
+
+
+``` r
+balanced2 <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
+  )
+)
+
+kable(balanced2$data)
+```
+
+
+
+| group_id| obs_id|      x| x_between| x_within| .mlsim_x_random_intercept|     y|
+|--------:|------:|------:|---------:|--------:|-------------------------:|-----:|
+|        1|      1|  0.512|     0.521|   -0.008|                     0.521| 1.347|
+|        1|      2|  0.454|     0.521|   -0.067|                     0.521| 1.347|
+|        1|      3|  0.269|     0.521|   -0.252|                     0.521| 1.347|
+|        1|      4|  0.447|     0.521|   -0.074|                     0.521| 1.347|
+|        2|      1| -1.182|    -1.080|   -0.102|                    -1.080| 0.616|
+|        2|      2| -1.068|    -1.080|    0.011|                    -1.080| 0.616|
+|        2|      3| -1.127|    -1.080|   -0.047|                    -1.080| 0.616|
+|        2|      4| -1.121|    -1.080|   -0.041|                    -1.080| 0.616|
+|        3|      1|  0.066|     0.139|   -0.073|                     0.139| 0.218|
+|        3|      2|  0.117|     0.139|   -0.022|                     0.139| 0.218|
+|        3|      3|  0.117|     0.139|   -0.023|                     0.139| 0.218|
+|        3|      4| -0.115|     0.139|   -0.255|                     0.139| 0.218|
+
+
+
+
+Vectors specs create unbalanced designs.
+
+
+``` r
+unbalanced <- simulate_data(
+  n_groups = 4,
+  n_per_group = c(3, 5, 4, 2),
+  seed = 2026,
+  generators = list(
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
+  )
+)
+
+kable(unbalanced$data)
+```
+
+
+
+| group_id| obs_id|      x| x_between| x_within| .mlsim_x_random_intercept|      y|
+|--------:|------:|------:|---------:|--------:|-------------------------:|------:|
+|        1|      1|  0.454|     0.521|   -0.067|                     0.521| -0.805|
+|        1|      2|  0.269|     0.521|   -0.252|                     0.521| -0.805|
+|        1|      3|  0.447|     0.521|   -0.074|                     0.521| -0.805|
+|        2|      1| -1.182|    -1.080|   -0.102|                    -1.080|  0.690|
+|        2|      2| -1.068|    -1.080|    0.011|                    -1.080|  0.690|
+|        2|      3| -1.127|    -1.080|   -0.047|                    -1.080|  0.690|
+|        2|      4| -1.121|    -1.080|   -0.041|                    -1.080|  0.690|
+|        2|      5| -1.153|    -1.080|   -0.073|                    -1.080|  0.690|
+|        3|      1|  0.117|     0.139|   -0.022|                     0.139| -0.329|
+|        3|      2|  0.117|     0.139|   -0.023|                     0.139| -0.329|
+|        3|      3| -0.115|     0.139|   -0.255|                     0.139| -0.329|
+|        3|      4|  0.274|     0.139|    0.135|                     0.139| -0.329|
+|        4|      1| -0.023|    -0.085|    0.062|                    -0.085| -0.165|
+|        4|      2| -0.063|    -0.085|    0.022|                    -0.085| -0.165|
+
+
+
+
+``` r
+drawn_sizes <- simulate_data(
+  n_groups = 5,
+  n_per_group = list(
+    distribution = "poisson",
+    lambda = 4,
+    minimum = 2,
+    maximum = 6
+  ),
+  seed = 2026,
+  generators = list(
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
+  )
+)
+
+kable(drawn_sizes$data)
+```
+
+
+
+| group_id| obs_id|      x| x_between| x_within| .mlsim_x_random_intercept|      y|
+|--------:|------:|------:|---------:|--------:|-------------------------:|------:|
+|        1|      1| -1.994|    -1.958|   -0.037|                    -1.958|  0.339|
+|        1|      2| -2.261|    -1.958|   -0.304|                    -1.958|  0.339|
+|        1|      3| -2.169|    -1.958|   -0.211|                    -1.958|  0.339|
+|        1|      4| -1.998|    -1.958|   -0.040|                    -1.958|  0.339|
+|        1|      5| -2.112|    -1.958|   -0.154|                    -1.958|  0.339|
+|        2|      1|  0.995|     1.085|   -0.089|                     1.085|  1.207|
+|        2|      2|  0.977|     1.085|   -0.108|                     1.085|  1.207|
+|        2|      3|  1.111|     1.085|    0.026|                     1.085|  1.207|
+|        2|      4|  0.992|     1.085|   -0.093|                     1.085|  1.207|
+|        3|      1| -0.010|     0.204|   -0.214|                     0.204|  0.571|
+|        3|      2|  0.185|     0.204|   -0.019|                     0.204|  0.571|
+|        4|      1|  0.495|     0.501|   -0.006|                     0.501| -1.686|
+|        4|      2|  0.488|     0.501|   -0.013|                     0.501| -1.686|
+|        4|      3|  0.616|     0.501|    0.115|                     0.501| -1.686|
+|        5|      1|  1.015|     1.030|   -0.015|                     1.030| -0.838|
+|        5|      2|  0.848|     1.030|   -0.182|                     1.030| -0.838|
+|        5|      3|  0.976|     1.030|   -0.054|                     1.030| -0.838|
+|        5|      4|  0.958|     1.030|   -0.072|                     1.030| -0.838|
+
+
+
+
+Longitudinal designs can add a time index. When groups have different lengths,
+`time_truncate = TRUE` uses the first values for shorter groups.
+Add a time index may not matter, but it can be used for 
+creating lags, etc.
+
+
+``` r
+dated <- simulate_data(
+  n_groups = 3,
+  n_per_group = c(5, 3, 4),
+  time_id = "date",
+  time_values = as.Date("2026-01-01") + 0:4,
+  seed = 2026,
+  generators = list(
+    x = gen_mvn("x", level = "multilevel",
+      fixed_intercept = 0, random_cov = 1, residual_cov = .01),
+    y = gen_mvn("y", level = "level2", fixed_intercept = 0, residual_cov = 1)
+  )
+)
+
+kable(dated$data)
+```
+
+
+
+| group_id| obs_id|date       |      x| x_between| x_within| .mlsim_x_random_intercept|     y|
+|--------:|------:|:----------|------:|---------:|--------:|-------------------------:|-----:|
+|        1|      1|2026-01-01 |  0.512|     0.521|   -0.008|                     0.521| 1.347|
+|        1|      2|2026-01-02 |  0.454|     0.521|   -0.067|                     0.521| 1.347|
+|        1|      3|2026-01-03 |  0.269|     0.521|   -0.252|                     0.521| 1.347|
+|        1|      4|2026-01-04 |  0.447|     0.521|   -0.074|                     0.521| 1.347|
+|        1|      5|2026-01-05 |  0.419|     0.521|   -0.102|                     0.521| 1.347|
+|        2|      1|2026-01-01 | -1.068|    -1.080|    0.011|                    -1.080| 0.616|
+|        2|      2|2026-01-02 | -1.127|    -1.080|   -0.047|                    -1.080| 0.616|
+|        2|      3|2026-01-03 | -1.121|    -1.080|   -0.041|                    -1.080| 0.616|
+|        3|      1|2026-01-01 |  0.066|     0.139|   -0.073|                     0.139| 0.218|
+|        3|      2|2026-01-02 |  0.117|     0.139|   -0.022|                     0.139| 0.218|
+|        3|      3|2026-01-03 |  0.117|     0.139|   -0.023|                     0.139| 0.218|
+|        3|      4|2026-01-04 | -0.115|     0.139|   -0.255|                     0.139| 0.218|
+
+
+
+# Single-Level, Group-Level, and Multilevel Predictors
+
+The `level` argument controls whether values vary by row, by group, or by row
+with group-specific random effects.
+
+
+``` r
+levels_demo <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    row_x = gen_mvn("row_x", fixed_intercept = 0, residual_cov = 1),
+    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 10, residual_cov = 1),
+    mixed_x = gen_mvn(
+      "mixed_x",
+      level = "multilevel",
+      fixed_intercept = 5,
+      random_cov = 0.50,
+      residual_cov = 1
+    )
+  )
+)
+
+levels_demo
+#> <mlsim_data>
+#>   rows: 16
+#>   columns: 8 (generated: 6)
+#>   seed: 2026
+#>   grouping: group_id (4 groups; size min/median/max: 4/4/4)
+#>   generators: 3
+#> 
+#> Generators:
+#>  generator distribution      level    vars
+#>      row_x          mvn     single   row_x
+#>    group_x          mvn     level2 group_x
+#>    mixed_x          mvn multilevel mixed_x
+```
+
+# Distribution Families
+
+All predictor generator levels use fixed location or link-scale intercepts.
+Multilevel forms add random covariance terms.
+Here is a quick demonstration of various distribution families with single level data.
+
+
+``` r
+families <- simulate_data(
+  n = 10,
+  seed = 2026,
+  generators = list(
+    normal = gen_mvn("normal", fixed_intercept = 5, residual_cov = 1),
+    successes = gen_binomial("successes", size = 5, fixed_intercept = stats::qlogis(0.40)),
+    visits = gen_poisson("visits", fixed_intercept = log(2)),
+    events = gen_negbin("events", fixed_intercept = log(2), scale_fixed_intercept = log(3)),
+    cost = gen_gamma("cost", fixed_intercept = log(20), scale_fixed_intercept = log(4)),
+    adherence = gen_beta("adherence", fixed_intercept = stats::qlogis(0.70), scale_fixed_intercept = log(12))
+  )
+)
+
+kable(families$data)
+```
+
+
+
+| obs_id| normal| successes| visits| events|  cost| adherence|
+|------:|------:|---------:|------:|------:|-----:|---------:|
+|      1|   5.52|         2|      4|      1| 10.63|     0.875|
+|      2|   3.92|         2|      1|      0| 36.47|     0.822|
+|      3|   5.14|         1|      3|      5| 38.06|     0.657|
+|      4|   4.92|         0|      0|      4| 41.29|     0.664|
+|      5|   4.33|         2|      2|      2| 33.78|     0.500|
+|      6|   2.48|         1|      2|      4| 10.91|     0.766|
+|      7|   4.26|         2|      1|      0| 24.79|     0.897|
+|      8|   3.98|         1|      2|      2| 13.94|     0.841|
+|      9|   5.11|         0|      3|      1| 14.41|     0.568|
+|     10|   4.53|         2|      2|      2|  8.27|     0.846|
+
+
+
+Here is an example of a multilevel count generator.
+
+
+``` r
+link_scale_counts <- simulate_data(
+  n_groups = 3,
+  n_per_group = 5,
+  seed = 2026,
+  generators = list(
+    count = gen_poisson(
+      "count",
+      level = "multilevel",
+      fixed_intercept = log(2.5),
+      random_cov = 0.20
+    )
+  )
+)
+
+link_scale_counts
+#> <mlsim_data>
+#>   rows: 15
+#>   columns: 4 (generated: 2)
+#>   seed: 2026
+#>   grouping: group_id (3 groups; size min/median/max: 5/5/5)
+#>   generators: 1
+#> 
+#> Generators:
+#>  generator distribution      level  vars
+#>      count      poisson multilevel count
+```
+
+# Categorical Variables
+
+`gen_categorical()` supports binary variables, labeled categories, ordered
+factors, character output, and integer codes.
+
+
+``` r
+categorical <- simulate_data(
+  n = 12,
+  seed = 2026,
+  generators = list(
+    binary_factor = gen_categorical("binary_factor", fixed_intercept = stats::qlogis(0.35)),
+    education = gen_categorical(
+      "education",
+      categories = c("< bachelor", "bachelor", "> bachelor"),
+      fixed_intercept = c("bachelor" = log(0.35 / 0.45), "> bachelor" = log(0.20 / 0.45)),
+      ordered = TRUE
+    ),
+    education_code = gen_categorical(
+      "education_code",
+      categories = c("arts", "science", "psychology"),
+      fixed_intercept = c("science" = log(0.35 / 0.45), "psychology" = log(0.20 / 0.45)),
+      output = "integer"
+    )
+  )
+)
+
+kable(categorical$data)
+```
+
+
+
+| obs_id|binary_factor |education  | education_code|
+|------:|:-------------|:----------|--------------:|
+|      1|1             |< bachelor |              0|
+|      2|0             |> bachelor |              0|
+|      3|0             |< bachelor |              0|
+|      4|0             |< bachelor |              0|
+|      5|0             |bachelor   |              0|
+|      6|0             |< bachelor |              1|
+|      7|0             |< bachelor |              2|
+|      8|1             |< bachelor |              0|
+|      9|0             |< bachelor |              1|
+|     10|0             |< bachelor |              0|
+|     11|0             |< bachelor |              1|
+|     12|1             |< bachelor |              0|
+
+
+
+Multilevel categorical generators use baseline-category logits and optional
+group random effects. For 2 categories, it is basically a multilevel bernoulli.
+For more than 2 categoaries, it is a multilevel multinomial with the first category as the baseline.
+The random intercepts can have their own variances and covariances. A full random effect
+covariance matrix must be specified. Use 0s on the off diagonal for uncorrelated random intercepts.
+
+
+``` r
+categorical_ml <- simulate_data(
+  n_groups = 4,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    education = gen_categorical(
+      "education",
+      level = "multilevel",
+      categories = c("< bachelor", "bachelor", "> bachelor"),
+      fixed_intercept = c("bachelor" = 0.15, "> bachelor" = -0.55),
+      random_cov = matrix(c(0.20, 0.04, 0.04, 0.12), nrow = 2),
+      ordered = TRUE
+    )
+  )
+)
+
+kable(categorical_ml$data)
+```
+
+
+
+| group_id| obs_id|education  | .mlsim_education_random_intercept_bachelor| .mlsim_education_random_intercept_X..bachelor|
+|--------:|------:|:----------|------------------------------------------:|---------------------------------------------:|
+|        1|      1|bachelor   |                                     -0.306|                                         0.105|
+|        1|      2|< bachelor |                                     -0.306|                                         0.105|
+|        1|      3|< bachelor |                                     -0.306|                                         0.105|
+|        1|      4|< bachelor |                                     -0.306|                                         0.105|
+|        2|      1|bachelor   |                                      0.155|                                         0.940|
+|        2|      2|bachelor   |                                      0.155|                                         0.940|
+|        2|      3|< bachelor |                                      0.155|                                         0.940|
+|        2|      4|< bachelor |                                      0.155|                                         0.940|
+|        3|      1|bachelor   |                                     -0.150|                                         0.194|
+|        3|      2|< bachelor |                                     -0.150|                                         0.194|
+|        3|      3|bachelor   |                                     -0.150|                                         0.194|
+|        3|      4|< bachelor |                                     -0.150|                                         0.194|
+|        4|      1|< bachelor |                                     -0.089|                                         0.318|
+|        4|      2|bachelor   |                                     -0.089|                                         0.318|
+|        4|      3|> bachelor |                                     -0.089|                                         0.318|
+|        4|      4|< bachelor |                                     -0.089|                                         0.318|
+
+
+
+# Correlated and Compositional Predictors
+
+`gen_mvn()` simulates correlated blocks. With `compositional = TRUE`, the MVN
+columns are interpreted as ILR coordinates and back-transformed into parts.
+Here we are back to single level data.
+
+
+``` r
+correlated_comp <- simulate_data(
+  n = 8,
+  seed = 2026,
+  generators = list(
+    affect_block = gen_mvn(
+      c("affect", "energy"),
+      fixed_intercept = c(0, 1),
+      residual_cov = matrix(c(1.0, 0.5, 0.5, 1.2), nrow = 2)
+    ),
+    time_use = gen_mvn(
+      c("ilr_1", "ilr_2"),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(c(0.30, 0.20)),
+      compositional = TRUE,
+      parts = c("sleep", "active", "sedentary"),
+      total = 24,
+      keep_ilr = TRUE
+    )
+  )
+)
+
+kable(correlated_comp$data)
+```
+
+
+
+| obs_id| affect| energy|  ilr_1|  ilr_2| sleep| active| sedentary|
+|------:|------:|------:|------:|------:|-----:|------:|---------:|
+|      1|  0.351|  1.566| -0.338| -0.022|  5.96|   8.88|      9.16|
+|      2| -0.587| -0.290| -0.119| -0.853|  6.40|   4.05|     13.54|
+|      3|  0.355|  0.938|  0.441| -0.774| 10.24|   3.45|     10.31|
+|      4|  0.366|  0.561| -0.378| -0.026|  5.75|   8.96|      9.29|
+|      5| -0.405|  0.238|  0.180| -0.289|  9.10|   5.95|      8.95|
+|      6| -1.890| -1.579|  0.090| -0.772|  7.83|   4.06|     12.10|
+|      7|  0.922| -0.962|  0.762|  0.237| 13.36|   6.21|      4.44|
+|      8| -1.621|  0.655| -0.803| -0.074|  3.78|   9.58|     10.64|
+
+
+
+
+``` r
+correlated_comp$generator_metadata$time_use$sbp
+#>           sleep active sedentary
+#> balance_1     1     -1        -1
+#> balance_2     0      1        -1
+correlated_comp$generator_metadata$time_use$ilr_coordinate_map
+#>       ilr sbp_row positive_parts   negative_parts
+#>    <char>   <int>         <AsIs>           <AsIs>
+#> 1:  ilr_1       1          sleep active,sedentary
+#> 2:  ilr_2       2         active        sedentary
+```
+
+Use `keep_ilr = FALSE` when you only want the original parts in the output.
+
+
+``` r
+parts_only <- simulate_data(
+  n = 5,
+  seed = 2026,
+  generators = list(
+    time_use = gen_mvn(
+      c("z1", "z2"),
+      fixed_intercept = c(0, 0),
+      residual_cov = diag(2),
+      compositional = TRUE,
+      parts = c("sleep", "active", "sedentary"),
+      total = 24,
+      keep_ilr = FALSE
+    )
+  )
+)
+
+kable(parts_only$data)
+```
+
+
+
+| obs_id| sleep| active| sedentary|
+|------:|-----:|------:|---------:|
+|      1| 21.86|   1.45|     0.694|
+|      2| 11.64|   2.21|    10.153|
+|      3| 15.23|   4.82|     3.956|
+|      4|  7.27|   7.87|     8.867|
+|      5| 10.69|   3.73|     9.582|
+
+
+
+
+# Location-Scale Predictors
+
+For multilevel predictors, `scale_fixed_intercept` adds group-varying scale
+parameters. For a univariate `gen_mvn()` generator this means log residual SD; for negative
+binomial, gamma, and beta generators it controls size, shape, and precision.
+
+Here you can see in the metadata the group specific parameters 
+that were generated.
+
+
+``` r
+location_scale <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  seed = 2026,
+  generators = list(
+    symptom = gen_mvn(
+      "symptom",
+      level = "multilevel",
+      fixed_intercept = 10,
+      scale_fixed_intercept = log(1.2),
+      random_cov = matrix(
+        c(1.00, 0.15,
+          0.15, 0.08),
+        nrow = 2
+      )
+    ),
+    event_count = gen_negbin(
+      "event_count",
+      level = "multilevel",
+      fixed_intercept = log(2),
+      scale_fixed_intercept = log(6),
+      random_cov = matrix(
+        c(0.20, 0.03,
+          0.03, 0.06),
+        nrow = 2
+      )
+    )
+  )
+)
+
+kable(data.table(
+  group_id = location_scale$data$group_id,
+  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd,
+  event_count_size = location_scale$generator_metadata$event_count$size
+))
+```
+
+
+
+| group_id| symptom_residual_sd.symptom| event_count_size|
+|--------:|---------------------------:|----------------:|
+|        1|                        1.29|             5.99|
+|        1|                        1.29|             5.99|
+|        1|                        1.29|             5.99|
+|        1|                        1.29|             5.99|
+|        1|                        1.29|             5.99|
+|        2|                        2.57|             4.75|
+|        2|                        2.57|             4.75|
+|        2|                        2.57|             4.75|
+|        2|                        2.57|             4.75|
+|        2|                        2.57|             4.75|
+|        3|                        1.39|             6.04|
+|        3|                        1.39|             6.04|
+|        3|                        1.39|             6.04|
+|        3|                        1.39|             6.04|
+|        3|                        1.39|             6.04|
+|        4|                        1.54|             4.54|
+|        4|                        1.54|             4.54|
+|        4|                        1.54|             4.54|
+|        4|                        1.54|             4.54|
+|        4|                        1.54|             4.54|
+
+
+
+# Custom Generators
+
+Custom generators receive a simulation context and return generated data,
+column names, and optional metadata. They can use the active design columns,
+previously generated variables, and any extra arguments supplied to
+`gen_custom()`. Their metadata would be captured in the 
+same was as built in generators.
+
+
+``` r
+pilot_sampler <- function(context, vars, level, pilot_values) {
+  values <- sample(pilot_values, context$n_rows, replace = TRUE)
+
+  list(
+    data = data.frame(values = values),
+    names = vars,
+    metadata = list(source = "pilot bootstrap", n_pilot = length(pilot_values))
+  )
+}
+
+clinic_load_sampler <- function(context, vars, level) {
+  load_values <- c("low", "medium", "high")
+  group_load <- load_values[context$data[[context$group_id]]]
+
+  list(
+    data = data.frame(load = group_load),
+    names = vars,
+    metadata = list(source = "derived from group index")
+  )
+}
+
+custom <- simulate_data(
+  n_groups = 3,
+  n_per_group = 4,
+  seed = 2026,
+  generators = list(
+    pilot_x = gen_custom(
+      "pilot_x",
+      generator = pilot_sampler,
+      pilot_values = c(1.2, 1.4, 1.8, 2.5, 3.1)
+    ),
+    clinic_load = gen_custom(
+      "clinic_load",
+      generator = clinic_load_sampler
+    )
+  )
+)
+
+kable(custom$data)
+```
+
+
+
+| group_id| obs_id| pilot_x|clinic_load |
+|--------:|------:|-------:|:-----------|
+|        1|      1|     3.1|low         |
+|        1|      2|     1.2|low         |
+|        1|      3|     1.2|low         |
+|        1|      4|     3.1|low         |
+|        2|      1|     1.8|medium      |
+|        2|      2|     2.5|medium      |
+|        2|      3|     2.5|medium      |
+|        2|      4|     3.1|medium      |
+|        3|      1|     2.5|high        |
+|        3|      2|     1.4|high        |
+|        3|      3|     1.4|high        |
+|        3|      4|     1.8|high        |
+
+
+
+# Dynamic Outcome Simulation
+
+`gen_outcome()` adds a model-based outcome generator to the same
+`simulate_data()` workflow. It is designed for simulation studies where
+predictors are generated first and outcomes are then generated from a known
+location, scale, and optional residual autoregressive process.
+
+The scale model is required. Use `scale = sigma ~ 1` for constant conditional
+standard deviations. When `ar1()` is present, the scale model controls
+innovation variability. When `ar1()` is absent, it controls ordinary residual
+variability. The AR process is applied to residual ILR states, not to lagged
+observed outcomes.
+
+`between(x)` and `within(x)` resolve to labelled component columns created by
+earlier generators. For example, a multilevel `gen_mvn("stress")` predictor
+creates visible `stress_between` and `stress_within` columns and stores their
+roles in generator metadata.
+
+`gen_template()` can be used first to ask the simulator for the exact parameter
+matrices and arrays required by a `gen_outcome()` specification. The template
+should be run with the same design, predictor generators, factor levels,
+formulas, and composition settings that will be used in the final simulation.
+
+
+``` r
+dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ treatment + between(stress) +
+  within(stress) + ar1() + treatment:ar1() + (1 + ar1() | ID)
+dynamic_scale_formula <- sigma ~ treatment + (1 | ID)
+dynamic_composition <- list(parts = c("sleep", "sedentary", "activity"), total = 24)
+
+dynamic_predictor_generators <- list(
+  treatment = gen_categorical(
+    "treatment",
+    level = "level2",
+    categories = c("control", "treatment"),
+    fixed_intercept = stats::qlogis(0.5),
+    output = "factor"
+  ),
+  stress = gen_mvn(
+    "stress",
+    level = "multilevel",
+    fixed_intercept = 3,
+    random_cov = 0.20,
+    residual_cov = 0.80
+  )
+)
+
+dynamic_template <- simulate_data(
+  n_groups = 4,
+  n_per_group = 5,
+  group_id = "ID",
+  time_id = "day",
+  seed = 2026,
+  generators = c(
+    dynamic_predictor_generators,
+    list(
+      outcome_template = gen_template(
+        dynamic_outcome_formula,
+        scale = dynamic_scale_formula,
+        composition = dynamic_composition,
+        burnin = 20
+      )
+    )
+  )
+)
+
+dynamic_params <- dynamic_template$generator_metadata$outcome_template$params
+dynamic_params$location$beta["between(stress)", ] <- c(0.15, -0.05)
+dynamic_params$location$beta["within(stress)", ] <- c(0.05, 0.03)
+dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.4, 0.35))
+dynamic_params$scale$beta["treatmenttreatment", ] <- log(c(0.45, 0.4))
+dynamic_params$ar$beta["ar1()", , ] <- matrix(c(0.25, 0.02, -0.01, 0.20), 2, 2, byrow = TRUE)
+dynamic_params$ar$beta["treatmenttreatment:ar1()", , ] <- matrix(c(0.05, 0, 0, 0.03), 2, 2, byrow = TRUE)
+
+dynamic_random_names <- rownames(dynamic_params$random$ID$covariance)
+dynamic_random_sd_values <- c(
+  "location|outcome=ilr1|term=(Intercept)" = 0.20,
+  "location|outcome=ilr2|term=(Intercept)" = 0.18,
+  "ar|term=ar1()|to=ilr1|from=ilr1" = 0.12,
+  "ar|term=ar1()|to=ilr1|from=ilr2" = 0.06,
+  "ar|term=ar1()|to=ilr2|from=ilr1" = 0.06,
+  "ar|term=ar1()|to=ilr2|from=ilr2" = 0.12,
+  "scale|outcome=ilr1|term=(Intercept)" = 0.16,
+  "scale|outcome=ilr2|term=(Intercept)" = 0.14
+)
+dynamic_random_sd <- dynamic_random_sd_values[dynamic_random_names]
+
+dynamic_random_cor <- diag(length(dynamic_random_names))
+dimnames(dynamic_random_cor) <- list(dynamic_random_names, dynamic_random_names)
+set_dynamic_random_cor <- function(x, y, value) {
+  dynamic_random_cor[x, y] <<- value
+  dynamic_random_cor[y, x] <<- value
+}
+set_dynamic_random_cor(
+  "location|outcome=ilr1|term=(Intercept)",
+  "ar|term=ar1()|to=ilr1|from=ilr1",
+  0.20
+)
+set_dynamic_random_cor(
+  "ar|term=ar1()|to=ilr1|from=ilr1",
+  "ar|term=ar1()|to=ilr1|from=ilr2",
+  0.15
+)
+set_dynamic_random_cor(
+  "location|outcome=ilr2|term=(Intercept)",
+  "ar|term=ar1()|to=ilr2|from=ilr1",
+  0.20
+)
+set_dynamic_random_cor(
+  "ar|term=ar1()|to=ilr2|from=ilr1",
+  "ar|term=ar1()|to=ilr2|from=ilr2",
+  0.15
+)
+
+if (anyNA(dynamic_random_sd) ||
+    min(eigen(dynamic_random_cor, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+  stop("The dynamic outcome random-effect covariance is not valid.")
+}
+
+dynamic_params$random$ID$covariance <- diag(dynamic_random_sd) %*%
+  dynamic_random_cor %*%
+  diag(dynamic_random_sd)
+dimnames(dynamic_params$random$ID$covariance) <- list(dynamic_random_names, dynamic_random_names)
+```
+
+
+``` r
+dynamic_comp <- simulate_data(
+  n_groups = 500,
+  n_per_group = 150,
+  group_id = "ID",
+  time_id = "day",
+  seed = 2026,
+  generators = c(
+    dynamic_predictor_generators,
+    list(
+      outcome = gen_outcome(
+        dynamic_outcome_formula,
+        scale = dynamic_scale_formula,
+        params = dynamic_params,
+        composition = dynamic_composition,
+        burnin = 50
+      )
+    )
+  )
+)
+
+kable(head(dynamic_comp$data[, c("ID", "day", "treatment", "stress", "ilr1", "ilr2", "sleep", "sedentary", "activity"), with = FALSE]))
+```
+
+
+
+| ID| day|treatment | stress|  ilr1|   ilr2| sleep| sedentary| activity|
+|--:|---:|:---------|------:|-----:|------:|-----:|---------:|--------:|
+|  1|   1|treatment |   3.27| 0.360| -0.400| 10.26|      4.98|     8.76|
+|  1|   2|treatment |   2.96| 0.318| -0.512|  9.82|      4.63|     9.55|
+|  1|   3|treatment |   3.17| 0.080| -0.164|  8.49|      6.86|     8.65|
+|  1|   4|treatment |   2.79| 0.355| -0.381| 10.24|      5.07|     8.69|
+|  1|   5|treatment |   2.71| 0.666| -0.115| 12.71|      5.19|     6.10|
+|  1|   6|treatment |   1.46| 0.823| -0.267| 13.77|      4.16|     6.07|
+
+
+
+
+``` r
+dynamic_template$generator_metadata$outcome_template$expected_parameter_names
+#> $location
+#> [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   
+#> [4] "within(stress)"    
+#> 
+#> $scale
+#> [1] "(Intercept)"        "treatmenttreatment"
+#> 
+#> $ar
+#> [1] "ar1()"                    "treatmenttreatment:ar1()"
+#> 
+#> $random
+#> [1] "location|outcome=ilr1|term=(Intercept)"
+#> [2] "location|outcome=ilr2|term=(Intercept)"
+#> [3] "ar|term=ar1()|to=ilr1|from=ilr1"       
+#> [4] "ar|term=ar1()|to=ilr1|from=ilr2"       
+#> [5] "ar|term=ar1()|to=ilr2|from=ilr1"       
+#> [6] "ar|term=ar1()|to=ilr2|from=ilr2"       
+#> [7] "scale|outcome=ilr1|term=(Intercept)"   
+#> [8] "scale|outcome=ilr2|term=(Intercept)"
+
+dynamic_comp$generator_metadata$outcome$expected_parameter_names
+#> $location
+#> [1] "(Intercept)"        "treatmenttreatment" "between(stress)"   
+#> [4] "within(stress)"    
+#> 
+#> $scale
+#> [1] "(Intercept)"        "treatmenttreatment"
+#> 
+#> $ar
+#> [1] "ar1()"                    "treatmenttreatment:ar1()"
+#> 
+#> $random
+#> [1] "location|outcome=ilr1|term=(Intercept)"
+#> [2] "location|outcome=ilr2|term=(Intercept)"
+#> [3] "ar|term=ar1()|to=ilr1|from=ilr1"       
+#> [4] "ar|term=ar1()|to=ilr1|from=ilr2"       
+#> [5] "ar|term=ar1()|to=ilr2|from=ilr1"       
+#> [6] "ar|term=ar1()|to=ilr2|from=ilr2"       
+#> [7] "scale|outcome=ilr1|term=(Intercept)"   
+#> [8] "scale|outcome=ilr2|term=(Intercept)"
+
+dynamic_comp$generator_metadata$outcome$ar$stability$max_spectral_radius_overall
+#> [1] 0.67
+
+table(rowSums(as.matrix(dynamic_comp$data[, c("sleep", "sedentary", "activity"), with = FALSE])))
+#> 
+#>    24 
+#> 75000
+```
+
+The generated data can be managed into an analysis data set and passed to
+`brmcoda()`. `prep_sim_analysis()` recomputes observed between- and within-person
+predictors from the total simulated data columns, rebuilds a `complr` object
+using the same SBP basis as the simulator, and translates `ar1()` into
+within-person centered lagged ILR predictors. The fitted model includes random
+level terms, random inertia terms through lagged ILR slopes, and random
+conditional variability through response-specific `sigma` models.
+
+
+``` r
+dynamic_analysis <- prep_sim_analysis(dynamic_comp)
+dynamic_analysis$metadata$lag_columns
+#> [1] "lag_z1_1_within" "lag_z2_1_within"
+dynamic_analysis$formula
+#> z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#> sigma ~ treatment + (1 | ID)
+#> z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#> sigma ~ treatment + (1 | ID)
+```
+
+
+``` r
+dynamic_fit <- brmcoda(
+  complr = dynamic_analysis$complr,
+  formula = dynamic_analysis$formula,
+  backend = "cmdstanr",
+  seed = 2026,
+  algorithm = "meanfield", 
+  iter = 2000
+)
+```
+
+
+``` r
+summary(dynamic_fit)
+#>  Family: MV(gaussian, gaussian) 
+#>   Links: mu = identity; sigma = log
+#>          mu = identity; sigma = log 
+#> Formula: z1_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#>          sigma ~ treatment + (1 | ID)
+#>          z2_1 ~ treatment + stress_between + stress_within + lag_z1_1_within + lag_z2_1_within + treatment:lag_z1_1_within + treatment:lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | ID) 
+#>          sigma ~ treatment + (1 | ID)
+#>    Data: complr$dataout (Number of observations: 74500) 
+#>   Draws: 1 chains, each with iter = 1000; warmup = 0; thin = 1;
+#>          total post-warmup draws = 1000
+#> 
+#> Multilevel Hyperparameters:
+#> ~ID (Number of levels: 500) 
+#>                                              Estimate Est.Error l-95% CI
+#> sd(z11_Intercept)                                0.76      0.50     0.18
+#> sd(z11_lag_z1_1_within)                          0.79      1.38     0.04
+#> sd(z11_lag_z2_1_within)                          0.51      0.35     0.14
+#> sd(sigma_z11_Intercept)                          2.17      1.94     0.35
+#> sd(z21_Intercept)                                0.87      2.15     0.02
+#> sd(z21_lag_z1_1_within)                          2.60      3.90     0.23
+#> sd(z21_lag_z2_1_within)                          0.48      0.31     0.13
+#> sd(sigma_z21_Intercept)                          4.96      3.56     1.08
+#> cor(z11_Intercept,z11_lag_z1_1_within)          -0.82      0.28    -1.00
+#> cor(z11_Intercept,z11_lag_z2_1_within)          -0.38      0.48    -0.97
+#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.51      0.46    -0.60
+#> cor(z21_Intercept,z21_lag_z1_1_within)           0.55      0.52    -0.82
+#> cor(z21_Intercept,z21_lag_z2_1_within)           0.19      0.57    -0.89
+#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)    -0.15      0.56    -0.97
+#>                                              u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(z11_Intercept)                                2.07 1.00      899      740
+#> sd(z11_lag_z1_1_within)                          4.77 1.00      878      842
+#> sd(z11_lag_z2_1_within)                          1.41 1.00     1055      840
+#> sd(sigma_z11_Intercept)                          6.88 1.00     1199      889
+#> sd(z21_Intercept)                                5.03 1.00      903      935
+#> sd(z21_lag_z1_1_within)                         11.52 1.00     1006      939
+#> sd(z21_lag_z2_1_within)                          1.26 1.00      898      875
+#> sd(sigma_z21_Intercept)                         14.94 1.00      955      901
+#> cor(z11_Intercept,z11_lag_z1_1_within)           0.05 1.00     1022      750
+#> cor(z11_Intercept,z11_lag_z2_1_within)           0.73 1.00     1007      877
+#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     1.00 1.00      995      755
+#> cor(z21_Intercept,z21_lag_z1_1_within)           1.00 1.00     1004      982
+#> cor(z21_Intercept,z21_lag_z2_1_within)           0.96 1.00      869      833
+#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.87 1.00      931      841
+#> 
+#> Regression Coefficients:
+#>                                        Estimate Est.Error l-95% CI u-95% CI
+#> z11_Intercept                              2.09      2.52    -2.78     7.00
+#> sigma_z11_Intercept                       -0.21      0.95    -2.02     1.67
+#> z21_Intercept                              3.00      6.03    -8.59    15.01
+#> sigma_z21_Intercept                       -0.89      1.65    -4.14     2.39
+#> z11_treatmenttreatment                     0.43      1.00    -1.58     2.47
+#> z11_stress_between                        -0.40      0.71    -1.76     0.96
+#> z11_stress_within                          1.31      0.89    -0.40     3.01
+#> z11_lag_z1_1_within                       -0.90      0.56    -2.02     0.14
+#> z11_lag_z2_1_within                       -1.58      0.73    -3.03    -0.18
+#> z11_treatmenttreatment:lag_z1_1_within    -0.70      0.85    -2.25     1.09
+#> z11_treatmenttreatment:lag_z2_1_within     2.01      0.97     0.09     3.89
+#> sigma_z11_treatmenttreatment              -1.34      0.95    -3.30     0.65
+#> z21_treatmenttreatment                     0.56      0.70    -0.76     1.97
+#> z21_stress_between                        -0.93      2.00    -5.06     2.90
+#> z21_stress_within                          0.84      0.57    -0.24     1.89
+#> z21_lag_z1_1_within                        0.97      1.11    -1.26     3.12
+#> z21_lag_z2_1_within                        1.22      1.21    -1.10     3.62
+#> z21_treatmenttreatment:lag_z1_1_within     0.13      0.67    -1.23     1.41
+#> z21_treatmenttreatment:lag_z2_1_within     0.68      1.10    -1.35     2.95
+#> sigma_z21_treatmenttreatment              -0.12      1.17    -2.39     2.16
+#>                                        Rhat Bulk_ESS Tail_ESS
+#> z11_Intercept                          1.00      898      820
+#> sigma_z11_Intercept                    1.00      916      988
+#> z21_Intercept                          1.00     1077     1020
+#> sigma_z21_Intercept                    1.00      846      978
+#> z11_treatmenttreatment                 1.00      913      896
+#> z11_stress_between                     1.00     1036      842
+#> z11_stress_within                      1.00      985     1026
+#> z11_lag_z1_1_within                    1.00      985      980
+#> z11_lag_z2_1_within                    1.00     1004      826
+#> z11_treatmenttreatment:lag_z1_1_within 1.00      930      983
+#> z11_treatmenttreatment:lag_z2_1_within 1.00      973      865
+#> sigma_z11_treatmenttreatment           1.00      939      799
+#> z21_treatmenttreatment                 1.00      836      937
+#> z21_stress_between                     1.00     1036      981
+#> z21_stress_within                      1.00      948      988
+#> z21_lag_z1_1_within                    1.00      957      864
+#> z21_lag_z2_1_within                    1.00      968      875
+#> z21_treatmenttreatment:lag_z1_1_within 1.00     1122      992
+#> z21_treatmenttreatment:lag_z2_1_within 1.00      922      882
+#> sigma_z21_treatmenttreatment           1.00      917      899
+#> 
+#> Residual Correlations: 
+#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> rescor(z11,z21)     0.57      0.48    -0.69     0.99 1.00      960      844
+#> 
+#> Draws were sampled using variational(meanfield).
+```
+
+
+
+``` r
+dynamic_response_map <- dynamic_analysis$metadata$response_map
+dynamic_response_prefix <- setNames(
+  gsub("_", "", unname(dynamic_response_map), fixed = TRUE),
+  names(dynamic_response_map)
+)
+dynamic_lag_columns <- setNames(
+  dynamic_analysis$metadata$lag_columns,
+  names(dynamic_response_map)
+)
+
+dynamic_model_term <- function(term) {
+  switch(
+    term,
+    "(Intercept)" = "Intercept",
+    "between(stress)" = "stress_between",
+    "within(stress)" = "stress_within",
+    term
+  )
+}
+
+dynamic_fixed_truth <- numeric()
+for (outcome in names(dynamic_response_map)) {
+  response_prefix <- dynamic_response_prefix[[outcome]]
+
+  for (term in rownames(dynamic_params$location$beta)) {
+    dynamic_fixed_truth[paste(response_prefix, dynamic_model_term(term), sep = "_")] <-
+      dynamic_params$location$beta[term, outcome]
+  }
+  for (term in rownames(dynamic_params$scale$beta)) {
+    dynamic_fixed_truth[paste("sigma", response_prefix, dynamic_model_term(term), sep = "_")] <-
+      dynamic_params$scale$beta[term, outcome]
+  }
+}
+for (ar_term in dimnames(dynamic_params$ar$beta)[[1]]) {
+  ar_interaction <- base::sub(":?ar1\\(\\)", "", ar_term)
+  for (to in names(dynamic_response_map)) {
+    for (from in names(dynamic_response_map)) {
+      lag_term <- dynamic_lag_columns[[from]]
+      model_term <- if (nzchar(ar_interaction)) {
+        paste(ar_interaction, lag_term, sep = ":")
+      } else {
+        lag_term
+      }
+      dynamic_fixed_truth[paste(dynamic_response_prefix[[to]], model_term, sep = "_")] <-
+        dynamic_params$ar$beta[ar_term, to, from]
+    }
+  }
+}
+
+dynamic_fixed_summary <- as.data.table(fixef(dynamic_fit), keep.rownames = "parameter")
+dynamic_fixed_recovery <- dynamic_fixed_summary[, .(
+  type = "fixed effect",
+  parameter = parameter,
+  estimate = Estimate,
+  lower_95 = Q2.5,
+  upper_95 = Q97.5,
+  true_value = dynamic_fixed_truth[parameter]
+)]
+
+dynamic_random_model_name <- function(parameter) {
+  if (startsWith(parameter, "location|")) {
+    outcome <- base::sub("^location\\|outcome=([^|]+)\\|term=.*$", "\\1", parameter)
+    term <- base::sub("^location\\|outcome=[^|]+\\|term=(.*)$", "\\1", parameter)
+    return(paste(dynamic_response_prefix[[outcome]], dynamic_model_term(term), sep = "_"))
+  }
+  if (startsWith(parameter, "scale|")) {
+    outcome <- base::sub("^scale\\|outcome=([^|]+)\\|term=.*$", "\\1", parameter)
+    term <- base::sub("^scale\\|outcome=[^|]+\\|term=(.*)$", "\\1", parameter)
+    return(paste("sigma", dynamic_response_prefix[[outcome]], dynamic_model_term(term), sep = "_"))
+  }
+  if (startsWith(parameter, "ar|")) {
+    to <- base::sub("^ar\\|term=[^|]+\\|to=([^|]+)\\|from=([^|]+)$", "\\1", parameter)
+    from <- base::sub("^ar\\|term=[^|]+\\|to=([^|]+)\\|from=([^|]+)$", "\\2", parameter)
+    return(paste(dynamic_response_prefix[[to]], dynamic_lag_columns[[from]], sep = "_"))
+  }
+  stop(sprintf("Unknown random-effect parameter: %s", parameter))
+}
+
+dynamic_random_cov_truth <- dynamic_params$random$ID$covariance
+dynamic_random_model_names <- vapply(
+  rownames(dynamic_random_cov_truth),
+  dynamic_random_model_name,
+  character(1)
+)
+dimnames(dynamic_random_cov_truth) <- list(dynamic_random_model_names, dynamic_random_model_names)
+dynamic_random_cor_truth <- cov2cor(dynamic_random_cov_truth)
+
+dynamic_varcorr_id <- VarCorr(dynamic_fit)$ID
+dynamic_random_sd_summary <- as.data.table(dynamic_varcorr_id$sd, keep.rownames = "parameter")
+dynamic_random_sd_summary[, random_effect := parameter]
+dynamic_random_variance_recovery <- dynamic_random_sd_summary[, .(
+  type = "random variance",
+  parameter = paste0("var(", random_effect, ")"),
+  estimate = Estimate^2,
+  lower_95 = Q2.5^2,
+  upper_95 = Q97.5^2,
+  true_value = diag(dynamic_random_cov_truth)[random_effect]
+)]
+
+dynamic_random_correlation_recovery <- data.table()
+if (!is.null(dynamic_varcorr_id$cor)) {
+  dynamic_cor_summary <- dynamic_varcorr_id$cor
+  dynamic_cor_names <- dimnames(dynamic_cor_summary)[[1]]
+  dynamic_cor_pairs <- which(
+    lower.tri(matrix(FALSE, length(dynamic_cor_names), length(dynamic_cor_names))),
+    arr.ind = TRUE
+  )
+  dynamic_random_correlation_recovery <- rbindlist(lapply(seq_len(nrow(dynamic_cor_pairs)), function(i) {
+    row <- dynamic_cor_pairs[i, "row"]
+    col <- dynamic_cor_pairs[i, "col"]
+    summary <- dynamic_cor_summary[row, , col]
+    data.table(
+      type = "random correlation",
+      parameter = sprintf("cor(%s, %s)", dynamic_cor_names[row], dynamic_cor_names[col]),
+      estimate = summary[["Estimate"]],
+      lower_95 = summary[["Q2.5"]],
+      upper_95 = summary[["Q97.5"]],
+      true_value = dynamic_random_cor_truth[dynamic_cor_names[row], dynamic_cor_names[col]]
+    )
+  }))
+}
+
+dynamic_recovery_table <- rbindlist(list(
+  dynamic_fixed_recovery,
+  dynamic_random_variance_recovery,
+  dynamic_random_correlation_recovery
+), use.names = TRUE)
+dynamic_recovery_table[, covered_by_95_ci := true_value >= lower_95 & true_value <= upper_95]
+
+if (anyNA(dynamic_recovery_table$true_value)) {
+  stop("Some fitted parameters could not be matched to simulation truth.")
+}
+
+kable(dynamic_recovery_table, digits = 3)
+```
+
+
+
+|type               |parameter                                     | estimate| lower_95| upper_95| true_value|covered_by_95_ci |
+|:------------------|:---------------------------------------------|--------:|--------:|--------:|----------:|:----------------|
+|fixed effect       |z11_Intercept                                 |    2.092|   -2.785|    6.998|      0.000|TRUE             |
+|fixed effect       |sigma_z11_Intercept                           |   -0.212|   -2.022|    1.674|     -0.916|TRUE             |
+|fixed effect       |z21_Intercept                                 |    3.005|   -8.589|   15.007|      0.000|TRUE             |
+|fixed effect       |sigma_z21_Intercept                           |   -0.886|   -4.142|    2.388|     -1.050|TRUE             |
+|fixed effect       |z11_treatmenttreatment                        |    0.432|   -1.584|    2.469|      0.000|TRUE             |
+|fixed effect       |z11_stress_between                            |   -0.397|   -1.761|    0.965|      0.150|TRUE             |
+|fixed effect       |z11_stress_within                             |    1.306|   -0.402|    3.007|      0.050|TRUE             |
+|fixed effect       |z11_lag_z1_1_within                           |   -0.902|   -2.022|    0.135|      0.250|FALSE            |
+|fixed effect       |z11_lag_z2_1_within                           |   -1.575|   -3.029|   -0.182|      0.020|FALSE            |
+|fixed effect       |z11_treatmenttreatment:lag_z1_1_within        |   -0.695|   -2.252|    1.086|      0.050|TRUE             |
+|fixed effect       |z11_treatmenttreatment:lag_z2_1_within        |    2.006|    0.091|    3.891|      0.000|FALSE            |
+|fixed effect       |sigma_z11_treatmenttreatment                  |   -1.338|   -3.305|    0.647|     -0.799|TRUE             |
+|fixed effect       |z21_treatmenttreatment                        |    0.562|   -0.759|    1.975|      0.000|TRUE             |
+|fixed effect       |z21_stress_between                            |   -0.932|   -5.064|    2.897|     -0.050|TRUE             |
+|fixed effect       |z21_stress_within                             |    0.841|   -0.239|    1.895|      0.030|TRUE             |
+|fixed effect       |z21_lag_z1_1_within                           |    0.970|   -1.262|    3.118|     -0.010|TRUE             |
+|fixed effect       |z21_lag_z2_1_within                           |    1.217|   -1.097|    3.617|      0.200|TRUE             |
+|fixed effect       |z21_treatmenttreatment:lag_z1_1_within        |    0.131|   -1.228|    1.410|      0.000|TRUE             |
+|fixed effect       |z21_treatmenttreatment:lag_z2_1_within        |    0.685|   -1.354|    2.949|      0.030|TRUE             |
+|fixed effect       |sigma_z21_treatmenttreatment                  |   -0.117|   -2.390|    2.158|     -0.916|TRUE             |
+|random variance    |var(z11_Intercept)                            |    0.574|    0.031|    4.282|      0.040|TRUE             |
+|random variance    |var(z11_lag_z1_1_within)                      |    0.627|    0.001|   22.784|      0.014|TRUE             |
+|random variance    |var(z11_lag_z2_1_within)                      |    0.260|    0.019|    1.976|      0.004|FALSE            |
+|random variance    |var(sigma_z11_Intercept)                      |    4.689|    0.124|   47.321|      0.026|FALSE            |
+|random variance    |var(z21_Intercept)                            |    0.750|    0.001|   25.347|      0.032|TRUE             |
+|random variance    |var(z21_lag_z1_1_within)                      |    6.742|    0.055|  132.653|      0.004|FALSE            |
+|random variance    |var(z21_lag_z2_1_within)                      |    0.230|    0.018|    1.598|      0.014|FALSE            |
+|random variance    |var(sigma_z21_Intercept)                      |   24.623|    1.177|  223.318|      0.020|FALSE            |
+|random correlation |cor(z11_lag_z1_1_within, z11_Intercept)       |   -0.817|   -0.998|    0.046|      0.200|FALSE            |
+|random correlation |cor(z11_lag_z2_1_within, z11_Intercept)       |   -0.380|   -0.968|    0.727|      0.000|TRUE             |
+|random correlation |cor(sigma_z11_Intercept, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_Intercept, z11_Intercept)             |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z1_1_within, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z11_lag_z2_1_within, z11_lag_z1_1_within) |    0.514|   -0.599|    0.997|      0.150|TRUE             |
+|random correlation |cor(sigma_z11_Intercept, z11_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_Intercept, z11_lag_z1_1_within)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z1_1_within, z11_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z11_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, z11_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(sigma_z11_Intercept, z11_lag_z2_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_Intercept, z11_lag_z2_1_within)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z1_1_within, z11_lag_z2_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z11_lag_z2_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, z11_lag_z2_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_Intercept, sigma_z11_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z1_1_within, sigma_z11_Intercept) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, sigma_z11_Intercept) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, sigma_z11_Intercept) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z1_1_within, z21_Intercept)       |    0.548|   -0.824|    0.996|      0.200|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z21_Intercept)       |    0.191|   -0.890|    0.955|      0.000|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, z21_Intercept)       |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(z21_lag_z2_1_within, z21_lag_z1_1_within) |   -0.151|   -0.975|    0.874|      0.150|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, z21_lag_z1_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+|random correlation |cor(sigma_z21_Intercept, z21_lag_z2_1_within) |    0.000|    0.000|    0.000|      0.000|TRUE             |
+
+

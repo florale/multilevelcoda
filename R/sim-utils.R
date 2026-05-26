@@ -934,6 +934,95 @@ NULL
 }
 
 #' @rdname multilevelcoda-internal-utils
+.mlsim_column_roles <- function(column, variable, component, level = "row") {
+  roles <- data.table::data.table(
+    column = column,
+    variable = variable,
+    component = component,
+    level = level
+  )
+  .mlsim_validate_column_roles(roles, column)
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_validate_column_roles <- function(roles, available_columns, arg = "column_roles") {
+  if (is.null(roles)) {
+    return(NULL)
+  }
+  roles <- data.table::as.data.table(roles)
+  required <- c("column", "variable", "component", "level")
+  missing <- required[required %any!in% names(roles)]
+  if (length(missing) > 0L) {
+    .mlsim_stop("`%s` must contain columns: %s.", arg, paste(required, collapse = ", "))
+  }
+  for (col in required) {
+    if (!is.character(roles[[col]]) || anyNA(roles[[col]]) || roles[[col]] %any==% "") {
+      .mlsim_stop("`%s$%s` must contain non-empty character values.", arg, col)
+    }
+  }
+  if (roles$component %any!in% c("observed", "between", "within")) {
+    .mlsim_stop("`%s$component` values must be observed, between, or within.", arg)
+  }
+  if (roles$level %any!in% c("row", "group")) {
+    .mlsim_stop("`%s$level` values must be row or group.", arg)
+  }
+  missing_cols <- roles$column[!roles$column %in% available_columns]
+  if (length(missing_cols) > 0L) {
+    .mlsim_stop(
+      "`%s$column` must refer to generated columns; missing: %s.",
+      arg,
+      paste(unique(missing_cols), collapse = ", ")
+    )
+  }
+  key <- paste(roles$variable, roles$component, sep = "\r")
+  if (anyDuplicated(key)) {
+    duplicated_roles <- roles[duplicated(key) | duplicated(key, fromLast = TRUE)]
+    .mlsim_stop(
+      "`%s` must not contain duplicate variable/component roles: %s.",
+      arg,
+      paste(unique(paste0(duplicated_roles$variable, "/", duplicated_roles$component)), collapse = ", ")
+    )
+  }
+  roles[]
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_collect_column_roles <- function(generator_metadata, data = NULL) {
+  roles <- lapply(names(generator_metadata), function(generator_name) {
+    generator_roles <- generator_metadata[[generator_name]]$column_roles
+    if (is.null(generator_roles)) {
+      return(NULL)
+    }
+    generator_roles <- data.table::as.data.table(generator_roles)
+    generator_roles[, generator := generator_name]
+    generator_roles
+  })
+  roles <- data.table::rbindlist(roles, fill = TRUE)
+  if (nrow(roles) == 0L) {
+    return(data.table::data.table(
+      column = character(),
+      variable = character(),
+      component = character(),
+      level = character(),
+      generator = character()
+    ))
+  }
+  .mlsim_validate_column_roles(
+    roles[, c("column", "variable", "component", "level"), with = FALSE],
+    roles$column,
+    "generator_metadata column_roles"
+  )
+  missing_cols <- if (is.null(data)) character() else roles$column[!roles$column %in% names(data)]
+  if (length(missing_cols) > 0L) {
+    .mlsim_stop(
+      "Column roles refer to columns that are not present in simulated data: %s.",
+      paste(unique(missing_cols), collapse = ", ")
+    )
+  }
+  roles[]
+}
+
+#' @rdname multilevelcoda-internal-utils
 .mlsim_resolve_size <- function(size, n, context) {
   if (is.function(size)) {
     size <- size(n)
@@ -1018,6 +1107,14 @@ NULL
       sprintf("%d rows", context$n_rows)
     }
     .mlsim_stop("Custom result `data` must have %s for level `%s`.", expected, level)
+  }
+
+  if (!is.null(metadata$column_roles)) {
+    metadata$column_roles <- .mlsim_validate_column_roles(
+      metadata$column_roles,
+      vars,
+      "custom metadata column_roles"
+    )
   }
 
   .mlsim_result(
