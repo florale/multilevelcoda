@@ -27,3 +27,4 @@ vignettes/fit_centered
 .codex
 R/optimise.R
 AGENTS.md
+plan.md
