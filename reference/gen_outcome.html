@@ -134,6 +134,52 @@ or shrinkage attempts.</p></dd>
     <p>An <code>mlsim_generator_spec</code> object for use in <code><a href="simulate_data.html">simulate_data()</a></code>.</p>
     </div>
     <div class="section level2">
+    <h2 id="time-spacing">Time spacing<a class="anchor" aria-label="anchor" href="#time-spacing"></a></h2>
+
+
+<p>When <code>ar1()</code> is present, time must be complete and equally spaced within
+each participant (or within the single series). Participants may have
+different start times, end times, and numbers of observations, and the
+simulator does not check or enforce equal spacing between participants:
+different participants may also use different step sizes. AR and VAR
+coefficients are defined per observation step, not per unit of real time,
+so dynamic parameters are only comparable across participants in real-time
+units when all participants share the same step size.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="ar-stability-and-realized-moderator-draws">AR stability and realized moderator draws<a class="anchor" aria-label="anchor" href="#ar-stability-and-realized-moderator-draws"></a></h2>
+
+
+<p>Stability is enforced through the row-wise spectral radius of the assembled
+AR coefficient matrices for every observed row. When <code>ar1()</code> interacts with
+predictors (for example <code>within(stress):ar1()</code>), the row-specific AR matrix
+depends on the moderator values realized earlier in the generator pipeline.
+Stability is therefore a property of the AR parameters jointly with the
+realized predictor data, not of the parameters alone: the same AR parameter
+values may be accepted in one simulated data set and rejected in another
+with more extreme moderator draws, and the chance of an unstable row grows
+with the number of rows. <code>ar_stability = "resample"</code> redraws only
+group-level effects, so it cannot repair instability caused by the
+population-level part of a moderated AR term; that case errors instead.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a></h2>
+
+
+<p>The simulator is written to scale to large designs without changing the
+data-generating model. Innovations are drawn in one vectorized step from
+the fixed conditional correlation matrix and scaled by the row-wise
+conditional SDs (an exact draw from the row-specific innovation
+distribution, since its covariance is the SD-scaled correlation matrix).
+Row-specific AR matrices are assembled with vectorized array operations,
+spectral radii are computed once per unique AR matrix so row-constant AR
+designs cost one eigendecomposition per participant, and stability
+resampling or shrinkage re-evaluates only the affected participant's rows.
+Because the order in which random numbers are consumed is part of the
+implementation, a given seed maps to a particular realization only within a
+package version; the distribution of simulated data is unaffected.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other predictor generators:
 <code><a href="continuous-generators.html">continuous-generators</a></code>,
@@ -191,22 +237,22 @@ or shrinkage attempts.</p></dd>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       ID obs_id   day treatment        ilr1      ilr2    sleep    active</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;int&gt;  &lt;int&gt; &lt;int&gt;    &lt;fctr&gt;       &lt;num&gt;     &lt;num&gt;    &lt;num&gt;     &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     1      1     1   control -0.13966660 0.8202144 6.343236 13.442538</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     1      2     2   control -0.28904909 0.3408946 6.102631 11.064925</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:     1      3     3   control -0.01135302 0.7371613 7.251181 12.382951</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:     1      4     4   control  0.18305016 0.1609256 9.200034  8.238424</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:     2      1     1   control -0.14991849 0.3436463 6.907676 10.582903</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:     2      2     2   control -0.17536396 0.6210080 6.448046 12.399700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       ID obs_id   day treatment       ilr1        ilr2     sleep    active</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;int&gt;  &lt;int&gt; &lt;int&gt;    &lt;fctr&gt;      &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     1      1     1   control -0.2064913 -0.03609880  6.710760  8.424008</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     1      2     2   control -0.2868224  0.70699869  5.708368 13.371705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:     1      3     3   control -0.4443665  0.41099101  5.225170 12.041240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:     1      4     4   control -0.4260561 -0.05385306  5.488733  8.903350</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:     2      1     1   control -0.1319125  0.28382912  7.062593 10.145892</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:     2      2     2   control  0.7619243  0.47254122 13.108039  7.200856</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    sedentary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  4.214225</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  6.832444</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  4.365868</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  6.561543</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:  6.509421</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:  5.152254</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  8.865232</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  4.919927</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  6.733590</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  9.607916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:  6.791514</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:  3.691105</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

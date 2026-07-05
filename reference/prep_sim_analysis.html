@@ -109,15 +109,47 @@ formula mappings.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The analysis formula is inferred from the stored <code><a href="gen_outcome.html">gen_outcome()</a></code> formula.
+    <p>The inferred analysis model is a deliberately <em>pragmatic default estimator</em>
+built from observed data, not the matched model for the simulated
+data-generating process. See the "Pragmatic default estimator" section
+before interpreting parameter recovery results.</p>
+<p>The analysis formula is inferred from the stored <code><a href="gen_outcome.html">gen_outcome()</a></code> formula.
 Simulation terms <code>between(x)</code> and <code>within(x)</code> become observed-data columns
 named <code>x_between</code> and <code>x_within</code>, computed from <code>x</code> by the simulation group
 identifier. These columns are recomputed even when columns with the same
 names already exist in <code>sim$data</code>.</p>
-<p>For dynamic formulas, <code>ar1()</code> is translated to within-person centered lag
-predictors. For compositional outcomes, the helper rebuilds the ILR
-coordinates through <code><a href="complr.html">complr()</a></code> using the simulator's parts and SBP metadata,
-then lags the generated <code>z</code> coordinates used by <code><a href="brmcoda.html">brmcoda()</a></code>.</p>
+<p>For dynamic formulas, <code>ar1()</code> is translated to lagged observed response
+columns centered at each person's observed mean of all their values (not
+the mean of the lagged values). For compositional outcomes, the helper
+rebuilds the ILR coordinates through <code><a href="complr.html">complr()</a></code> using the simulator's parts
+and SBP metadata, then lags the generated <code>z</code> coordinates used by
+<code><a href="brmcoda.html">brmcoda()</a></code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="pragmatic-default-estimator">Pragmatic default estimator<a class="anchor" aria-label="anchor" href="#pragmatic-default-estimator"></a></h2>
+
+
+<p><code><a href="gen_outcome.html">gen_outcome()</a></code> simulates latent residual AR/VAR dynamics around the
+model-implied mean and resolves <code>between()</code>/<code><a href="https://rdrr.io/r/base/with.html" class="external-link">within()</a></code> from latent
+generating components supplied by upstream predictor generators.
+<code>prep_sim_analysis()</code> instead constructs the model applied analysts
+commonly fit to observed data:</p><ul><li><p><code>between(x)</code> and <code>within(x)</code> become <code>x_between</code> and <code>x_within</code>,
+recomputed from realised person means of the observed <code>x</code> (manifest
+centering), not from the latent generating components.</p></li>
+<li><p><code>ar1()</code> becomes person-mean-centered lagged <em>observed</em>
+response predictors (<code>lag_&lt;response&gt;_within</code>), not the latent residual
+state.</p></li>
+</ul><p>These observed-data constructions target different estimands from the
+simulation truth. Manifest person-mean centering and observed-score lagged
+regression are known to yield biased estimates of between-person effects
+and of inertia and cross-lag parameters relative to the latent generating
+values, especially with short series (Ludtke et al. 2008; Hamaker &amp;
+Grasman 2014). This mismatch is intentional: it lets simulation studies
+quantify the bias of the pragmatic estimator. Do not interpret systematic
+discrepancies between estimates from this default analysis model and the
+<code><a href="gen_outcome.html">gen_outcome()</a></code> truth parameters as errors in the simulator. For
+matched-model recovery studies, construct the analysis model by hand
+instead of using this helper.</p>
     </div>
 
     <div class="section level2">

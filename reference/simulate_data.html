@@ -83,7 +83,8 @@ by <code>gen_*()</code> functions.</p></dd>
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
 <dd><p>Total number of observations for a single-level design. For grouped
 designs, <code>n</code> may be supplied instead of <code>n_per_group</code>; rows are distributed
-as evenly as possible across groups.</p></dd>
+as evenly as possible across groups. Supplying both <code>n</code> and <code>n_per_group</code>
+is an error.</p></dd>
 
 
 <dt id="arg-n-groups">n_groups<a class="anchor" aria-label="anchor" href="#arg-n-groups"></a></dt>
@@ -94,7 +95,8 @@ created.</p></dd>
 <dt id="arg-n-per-group">n_per_group<a class="anchor" aria-label="anchor" href="#arg-n-per-group"></a></dt>
 <dd><p>Group sizes. May be a scalar/vector, a function of
 <code>n_groups</code>, or a count-distribution list such as
-<code>list(distribution = "poisson", lambda = 4, minimum = 1)</code>.</p></dd>
+<code>list(distribution = "poisson", lambda = 4, minimum = 1)</code>. Requires
+<code>n_groups</code> and cannot be combined with <code>n</code>.</p></dd>
 
 
 <dt id="arg-group-id-obs-id">group_id, obs_id<a class="anchor" aria-label="anchor" href="#arg-group-id-obs-id"></a></dt>

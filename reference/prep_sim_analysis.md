@@ -58,6 +58,11 @@ An `mlsim_analysis` object, a list with:
 
 ## Details
 
+The inferred analysis model is a deliberately *pragmatic default
+estimator* built from observed data, not the matched model for the
+simulated data-generating process. See the "Pragmatic default estimator"
+section before interpreting parameter recovery results.
+
 The analysis formula is inferred from the stored
 [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
 formula. Simulation terms `between(x)` and `within(x)` become
@@ -65,13 +70,44 @@ observed-data columns named `x_between` and `x_within`, computed from
 `x` by the simulation group identifier. These columns are recomputed
 even when columns with the same names already exist in `sim$data`.
 
-For dynamic formulas, `ar1()` is translated to within-person centered
-lag predictors. For compositional outcomes, the helper rebuilds the ILR
-coordinates through
+For dynamic formulas, `ar1()` is translated to lagged observed response
+columns centered at each person's observed mean of all their values (not
+the mean of the lagged values). For compositional outcomes, the helper
+rebuilds the ILR coordinates through
 [`complr()`](https://florale.github.io/multilevelcoda/reference/complr.md)
 using the simulator's parts and SBP metadata, then lags the generated
 `z` coordinates used by
 [`brmcoda()`](https://florale.github.io/multilevelcoda/reference/brmcoda.md).
+
+## Pragmatic default estimator
+
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
+simulates latent residual AR/VAR dynamics around the model-implied mean
+and resolves `between()`/[`within()`](https://rdrr.io/r/base/with.html)
+from latent generating components supplied by upstream predictor
+generators. `prep_sim_analysis()` instead constructs the model applied
+analysts commonly fit to observed data:
+
+- `between(x)` and `within(x)` become `x_between` and `x_within`,
+  recomputed from realised person means of the observed `x` (manifest
+  centering), not from the latent generating components.
+
+- `ar1()` becomes person-mean-centered lagged *observed* response
+  predictors (`lag_<response>_within`), not the latent residual state.
+
+These observed-data constructions target different estimands from the
+simulation truth. Manifest person-mean centering and observed-score
+lagged regression are known to yield biased estimates of between-person
+effects and of inertia and cross-lag parameters relative to the latent
+generating values, especially with short series (Ludtke et al. 2008;
+Hamaker & Grasman 2014). This mismatch is intentional: it lets
+simulation studies quantify the bias of the pragmatic estimator. Do not
+interpret systematic discrepancies between estimates from this default
+analysis model and the
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
+truth parameters as errors in the simulator. For matched-model recovery
+studies, construct the analysis model by hand instead of using this
+helper.
 
 ## Examples
 

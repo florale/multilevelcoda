@@ -31,7 +31,8 @@ simulate_data(
 
   Total number of observations for a single-level design. For grouped
   designs, `n` may be supplied instead of `n_per_group`; rows are
-  distributed as evenly as possible across groups.
+  distributed as evenly as possible across groups. Supplying both `n`
+  and `n_per_group` is an error.
 
 - n_groups:
 
@@ -41,7 +42,8 @@ simulate_data(
 
   Group sizes. May be a scalar/vector, a function of `n_groups`, or a
   count-distribution list such as
-  `list(distribution = "poisson", lambda = 4, minimum = 1)`.
+  `list(distribution = "poisson", lambda = 4, minimum = 1)`. Requires
+  `n_groups` and cannot be combined with `n`.
 
 - group_id, obs_id:
 
