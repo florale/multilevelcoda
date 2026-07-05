@@ -7,12 +7,14 @@
 #'   by `gen_*()` functions.
 #' @param n Total number of observations for a single-level design. For grouped
 #'   designs, `n` may be supplied instead of `n_per_group`; rows are distributed
-#'   as evenly as possible across groups.
+#'   as evenly as possible across groups. Supplying both `n` and `n_per_group`
+#'   is an error.
 #' @param n_groups Number of groups. When `NULL`, a single-level design is
 #'   created.
 #' @param n_per_group Group sizes. May be a scalar/vector, a function of
 #'   `n_groups`, or a count-distribution list such as
-#'   `list(distribution = "poisson", lambda = 4, minimum = 1)`.
+#'   `list(distribution = "poisson", lambda = 4, minimum = 1)`. Requires
+#'   `n_groups` and cannot be combined with `n`.
 #' @param group_id,obs_id Character scalars naming the group and observation
 #'   index columns.
 #' @param time_id Optional character scalar naming a time column.
@@ -258,6 +260,9 @@ NULL
   .mlsim_check_vars(c(group_id, obs_id, time_id), arg = "design column names")
 
   if (is.null(n_groups)) {
+    if (!is.null(n_per_group)) {
+      .mlsim_stop("`n_per_group` requires `n_groups`; supply `n_groups` or use `n` for a single-level design.")
+    }
     if (is.null(n)) {
       .mlsim_stop("Single-level designs require `n` when `n_groups` is not supplied.")
     }
@@ -289,6 +294,9 @@ NULL
   n_groups <- .mlsim_recycle_integer(n_groups, 1L, "n_groups")
   if (n_groups < 1L) {
     .mlsim_stop("`n_groups` must be at least 1.")
+  }
+  if (!is.null(n) && !is.null(n_per_group)) {
+    .mlsim_stop("Supply either `n` or `n_per_group` for a grouped design, not both.")
   }
 
 	  if (is.null(n_per_group)) {

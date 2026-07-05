@@ -114,7 +114,7 @@ is.sequential <- function(x) {
       y_breaks <- c(0.9, 0.95, 1)
     }
   } else if (all(data$Stat == "mse")) {
-    ylab <- "Empirical Standard Error"
+    ylab <- "Mean-squared Error"
     yintercept <- 0
     if ("Estimand" %in% colnames(data)) {
       y_lims <- c(0, 3.5)
@@ -124,7 +124,7 @@ is.sequential <- function(x) {
       y_breaks <- c(0, 0.5, 1)
     }
   } else if (all(data$Stat == "empse")) {
-    ylab <- "Mean-squared Error"
+    ylab <- "Empirical Standard Error"
     yintercept <- 0
     if ("Estimand" %in% colnames(data)) {
       y_lims <- c(0, 3)

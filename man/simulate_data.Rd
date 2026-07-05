@@ -23,14 +23,16 @@ by \verb{gen_*()} functions.}
 
 \item{n}{Total number of observations for a single-level design. For grouped
 designs, \code{n} may be supplied instead of \code{n_per_group}; rows are distributed
-as evenly as possible across groups.}
+as evenly as possible across groups. Supplying both \code{n} and \code{n_per_group}
+is an error.}
 
 \item{n_groups}{Number of groups. When \code{NULL}, a single-level design is
 created.}
 
 \item{n_per_group}{Group sizes. May be a scalar/vector, a function of
 \code{n_groups}, or a count-distribution list such as
-\code{list(distribution = "poisson", lambda = 4, minimum = 1)}.}
+\code{list(distribution = "poisson", lambda = 4, minimum = 1)}. Requires
+\code{n_groups} and cannot be combined with \code{n}.}
 
 \item{group_id, obs_id}{Character scalars naming the group and observation
 index columns.}

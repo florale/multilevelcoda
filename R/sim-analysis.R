@@ -154,7 +154,16 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE) {
   if (!is.null(complr_object)) {
     complr_object$dataout <- data.table::copy(data)
     if (isTRUE(lag_info$dropped_rows > 0L)) {
-      complr_object$datain <- complr_object$datain[lag_info$keep_rows]
+      keep_rows <- lag_info$keep_rows
+      complr_object$datain <- complr_object$datain[keep_rows]
+      complr_object$output <- lapply(complr_object$output, function(out) {
+        for (element in c("X", "bX", "wX", "Z", "bZ", "wZ", "dataout")) {
+          if (!is.null(out[[element]])) {
+            out[[element]] <- out[[element]][keep_rows, , drop = FALSE]
+          }
+        }
+        out
+      })
     }
   }
 

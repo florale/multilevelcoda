@@ -125,6 +125,11 @@ NULL
       !(dim(basis) %a==% c(d + 1L, d))) {
     .mlsim_stop("`sbp` must define a finite ILR basis.")
   }
+  if (max(abs(crossprod(basis) - diag(d))) > 1e-8) {
+    .mlsim_stop(
+      "`sbp` must be a nested sequential binary partition: the implied ILR basis is not orthonormal, so simulated ILR parameters would not be recovered by `ilr()`."
+    )
+  }
   invisible(TRUE)
 }
 

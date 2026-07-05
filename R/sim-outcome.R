@@ -347,11 +347,8 @@ gen_template <- function(formula, scale, burnin,
 }
 
 .mlsim_check_burnin <- function(burnin) {
-  burnin <- .mlsim_recycle_integer(burnin, 1L, "burnin")
-  if (burnin < 0L) {
-    .mlsim_stop("`burnin` must be non-negative.")
-  }
-  burnin
+  # .mlsim_recycle_integer() already rejects negative values
+  .mlsim_recycle_integer(burnin, 1L, "burnin")
 }
 
 .mlsim_normalize_outcome_composition <- function(composition) {
@@ -1263,7 +1260,9 @@ gen_template <- function(formula, scale, burnin,
         .mlsim_stop("Unstable AR matrix for group %d; spectral radius %.3f.", g, radius)
       }
       if (radius >= shrink_target_radius && identical(ar_stability, "shrink")) {
-        lambda <- 1
+        # the unshrunk draws already failed the radius check, so the first
+        # attempt must apply a genuine shrinkage factor
+        lambda <- 0.8
         for (attempt in seq_len(max_stability_attempts)) {
           candidate_draws <- .mlsim_shrink_ar_draws(spec, draws, g, lambda)
           radius <- .mlsim_group_max_radius(spec, checked, candidate_draws, g)
