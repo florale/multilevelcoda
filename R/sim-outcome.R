@@ -32,6 +32,43 @@
 #'
 #' @return An `mlsim_generator_spec` object for use in [simulate_data()].
 #'
+#' @section Time spacing:
+#' When `ar1()` is present, time must be complete and equally spaced within
+#' each participant (or within the single series). Participants may have
+#' different start times, end times, and numbers of observations, and the
+#' simulator does not check or enforce equal spacing between participants:
+#' different participants may also use different step sizes. AR and VAR
+#' coefficients are defined per observation step, not per unit of real time,
+#' so dynamic parameters are only comparable across participants in real-time
+#' units when all participants share the same step size.
+#'
+#' @section AR stability and realized moderator draws:
+#' Stability is enforced through the row-wise spectral radius of the assembled
+#' AR coefficient matrices for every observed row. When `ar1()` interacts with
+#' predictors (for example `within(stress):ar1()`), the row-specific AR matrix
+#' depends on the moderator values realized earlier in the generator pipeline.
+#' Stability is therefore a property of the AR parameters jointly with the
+#' realized predictor data, not of the parameters alone: the same AR parameter
+#' values may be accepted in one simulated data set and rejected in another
+#' with more extreme moderator draws, and the chance of an unstable row grows
+#' with the number of rows. `ar_stability = "resample"` redraws only
+#' group-level effects, so it cannot repair instability caused by the
+#' population-level part of a moderated AR term; that case errors instead.
+#'
+#' @section Performance:
+#' The simulator is written to scale to large designs without changing the
+#' data-generating model. Innovations are drawn in one vectorized step from
+#' the fixed conditional correlation matrix and scaled by the row-wise
+#' conditional SDs (an exact draw from the row-specific innovation
+#' distribution, since its covariance is the SD-scaled correlation matrix).
+#' Row-specific AR matrices are assembled with vectorized array operations,
+#' spectral radii are computed once per unique AR matrix so row-constant AR
+#' designs cost one eigendecomposition per participant, and stability
+#' resampling or shrinkage re-evaluates only the affected participant's rows.
+#' Because the order in which random numbers are consumed is part of the
+#' implementation, a given seed maps to a particular realization only within a
+#' package version; the distribution of simulated data is unaffected.
+#'
 #' @examples
 #' beta_location <- matrix(
 #'   c(0, 0, 0.2, -0.1),
@@ -583,7 +620,25 @@ gen_template <- function(formula, scale, burnin,
   if (.mlsim_expr_has_ar(expr)) {
     .mlsim_stop("`ar1()` may only appear as a main effect or inside interactions in the location formula.")
   }
+  specials <- .mlsim_find_special_calls(expr)
+  if (length(specials) > 0L) {
+    .mlsim_stop(
+      "`%s` terms may only appear as main effects or inside interactions in the %s formula, not inside `%s(...)`.",
+      specials[[1L]],
+      component,
+      op
+    )
+  }
   expr
+}
+
+.mlsim_find_special_calls <- function(expr) {
+  if (!is.call(expr)) {
+    return(character())
+  }
+  op <- as.character(expr[[1L]])
+  found <- if (op %in% c("between", "within")) sprintf("%s()", op) else character()
+  c(found, unlist(lapply(as.list(expr[-1L]), .mlsim_find_special_calls)))
 }
 
 .mlsim_expr_has_ar <- function(expr) {
@@ -638,11 +693,38 @@ gen_template <- function(formula, scale, burnin,
     )
   }
   source_col <- matches$column[[1L]]
+  if (identical(component, "between")) {
+    .mlsim_check_between_constant(
+      env$data[[source_col]],
+      env$context$group_index,
+      variable,
+      source_col
+    )
+  }
   safe_col <- sprintf(".__mlsim_%s_%s__", component, make.names(variable))
   env$data[[safe_col]] <- env$data[[source_col]]
   env$term_map[safe_col] <- sprintf("%s(%s)", component, variable)
   env$selected_roles <- unique(data.table::rbindlist(list(env$selected_roles, matches), fill = TRUE))
   safe_col
+}
+
+.mlsim_check_between_constant <- function(values, group_index, variable, column) {
+  if (is.null(group_index)) {
+    return(invisible(TRUE))
+  }
+  constant <- if (is.numeric(values)) {
+    all(tapply(values, group_index, function(x) max(x) - min(x) <= 1e-8))
+  } else {
+    all(tapply(values, group_index, function(x) length(unique(x)) == 1L))
+  }
+  if (!isTRUE(constant)) {
+    .mlsim_stop(
+      "`between(%s)` requires the role-labelled column `%s` to be constant within each active group; fix the upstream predictor generator that labelled this column with component `between`.",
+      variable,
+      column
+    )
+  }
+  invisible(TRUE)
 }
 
 .mlsim_build_model_matrix <- function(expr, data, component, term_map, allow_ar) {
@@ -717,6 +799,9 @@ gen_template <- function(formula, scale, burnin,
   sc_Z <- NULL
   for (term in location_random) {
     transformed <- .mlsim_transform_specials(term$expr, special_env, allow_ar = TRUE, component = "location")
+    if (isTRUE(special_env$has_ar) && !(.mlsim_ar_placeholder() %in% names(special_env$data))) {
+      special_env$data[[.mlsim_ar_placeholder()]] <- 1
+    }
     data <- special_env$data
     mat <- .mlsim_build_model_matrix(transformed, data, "location random-effect", special_env$term_map, allow_ar = TRUE)
     split <- .mlsim_split_ar_matrix(mat)
@@ -771,10 +856,16 @@ gen_template <- function(formula, scale, burnin,
 .mlsim_check_random_terms_match <- function(random_terms, population_terms, component) {
   missing <- random_terms[!random_terms %in% population_terms]
   if (length(missing) > 0L) {
+    hint <- if (identical(component, "AR")) {
+      " Add the matching `ar1()` term(s) to the location formula."
+    } else {
+      ""
+    }
     .mlsim_stop(
-      "%s group-level terms must have matching population-level terms in the same component; missing: %s.",
+      "%s group-level terms must have matching population-level terms in the same component; missing: %s.%s",
       component,
-      paste(missing, collapse = ", ")
+      paste(missing, collapse = ", "),
+      hint
     )
   }
   invisible(TRUE)
@@ -882,6 +973,7 @@ gen_template <- function(formula, scale, burnin,
       basis = comp$basis,
       basis_matrix = comp$basis,
       basis_source = "sbp",
+      basis_package_version = as.character(utils::packageVersion("compositions")),
       ilr_coordinate_map = comp$coordinate_map,
       total = comp$total,
       keep_ilr = spec$composition$keep_ilr,
@@ -909,6 +1001,7 @@ gen_template <- function(formula, scale, burnin,
         beta = checked$ar$beta,
         phi_by_row = phi$phi,
         fixed_phi_by_row = phi$fixed_phi,
+        phi_by_group_and_term = .mlsim_phi_by_group_and_term(spec, checked, random$draws),
         stability = random$stability
       ),
       mu = mu,
@@ -1148,8 +1241,7 @@ gen_template <- function(formula, scale, burnin,
         colnames(candidate) <- names
         candidate_draws <- draws
         candidate_draws[g, ] <- candidate[1L, ]
-        phi <- .mlsim_outcome_phi(spec, checked, candidate_draws)$phi
-        radius <- .mlsim_group_max_radius(spec, phi, g)
+        radius <- .mlsim_group_max_radius(spec, checked, candidate_draws, g)
         if (radius < 1 - 1e-10) {
           draws[g, ] <- candidate[1L, ]
           attempts[[g]] <- attempt
@@ -1165,8 +1257,7 @@ gen_template <- function(formula, scale, burnin,
       candidate <- .mlsim_rmvnorm(1L, rep(0, n_random), covariance)
       colnames(candidate) <- names
       draws[g, ] <- candidate[1L, ]
-      phi <- .mlsim_outcome_phi(spec, checked, draws)$phi
-      radius <- .mlsim_group_max_radius(spec, phi, g)
+      radius <- .mlsim_group_max_radius(spec, checked, draws, g)
       before[[g]] <- radius
       if (radius >= 1 - 1e-10 && identical(ar_stability, "error")) {
         .mlsim_stop("Unstable AR matrix for group %d; spectral radius %.3f.", g, radius)
@@ -1175,8 +1266,7 @@ gen_template <- function(formula, scale, burnin,
         lambda <- 1
         for (attempt in seq_len(max_stability_attempts)) {
           candidate_draws <- .mlsim_shrink_ar_draws(spec, draws, g, lambda)
-          phi <- .mlsim_outcome_phi(spec, checked, candidate_draws)$phi
-          radius <- .mlsim_group_max_radius(spec, phi, g)
+          radius <- .mlsim_group_max_radius(spec, checked, candidate_draws, g)
           if (radius < shrink_target_radius) {
             draws <- candidate_draws
             shrink_factor[[g]] <- lambda
@@ -1256,25 +1346,42 @@ gen_template <- function(formula, scale, burnin,
   list(
     stability_rule = rule,
     stability_attempts_by_group_level = attempts,
-    stability_acceptance_rate = if (is.null(attempts)) NULL else mean(1 / attempts),
+    stability_acceptance_rate = if (is.null(attempts) || !identical(rule, "resample")) {
+      NULL
+    } else {
+      length(attempts) / sum(attempts)
+    },
     spectral_radius_by_group_level_and_row = radius_table,
     max_spectral_radius_by_group_level = max_by_group,
     max_spectral_radius_overall = max(radii, na.rm = TRUE)
   )
 }
 
-.mlsim_group_max_radius <- function(spec, phi, group) {
+.mlsim_group_max_radius <- function(spec, checked, draws, group) {
   idx <- which(spec$series$group_index == group)
-  max(.mlsim_phi_radii(phi[idx, , , drop = FALSE]), na.rm = TRUE)
+  phi <- .mlsim_outcome_phi(spec, checked, draws, rows = idx)$phi
+  max(.mlsim_phi_radii(phi), na.rm = TRUE)
 }
 
 .mlsim_phi_radii <- function(phi) {
   if (is.null(phi) || length(phi) == 0L) {
     return(numeric())
   }
-  vapply(seq_len(dim(phi)[[1L]]), function(i) {
-    max(Mod(eigen(phi[i, , ], only.values = TRUE)$values))
+  n <- dim(phi)[[1L]]
+  k <- dim(phi)[[2L]]
+  if (k == 1L) {
+    return(abs(as.vector(phi[, 1L, 1L])))
+  }
+  flat <- matrix(phi, nrow = n)
+  keys <- do.call(
+    paste,
+    c(lapply(seq_len(ncol(flat)), function(j) sprintf("%.17g", flat[, j])), list(sep = ","))
+  )
+  first_idx <- which(!duplicated(keys))
+  unique_radii <- vapply(first_idx, function(i) {
+    max(Mod(eigen(matrix(phi[i, , ], k, k), only.values = TRUE)$values))
   }, numeric(1))
+  unique_radii[match(keys, keys[first_idx])]
 }
 
 .mlsim_outcome_location <- function(spec, checked, draws) {
@@ -1307,31 +1414,26 @@ gen_template <- function(formula, scale, burnin,
   eta
 }
 
-.mlsim_outcome_phi <- function(spec, checked, draws) {
-  n <- nrow(spec$X)
+.mlsim_outcome_phi <- function(spec, checked, draws, rows = NULL) {
+  idx <- rows %||% seq_len(nrow(spec$X))
+  n <- length(idx)
   k <- length(spec$outcomes)
   fixed_phi <- array(0, dim = c(n, k, k), dimnames = list(NULL, spec$outcomes, spec$outcomes))
   phi <- fixed_phi
   if (isTRUE(spec$has_ar)) {
     for (term in colnames(spec$Q)) {
-      beta_term <- matrix(
-        checked$ar$beta[term, , ],
-        nrow = k,
-        ncol = k,
-        dimnames = list(spec$outcomes, spec$outcomes)
-      )
-      for (i in seq_len(n)) {
-        fixed_phi[i, , ] <- fixed_phi[i, , ] + spec$Q[i, term] * beta_term
-      }
+      beta_term <- matrix(checked$ar$beta[term, , ], nrow = k, ncol = k)
+      fixed_phi <- fixed_phi + outer(spec$Q[idx, term], beta_term)
     }
     phi <- fixed_phi
     if (!is.null(draws) && length(spec$random$ar_terms) > 0L) {
+      group_index <- spec$series$group_index[idx]
       for (term in spec$random$ar_terms) {
-        z <- spec$random$ar_Z[, term]
+        z <- spec$random$ar_Z[idx, term]
         for (to in spec$outcomes) {
           for (from in spec$outcomes) {
             name <- sprintf("ar|term=%s|to=%s|from=%s", term, to, from)
-            phi[, to, from] <- phi[, to, from] + z * draws[spec$series$group_index, name]
+            phi[, to, from] <- phi[, to, from] + z * draws[group_index, name]
           }
         }
       }
@@ -1340,32 +1442,69 @@ gen_template <- function(formula, scale, burnin,
   list(phi = phi, fixed_phi = fixed_phi)
 }
 
+.mlsim_phi_by_group_and_term <- function(spec, checked, draws) {
+  if (!isTRUE(spec$has_ar)) {
+    return(NULL)
+  }
+  k <- length(spec$outcomes)
+  n_groups <- max(spec$series$group_index)
+  terms <- spec$expected_parameter_names$ar
+  out <- lapply(terms, function(term) {
+    arr <- array(
+      rep(checked$ar$beta[term, , ], each = n_groups),
+      dim = c(n_groups, k, k),
+      dimnames = list(as.character(seq_len(n_groups)), spec$outcomes, spec$outcomes)
+    )
+    if (!is.null(draws) && term %in% spec$random$ar_terms) {
+      for (to in spec$outcomes) {
+        for (from in spec$outcomes) {
+          name <- sprintf("ar|term=%s|to=%s|from=%s", term, to, from)
+          arr[, to, from] <- arr[, to, from] + draws[, name]
+        }
+      }
+    }
+    arr
+  })
+  names(out) <- terms
+  out
+}
+
 .mlsim_draw_outcome_values <- function(spec, mu, sigma, correlation, phi, burnin) {
   n <- nrow(mu)
   k <- ncol(mu)
-  z <- residual <- innovation <- matrix(NA_real_, n, k, dimnames = list(NULL, colnames(mu)))
-  sigma_array <- .mlsim_mvn_row_covariance_array(sigma, correlation)
-  for (rows in spec$series$rows) {
+  # Var(eps_ij) = S_ij R S_ij, so a base draw from MVN(0, R) scaled row-wise by
+  # the conditional SDs is an exact draw from the row-specific innovation
+  # distribution and lets all observed-row innovations be drawn in one step.
+  innovation <- .mlsim_mvn_row_residual(sigma, correlation)
+  dimnames(innovation) <- list(NULL, colnames(mu))
+  if (!isTRUE(spec$has_ar)) {
+    residual <- innovation
+    return(list(z = mu + residual, residual = residual, innovation = innovation))
+  }
+
+  residual <- matrix(NA_real_, n, k, dimnames = list(NULL, colnames(mu)))
+  series_rows <- spec$series$rows
+  burn_base <- if (burnin > 0L) {
+    .mlsim_rmvnorm(burnin * length(series_rows), rep(0, k), correlation)
+  } else {
+    NULL
+  }
+  for (s in seq_along(series_rows)) {
+    rows <- series_rows[[s]]
     e_prev <- rep(0, k)
-    if (isTRUE(spec$has_ar) && burnin > 0L) {
+    if (burnin > 0L) {
       first <- rows[[1L]]
+      phi_first <- matrix(phi$phi[first, , ], k, k)
+      burn_eps <- burn_base[(s - 1L) * burnin + seq_len(burnin), , drop = FALSE] *
+        matrix(sigma[first, ], burnin, k, byrow = TRUE)
       for (b in seq_len(burnin)) {
-        eps <- as.vector(.mlsim_rmvnorm(1L, rep(0, k), sigma_array[first, , ]))
-        e_prev <- as.vector(phi$phi[first, , ] %*% e_prev + eps)
+        e_prev <- as.vector(phi_first %*% e_prev) + burn_eps[b, ]
       }
     }
     for (r in rows) {
-      eps <- as.vector(.mlsim_rmvnorm(1L, rep(0, k), sigma_array[r, , ]))
-      e <- if (isTRUE(spec$has_ar)) {
-        as.vector(phi$phi[r, , ] %*% e_prev + eps)
-      } else {
-        eps
-      }
-      innovation[r, ] <- eps
-      residual[r, ] <- e
-      z[r, ] <- mu[r, ] + e
-      e_prev <- e
+      e_prev <- as.vector(matrix(phi$phi[r, , ], k, k) %*% e_prev) + innovation[r, ]
+      residual[r, ] <- e_prev
     }
   }
-  list(z = z, residual = residual, innovation = innovation)
+  list(z = mu + residual, residual = residual, innovation = innovation)
 }

@@ -140,6 +140,27 @@ test_that("gen_outcome supports residual VAR and compositional output", {
   expect_equal(dim(sim$generator_metadata$outcome$ar$phi_by_row), c(nrow(sim$data), 2L, 2L))
   expect_true("treatmenttreatment:ar1()" %in% sim$generator_metadata$outcome$expected_parameter_names$ar)
   expect_false(is.null(sim$generator_metadata$outcome$ar$stability$stability_attempts_by_group_level))
+
+  attempts <- sim$generator_metadata$outcome$ar$stability$stability_attempts_by_group_level
+  expect_equal(
+    sim$generator_metadata$outcome$ar$stability$stability_acceptance_rate,
+    length(attempts) / sum(attempts)
+  )
+
+  phi_by_term <- sim$generator_metadata$outcome$ar$phi_by_group_and_term
+  expect_equal(names(phi_by_term), sim$generator_metadata$outcome$expected_parameter_names$ar)
+  expect_equal(dim(phi_by_term[["ar1()"]]), c(4L, 2L, 2L))
+  u <- sim$generator_metadata$outcome$group_level_effects
+  expect_equal(
+    phi_by_term[["ar1()"]][1L, "ilr1", "ilr2"],
+    outcome_acceptance_params()$ar$beta["ar1()", "ilr1", "ilr2"] +
+      u[1L, "ar|term=ar1()|to=ilr1|from=ilr2"]
+  )
+
+  expect_identical(
+    sim$generator_metadata$outcome$basis_package_version,
+    as.character(utils::packageVersion("compositions"))
+  )
 })
 
 test_that("gen_outcome validates dynamic formula restrictions", {
@@ -234,6 +255,79 @@ test_that("gen_outcome validates dynamic formula restrictions", {
   expect_equal(
     valid_interaction$generator_metadata$outcome_template$expected_parameter_names$ar,
     c("ar1()", "treatmenttreatment:ar1()")
+  )
+})
+
+test_that("gen_outcome rejects between columns that vary within groups", {
+  params <- list(
+    location = list(beta = matrix(c(0, 1), nrow = 2, dimnames = list(c("(Intercept)", "between(x)"), "y"))),
+    scale = list(beta = matrix(log(0.1), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  varying_between <- gen_custom("x", function(context, vars, level) {
+    list(
+      data = data.frame(x = seq_len(context$n_rows)),
+      names = "x",
+      metadata = list(column_roles = data.frame(
+        column = "x",
+        variable = "x",
+        component = "between",
+        level = "group"
+      ))
+    )
+  })
+
+  expect_error(
+    simulate_data(
+      n_groups = 3,
+      n_per_group = 4,
+      seed = 401,
+      generators = list(
+        x = varying_between,
+        y = gen_outcome(y ~ between(x), scale = sigma ~ 1, params = params, burnin = 0)
+      )
+    ),
+    "constant within each active group"
+  )
+})
+
+test_that("gen_outcome rejects helper terms inside unsupported calls", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.1), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+
+  expect_error(
+    simulate_data(
+      n_groups = 3,
+      n_per_group = 4,
+      seed = 402,
+      generators = list(
+        stress = gen_mvn("stress", level = "multilevel", fixed_intercept = 0, random_cov = 0.2, residual_cov = 0.8),
+        y = gen_outcome(y ~ I(within(stress)^2), scale = sigma ~ 1, params = params, burnin = 0)
+      )
+    ),
+    "`within\\(\\)` terms may only appear as main effects or inside interactions"
+  )
+})
+
+test_that("group-level ar1() requires a matching population-level ar1() term", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.1), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+
+  expect_error(
+    simulate_data(
+      n_groups = 3,
+      n_per_group = 4,
+      group_id = "ID",
+      time_id = "time",
+      seed = 403,
+      generators = list(
+        y = gen_outcome(y ~ (1 + ar1() | ID), scale = sigma ~ 1, params = params, burnin = 0)
+      )
+    ),
+    "matching population-level terms in the same component; missing: ar1\\(\\)\\. Add the matching `ar1\\(\\)` term"
   )
 })
 
@@ -758,6 +852,10 @@ test_that("prep_sim_analysis creates within lags for single-level AR outcomes", 
   expect_equal(nrow(analysis$data), nrow(sim$data))
   expect_true("lag_y_within" %in% names(analysis$data))
   expect_true(is.na(analysis$data$lag_y_within[[1L]]))
+  expect_equal(
+    analysis$data$lag_y_within[-1L],
+    head(sim$data$y, -1L) - mean(sim$data$y)
+  )
   expect_equal(nrow(dropped$data), nrow(sim$data) - 1L)
   expect_match(formula_text, "lag_y_within", fixed = TRUE)
 })
@@ -865,4 +963,136 @@ test_that("prep_sim_analysis reports missing or ambiguous outcome context", {
   )
   ar_sim$metadata$time_id <- NULL
   expect_error(prep_sim_analysis(ar_sim), "time_id")
+})
+
+test_that(".mlsim_phi_radii matches direct eigendecomposition and handles duplicates", {
+  m1 <- matrix(c(0.5, 0.1, -0.2, 0.3), 2, 2)
+  m2 <- matrix(c(0.9, 0, 0.4, -0.4), 2, 2)
+  phi <- array(NA_real_, c(5, 2, 2))
+  phi[1, , ] <- m1
+  phi[2, , ] <- m2
+  phi[3, , ] <- m1
+  phi[4, , ] <- m2
+  phi[5, , ] <- m1
+  direct <- vapply(seq_len(5), function(i) {
+    max(Mod(eigen(phi[i, , ], only.values = TRUE)$values))
+  }, numeric(1))
+  expect_equal(multilevelcoda:::.mlsim_phi_radii(phi), direct)
+
+  set.seed(42)
+  uni <- array(rnorm(7), c(7, 1, 1))
+  expect_equal(multilevelcoda:::.mlsim_phi_radii(uni), abs(as.vector(uni)))
+})
+
+test_that(".mlsim_outcome_phi row subsetting matches full assembly", {
+  set.seed(7)
+  n <- 12L
+  outcomes <- c("y1", "y2")
+  Q <- cbind(rep(1, n), rnorm(n))
+  colnames(Q) <- c("ar1()", "x:ar1()")
+  group_index <- rep(1:3, each = 4L)
+  spec <- list(
+    X = matrix(1, n, 1L),
+    Q = Q,
+    has_ar = TRUE,
+    outcomes = outcomes,
+    random = list(
+      ar_terms = "ar1()",
+      ar_Z = matrix(1, n, 1L, dimnames = list(NULL, "ar1()"))
+    ),
+    series = list(group_index = group_index)
+  )
+  beta <- array(
+    rnorm(8, sd = 0.1),
+    dim = c(2, 2, 2),
+    dimnames = list(colnames(Q), outcomes, outcomes)
+  )
+  checked <- list(ar = list(beta = beta))
+  ar_names <- multilevelcoda:::.mlsim_random_effect_names("ar", "ar1()", outcomes)
+  draws <- matrix(
+    rnorm(3L * length(ar_names), sd = 0.05),
+    nrow = 3L,
+    ncol = length(ar_names),
+    dimnames = list(NULL, ar_names)
+  )
+
+  full <- multilevelcoda:::.mlsim_outcome_phi(spec, checked, draws)
+  rows <- which(group_index == 2L)
+  sub <- multilevelcoda:::.mlsim_outcome_phi(spec, checked, draws, rows = rows)
+  expect_equal(sub$phi, full$phi[rows, , , drop = FALSE])
+  expect_equal(sub$fixed_phi, full$fixed_phi[rows, , , drop = FALSE])
+})
+
+test_that("simulated values satisfy the exact residual VAR recursion", {
+  params <- outcome_acceptance_params()
+  params$scale$correlation[1L, 2L] <- 0.4
+  params$scale$correlation[2L, 1L] <- 0.4
+  re <- params$random$ID$covariance
+  diag(re) <- c(0.2, 0.15, 0.01, 0, 0, 0.01, 0.05, 0.05)
+  params$random$ID$covariance <- re
+
+  sim <- simulate_data(
+    n_groups = 8,
+    n_per_group = 60,
+    group_id = "ID",
+    time_id = "day",
+    seed = 606,
+    generators = list(
+      treatment = gen_categorical(
+        "treatment",
+        level = "level2",
+        categories = c("control", "treatment"),
+        fixed_intercept = stats::qlogis(0.5),
+        output = "factor"
+      ),
+      stress = gen_mvn("stress", level = "multilevel", fixed_intercept = 0, random_cov = 0.2, residual_cov = 0.8),
+      outcome = gen_outcome(
+        mvbind(ilr1, ilr2) ~ treatment + between(stress) + within(stress) +
+          ar1() + treatment:ar1() + (1 + ar1() | ID),
+        scale = sigma ~ treatment + (1 | ID),
+        params = params,
+        burnin = 5,
+        composition = list(parts = c("sleep", "sedentary", "activity"), total = 24)
+      )
+    )
+  )
+
+  md <- sim$generator_metadata$outcome
+  z <- as.matrix(sim$data[, c("ilr1", "ilr2"), with = FALSE])
+
+  # Generated outcomes decompose exactly into location plus residual state.
+  expect_equal(unname(z), unname(md$mu + md$residual))
+
+  # Residuals follow the defining recursion e_t = Phi_t e_{t-1} + eps_t exactly.
+  phi <- md$ar$phi_by_row
+  groups <- as.integer(sim$data$ID)
+  for (g in unique(groups)) {
+    rows <- which(groups == g)
+    for (i in seq_along(rows)[-1L]) {
+      r <- rows[[i]]
+      p <- rows[[i - 1L]]
+      expect_equal(
+        unname(md$residual[r, ]),
+        unname(as.vector(phi[r, , ] %*% md$residual[p, ]) + md$innovation[r, ]),
+        tolerance = 1e-12
+      )
+    }
+  }
+
+  # Innovations divided by their row-wise conditional SDs are standardized
+  # draws with the requested conditional correlation.
+  scaled <- md$innovation / md$sigma
+  expect_lt(max(abs(apply(scaled, 2L, stats::sd) - 1)), 0.1)
+  expect_lt(abs(stats::cor(scaled)[1L, 2L] - 0.4), 0.1)
+
+  # Stored stability radii match direct per-row eigendecompositions.
+  radii_direct <- vapply(seq_len(nrow(z)), function(i) {
+    max(Mod(eigen(phi[i, , ], only.values = TRUE)$values))
+  }, numeric(1))
+  tab <- md$ar$stability$spectral_radius_by_group_level_and_row
+  expect_equal(tab$spectral_radius, radii_direct[tab$row])
+  expect_equal(
+    md$ar$stability$max_spectral_radius_by_group_level,
+    unname(as.numeric(tapply(radii_direct[tab$row], tab$group, max)))
+  )
 })

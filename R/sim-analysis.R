@@ -6,6 +6,11 @@
 #' columns, creates within-person centered lag columns for `ar1()` terms, and
 #' creates a [complr()] object when the outcome is compositional.
 #'
+#' The inferred analysis model is a deliberately *pragmatic default estimator*
+#' built from observed data, not the matched model for the simulated
+#' data-generating process. See the "Pragmatic default estimator" section
+#' before interpreting parameter recovery results.
+#'
 #' @param sim An `mlsim_data` object returned by [simulate_data()].
 #' @param outcome Optional character scalar naming the outcome generator. When
 #'   `NULL`, the helper uses the only generator with
@@ -29,10 +34,38 @@
 #' identifier. These columns are recomputed even when columns with the same
 #' names already exist in `sim$data`.
 #'
-#' For dynamic formulas, `ar1()` is translated to within-person centered lag
-#' predictors. For compositional outcomes, the helper rebuilds the ILR
-#' coordinates through [complr()] using the simulator's parts and SBP metadata,
-#' then lags the generated `z` coordinates used by [brmcoda()].
+#' For dynamic formulas, `ar1()` is translated to lagged observed response
+#' columns centered at each person's observed mean of all their values (not
+#' the mean of the lagged values). For compositional outcomes, the helper
+#' rebuilds the ILR coordinates through [complr()] using the simulator's parts
+#' and SBP metadata, then lags the generated `z` coordinates used by
+#' [brmcoda()].
+#'
+#' @section Pragmatic default estimator:
+#' [gen_outcome()] simulates latent residual AR/VAR dynamics around the
+#' model-implied mean and resolves `between()`/`within()` from latent
+#' generating components supplied by upstream predictor generators.
+#' `prep_sim_analysis()` instead constructs the model applied analysts
+#' commonly fit to observed data:
+#' \itemize{
+#'   \item `between(x)` and `within(x)` become `x_between` and `x_within`,
+#'     recomputed from realised person means of the observed `x` (manifest
+#'     centering), not from the latent generating components.
+#'   \item `ar1()` becomes person-mean-centered lagged \emph{observed}
+#'     response predictors (`lag_<response>_within`), not the latent residual
+#'     state.
+#' }
+#' These observed-data constructions target different estimands from the
+#' simulation truth. Manifest person-mean centering and observed-score lagged
+#' regression are known to yield biased estimates of between-person effects
+#' and of inertia and cross-lag parameters relative to the latent generating
+#' values, especially with short series (Ludtke et al. 2008; Hamaker &
+#' Grasman 2014). This mismatch is intentional: it lets simulation studies
+#' quantify the bias of the pragmatic estimator. Do not interpret systematic
+#' discrepancies between estimates from this default analysis model and the
+#' `gen_outcome()` truth parameters as errors in the simulator. For
+#' matched-model recovery studies, construct the analysis model by hand
+#' instead of using this helper.
 #'
 #' @examples
 #' params <- list(
@@ -280,10 +313,10 @@ print.mlsim_analysis <- function(x, ...) {
     raw_col <- paste0(".__mlsim_lag_", response, "__")
     if (isTRUE(grouped)) {
       data[, (raw_col) := data.table::shift(get(response)), by = group_id]
-      data[, (lag_col) := get(raw_col) - mean(get(raw_col), na.rm = TRUE), by = group_id]
+      data[, (lag_col) := get(raw_col) - mean(get(response), na.rm = TRUE), by = group_id]
     } else {
       data[, (raw_col) := data.table::shift(get(response))]
-      data[, (lag_col) := get(raw_col) - mean(get(raw_col), na.rm = TRUE)]
+      data[, (lag_col) := get(raw_col) - mean(get(response), na.rm = TRUE)]
     }
     data[, (raw_col) := NULL]
   }

@@ -57,6 +57,49 @@ strictly positive compositions. If \code{ar1()} appears in the location formula,
 it defines a residual VAR(1) process, not an observed lagged-outcome
 predictor.
 }
+\section{Time spacing}{
+
+When \code{ar1()} is present, time must be complete and equally spaced within
+each participant (or within the single series). Participants may have
+different start times, end times, and numbers of observations, and the
+simulator does not check or enforce equal spacing between participants:
+different participants may also use different step sizes. AR and VAR
+coefficients are defined per observation step, not per unit of real time,
+so dynamic parameters are only comparable across participants in real-time
+units when all participants share the same step size.
+}
+
+\section{AR stability and realized moderator draws}{
+
+Stability is enforced through the row-wise spectral radius of the assembled
+AR coefficient matrices for every observed row. When \code{ar1()} interacts with
+predictors (for example \code{within(stress):ar1()}), the row-specific AR matrix
+depends on the moderator values realized earlier in the generator pipeline.
+Stability is therefore a property of the AR parameters jointly with the
+realized predictor data, not of the parameters alone: the same AR parameter
+values may be accepted in one simulated data set and rejected in another
+with more extreme moderator draws, and the chance of an unstable row grows
+with the number of rows. \code{ar_stability = "resample"} redraws only
+group-level effects, so it cannot repair instability caused by the
+population-level part of a moderated AR term; that case errors instead.
+}
+
+\section{Performance}{
+
+The simulator is written to scale to large designs without changing the
+data-generating model. Innovations are drawn in one vectorized step from
+the fixed conditional correlation matrix and scaled by the row-wise
+conditional SDs (an exact draw from the row-specific innovation
+distribution, since its covariance is the SD-scaled correlation matrix).
+Row-specific AR matrices are assembled with vectorized array operations,
+spectral radii are computed once per unique AR matrix so row-constant AR
+designs cost one eigendecomposition per participant, and stability
+resampling or shrinkage re-evaluates only the affected participant's rows.
+Because the order in which random numbers are consumed is part of the
+implementation, a given seed maps to a particular realization only within a
+package version; the distribution of simulated data is unaffected.
+}
+
 \examples{
 beta_location <- matrix(
   c(0, 0, 0.2, -0.1),
