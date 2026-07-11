@@ -20,3 +20,5 @@ internal.md
 .codex
 AGENTS.md
 plan.md
+^\.claude$
+^CLAUDE\.md$

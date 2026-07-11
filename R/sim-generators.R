@@ -213,7 +213,16 @@ NULL
         .mlsim_stop("`parts` and `sbp` require `compositional = TRUE`.")
       }
       output_vars <- if (compositional) {
-        if (keep_ilr) c(vars, parts) else parts
+        base <- if (keep_ilr) c(vars, parts) else parts
+        if (identical(level, "multilevel")) {
+          base <- c(
+            base,
+            paste0(vars, "_between"),
+            paste0(vars, "_within"),
+            paste0(parts, "_between")
+          )
+        }
+        .mlsim_check_vars(base, NULL, "compositional output columns")
       } else {
         vars
       }
@@ -249,7 +258,7 @@ NULL
         values <- lp$eta + residual
         between_values <- NULL
         within_values <- NULL
-        if (identical(level, "multilevel") && !isTRUE(compositional)) {
+        if (identical(level, "multilevel")) {
           between_values <- lp$eta
           within_values <- residual
           colnames(between_values) <- paste0(vars, "_between")
@@ -298,6 +307,47 @@ NULL
           metadata$total <- comp$total
           metadata$keep_ilr <- keep_ilr
           metadata$ilr_vars <- vars
+          if (!is.null(between_values)) {
+            # the latent between composition is the closed back-transform of the
+            # group-level ILR means, not the mean of the observed parts
+            between_parts <- .mlsim_ilr_inverse(
+              lp$eta,
+              parts,
+              total = total,
+              coordinate_names = vars,
+              sbp = sbp
+            )$values
+            colnames(between_parts) <- paste0(parts, "_between")
+            out_values <- cbind(out_values, between_values, within_values, between_parts)
+            metadata$between_parts_vars <- colnames(between_parts)
+            metadata$column_roles <- .mlsim_column_roles(
+              column = c(
+                if (keep_ilr) vars,
+                colnames(between_values),
+                colnames(within_values)
+              ),
+              variable = c(if (keep_ilr) vars, vars, vars),
+              component = c(
+                if (keep_ilr) rep("observed", length(vars)),
+                rep("between", length(vars)),
+                rep("within", length(vars))
+              ),
+              level = c(
+                if (keep_ilr) rep("row", length(vars)),
+                rep("group", length(vars)),
+                rep("row", length(vars))
+              )
+            )
+          } else if (keep_ilr) {
+            component <- if (identical(level, "level2")) "between" else "observed"
+            role_level <- if (identical(level, "level2")) "group" else "row"
+            metadata$column_roles <- .mlsim_column_roles(
+              column = vars,
+              variable = vars,
+              component = rep(component, length(vars)),
+              level = rep(role_level, length(vars))
+            )
+          }
           metadata$vars <- colnames(out_values)
         } else {
           metadata$compositional <- FALSE
@@ -644,6 +694,22 @@ NULL
 #' SBP basis to transform the coordinates into positive composition parts that
 #' sum to `total`.
 #'
+#' Multilevel generators additionally emit the latent between- and
+#' within-group components of each generated variable as visible columns.
+#' For non-compositional variables these are `<var>_between` (the group-level
+#' mean, fixed plus random intercept) and `<var>_within` (the row-level
+#' residual), with `<var> = <var>_between + <var>_within` exactly. For
+#' compositional generators the same decomposition is emitted on the ILR
+#' scale (`<ilr>_between`, `<ilr>_within`), together with the true between
+#' composition `<part>_between`, the closed back-transform of the group-level
+#' ILR means. All generated variables are labelled with column roles so that
+#' `between()` and `within()` terms in [gen_outcome()] formulas resolve to the
+#' latent components; roles (and hence `between()`/`within()`) apply to the
+#' ILR coordinates of a compositional generator, not to its parts. When
+#' `keep_ilr = FALSE` the observed ILR columns are dropped, but the
+#' between/within columns and their roles are still emitted for multilevel
+#' generators.
+#'
 #' @examples
 #' sim <- simulate_data(
 #'   n = 4,
@@ -755,7 +821,8 @@ gen_categorical <- function(vars, level = c("single", "level2", "multilevel"),
 #'   `"level2"` generates group-level values, and `"multilevel"` uses a
 #'   random-intercept model.
 #' @param size Binomial trial size. May be a scalar, vector, function of `n`, or
-#'   count-distribution list.
+#'   count-distribution list. Count-distribution `minimum`/`maximum` bounds
+#'   clamp draws to the bounds (censoring, not truncation).
 #' @param fixed_intercept Link-scale intercept. Binomial uses the logit link;
 #'   Poisson and negative binomial use the log link.
 #' @param random_cov Group-level random-intercept covariance for multilevel

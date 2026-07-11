@@ -4,7 +4,14 @@
 \alias{prep_sim_analysis}
 \title{Prepare Simulated Outcome Data for Analysis}
 \usage{
-prep_sim_analysis(sim, outcome = NULL, drop_lag_na = FALSE)
+prep_sim_analysis(
+  sim,
+  outcome = NULL,
+  drop_lag_na = FALSE,
+  time_step = NULL,
+  lag_center = c("within", "none"),
+  link_random = TRUE
+)
 }
 \arguments{
 \item{sim}{An \code{mlsim_data} object returned by \code{\link[=simulate_data]{simulate_data()}}.}
@@ -16,13 +23,53 @@ prep_sim_analysis(sim, outcome = NULL, drop_lag_na = FALSE)
 \item{drop_lag_na}{Logical scalar. When \code{FALSE}, the default, first rows in
 each series are retained and lag-derived columns are left as \code{NA}. When
 \code{TRUE}, rows with missing lag-derived predictors are removed.}
+
+\item{time_step}{Optional positive scalar giving the spacing between
+consecutive time points of the simulation \code{time_id}, used to build
+\code{ar1()} lag columns with \code{\link[=lag_by_time]{lag_by_time()}}. When \code{NULL}, the default, the
+step is inferred as the smallest positive within-group time difference.
+For \code{Date} time the unit is days; for \code{POSIXct} time the unit is
+seconds. Ignored when the outcome formula has no \code{ar1()} term.}
+
+\item{lag_center}{Character scalar controlling how \code{ar1()} lag columns are
+centered. With \code{"within"}, the default, each lagged response is centered
+at the person's observed mean of the response, producing
+\verb{lag_<response>_within} columns (cluster-mean centering, CMC). With
+\code{"none"}, the raw lagged response is used as-is, producing
+\verb{lag_<response>} columns (no centering, NC) -- the non-centered
+parametrization of Hamaker & Grasman (2014). Under \code{"none"} the model
+intercept estimates \code{(1 - phi_i) * mu_i} (multivariate:
+\verb{(I - Phi_i) mu_i}) rather than the person mean \code{mu_i}, so location
+parameters lose their direct correspondence with the simulation truth;
+see the "Pragmatic default estimator" section and the Comparability
+section of \code{\link[=sim_recovery]{sim_recovery()}}. Ignored when the outcome formula has no
+\code{ar1()} term.}
+
+\item{link_random}{Logical scalar. When \code{TRUE}, the default, grouping
+factors that appear in both the mean and the scale formulas emit brms
+ID-linked random effects (for example \code{(1 | p1 | ID)}), so the analysis
+model can estimate the cross-parameter random-effect correlations that
+the simulator generates from one joint covariance. Set to \code{FALSE} to
+emit separate, uncorrelated random-effect blocks instead; this drops
+those correlations from the analysis model but keeps large models
+tractable for approximate algorithms (variational inference and
+pathfinder often fail on large linked random-effect blocks).}
 }
 \value{
 An \code{mlsim_analysis} object, a list with:
 \item{\code{data}}{Analysis data with derived between/within and lag columns.}
 \item{\code{formula}}{An inferred \code{brms} formula.}
-\item{\code{complr}}{A \code{complr} object for compositional outcomes, otherwise
-\code{NULL}.}
+\item{\code{complr}}{A \code{complr} object covering every composition used by the
+analysis model (compositional predictors referenced through
+\code{between()}/\code{within()} and, when applicable, the compositional outcome),
+otherwise \code{NULL}. This object can be passed directly to \code{\link[=brmcoda]{brmcoda()}} and
+used with \code{\link[=substitution]{substitution()}}.}
+\item{\code{truth}}{A \link[data.table:data.table]{data.table::data.table} of the true generating
+parameter values labeled with the parameter names of the inferred
+analysis model, ready to be compared against the fitted model with
+\code{\link[=sim_recovery]{sim_recovery()}}. \code{NULL} when the analysis model cannot be aligned with
+the simulator parameters (the reason is recorded in
+\code{metadata$truth_unavailable_reason}).}
 \item{\code{metadata}}{Preparation metadata, including derived column names and
 formula mappings.}
 }
@@ -30,8 +77,11 @@ formula mappings.}
 Convert an \code{\link[=simulate_data]{simulate_data()}} result with a \code{\link[=gen_outcome]{gen_outcome()}} generator into an
 analysis-ready data set and inferred \code{brms} formula. The helper recomputes
 observed between- and within-person predictors from the raw simulated
-columns, creates within-person centered lag columns for \code{ar1()} terms, and
-creates a \code{\link[=complr]{complr()}} object when the outcome is compositional.
+columns, creates lagged outcome predictor columns for \code{ar1()} terms
+(person-mean-centered by default; see \code{lag_center}), and
+creates a \code{\link[=complr]{complr()}} object when the outcome is compositional or when
+\code{between()}/\code{within()} terms reference ILR coordinates of a compositional
+predictor generator.
 }
 \details{
 The inferred analysis model is a deliberately \emph{pragmatic default estimator}
@@ -45,12 +95,48 @@ named \code{x_between} and \code{x_within}, computed from \code{x} by the simula
 identifier. These columns are recomputed even when columns with the same
 names already exist in \code{sim$data}.
 
+When \code{between()}/\code{within()} reference ILR coordinates of a compositional
+\code{\link[=gen_mvn]{gen_mvn()}} predictor, the helper instead builds a \code{\link[=complr]{complr()}} object for
+that predictor composition (using the simulator's parts, SBP, and total)
+and maps the terms to the complr between/within coordinates (\verb{bz<k>_<j>}
+and \verb{wz<k>_<j>}, where \code{k} is the coordinate and \code{j} the composition
+index), exactly as in the standard \code{multilevelcoda} workflow. When the
+outcome is also compositional, one multi-composition \code{complr} object
+covers both the predictor and outcome compositions.
+
+The returned \code{brms} formula carries the family recorded by the outcome
+generator (\code{gaussian()}, \code{poisson()}, \code{binomial()},
+\code{\link[brms:negbinomial]{brms::negbinomial()}}, \code{Gamma(link = "log")}, or \code{\link[brms:Beta]{brms::Beta()}}). When the
+generator has a scale model, it becomes the matching distributional
+formula (\code{sigma}, \code{shape}, or \code{phi}). Binomial outcomes use
+\verb{y | trials(<outcome>_trials)} with the trials column generated by
+\code{\link[=gen_outcome]{gen_outcome()}}. When the same grouping factor appears in both the mean
+and the scale formulas, the random effects are emitted with brms ID-linked
+syntax (for example \code{(1 | p1 | ID)}) by default, because the simulator
+draws these group-level effects from one joint covariance and the linked
+syntax lets the analysis model estimate their correlation; see
+\code{link_random} to opt out for large models fitted with approximate
+algorithms.
+
 For dynamic formulas, \code{ar1()} is translated to lagged observed response
-columns centered at each person's observed mean of all their values (not
-the mean of the lagged values). For compositional outcomes, the helper
+columns. By default (\code{lag_center = "within"}) these are centered at each
+person's observed mean of all their values (not the mean of the lagged
+values) and named \verb{lag_<response>_within}; with \code{lag_center = "none"} the
+raw lagged responses are used and named \verb{lag_<response>}. For
+compositional outcomes, the helper
 rebuilds the ILR coordinates through \code{\link[=complr]{complr()}} using the simulator's parts
 and SBP metadata, then lags the generated \code{z} coordinates used by
 \code{\link[=brmcoda]{brmcoda()}}.
+
+The lags are built by \code{\link[=lag_by_time]{lag_by_time()}} as \emph{time-based} lags on the
+simulation \code{time_id}: a row's lag comes from the observation at
+\code{time - time_step}, not from the previous row. When a time point is
+missing -- as can happen when analysing real data with skipped
+observations -- the following row's lag is \code{NA} rather than the value from
+before the gap. The autoregressive coefficient therefore refers to one
+\code{time_step}. For data simulated with \code{ar1()} the time grid is complete and
+equally spaced, so the result is identical to a positional shift. The
+number of gap-affected rows is recorded in \code{metadata$lag_gaps}.
 }
 \section{Pragmatic default estimator}{
 
@@ -63,9 +149,18 @@ commonly fit to observed data:
 \item \code{between(x)} and \code{within(x)} become \code{x_between} and \code{x_within},
 recomputed from realised person means of the observed \code{x} (manifest
 centering), not from the latent generating components.
-\item \code{ar1()} becomes person-mean-centered lagged \emph{observed}
-response predictors (\verb{lag_<response>_within}), not the latent residual
-state.
+\item \code{ar1()} becomes, by default, person-mean-centered lagged
+\emph{observed} response predictors (\verb{lag_<response>_within}), not the
+latent residual state.
+\item For ILR coordinates of compositional predictors, \code{between(ilr)} and
+\code{within(ilr)} become the \code{\link[=complr]{complr()}} coordinates \verb{bz*}/\verb{wz*}, where the
+between composition is the ILR of each person's closed
+\emph{arithmetic-mean} composition of the observed parts. The
+simulator's \code{between(ilr)}, in contrast, is the latent group-level ILR
+mean (whose back-transform is a geometric-mean-style composition).
+These are different estimands, and manifest centering is biased for
+latent between-person effects with short series, just as for scalar
+predictors.
 }
 These observed-data constructions target different estimands from the
 simulation truth. Manifest person-mean centering and observed-score lagged
@@ -75,9 +170,28 @@ values, especially with short series (Ludtke et al. 2008; Hamaker &
 Grasman 2014). This mismatch is intentional: it lets simulation studies
 quantify the bias of the pragmatic estimator. Do not interpret systematic
 discrepancies between estimates from this default analysis model and the
-\code{gen_outcome()} truth parameters as errors in the simulator. For
-matched-model recovery studies, construct the analysis model by hand
-instead of using this helper.
+\code{gen_outcome()} truth parameters as errors in the simulator.
+\code{\link[=sim_recovery]{sim_recovery()}} marks every affected parameter with
+\code{comparability = "approximate"}; its Comparability section documents the
+full decision rules and their justification, parameter type by parameter
+type. For matched-model recovery studies, construct the analysis model by
+hand instead of using this helper.
+
+The centering of the \code{ar1()} lag columns is controlled by \code{lag_center}.
+Hamaker & Grasman (2014) show that in multilevel autoregressive models,
+cluster-mean centering the lagged outcome (the \code{"within"} default)
+attenuates the average autoregressive coefficient, whereas the
+non-centered lagged outcome (\code{"none"}) recovers it nearly unbiased. The
+trade-off is that under \code{"none"} the whole location mean structure is
+reparametrized: the intercept estimates \verb{(I - Phi_i) mu_i} rather than the
+person mean, and any location covariate effects absorb omitted
+\verb{-Phi x_\{t-1\} beta} terms. \code{\link[=sim_recovery]{sim_recovery()}} therefore marks every location
+parameter (fixed and random) as \code{comparability = "approximate"} when
+\code{lag_center = "none"} and the formula contains \code{ar1()}. Use \code{"none"} when
+the average autoregressive (inertia and cross-lag) coefficients are the
+estimands of interest, and the default \code{"within"} when person means and
+their predictors must remain interpretable; the data-simulation vignette
+compares parameter recovery under both.
 }
 
 \examples{
@@ -92,8 +206,7 @@ sim <- simulate_data(
     outcome = gen_outcome(
       y ~ 1,
       scale = sigma ~ 1,
-      params = params,
-      burnin = 0
+      params = params
     )
   )
 )

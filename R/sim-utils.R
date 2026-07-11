@@ -7,11 +7,8 @@
 #' @param level Simulation level.
 #' @param ... Values passed to formatting or error helpers.
 #' @param call. Logical flag passed to [stop()].
-#' @param args,used,ignored,supplied,use,direct_supplied,multilevel_only
-#'   Character vectors or named logicals used to build diagnostics.
-#' @param generator Generator label used in diagnostic messages.
-#' @param vars,var,n,vars_n,names,arg,arg_name Variable names, target lengths,
-#'   or argument labels.
+#' @param vars,var,n,names,arg Variable names, target lengths, or argument
+#'   labels.
 #' @param allow_empty Logical flag allowing an empty name vector.
 #' @param new,existing Candidate and existing generated names.
 #' @param x,y Generic vectors, matrices, formulas, or fallback values.
@@ -29,9 +26,7 @@
 #' @param internal Optional internal data columns to append to a generator
 #'   result.
 #' @param scale Logical flag for joint location/scale random effects.
-#' @param multilevel_required,multilevel_use,scale_arg Multilevel constructor
-#'   contract declarations.
-#' @param fixed_intercept,scale_fixed_intercept Location and scale intercepts.
+#' @param scale_fixed_intercept Scale intercepts.
 #' @param expected_names Optional names used to align named vector and matrix
 #'   inputs.
 #' @param random,random_intercepts Random-effect draw metadata.
@@ -64,64 +59,6 @@ NULL
 #' @rdname multilevelcoda-internal-utils
 .mlsim_stop <- function(..., call. = FALSE) {
   stop(sprintf(...), call. = call.)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_format_args <- function(args) {
-  paste(sprintf("`%s`", args), collapse = ", ")
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_warn_ignored_args <- function(generator, used, ignored) {
-  ignored <- ignored[!is.na(ignored) & ignored != ""]
-  used <- used[!is.na(used) & used != ""]
-  if (length(ignored) == 0L || length(used) == 0L) {
-    return(invisible(NULL))
-  }
-
-  warning(
-    sprintf(
-      "`%s` generator will use %s and ignore %s.",
-      generator,
-      .mlsim_format_args(used),
-      .mlsim_format_args(ignored)
-    ),
-    call. = FALSE
-  )
-  invisible(NULL)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_multilevel_unused <- function(level, supplied, generator, use) {
-  if (!identical(level, "multilevel")) {
-    return(invisible(NULL))
-  }
-  unused <- names(supplied)[as.logical(supplied)]
-  if (length(unused) > 0L) {
-    .mlsim_stop(
-      "Multilevel `%s` generator does not accept %s; use %s.",
-      generator,
-      .mlsim_format_args(unused),
-      use
-    )
-  }
-  invisible(NULL)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_multilevel_required <- function(level, supplied, generator) {
-  if (!identical(level, "multilevel")) {
-    return(invisible(NULL))
-  }
-  missing <- names(supplied)[vapply(supplied, is.null, logical(1))]
-  if (length(missing) > 0L) {
-    .mlsim_stop(
-      "Multilevel `%s` generator requires %s.",
-      generator,
-      .mlsim_format_args(missing)
-    )
-  }
-  invisible(NULL)
 }
 
 #' @rdname multilevelcoda-internal-utils
@@ -172,14 +109,6 @@ NULL
 .mlsim_check_finite_numeric <- function(x, arg) {
   if (!is.numeric(x) || anyNA(x) || any(!is.finite(x))) {
     .mlsim_stop("`%s` must contain finite numeric values.", arg)
-  }
-  x
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_prob <- function(x, arg = "prob") {
-  if (!is.numeric(x) || anyNA(x) || !(x %agele% c(0, 1))) {
-    .mlsim_stop("`%s` must be numeric probabilities in [0, 1].", arg)
   }
   x
 }
@@ -268,71 +197,6 @@ NULL
     default = "zero",
     allow_scalar = FALSE
   )
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_resolve_category_prob <- function(prob, n, labels, arg = "prob") {
-  k <- length(labels)
-  if (is.matrix(prob) || is.data.frame(prob)) {
-    prob <- as.matrix(prob)
-    if (ncol(prob) != k) {
-      .mlsim_stop("`%s` must have one column per category.", arg)
-    }
-    prob_names <- colnames(prob)
-    if (!is.null(prob_names)) {
-      if (prob_names %any==% "" || anyDuplicated(prob_names) || !setequal(prob_names, labels)) {
-        .mlsim_stop("`%s` column names must match the category labels.", arg)
-      }
-      prob <- prob[, labels, drop = FALSE]
-    }
-    if (nrow(prob) == 1L) {
-      prob <- prob[rep(1L, n), , drop = FALSE]
-    } else if (nrow(prob) != n) {
-      .mlsim_stop("`%s` must have 1 or %d rows.", arg, n)
-    }
-    colnames(prob) <- labels
-    return(.mlsim_check_category_prob_matrix(prob, arg))
-  }
-
-  if (!is.numeric(prob) || anyNA(prob) || any(!is.finite(prob))) {
-    .mlsim_stop("`%s` must contain finite numeric probabilities.", arg)
-  }
-
-  if (!is.null(names(prob)) && length(prob) != 1L) {
-    if (length(prob) != k || names(prob) %any==% "" || !setequal(names(prob), labels)) {
-      .mlsim_stop("`%s` names must match the category labels.", arg)
-    }
-    prob <- prob[labels]
-  }
-
-  if (k == 2L && length(prob) == 1L) {
-    success_prob <- .mlsim_check_prob(prob, arg)
-    out <- cbind(1 - success_prob, success_prob)
-    colnames(out) <- labels
-    return(out[rep(1L, n), , drop = FALSE])
-  }
-
-  if (length(prob) != k) {
-    .mlsim_stop(
-      "`%s` must be a scalar binary success probability, a vector with one value per category, or a probability matrix.",
-      arg
-    )
-  }
-  out <- matrix(rep(prob, n), nrow = n, byrow = TRUE)
-  colnames(out) <- labels
-  .mlsim_check_category_prob_matrix(out, arg)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_category_prob_matrix <- function(prob, arg = "prob") {
-  if (!is.numeric(prob) || anyNA(prob) || any(!is.finite(prob)) || any(prob < 0 | prob > 1)) {
-    .mlsim_stop("`%s` must be numeric probabilities in [0, 1].", arg)
-  }
-  row_sums <- rowSums(prob)
-  if (abs(row_sums - 1) %anyg% 1e-8) {
-    .mlsim_stop("Rows of `%s` must sum to 1.", arg)
-  }
-  prob
 }
 
 #' @rdname multilevelcoda-internal-utils
@@ -565,77 +429,6 @@ NULL
 }
 
 #' @rdname multilevelcoda-internal-utils
-.mlsim_expand_level2 <- function(values, level, context) {
-  if (identical(level, "level2")) {
-    values[context$group_index, , drop = FALSE]
-  } else {
-    values
-  }
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_expand_level2_vector <- function(values, level, context) {
-  if (identical(level, "level2")) values[context$group_index] else values
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_multilevel_only_args <- function(level, supplied) {
-  if (identical(level, "multilevel")) {
-    return(invisible(NULL))
-  }
-  supplied <- names(supplied)[as.logical(supplied)]
-  if (length(supplied) > 0L) {
-    .mlsim_stop("%s require `level = \"multilevel\"`.", .mlsim_format_args(supplied))
-  }
-  invisible(NULL)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_generator_contract <- function(generator, vars, level, vars_n = 1L,
-                                      direct_supplied = NULL,
-                                      multilevel_only = NULL,
-                                      multilevel_required = NULL,
-                                      multilevel_use = NULL,
-                                      scale_arg = NULL,
-                                      scale_fixed_intercept = NULL) {
-  vars <- .mlsim_check_vars(vars, vars_n)
-  level <- .mlsim_match_level(level)
-
-  if (!is.null(multilevel_only)) {
-    .mlsim_check_multilevel_only_args(level, multilevel_only)
-  }
-  if (!is.null(direct_supplied)) {
-    .mlsim_check_multilevel_unused(
-      level,
-      direct_supplied,
-      generator,
-      multilevel_use
-    )
-  }
-  if (!is.null(multilevel_required)) {
-    .mlsim_check_multilevel_required(level, multilevel_required, generator)
-  }
-  if (!is.null(scale_arg) && identical(level, "multilevel")) {
-    .mlsim_check_scale_or_arg(
-      scale_arg$value,
-      scale_arg$name,
-      scale_fixed_intercept,
-      generator
-    )
-  }
-
-  list(vars = vars, level = level)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_warn_direct_precedence <- function(level, generator, used, ignored) {
-  if (!identical(level, "multilevel")) {
-    .mlsim_warn_ignored_args(generator, used, ignored)
-  }
-  invisible(NULL)
-}
-
-#' @rdname multilevelcoda-internal-utils
 .mlsim_random_intercept_names <- function(vars, scale = FALSE) {
   location <- paste0(vars, ":(Intercept)")
   if (!isTRUE(scale)) {
@@ -776,49 +569,6 @@ NULL
 }
 
 #' @rdname multilevelcoda-internal-utils
-.mlsim_random_eta <- function(type, fixed_intercept, random_cov, context, vars,
-                              scale_fixed_intercept = NULL) {
-  if (is.null(fixed_intercept)) {
-    .mlsim_stop("Multilevel `%s` generator requires `fixed_intercept`.", type)
-  }
-  fixed_intercept <- .mlsim_check_scalar_number(fixed_intercept, "fixed_intercept")
-  scale_fixed_intercept <- .mlsim_check_scale_fixed_intercept(scale_fixed_intercept, 1L)
-
-  random <- .mlsim_joint_random_intercepts(
-    vars,
-    random_cov,
-    context,
-    scale = !is.null(scale_fixed_intercept)
-  )
-
-  eta <- fixed_intercept + random$random_intercepts[context$group_index, 1L]
-  metadata <- list(
-    fixed_parameters = list(intercept = fixed_intercept),
-    group_parameters = list(random_cov = random$random_cov),
-    fixed_intercept = fixed_intercept,
-    random_cov = random$random_cov
-  )
-
-  scale_eta <- NULL
-  if (!is.null(scale_fixed_intercept)) {
-    scale_eta <- if (is.null(random$scale_random_intercepts)) {
-      rep(scale_fixed_intercept, context$n_rows)
-    } else {
-      scale_fixed_intercept + random$scale_random_intercepts[context$group_index, 1L]
-    }
-    metadata$fixed_parameters$scale_intercept <- scale_fixed_intercept
-    metadata$scale_fixed_intercept <- scale_fixed_intercept
-  }
-
-  list(
-    eta = eta,
-    scale_eta = scale_eta,
-    random = random,
-    metadata = metadata
-  )
-}
-
-#' @rdname multilevelcoda-internal-utils
 .mlsim_check_simple_residual_cor <- function(residual_cor, vars) {
   d <- length(vars)
   if (d > 1L && length(residual_cor) == 1L && !is.matrix(residual_cor) && !is.null(residual_cor)) {
@@ -859,55 +609,6 @@ NULL
     out[i, , ] <- diag(residual_sd[i, ], d) %*% residual_cor %*% diag(residual_sd[i, ], d)
   }
   out
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_scale_or_arg <- function(arg, arg_name, scale_fixed_intercept, generator) {
-  if (!is.null(arg) && !is.null(scale_fixed_intercept)) {
-    .mlsim_stop("`%s` cannot be supplied with `scale_fixed_intercept`.", arg_name)
-  }
-  if (is.null(arg) && is.null(scale_fixed_intercept)) {
-    .mlsim_stop("Multilevel `%s` generator requires `%s` or `scale_fixed_intercept`.", generator, arg_name)
-  }
-  invisible(NULL)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_check_positive_or_null <- function(x, arg) {
-  if (is.null(x)) {
-    return(NULL)
-  }
-  .mlsim_check_positive(x, arg)
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_simple_random_metadata <- function(fixed_intercept, random,
-                                          scale_fixed_intercept = NULL) {
-  metadata <- list(
-    fixed_parameters = list(intercept = fixed_intercept),
-    group_parameters = list(random_cov = random$random_cov),
-    fixed_intercept = fixed_intercept,
-    random_cov = random$random_cov
-  )
-  if (!is.null(scale_fixed_intercept)) {
-    metadata$fixed_parameters$scale_intercept <- scale_fixed_intercept
-    metadata$scale_fixed_intercept <- scale_fixed_intercept
-  }
-  metadata
-}
-
-#' @rdname multilevelcoda-internal-utils
-.mlsim_validate_scale_multilevel_args <- function(level, scale_fixed_intercept,
-                                                  random_cov = NULL,
-                                                  residual_cor = NULL) {
-  .mlsim_check_multilevel_only_args(
-    level,
-    c(
-      random_cov = !is.null(random_cov),
-      scale_fixed_intercept = !is.null(scale_fixed_intercept),
-      residual_cor = !is.null(residual_cor)
-    )
-  )
 }
 
 #' @rdname multilevelcoda-internal-utils
@@ -1187,14 +888,20 @@ NULL
   maximum <- spec$maximum %||% spec$max_count
   if (!is.null(minimum)) {
     minimum <- .mlsim_recycle_integer(minimum, 1L, "minimum")
-    values <- pmax(values, minimum)
   }
   if (!is.null(maximum)) {
     maximum <- .mlsim_recycle_integer(maximum, 1L, "maximum")
-    values <- pmin(values, maximum)
   }
   if (!is.null(minimum) && !is.null(maximum) && minimum > maximum) {
     .mlsim_stop("Count distribution bounds require `minimum` to be less than or equal to `maximum`.")
+  }
+  # bounds clamp draws to the boundary values (censoring), which piles
+  # probability mass at the bounds rather than redistributing it (truncation)
+  if (!is.null(minimum)) {
+    values <- pmax(values, minimum)
+  }
+  if (!is.null(maximum)) {
+    values <- pmin(values, maximum)
   }
   .mlsim_recycle_integer(values, n, "generated counts")
 }

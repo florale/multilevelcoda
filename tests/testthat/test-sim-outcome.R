@@ -904,7 +904,235 @@ test_that("prep_sim_analysis translates dynamic compositional formulas", {
   expect_match(formula_text, "stress_between", fixed = TRUE)
   expect_match(formula_text, "stress_within", fixed = TRUE)
   expect_match(formula_text, "treatment:lag_z1_1_within", fixed = TRUE)
-  expect_match(formula_text, "1 + lag_z1_1_within + lag_z2_1_within | ID", fixed = TRUE)
+  # the grouping factor appears in both the mean and sigma formulas, so the
+  # analysis model links the random effects across formulas to estimate their
+  # correlation (the simulator draws them from one joint covariance)
+  expect_match(formula_text, "1 + lag_z1_1_within + lag_z2_1_within | p1 | ID", fixed = TRUE)
+  expect_match(formula_text, "sigma = sigma ~ treatment + (1 | p1 | ID)", fixed = TRUE)
+})
+
+test_that("prep_sim_analysis lag_center = none uses raw lags", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.2, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  sim <- simulate_data(
+    n = 6,
+    time_id = "time",
+    seed = 302,
+    generators = list(
+      outcome = gen_outcome(
+        y ~ ar1(),
+        scale = sigma ~ 1,
+        params = params,
+        burnin = 2
+      )
+    )
+  )
+
+  analysis <- prep_sim_analysis(sim, lag_center = "none")
+  default_analysis <- prep_sim_analysis(sim)
+  formula_text <- paste(deparse(analysis$formula), collapse = " ")
+
+  expect_true("lag_y" %in% names(analysis$data))
+  expect_false("lag_y_within" %in% names(analysis$data))
+  expect_true(is.na(analysis$data$lag_y[[1L]]))
+  expect_equal(analysis$data$lag_y[-1L], head(sim$data$y, -1L))
+  expect_match(formula_text, "lag_y", fixed = TRUE)
+  expect_false(grepl("lag_y_within", formula_text, fixed = TRUE))
+  expect_identical(analysis$metadata$lag_center, "none")
+  expect_identical(analysis$metadata$lag_columns, "lag_y")
+  expect_identical(default_analysis$metadata$lag_center, "within")
+  expect_error(prep_sim_analysis(sim, lag_center = "person"), "arg")
+})
+
+test_that("prep_sim_analysis errors when lag columns collide with existing columns", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.2, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  sim <- simulate_data(
+    n = 6,
+    time_id = "time",
+    seed = 302,
+    generators = list(
+      outcome = gen_outcome(
+        y ~ ar1(),
+        scale = sigma ~ 1,
+        params = params,
+        burnin = 2
+      )
+    )
+  )
+  sim$data[, lag_y := 0]
+
+  expect_error(prep_sim_analysis(sim, lag_center = "none"), "lag_y")
+  expect_no_error(prep_sim_analysis(sim))
+
+  sim$data[, lag_y := NULL]
+  sim$data[, lag_y_within := 0]
+  expect_error(prep_sim_analysis(sim), "lag_y_within")
+  expect_no_error(prep_sim_analysis(sim, lag_center = "none"))
+})
+
+test_that("prep_sim_analysis lag_center = none translates dynamic compositional formulas", {
+  sim <- simulate_data(
+    n_groups = 4,
+    n_per_group = 5,
+    group_id = "ID",
+    time_id = "day",
+    seed = 303,
+    generators = list(
+      treatment = gen_categorical(
+        "treatment",
+        level = "level2",
+        categories = c("control", "treatment"),
+        fixed_intercept = stats::qlogis(0.5),
+        output = "factor"
+      ),
+      stress = gen_mvn("stress", level = "multilevel", fixed_intercept = 0, random_cov = 0.2, residual_cov = 0.8),
+      outcome = gen_outcome(
+        mvbind(ilr1, ilr2) ~ treatment + between(stress) + within(stress) +
+          ar1() + treatment:ar1() + (1 + ar1() | ID),
+        scale = sigma ~ treatment + (1 | ID),
+        params = outcome_acceptance_params(),
+        burnin = 4,
+        composition = list(parts = c("sleep", "sedentary", "activity"), total = 24)
+      )
+    )
+  )
+
+  analysis <- prep_sim_analysis(sim, lag_center = "none")
+  formula_text <- paste(deparse(analysis$formula), collapse = " ")
+  first_rows <- analysis$data[, .I[1L], by = ID]$V1
+  shifted <- analysis$data[, shift(z1_1), by = ID]$V1
+
+  expect_true(all(c("lag_z1_1", "lag_z2_1") %in% names(analysis$complr$dataout)))
+  expect_false(any(c("lag_z1_1_within", "lag_z2_1_within") %in% names(analysis$data)))
+  expect_true(all(is.na(analysis$data$lag_z1_1[first_rows])))
+  expect_equal(analysis$data$lag_z1_1, shifted)
+  expect_match(formula_text, "treatment:lag_z1_1", fixed = TRUE)
+  expect_match(formula_text, "1 + lag_z1_1 + lag_z2_1 | p1 | ID", fixed = TRUE)
+})
+
+test_that("prep_sim_analysis lags by time so gaps yield NA in grouped data", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.2, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  sim <- simulate_data(
+    n_groups = 4,
+    n_per_group = 5,
+    group_id = "ID",
+    time_id = "day",
+    seed = 306,
+    generators = list(
+      outcome = gen_outcome(y ~ ar1(), scale = sigma ~ 1, params = params, burnin = 2)
+    )
+  )
+  gap_id <- sim$data$ID[[1L]]
+  # a skipped day, as in real intensive longitudinal data
+  sim$data <- sim$data[!(ID == gap_id & day == 3)]
+
+  analysis <- prep_sim_analysis(sim)
+  dropped <- prep_sim_analysis(sim, drop_lag_na = TRUE)
+  gap_rows <- analysis$data[ID == gap_id]
+  other <- analysis$data[ID != gap_id]
+
+  # the day after the gap must not silently lag across it
+  expect_true(is.na(gap_rows[day == 4, lag_y_within]))
+  expect_equal(
+    gap_rows[day == 5, lag_y_within],
+    gap_rows[day == 4, y] - mean(gap_rows$y)
+  )
+  expect_equal(
+    other[, lag_y_within[-1L] - (head(y, -1L) - mean(y)), by = ID]$V1,
+    rep(0, 3L * 4L)
+  )
+  expect_true(all(is.na(analysis$data[, lag_y_within[1L], by = ID]$V1)))
+  # one first row per group plus the row after the gap
+  expect_equal(nrow(dropped$data), nrow(sim$data) - 5L)
+  expect_identical(analysis$metadata$time_step, 1)
+  expect_identical(analysis$metadata$lag_gaps, 1L)
+  expect_identical(analysis$metadata$lag_irregular, 0L)
+})
+
+test_that("prep_sim_analysis lags by time so gaps yield NA in single-level data", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.2, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  sim <- simulate_data(
+    n = 6,
+    time_id = "time",
+    seed = 307,
+    generators = list(
+      outcome = gen_outcome(y ~ ar1(), scale = sigma ~ 1, params = params, burnin = 2)
+    )
+  )
+  intact <- prep_sim_analysis(sim)
+  explicit <- prep_sim_analysis(sim, time_step = 1)
+  expect_equal(explicit$data, intact$data)
+  expect_identical(intact$metadata$time_step, 1)
+  expect_identical(intact$metadata$lag_gaps, 0L)
+
+  sim$data <- sim$data[time != 3]
+  analysis <- prep_sim_analysis(sim)
+
+  expect_true(is.na(analysis$data[time == 4, lag_y_within]))
+  expect_equal(
+    analysis$data[time == 5, lag_y_within],
+    analysis$data[time == 4, y] - mean(analysis$data$y)
+  )
+  expect_identical(analysis$metadata$lag_gaps, 1L)
+})
+
+test_that("prep_sim_analysis keeps complr aligned when gaps drop lag rows", {
+  sim <- simulate_data(
+    n_groups = 4,
+    n_per_group = 5,
+    group_id = "ID",
+    time_id = "day",
+    seed = 308,
+    generators = list(
+      treatment = gen_categorical(
+        "treatment",
+        level = "level2",
+        categories = c("control", "treatment"),
+        fixed_intercept = stats::qlogis(0.5),
+        output = "factor"
+      ),
+      stress = gen_mvn("stress", level = "multilevel", fixed_intercept = 0, random_cov = 0.2, residual_cov = 0.8),
+      outcome = gen_outcome(
+        mvbind(ilr1, ilr2) ~ treatment + between(stress) + within(stress) +
+          ar1() + treatment:ar1() + (1 + ar1() | ID),
+        scale = sigma ~ treatment + (1 | ID),
+        params = outcome_acceptance_params(),
+        burnin = 4,
+        composition = list(parts = c("sleep", "sedentary", "activity"), total = 24)
+      )
+    )
+  )
+  gap_id <- sim$data$ID[[1L]]
+  sim$data <- sim$data[!(ID == gap_id & day == 3)]
+
+  analysis <- prep_sim_analysis(sim)
+  dropped <- prep_sim_analysis(sim, drop_lag_na = TRUE)
+
+  expect_true(all(is.na(
+    analysis$data[ID == gap_id & day == 4, c("lag_z1_1_within", "lag_z2_1_within"), with = FALSE]
+  )))
+  # one first row per group plus the post-gap row
+  expect_equal(nrow(dropped$data), nrow(sim$data) - 5L)
+  expect_equal(nrow(dropped$complr$datain), nrow(dropped$data))
+  expect_equal(nrow(dropped$complr$output[[1L]]$Z), nrow(dropped$data))
+  expect_equal(nrow(dropped$complr$output[[1L]]$dataout), nrow(dropped$data))
+  expect_identical(dropped$metadata$lag_gaps, 1L)
+  expect_identical(dropped$metadata$time_step, 1)
 })
 
 test_that("prep_sim_analysis reports missing or ambiguous outcome context", {
@@ -1098,4 +1326,816 @@ test_that("simulated values satisfy the exact residual VAR recursion", {
     md$ar$stability$max_spectral_radius_by_group_level,
     unname(as.numeric(tapply(radii_direct[tab$row], tab$group, max)))
   )
+})
+
+test_that("gen_outcome simulates poisson outcomes", {
+  beta_location <- matrix(
+    c(1, 0.3),
+    nrow = 2,
+    dimnames = list(c("(Intercept)", "between(stress)"), "y")
+  )
+  random_cov <- matrix(
+    0.1,
+    dimnames = list("location|outcome=y|term=(Intercept)", "location|outcome=y|term=(Intercept)")
+  )
+
+  sim <- simulate_data(
+    n_groups = 4,
+    n_per_group = 5,
+    group_id = "ID",
+    seed = 401,
+    generators = list(
+      stress = gen_mvn("stress", level = "multilevel", fixed_intercept = 0, random_cov = 0.2, residual_cov = 0.8),
+      y = gen_outcome(
+        y ~ between(stress) + (1 | ID),
+        params = list(
+          location = list(beta = beta_location),
+          random = list(ID = list(covariance = random_cov))
+        ),
+        burnin = 0,
+        family = "poisson"
+      )
+    )
+  )
+  md <- sim$generator_metadata$y
+
+  expect_true(all(sim$data$y >= 0))
+  expect_equal(sim$data$y, round(sim$data$y))
+  expect_identical(md$family, "poisson")
+  expect_identical(md$parsed$family, "poisson")
+  expect_null(md$parsed$dpar)
+  expect_equal(md$mu, exp(md$eta))
+  expect_identical(md$expected_parameter_names$scale, character())
+  expect_null(md$sigma)
+  expect_null(md$residual)
+  expect_null(md$innovation)
+  expect_null(md$ar)
+  expect_null(md$Sigma_epsilon)
+  expect_null(md$ilr_conditional_correlation)
+  expect_true("location|outcome=y|term=(Intercept)" %in% md$parsed$random_effect_names)
+})
+
+test_that("gen_outcome resolves binomial trials in all shapes", {
+  params <- list(
+    location = list(beta = matrix(0.4, nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  make_sim <- function(trials, seed) {
+    simulate_data(
+      n = 40,
+      seed = seed,
+      generators = list(
+        y = gen_outcome(y ~ 1, params = params, burnin = 0, family = "binomial", trials = trials)
+      )
+    )
+  }
+
+  scalar_sim <- make_sim(10, 402)
+  fn_sim <- make_sim(function(n) rep(5L, n), 403)
+  dist_sim <- make_sim(list(distribution = "uniform", min = 3, max = 9), 404)
+
+  for (sim in list(scalar_sim, fn_sim, dist_sim)) {
+    md <- sim$generator_metadata$y
+    expect_true("y_trials" %in% names(sim$data))
+    expect_equal(sim$data$y_trials, as.integer(sim$data$y_trials))
+    expect_true(all(sim$data$y >= 0))
+    expect_true(all(sim$data$y <= sim$data$y_trials))
+    expect_identical(md$family, "binomial")
+    expect_identical(md$trials_column, "y_trials")
+    expect_identical(md$parsed$trials_column, "y_trials")
+    expect_true("y_trials" %in% md$vars)
+    expect_equal(md$prob, stats::plogis(md$eta))
+    expect_equal(as.vector(md$mu), as.vector(md$prob) * sim$data$y_trials)
+  }
+  expect_true(all(scalar_sim$data$y_trials == 10L))
+  expect_true(all(fn_sim$data$y_trials == 5L))
+  expect_true(all(dist_sim$data$y_trials >= 3L & dist_sim$data$y_trials <= 9L))
+})
+
+test_that("gen_outcome simulates negbin, gamma, and beta with dpar scale models", {
+  intercept_beta <- function(value) {
+    matrix(value, nrow = 1, dimnames = list("(Intercept)", "y"))
+  }
+  simple_params <- list(
+    location = list(beta = intercept_beta(1)),
+    scale = list(beta = intercept_beta(log(2)))
+  )
+
+  nb_sim <- simulate_data(
+    n = 60,
+    seed = 405,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = shape ~ 1, params = simple_params, burnin = 0, family = "negbin")
+    )
+  )
+  nb_md <- nb_sim$generator_metadata$y
+  expect_true(all(nb_sim$data$y >= 0))
+  expect_equal(nb_sim$data$y, round(nb_sim$data$y))
+  expect_identical(nb_md$dpar$name, "shape")
+  expect_identical(nb_md$parsed$dpar, "shape")
+  expect_equal(nb_md$dpar$value, exp(nb_md$dpar$eta))
+
+  gamma_sim <- simulate_data(
+    n = 60,
+    seed = 406,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = shape ~ 1, params = simple_params, burnin = 0, family = "gamma")
+    )
+  )
+  expect_true(all(gamma_sim$data$y > 0))
+  expect_identical(gamma_sim$generator_metadata$y$dpar$name, "shape")
+
+  beta_names <- c(
+    "location|outcome=y|term=(Intercept)",
+    "phi|outcome=y|term=(Intercept)"
+  )
+  beta_cov <- diag(c(0.2, 0.1))
+  dimnames(beta_cov) <- list(beta_names, beta_names)
+  beta_params <- list(
+    location = list(beta = intercept_beta(0)),
+    scale = list(beta = intercept_beta(log(15))),
+    random = list(ID = list(covariance = beta_cov))
+  )
+  beta_sim <- simulate_data(
+    n_groups = 6,
+    n_per_group = 5,
+    group_id = "ID",
+    seed = 407,
+    generators = list(
+      y = gen_outcome(
+        y ~ 1 + (1 | ID),
+        scale = phi ~ 1 + (1 | ID),
+        params = beta_params,
+        burnin = 0,
+        family = "beta"
+      )
+    )
+  )
+  beta_md <- beta_sim$generator_metadata$y
+  expect_true(all(beta_sim$data$y > 0))
+  expect_true(all(beta_sim$data$y < 1))
+  expect_identical(beta_md$dpar$name, "phi")
+  expect_identical(sort(beta_md$parsed$random_effect_names), sort(beta_names))
+  expect_identical(
+    colnames(beta_md$group_level_effects),
+    c("location|outcome=y|term=(Intercept)", "phi|outcome=y|term=(Intercept)")
+  )
+})
+
+test_that("gen_outcome validates non-Gaussian restrictions", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+
+  expect_error(
+    gen_outcome(y ~ 1, params = params, burnin = 0, family = "student"),
+    "`family` must be one of"
+  )
+  expect_error(
+    gen_outcome(mvbind(y1, y2) ~ 1, params = params, burnin = 0, family = "poisson"),
+    "only supported for `family = \"gaussian\"`"
+  )
+  expect_error(
+    gen_outcome(
+      y ~ 1,
+      params = params,
+      burnin = 0,
+      family = "poisson",
+      composition = list(parts = c("sleep", "wake"))
+    ),
+    "only supported for `family = \"gaussian\"`"
+  )
+  expect_error(
+    gen_outcome(y ~ ar1(), params = params, burnin = 0, family = "poisson"),
+    "`ar1\\(\\)` is currently only supported"
+  )
+  expect_error(
+    gen_outcome(y ~ (1 + ar1() | ID), scale = shape ~ 1, params = params, burnin = 0, family = "negbin"),
+    "`ar1\\(\\)` is currently only supported"
+  )
+  expect_error(
+    gen_outcome(y ~ 1, scale = shape ~ ar1(), params = params, burnin = 0, family = "negbin"),
+    "`ar1\\(\\)` is currently only supported"
+  )
+  expect_error(
+    gen_outcome(y ~ 1, scale = sigma ~ 1, params = params, burnin = 0, family = "poisson"),
+    "`scale` must not be supplied"
+  )
+  expect_error(
+    gen_outcome(y ~ 1, params = params, burnin = 0, family = "negbin"),
+    "Use `scale = shape ~ 1`"
+  )
+  expect_error(
+    gen_outcome(y ~ 1, scale = sigma ~ 1, params = params, burnin = 0, family = "negbin"),
+    "must have `shape` on the left-hand side"
+  )
+  expect_error(
+    gen_outcome(y ~ 1, params = params, burnin = 0, family = "binomial"),
+    "`trials` is required"
+  )
+  expect_error(
+    gen_outcome(y ~ 1, scale = shape ~ 1, params = params, burnin = 0, family = "gamma", trials = 5),
+    "must only be supplied"
+  )
+  expect_error(
+    simulate_data(
+      n = 5,
+      seed = 408,
+      generators = list(
+        y = gen_outcome(y ~ 1, params = params, burnin = 0, family = "binomial", trials = 0)
+      )
+    ),
+    "at least 1"
+  )
+
+  params_with_scale <- c(
+    params,
+    list(scale = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))))
+  )
+  expect_error(
+    simulate_data(
+      n = 5,
+      seed = 409,
+      generators = list(
+        y = gen_outcome(y ~ 1, params = params_with_scale, burnin = 0, family = "poisson")
+      )
+    ),
+    "`params\\$scale` must not be supplied"
+  )
+
+  params_with_correlation <- list(
+    location = params$location,
+    scale = list(
+      beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y")),
+      correlation = matrix(1, dimnames = list("y", "y"))
+    )
+  )
+  expect_error(
+    simulate_data(
+      n = 5,
+      seed = 410,
+      generators = list(
+        y = gen_outcome(y ~ 1, scale = shape ~ 1, params = params_with_correlation, burnin = 0, family = "negbin")
+      )
+    ),
+    "only used for `family = \"gaussian\"`"
+  )
+})
+
+test_that("gen_outcome guards against numerically extreme family parameters", {
+  extreme_location <- list(
+    location = list(beta = matrix(1000, nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  expect_error(
+    simulate_data(
+      n = 5,
+      seed = 411,
+      generators = list(
+        y = gen_outcome(y ~ 1, params = extreme_location, burnin = 0, family = "poisson")
+      )
+    ),
+    "Non-finite poisson mean values"
+  )
+
+  extreme_scale <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(1000, nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  expect_error(
+    simulate_data(
+      n = 5,
+      seed = 412,
+      generators = list(
+        y = gen_outcome(y ~ 1, scale = shape ~ 1, params = extreme_scale, burnin = 0, family = "negbin")
+      )
+    ),
+    "Non-finite negbin auxiliary scale parameter"
+  )
+
+  boundary_beta <- list(
+    location = list(beta = matrix(20, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.01), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  expect_warning(
+    simulate_data(
+      n = 40,
+      seed = 413,
+      generators = list(
+        y = gen_outcome(y ~ 1, scale = phi ~ 1, params = boundary_beta, burnin = 0, family = "beta")
+      )
+    ),
+    "0/1 boundary"
+  )
+})
+
+test_that("gen_template emits family-aware parameter templates", {
+  poisson_sim <- simulate_data(
+    n = 5,
+    seed = 414,
+    generators = list(
+      template = gen_template(y ~ 1, burnin = 0, family = "poisson")
+    )
+  )
+  poisson_md <- poisson_sim$generator_metadata$template
+  expect_null(poisson_md$params$scale)
+  expect_null(poisson_md$params$ar)
+  expect_equal(
+    poisson_md$params$location$beta,
+    matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))
+  )
+  expect_identical(poisson_md$family, "poisson")
+  expect_identical(poisson_md$parsed$family, "poisson")
+  expect_null(poisson_md$parsed$dpar)
+
+  binomial_sim <- simulate_data(
+    n = 5,
+    seed = 415,
+    generators = list(
+      template = gen_template(y ~ 1, burnin = 0, family = "binomial")
+    )
+  )
+  expect_identical(binomial_sim$generator_metadata$template$parsed$trials_column, "y_trials")
+
+  negbin_sim <- simulate_data(
+    n = 5,
+    seed = 416,
+    generators = list(
+      template = gen_template(y ~ 1, scale = shape ~ 1, burnin = 0, family = "negbin")
+    )
+  )
+  negbin_params <- negbin_sim$generator_metadata$template$params
+  expect_equal(
+    negbin_params$scale$beta,
+    matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))
+  )
+  expect_null(negbin_params$scale$correlation)
+
+  beta_sim <- simulate_data(
+    n_groups = 3,
+    n_per_group = 2,
+    group_id = "ID",
+    seed = 417,
+    generators = list(
+      template = gen_template(
+        y ~ 1 + (1 | ID),
+        scale = phi ~ 1 + (1 | ID),
+        burnin = 0,
+        family = "beta"
+      )
+    )
+  )
+  beta_cov <- beta_sim$generator_metadata$template$params$random$ID$covariance
+  expect_identical(
+    rownames(beta_cov),
+    c("location|outcome=y|term=(Intercept)", "phi|outcome=y|term=(Intercept)")
+  )
+})
+
+test_that("gen_template params round-trip into gen_outcome for non-Gaussian families", {
+  template_sim <- simulate_data(
+    n = 30,
+    seed = 418,
+    generators = list(
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
+      template = gen_template(y ~ x, scale = shape ~ 1, burnin = 0, family = "negbin")
+    )
+  )
+  params <- template_sim$generator_metadata$template$params
+  params$location$beta["(Intercept)", "y"] <- 1
+  params$location$beta["x", "y"] <- 0.4
+  params$scale$beta["(Intercept)", "y"] <- log(3)
+
+  sim <- simulate_data(
+    n = 30,
+    seed = 419,
+    generators = list(
+      x = gen_mvn("x", fixed_intercept = 0, residual_cov = 1),
+      y = gen_outcome(y ~ x, scale = shape ~ 1, params = params, burnin = 0, family = "negbin")
+    )
+  )
+  expect_true(all(sim$data$y >= 0))
+  expect_identical(sim$generator_metadata$y$family, "negbin")
+})
+
+test_that("prep_sim_analysis emits family-correct brms formulas", {
+  intercept_beta <- function(value) {
+    matrix(value, nrow = 1, dimnames = list("(Intercept)", "y"))
+  }
+
+  poisson_sim <- simulate_data(
+    n = 20,
+    seed = 420,
+    generators = list(
+      y = gen_outcome(y ~ 1, params = list(location = list(beta = intercept_beta(1))), burnin = 0, family = "poisson")
+    )
+  )
+  poisson_analysis <- prep_sim_analysis(poisson_sim)
+  expect_identical(poisson_analysis$formula$family$family, "poisson")
+  expect_length(poisson_analysis$formula$pforms, 0L)
+  expect_identical(poisson_analysis$metadata$family, "poisson")
+
+  binomial_sim <- simulate_data(
+    n = 20,
+    seed = 421,
+    generators = list(
+      y = gen_outcome(
+        y ~ 1,
+        params = list(location = list(beta = intercept_beta(0))),
+        burnin = 0,
+        family = "binomial",
+        trials = 8
+      )
+    )
+  )
+  binomial_analysis <- prep_sim_analysis(binomial_sim)
+  expect_identical(binomial_analysis$formula$family$family, "binomial")
+  expect_match(
+    deparse(binomial_analysis$formula$formula[[2L]]),
+    "y | trials(y_trials)",
+    fixed = TRUE
+  )
+  expect_true("y_trials" %in% names(binomial_analysis$data))
+
+  dpar_params <- list(
+    location = list(beta = intercept_beta(1)),
+    scale = list(beta = intercept_beta(log(2)))
+  )
+  negbin_sim <- simulate_data(
+    n = 20,
+    seed = 422,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = shape ~ 1, params = dpar_params, burnin = 0, family = "negbin")
+    )
+  )
+  negbin_analysis <- prep_sim_analysis(negbin_sim)
+  expect_identical(negbin_analysis$formula$family$family, "negbinomial")
+  expect_identical(deparse(negbin_analysis$formula$pforms$shape), "shape ~ 1")
+
+  gamma_sim <- simulate_data(
+    n = 20,
+    seed = 423,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = shape ~ 1, params = dpar_params, burnin = 0, family = "gamma")
+    )
+  )
+  gamma_analysis <- prep_sim_analysis(gamma_sim)
+  expect_identical(gamma_analysis$formula$family$family, "gamma")
+  expect_identical(gamma_analysis$formula$family$link, "log")
+
+  beta_params <- list(
+    location = list(beta = intercept_beta(0)),
+    scale = list(beta = intercept_beta(log(10)))
+  )
+  beta_sim <- simulate_data(
+    n = 20,
+    seed = 424,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = phi ~ 1, params = beta_params, burnin = 0, family = "beta")
+    )
+  )
+  beta_analysis <- prep_sim_analysis(beta_sim)
+  expect_identical(beta_analysis$formula$family$family, "beta")
+  expect_identical(deparse(beta_analysis$formula$pforms$phi), "phi ~ 1")
+})
+
+test_that("prep_sim_analysis links random effects shared across mean and scale formulas", {
+  names_linked <- c(
+    "location|outcome=y|term=(Intercept)",
+    "phi|outcome=y|term=(Intercept)"
+  )
+  cov_linked <- diag(c(0.2, 0.1))
+  dimnames(cov_linked) <- list(names_linked, names_linked)
+  linked_params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(15), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    random = list(ID = list(covariance = cov_linked))
+  )
+  linked_sim <- simulate_data(
+    n_groups = 5,
+    n_per_group = 4,
+    group_id = "ID",
+    seed = 425,
+    generators = list(
+      y = gen_outcome(
+        y ~ 1 + (1 | ID),
+        scale = phi ~ 1 + (1 | ID),
+        params = linked_params,
+        burnin = 0,
+        family = "beta"
+      )
+    )
+  )
+  linked_analysis <- prep_sim_analysis(linked_sim)
+  expect_identical(deparse(linked_analysis$formula$formula), "y ~ 1 + (1 | p1 | ID)")
+  expect_identical(deparse(linked_analysis$formula$pforms$phi), "phi ~ 1 + (1 | p1 | ID)")
+  expect_true(linked_analysis$metadata$link_random)
+
+  unlinked_analysis <- prep_sim_analysis(linked_sim, link_random = FALSE)
+  expect_identical(deparse(unlinked_analysis$formula$formula), "y ~ 1 + (1 | ID)")
+  expect_identical(deparse(unlinked_analysis$formula$pforms$phi), "phi ~ 1 + (1 | ID)")
+  expect_false(unlinked_analysis$metadata$link_random)
+
+  name_single <- "location|outcome=y|term=(Intercept)"
+  cov_single <- matrix(0.2, dimnames = list(name_single, name_single))
+  single_params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.5), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    random = list(ID = list(covariance = cov_single))
+  )
+  single_sim <- simulate_data(
+    n_groups = 5,
+    n_per_group = 4,
+    group_id = "ID",
+    seed = 426,
+    generators = list(
+      y = gen_outcome(
+        y ~ 1 + (1 | ID),
+        scale = sigma ~ 1,
+        params = single_params,
+        burnin = 0
+      )
+    )
+  )
+  single_analysis <- prep_sim_analysis(single_sim)
+  expect_identical(deparse(single_analysis$formula$formula), "y ~ 1 + (1 | ID)")
+  expect_identical(deparse(single_analysis$formula$pforms$sigma), "sigma ~ 1")
+})
+
+test_that("prep_sim_analysis falls back to gaussian for legacy metadata", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  sim <- simulate_data(
+    n = 10,
+    seed = 427,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = sigma ~ 1, params = params, burnin = 0)
+    )
+  )
+  sim$generator_metadata$y$parsed$family <- NULL
+  sim$generator_metadata$y$parsed$dpar <- NULL
+
+  analysis <- prep_sim_analysis(sim)
+  expect_identical(analysis$formula$family$family, "gaussian")
+  expect_identical(deparse(analysis$formula$pforms$sigma), "sigma ~ 1")
+  expect_identical(analysis$metadata$family, "gaussian")
+})
+
+test_that("burnin is only required when ar1() appears in the location formula", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.5), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  expect_error(
+    gen_outcome(y ~ ar1(), scale = sigma ~ 1, params = params),
+    "`burnin` is required when `ar1\\(\\)` appears"
+  )
+  expect_error(
+    gen_template(y ~ ar1(), scale = sigma ~ 1),
+    "`burnin` is required when `ar1\\(\\)` appears"
+  )
+
+  sim <- simulate_data(
+    n = 6,
+    seed = 511,
+    generators = list(
+      y = gen_outcome(y ~ 1, scale = sigma ~ 1, params = params)
+    )
+  )
+  expect_true("y" %in% names(sim$data))
+  expect_identical(sim$generator_metadata$y$burnin$burnin, 0L)
+
+  poisson_params <- list(
+    location = list(beta = matrix(log(2), nrow = 1, dimnames = list("(Intercept)", "y")))
+  )
+  poisson_sim <- simulate_data(
+    n = 6,
+    seed = 512,
+    generators = list(
+      y = gen_outcome(y ~ 1, params = poisson_params, family = "poisson")
+    )
+  )
+  expect_true("y" %in% names(poisson_sim$data))
+
+  template_sim <- simulate_data(
+    n = 6,
+    seed = 513,
+    generators = list(
+      tmpl = gen_template(y ~ 1, scale = sigma ~ 1)
+    )
+  )
+  expect_named(
+    template_sim$generator_metadata$tmpl$params,
+    c("location", "scale")
+  )
+})
+
+test_that("stability metadata records the time-varying spectral norm guarantee", {
+  ar_params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.5), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.4, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  sim <- simulate_data(
+    n_groups = 3,
+    n_per_group = 5,
+    group_id = "ID",
+    time_id = "day",
+    seed = 514,
+    generators = list(
+      y = gen_outcome(y ~ ar1(), scale = sigma ~ 1, params = ar_params, burnin = 10)
+    )
+  )
+  stability <- sim$generator_metadata$y$ar$stability
+  expect_false(stability$ar_matrices_vary_within_group)
+  expect_true(stability$time_varying_stability_guaranteed)
+  expect_null(stability$max_spectral_norm_overall)
+})
+
+test_that("gen_outcome resolves between/within of compositional ILR predictors", {
+  params <- list(
+    location = list(beta = matrix(
+      c(0, 0.5, -0.3, 0.2, 0.1), 5, 1,
+      dimnames = list(
+        c("(Intercept)", "between(ilr1)", "between(ilr2)", "within(ilr1)", "within(ilr2)"),
+        "y"
+      )
+    )),
+    scale = list(beta = matrix(log(0.3), 1, 1, dimnames = list("(Intercept)", "y"))),
+    random = list(ID = list(covariance = matrix(
+      0.1, 1, 1,
+      dimnames = list(
+        "location|outcome=y|term=(Intercept)",
+        "location|outcome=y|term=(Intercept)"
+      )
+    )))
+  )
+  sim <- simulate_data(
+    n_groups = 5,
+    n_per_group = 6,
+    group_id = "ID",
+    seed = 71,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        level = "multilevel",
+        fixed_intercept = c(0.2, -0.1),
+        random_cov = diag(2) * 0.2,
+        residual_cov = diag(2) * 0.4,
+        compositional = TRUE,
+        parts = c("sleep", "active", "sedentary"),
+        total = 24
+      ),
+      y = gen_outcome(
+        y ~ between(ilr1) + between(ilr2) + within(ilr1) + within(ilr2) + (1 | ID),
+        scale = sigma ~ 1,
+        params = params
+      )
+    )
+  )
+  metadata <- sim$generator_metadata$y
+  X <- cbind(
+    1,
+    sim$data$ilr1_between, sim$data$ilr2_between,
+    sim$data$ilr1_within, sim$data$ilr2_within
+  )
+  mu_manual <- as.vector(
+    X %*% params$location$beta +
+      metadata$group_level_effects[as.integer(sim$data$ID), 1L]
+  )
+  expect_equal(as.vector(metadata$mu), mu_manual)
+  selected <- metadata$selected_column_roles
+  expect_setequal(selected$variable, c("ilr1", "ilr2"))
+  expect_identical(unique(selected$generator), "comp")
+})
+
+test_that("prep_sim_analysis maps ILR between/within terms to complr coordinates", {
+  params <- list(
+    location = list(beta = matrix(
+      c(0, 0.5, 0.2, 0.3), 4, 1,
+      dimnames = list(
+        c("(Intercept)", "between(ilr1)", "within(ilr1)", "between(x)"),
+        "y"
+      )
+    )),
+    scale = list(beta = matrix(log(0.3), 1, 1, dimnames = list("(Intercept)", "y")))
+  )
+  sim <- simulate_data(
+    n_groups = 6,
+    n_per_group = 5,
+    group_id = "ID",
+    seed = 72,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        level = "multilevel",
+        fixed_intercept = c(0.2, -0.1),
+        random_cov = diag(2) * 0.2,
+        residual_cov = diag(2) * 0.4,
+        compositional = TRUE,
+        parts = c("sleep", "active", "sedentary"),
+        total = 24
+      ),
+      x = gen_mvn(
+        "x",
+        level = "multilevel",
+        fixed_intercept = 0,
+        random_cov = 0.3,
+        residual_cov = 1
+      ),
+      y = gen_outcome(
+        y ~ between(ilr1) + within(ilr1) + between(x),
+        scale = sigma ~ 1,
+        params = params
+      )
+    )
+  )
+  analysis <- prep_sim_analysis(sim)
+
+  expect_s3_class(analysis$complr, "complr")
+  expect_length(analysis$complr$output, 1L)
+  expect_null(analysis$metadata$outcome_composition_index)
+  expect_identical(analysis$metadata$composition_generators, "comp")
+  expect_identical(
+    analysis$metadata$special_term_map,
+    c("between(ilr1)" = "bz1_1", "within(ilr1)" = "wz1_1")
+  )
+  expect_identical(
+    deparse(analysis$formula$formula),
+    "y ~ bz1_1 + wz1_1 + x_between"
+  )
+  expect_true(all(c("bz1_1", "wz1_1", "x_between") %in% names(analysis$data)))
+  # ILR variables are not manifest-centered; scalar predictors still are
+  expect_false("ilr1" %in% analysis$metadata$derived_roles$variable)
+  expect_true("x" %in% analysis$metadata$derived_roles$variable)
+
+  # complr between coordinate equals the ILR of the closed arithmetic-mean composition
+  parts <- as.matrix(sim$data[, c("sleep", "active", "sedentary"), with = FALSE])
+  person_mean <- rowsum(parts, group = as.integer(sim$data$ID)) /
+    as.vector(table(as.integer(sim$data$ID)))
+  closed <- person_mean / rowSums(person_mean) * 24
+  bz_manual <- multilevelcoda:::.mlsim_ilr_inverse
+  basis <- compositions::gsi.buildilrBase(t(sim$generator_metadata$comp$sbp))
+  bz_expected <- compositions::ilr(compositions::acomp(closed), V = basis)
+  expect_equal(
+    unname(analysis$data$bz1_1),
+    unname(as.numeric(bz_expected[, 1L])[as.integer(sim$data$ID)]),
+    tolerance = 1e-8
+  )
+})
+
+test_that("prep_sim_analysis supports compositional predictors and outcomes together", {
+  correlation <- diag(2)
+  dimnames(correlation) <- list(c("o1", "o2"), c("o1", "o2"))
+  params <- list(
+    location = list(beta = matrix(
+      c(0, 0.4, 0, -0.2), 2, 2,
+      dimnames = list(c("(Intercept)", "between(ilr1)"), c("o1", "o2"))
+    )),
+    scale = list(
+      beta = matrix(log(c(0.4, 0.35)), 1, 2, dimnames = list("(Intercept)", c("o1", "o2"))),
+      correlation = correlation
+    )
+  )
+  sim <- simulate_data(
+    n_groups = 6,
+    n_per_group = 5,
+    group_id = "ID",
+    seed = 73,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        level = "multilevel",
+        fixed_intercept = c(0.2, -0.1),
+        random_cov = diag(2) * 0.2,
+        residual_cov = diag(2) * 0.4,
+        compositional = TRUE,
+        parts = c("sleep", "active", "sedentary"),
+        total = 24
+      ),
+      out = gen_outcome(
+        mvbind(o1, o2) ~ between(ilr1),
+        scale = sigma ~ 1,
+        params = params,
+        composition = list(parts = c("rest", "move", "sit"), total = 24)
+      )
+    )
+  )
+  analysis <- prep_sim_analysis(sim)
+
+  expect_length(analysis$complr$output, 2L)
+  expect_identical(analysis$metadata$outcome_composition_index, 2L)
+  expect_identical(analysis$metadata$composition_generators, "comp")
+  expect_identical(
+    analysis$metadata$response_map,
+    c(o1 = "z1_2", o2 = "z2_2")
+  )
+  expect_identical(
+    analysis$metadata$special_term_map,
+    c("between(ilr1)" = "bz1_1")
+  )
+  expect_true(all(c("z1_2", "z2_2", "bz1_1") %in% names(analysis$data)))
+  formulas <- analysis$formula$forms
+  expect_identical(deparse(formulas[[1L]]$formula), "z1_2 ~ bz1_1")
+  expect_identical(deparse(formulas[[2L]]$formula), "z2_2 ~ bz1_1")
 })

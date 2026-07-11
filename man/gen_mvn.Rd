@@ -71,6 +71,22 @@ variables, optionally transformed from ILR coordinates to compositional parts.
 Compositional MVN generators simulate ILR coordinates first, then use the
 SBP basis to transform the coordinates into positive composition parts that
 sum to \code{total}.
+
+Multilevel generators additionally emit the latent between- and
+within-group components of each generated variable as visible columns.
+For non-compositional variables these are \verb{<var>_between} (the group-level
+mean, fixed plus random intercept) and \verb{<var>_within} (the row-level
+residual), with \verb{<var> = <var>_between + <var>_within} exactly. For
+compositional generators the same decomposition is emitted on the ILR
+scale (\verb{<ilr>_between}, \verb{<ilr>_within}), together with the true between
+composition \verb{<part>_between}, the closed back-transform of the group-level
+ILR means. All generated variables are labelled with column roles so that
+\code{between()} and \code{within()} terms in \code{\link[=gen_outcome]{gen_outcome()}} formulas resolve to the
+latent components; roles (and hence \code{between()}/\code{within()}) apply to the
+ILR coordinates of a compositional generator, not to its parts. When
+\code{keep_ilr = FALSE} the observed ILR columns are dropped, but the
+between/within columns and their roles are still emitted for multilevel
+generators.
 }
 \examples{
 sim <- simulate_data(

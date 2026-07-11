@@ -6,8 +6,9 @@
 \usage{
 gen_template(
   formula,
-  scale,
-  burnin,
+  scale = NULL,
+  burnin = NULL,
+  family = "gaussian",
   composition = list(parts = NULL, total = 24, sbp = NULL, keep_ilr = TRUE),
   ar_stability = c("resample", "shrink", "error"),
   max_stability_attempts = 1000,
@@ -16,20 +17,48 @@ gen_template(
 }
 \arguments{
 \item{formula}{Outcome location formula. The left-hand side may be a single
-outcome (\code{y}) or \code{mvbind(y1, y2, ...)}. The right-hand side may include
-ordinary model terms, \code{between(x)}, \code{within(x)}, \code{ar1()}, interactions, and
-one brms/lme4-style grouping term.}
+outcome (\code{y}) or, for \code{family = "gaussian"} only, \code{mvbind(y1, y2, ...)}.
+The right-hand side may include ordinary model terms, \code{between(x)},
+\code{within(x)}, interactions, one brms/lme4-style grouping term, and, for
+\code{family = "gaussian"} only, \code{ar1()}. \code{between()}/\code{within()} resolve
+against the column roles emitted by earlier predictor generators; this
+includes the ILR coordinates of multilevel compositional \code{\link[=gen_mvn]{gen_mvn()}}
+generators (for example \code{between(ilr1)}), enabling simulation of models
+where a scalar outcome depends on the between- and within-person parts
+of a composition. Roles apply to ILR coordinates, not to composition
+parts.}
 
-\item{scale}{Required scale formula with \code{sigma} on the left-hand side, for
-example \code{sigma ~ 1} or \code{sigma ~ treatment + (1 | ID)}. The scale model is
-on the log conditional standard-deviation scale.}
+\item{scale}{Scale formula with the family's brms distributional-parameter
+name on the left-hand side: \code{sigma} for \code{"gaussian"} (log conditional SD,
+for example \code{sigma ~ 1} or \code{sigma ~ treatment + (1 | ID)}), \code{shape} for
+\code{"negbin"} (log size) and \code{"gamma"} (log shape), and \code{phi} for \code{"beta"}
+(log precision). Required for these families; must be omitted for
+\code{"poisson"} and \code{"binomial"}, which have no auxiliary scale parameter.}
 
-\item{burnin}{Fixed non-negative integer burn-in length used when AR is
-active. Ignored when no AR terms are present.}
+\item{burnin}{Fixed integer burn-in length for the residual AR/VAR
+process. Required when \code{ar1()} appears in the location formula and
+ignored otherwise (non-AR Gaussian models and all non-Gaussian families
+have no burn-in phase). Each series is initialized at zero
+residuals and iterated \code{burnin} steps before the first observed row, so
+\code{burnin = 0} starts the residual process exactly at zero and the first
+observations are under-dispersed relative to the stationary
+distribution. Do not use \code{burnin = 0} or other small values for
+simulation studies: choose a burn-in long enough for the process to
+forget its start, for example at least \code{log(0.01) / log(rho)} steps,
+where \code{rho} is the largest spectral radius of the AR matrices (about 90
+steps at \code{rho = 0.95}).}
 
-\item{composition}{List controlling optional ILR back-transformation. Use
-\code{parts} or \code{sbp} to request compositional output, \code{total} for the closure
-total, and \code{keep_ilr} to keep ILR coordinates alongside parts.}
+\item{family}{Character scalar naming the outcome family: \code{"gaussian"}
+(default), \code{"poisson"} (log link), \code{"binomial"} (logit link, requires
+\code{trials}), \code{"negbin"} (log link, \code{scale} is log size), \code{"gamma"} (log
+link, \code{scale} is log shape), or \code{"beta"} (logit link, \code{scale} is log
+precision). Non-Gaussian families are univariate only and do not support
+\code{ar1()} or \code{composition}.}
+
+\item{composition}{List controlling optional ILR back-transformation
+(\code{family = "gaussian"} only). Use \code{parts} or \code{sbp} to request
+compositional output, \code{total} for the closure total, and \code{keep_ilr} to
+keep ILR coordinates alongside parts.}
 
 \item{ar_stability}{Handling for unstable AR matrices: \code{"resample"},
 \code{"shrink"}, or \code{"error"}.}
@@ -63,6 +92,13 @@ scale formula, and composition settings that will be used for the later
 Template values are initialized to zero for regression, AR, and group-level
 covariance parameters, and to identity for residual ILR correlations. The
 object is ready to edit and pass as \code{params} to \code{\link[=gen_outcome]{gen_outcome()}}.
+
+Templates are family-aware: \code{params$scale} is only included for families
+with an auxiliary scale model (\code{"gaussian"}, \code{"negbin"}, \code{"gamma"},
+\code{"beta"}), \code{params$scale$correlation} only for \code{"gaussian"}, and
+\code{params$ar} only when \code{ar1()} appears (which requires
+\code{family = "gaussian"}). \code{trials} is not needed to build a binomial
+template because no parameter block depends on it.
 }
 \examples{
 template_sim <- simulate_data(
@@ -80,7 +116,6 @@ template_sim <- simulate_data(
     outcome_template = gen_template(
       mvbind(ilr1, ilr2) ~ treatment,
       scale = sigma ~ 1,
-      burnin = 0,
       composition = list(parts = c("sleep", "active", "sedentary"), total = 24)
     )
   )

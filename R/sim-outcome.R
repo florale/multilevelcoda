@@ -1,28 +1,67 @@
-#' Generate Dynamic Gaussian and Compositional Outcomes
+#' Generate Dynamic Gaussian, Compositional, and GLM-Family Outcomes
 #'
-#' Create an outcome generator for [simulate_data()]. Outcomes are simulated on
-#' a Gaussian scale, optionally as ILR coordinates that are back-transformed to
-#' strictly positive compositions. If `ar1()` appears in the location formula,
-#' it defines a residual VAR(1) process, not an observed lagged-outcome
-#' predictor.
+#' Create an outcome generator for [simulate_data()]. With the default
+#' `family = "gaussian"`, outcomes are simulated on a Gaussian scale,
+#' optionally as ILR coordinates that are back-transformed to strictly
+#' positive compositions, and `ar1()` in the location formula defines a
+#' residual VAR(1) process, not an observed lagged-outcome predictor.
+#' Non-Gaussian families (`"poisson"`, `"binomial"`, `"negbin"`, `"gamma"`,
+#' `"beta"`) simulate a single outcome from the family distribution with the
+#' location linear predictor mapped through the family link.
 #'
 #' @param formula Outcome location formula. The left-hand side may be a single
-#'   outcome (`y`) or `mvbind(y1, y2, ...)`. The right-hand side may include
-#'   ordinary model terms, `between(x)`, `within(x)`, `ar1()`, interactions, and
-#'   one brms/lme4-style grouping term.
-#' @param scale Required scale formula with `sigma` on the left-hand side, for
-#'   example `sigma ~ 1` or `sigma ~ treatment + (1 | ID)`. The scale model is
-#'   on the log conditional standard-deviation scale.
+#'   outcome (`y`) or, for `family = "gaussian"` only, `mvbind(y1, y2, ...)`.
+#'   The right-hand side may include ordinary model terms, `between(x)`,
+#'   `within(x)`, interactions, one brms/lme4-style grouping term, and, for
+#'   `family = "gaussian"` only, `ar1()`. `between()`/`within()` resolve
+#'   against the column roles emitted by earlier predictor generators; this
+#'   includes the ILR coordinates of multilevel compositional [gen_mvn()]
+#'   generators (for example `between(ilr1)`), enabling simulation of models
+#'   where a scalar outcome depends on the between- and within-person parts
+#'   of a composition. Roles apply to ILR coordinates, not to composition
+#'   parts.
+#' @param scale Scale formula with the family's brms distributional-parameter
+#'   name on the left-hand side: `sigma` for `"gaussian"` (log conditional SD,
+#'   for example `sigma ~ 1` or `sigma ~ treatment + (1 | ID)`), `shape` for
+#'   `"negbin"` (log size) and `"gamma"` (log shape), and `phi` for `"beta"`
+#'   (log precision). Required for these families; must be omitted for
+#'   `"poisson"` and `"binomial"`, which have no auxiliary scale parameter.
 #' @param params List of true parameters. Required components are
-#'   `params$location$beta`, `params$scale$beta`, and, for multivariate
-#'   outcomes, `params$scale$correlation`. When AR terms are present,
+#'   `params$location$beta` and, for families with a scale model,
+#'   `params$scale$beta`. For multivariate Gaussian outcomes,
+#'   `params$scale$correlation` is required. When AR terms are present,
 #'   `params$ar$beta` is required. When grouping terms are present,
 #'   `params$random[[group]]$covariance` is required.
-#' @param burnin Fixed non-negative integer burn-in length used when AR is
-#'   active. Ignored when no AR terms are present.
-#' @param composition List controlling optional ILR back-transformation. Use
-#'   `parts` or `sbp` to request compositional output, `total` for the closure
-#'   total, and `keep_ilr` to keep ILR coordinates alongside parts.
+#' @param burnin Fixed integer burn-in length for the residual AR/VAR
+#'   process. Required when `ar1()` appears in the location formula and
+#'   ignored otherwise (non-AR Gaussian models and all non-Gaussian families
+#'   have no burn-in phase). Each series is initialized at zero
+#'   residuals and iterated `burnin` steps before the first observed row, so
+#'   `burnin = 0` starts the residual process exactly at zero and the first
+#'   observations are under-dispersed relative to the stationary
+#'   distribution. Do not use `burnin = 0` or other small values for
+#'   simulation studies: choose a burn-in long enough for the process to
+#'   forget its start, for example at least `log(0.01) / log(rho)` steps,
+#'   where `rho` is the largest spectral radius of the AR matrices (about 90
+#'   steps at `rho = 0.95`).
+#' @param family Character scalar naming the outcome family: `"gaussian"`
+#'   (default), `"poisson"` (log link), `"binomial"` (logit link, requires
+#'   `trials`), `"negbin"` (log link, `scale` is log size), `"gamma"` (log
+#'   link, `scale` is log shape), or `"beta"` (logit link, `scale` is log
+#'   precision). Non-Gaussian families are univariate only and do not support
+#'   `ar1()` or `composition`.
+#' @param trials Number of binomial trials, required for and only allowed with
+#'   `family = "binomial"`. Accepts a scalar, a vector recycled to the number
+#'   of rows, a function of `n`, or a count-distribution list as in
+#'   [gen_binomial()] (count-distribution `minimum`/`maximum` bounds clamp
+#'   draws to the bounds; censoring, not truncation). Resolved trial sizes
+#'   are written into the simulated
+#'   data as a `<outcome>_trials` column for use with
+#'   `y | trials(y_trials)` in brms.
+#' @param composition List controlling optional ILR back-transformation
+#'   (`family = "gaussian"` only). Use `parts` or `sbp` to request
+#'   compositional output, `total` for the closure total, and `keep_ilr` to
+#'   keep ILR coordinates alongside parts.
 #' @param ar_stability Handling for unstable AR matrices: `"resample"`,
 #'   `"shrink"`, or `"error"`.
 #' @param max_stability_attempts Positive integer maximum number of resampling
@@ -31,6 +70,21 @@
 #'   `ar_stability = "shrink"`.
 #'
 #' @return An `mlsim_generator_spec` object for use in [simulate_data()].
+#'
+#' @section Non-Gaussian families:
+#' Non-Gaussian outcomes are drawn independently per row from the family
+#' distribution after mapping the location linear predictor through the
+#' inverse link, with the auxiliary parameter (size, shape, or precision)
+#' taken as `exp()` of the scale linear predictor. `ar1()` is currently only
+#' supported for `family = "gaussian"`. Group-level effects on the location
+#' and scale linear predictors are drawn jointly from
+#' `params$random[[group]]$covariance` exactly as for Gaussian outcomes.
+#' Because the links are nonlinear, fixed effects are conditional
+#' (subject-specific) effects: the marginal mean of the outcome is not the
+#' inverse link of the fixed-effect predictor alone. Extreme linear-predictor
+#' values that produce non-finite means or auxiliary parameters are an error;
+#' draws that land on a boundary the family likelihood cannot support (beta
+#' outcomes numerically at 0 or 1, gamma outcomes at 0) produce a warning.
 #'
 #' @section Time spacing:
 #' When `ar1()` is present, time must be complete and equally spaced within
@@ -54,6 +108,26 @@
 #' with the number of rows. `ar_stability = "resample"` redraws only
 #' group-level effects, so it cannot repair instability caused by the
 #' population-level part of a moderated AR term; that case errors instead.
+#'
+#' Two further diagnostics guard the validity of accepted draws. First, when
+#' the AR matrices vary over time within a series (moderated `ar1()` with
+#' more than one outcome), a spectral radius below 1 for every row is
+#' necessary but not sufficient for stability of the time-varying process:
+#' products of individually stable matrices can still diverge. The simulator
+#' therefore also computes the spectral norm (largest singular value) of each
+#' row-specific AR matrix; a largest norm below 1 guarantees stability. When
+#' the matrices vary within a series and the largest spectral norm is 1 or
+#' more, stability cannot be guaranteed and a warning is issued; the result
+#' is recorded in the stability metadata as
+#' `time_varying_stability_guaranteed`. Second, `ar_stability = "resample"`
+#' truncates the group-level effect distribution: each group's entire
+#' random-effect vector (location, scale, and AR effects jointly) is redrawn
+#' until the AR part is stable, so when the acceptance rate is below 1 the
+#' realized random-effect covariance is smaller than
+#' `params$random[[group]]$covariance` requested. The realized covariance is
+#' always recorded in the generator metadata as
+#' `realised_group_level_effect_covariance`, and a message is emitted when
+#' the acceptance rate falls below 0.95.
 #'
 #' @section Performance:
 #' The simulator is written to scale to large designs without changing the
@@ -118,7 +192,9 @@
 #'
 #' @family predictor generators
 #' @export
-gen_outcome <- function(formula, scale, params, burnin,
+gen_outcome <- function(formula, scale = NULL, params, burnin = NULL,
+                        family = "gaussian",
+                        trials = NULL,
                         composition = list(
                           parts = NULL,
                           total = 24,
@@ -131,14 +207,8 @@ gen_outcome <- function(formula, scale, params, burnin,
   if (missing(formula)) {
     .mlsim_stop("`formula` is required.")
   }
-  if (missing(scale)) {
-    .mlsim_stop("`scale` is required. Use `scale = sigma ~ 1` for constant conditional SDs.")
-  }
   if (missing(params)) {
     .mlsim_stop("`params` is required.")
-  }
-  if (missing(burnin)) {
-    .mlsim_stop("`burnin` is required and must be a fixed non-negative integer.")
   }
   ar_stability <- match.arg(ar_stability, c("resample", "shrink", "error"))
   controls <- .mlsim_prepare_outcome_controls(
@@ -148,7 +218,10 @@ gen_outcome <- function(formula, scale, params, burnin,
     composition = composition,
     ar_stability = ar_stability,
     max_stability_attempts = max_stability_attempts,
-    shrink_target_radius = shrink_target_radius
+    shrink_target_radius = shrink_target_radius,
+    family = family,
+    trials = trials,
+    trials_allowed = TRUE
   )
   formula <- controls$formula
   scale <- controls$scale
@@ -157,9 +230,11 @@ gen_outcome <- function(formula, scale, params, burnin,
   ar_stability <- controls$ar_stability
   max_stability_attempts <- controls$max_stability_attempts
   shrink_target_radius <- controls$shrink_target_radius
+  family <- controls$family
+  family_info <- controls$family_info
 
   simulate <- function(context) {
-    spec <- .mlsim_build_outcome_spec(context, formula, scale, composition)
+    spec <- .mlsim_build_outcome_spec(context, formula, scale, composition, family_info)
     .mlsim_simulate_outcome(
       context = context,
       spec = spec,
@@ -167,7 +242,8 @@ gen_outcome <- function(formula, scale, params, burnin,
       burnin = burnin,
       ar_stability = ar_stability,
       max_stability_attempts = max_stability_attempts,
-      shrink_target_radius = shrink_target_radius
+      shrink_target_radius = shrink_target_radius,
+      trials = trials
     )
   }
 
@@ -179,6 +255,8 @@ gen_outcome <- function(formula, scale, params, burnin,
     formula = formula,
     scale = scale,
     burnin = burnin,
+    family = family,
+    trials = trials,
     composition = composition,
     ar_stability = ar_stability,
     max_stability_attempts = max_stability_attempts,
@@ -208,6 +286,13 @@ gen_outcome <- function(formula, scale, params, burnin,
 #' covariance parameters, and to identity for residual ILR correlations. The
 #' object is ready to edit and pass as `params` to [gen_outcome()].
 #'
+#' Templates are family-aware: `params$scale` is only included for families
+#' with an auxiliary scale model (`"gaussian"`, `"negbin"`, `"gamma"`,
+#' `"beta"`), `params$scale$correlation` only for `"gaussian"`, and
+#' `params$ar` only when `ar1()` appears (which requires
+#' `family = "gaussian"`). `trials` is not needed to build a binomial
+#' template because no parameter block depends on it.
+#'
 #' @return An `mlsim_generator_spec` object for use in [simulate_data()]. It
 #'   emits no data columns and stores the parameter template in generator
 #'   metadata.
@@ -228,7 +313,6 @@ gen_outcome <- function(formula, scale, params, burnin,
 #'     outcome_template = gen_template(
 #'       mvbind(ilr1, ilr2) ~ treatment,
 #'       scale = sigma ~ 1,
-#'       burnin = 0,
 #'       composition = list(parts = c("sleep", "active", "sedentary"), total = 24)
 #'     )
 #'   )
@@ -239,7 +323,8 @@ gen_outcome <- function(formula, scale, params, burnin,
 #'
 #' @family predictor generators
 #' @export
-gen_template <- function(formula, scale, burnin,
+gen_template <- function(formula, scale = NULL, burnin = NULL,
+                         family = "gaussian",
                          composition = list(
                            parts = NULL,
                            total = 24,
@@ -252,12 +337,6 @@ gen_template <- function(formula, scale, burnin,
   if (missing(formula)) {
     .mlsim_stop("`formula` is required.")
   }
-  if (missing(scale)) {
-    .mlsim_stop("`scale` is required. Use `scale = sigma ~ 1` for constant conditional SDs.")
-  }
-  if (missing(burnin)) {
-    .mlsim_stop("`burnin` is required and must be a fixed non-negative integer.")
-  }
   ar_stability <- match.arg(ar_stability, c("resample", "shrink", "error"))
   controls <- .mlsim_prepare_outcome_controls(
     formula = formula,
@@ -266,7 +345,10 @@ gen_template <- function(formula, scale, burnin,
     composition = composition,
     ar_stability = ar_stability,
     max_stability_attempts = max_stability_attempts,
-    shrink_target_radius = shrink_target_radius
+    shrink_target_radius = shrink_target_radius,
+    family = family,
+    trials = NULL,
+    trials_allowed = FALSE
   )
   formula <- controls$formula
   scale <- controls$scale
@@ -275,9 +357,11 @@ gen_template <- function(formula, scale, burnin,
   ar_stability <- controls$ar_stability
   max_stability_attempts <- controls$max_stability_attempts
   shrink_target_radius <- controls$shrink_target_radius
+  family <- controls$family
+  family_info <- controls$family_info
 
   simulate <- function(context) {
-    spec <- .mlsim_build_outcome_spec(context, formula, scale, composition)
+    spec <- .mlsim_build_outcome_spec(context, formula, scale, composition, family_info)
     params <- .mlsim_outcome_template_params(spec)
     metadata <- list(
       distribution = "outcome_template",
@@ -285,6 +369,7 @@ gen_template <- function(formula, scale, burnin,
       vars = character(),
       formula = spec$formula,
       scale = spec$scale,
+      family = spec$family,
       params = params,
       parsed = .mlsim_outcome_parsed_metadata(spec),
       term_map = spec$term_map,
@@ -312,6 +397,7 @@ gen_template <- function(formula, scale, burnin,
     formula = formula,
     scale = scale,
     burnin = burnin,
+    family = family,
     composition = composition,
     ar_stability = ar_stability,
     max_stability_attempts = max_stability_attempts,
@@ -321,10 +407,54 @@ gen_template <- function(formula, scale, burnin,
 
 .mlsim_prepare_outcome_controls <- function(formula, scale, burnin, composition,
                                             ar_stability, max_stability_attempts,
-                                            shrink_target_radius) {
+                                            shrink_target_radius,
+                                            family = "gaussian", trials = NULL,
+                                            trials_allowed = FALSE) {
+  family_info <- .mlsim_outcome_family_info(family)
   formula <- stats::as.formula(formula)
-  scale <- stats::as.formula(scale)
-  burnin <- .mlsim_check_burnin(burnin)
+  if (!is.null(scale)) {
+    scale <- stats::as.formula(scale)
+  }
+  if (!isTRUE(family_info$multivariate) && length(formula) == 3L &&
+      length(.mlsim_parse_outcome_lhs(formula[[2L]])) > 1L) {
+    .mlsim_stop("`mvbind()` responses are only supported for `family = \"gaussian\"`.")
+  }
+  if (!isTRUE(family_info$ar) &&
+      (.mlsim_expr_has_ar(formula[[length(formula)]]) ||
+       (!is.null(scale) && .mlsim_expr_has_ar(scale[[length(scale)]])))) {
+    .mlsim_stop("`ar1()` is currently only supported for `family = \"gaussian\"`.")
+  }
+  if (is.null(family_info$dpar) && !is.null(scale)) {
+    .mlsim_stop(
+      "`scale` must not be supplied for `family = \"%s\"`; this family has no auxiliary scale parameter.",
+      family_info$name
+    )
+  }
+  if (!is.null(family_info$dpar) && is.null(scale)) {
+    if (identical(family_info$name, "gaussian")) {
+      .mlsim_stop("`scale` is required. Use `scale = sigma ~ 1` for constant conditional SDs.")
+    }
+    .mlsim_stop(
+      "`scale` is required for `family = \"%s\"`. Use `scale = %s ~ 1` for a constant %s.",
+      family_info$name,
+      family_info$dpar,
+      family_info$dpar
+    )
+  }
+  if (.mlsim_expr_has_ar(formula[[length(formula)]]) && is.null(burnin)) {
+    .mlsim_stop(
+      "`burnin` is required when `ar1()` appears in the location formula. Choose a burn-in long enough for the residual process to forget its start (see `?gen_outcome`); do not use `burnin = 0`."
+    )
+  }
+  if (!is.null(scale) &&
+      (length(scale) != 3L || !is.symbol(scale[[2L]]) ||
+       !identical(as.character(scale[[2L]]), family_info$dpar))) {
+    .mlsim_stop(
+      "The scale formula must have `%s` on the left-hand side for this family, and ar1() is not allowed in the scale formula. The scale model defines row-wise conditional variability, not scale dynamics.",
+      family_info$dpar
+    )
+  }
+  burnin <- if (is.null(burnin)) 0L else .mlsim_check_burnin(burnin)
   ar_stability <- match.arg(ar_stability, c("resample", "shrink", "error"))
   max_stability_attempts <- .mlsim_recycle_integer(max_stability_attempts, 1L, "max_stability_attempts")
   if (max_stability_attempts < 1L) {
@@ -335,6 +465,23 @@ gen_template <- function(formula, scale, burnin,
     .mlsim_stop("`shrink_target_radius` must be a scalar in (0, 1).")
   }
   composition <- .mlsim_normalize_outcome_composition(composition)
+  if (!isTRUE(family_info$composition) &&
+      (!is.null(composition$parts) || !is.null(composition$sbp))) {
+    .mlsim_stop(
+      "Compositional output (`composition$parts`/`composition$sbp`) is only supported for `family = \"gaussian\"`."
+    )
+  }
+  if (isTRUE(trials_allowed)) {
+    if (isTRUE(family_info$trials) && is.null(trials)) {
+      .mlsim_stop("`trials` is required for `family = \"binomial\"`.")
+    }
+    if (!isTRUE(family_info$trials) && !is.null(trials)) {
+      .mlsim_stop("`trials` must only be supplied for `family = \"binomial\"`.")
+    }
+    if (!is.null(trials) && !(is.numeric(trials) || is.function(trials) || is.list(trials))) {
+      .mlsim_stop("`trials` must be a numeric scalar or vector, a function of `n`, or a count-distribution list.")
+    }
+  }
   list(
     formula = formula,
     scale = scale,
@@ -342,8 +489,38 @@ gen_template <- function(formula, scale, burnin,
     composition = composition,
     ar_stability = ar_stability,
     max_stability_attempts = max_stability_attempts,
-    shrink_target_radius = shrink_target_radius
+    shrink_target_radius = shrink_target_radius,
+    family = family_info$name,
+    family_info = family_info
   )
+}
+
+.mlsim_outcome_families <- function() {
+  list(
+    gaussian = list(dpar = "sigma", scale_label = "scale", multivariate = TRUE,
+                    composition = TRUE, ar = TRUE, trials = FALSE),
+    poisson = list(dpar = NULL, scale_label = NULL, multivariate = FALSE,
+                   composition = FALSE, ar = FALSE, trials = FALSE),
+    binomial = list(dpar = NULL, scale_label = NULL, multivariate = FALSE,
+                    composition = FALSE, ar = FALSE, trials = TRUE),
+    negbin = list(dpar = "shape", scale_label = "shape", multivariate = FALSE,
+                  composition = FALSE, ar = FALSE, trials = FALSE),
+    gamma = list(dpar = "shape", scale_label = "shape", multivariate = FALSE,
+                 composition = FALSE, ar = FALSE, trials = FALSE),
+    beta = list(dpar = "phi", scale_label = "phi", multivariate = FALSE,
+                composition = FALSE, ar = FALSE, trials = FALSE)
+  )
+}
+
+.mlsim_outcome_family_info <- function(family) {
+  families <- .mlsim_outcome_families()
+  if (!is.character(family) || length(family) != 1L || is.na(family) ||
+      !family %in% names(families)) {
+    .mlsim_stop("`family` must be one of: %s.", paste(names(families), collapse = ", "))
+  }
+  info <- families[[family]]
+  info$name <- family
+  info
 }
 
 .mlsim_check_burnin <- function(burnin) {
@@ -370,7 +547,7 @@ gen_template <- function(formula, scale, burnin,
   list(parts = parts, total = total, sbp = sbp, keep_ilr = keep_ilr)
 }
 
-.mlsim_build_outcome_spec <- function(context, formula, scale, composition) {
+.mlsim_build_outcome_spec <- function(context, formula, scale, composition, family_info) {
   data <- data.table::copy(context$data)
   roles <- .mlsim_collect_column_roles(context$generator_metadata, data)
   special_env <- .mlsim_special_term_env(data, roles, context)
@@ -400,21 +577,29 @@ gen_template <- function(formula, scale, burnin,
   )
   location <- .mlsim_split_ar_matrix(location_matrix)
 
-  scale_parts <- .mlsim_split_scale_formula(scale)
-  scale_expr <- .mlsim_transform_specials(
-    scale_parts$fixed,
-    special_env,
-    allow_ar = FALSE,
-    component = "scale"
-  )
-  data <- special_env$data
-  scale_matrix <- .mlsim_build_model_matrix(
-    scale_expr,
-    data,
-    component = "scale",
-    term_map = special_env$term_map,
-    allow_ar = FALSE
-  )
+  if (!is.null(scale)) {
+    scale_parts <- .mlsim_split_scale_formula(scale, family_info$dpar)
+    scale_expr <- .mlsim_transform_specials(
+      scale_parts$fixed,
+      special_env,
+      allow_ar = FALSE,
+      component = "scale"
+    )
+    data <- special_env$data
+    scale_matrix <- .mlsim_build_model_matrix(
+      scale_expr,
+      data,
+      component = "scale",
+      term_map = special_env$term_map,
+      allow_ar = FALSE
+    )
+  } else {
+    scale_parts <- list(fixed = NULL, random = list())
+    scale_matrix <- list(
+      matrix = matrix(numeric(), nrow(data), 0L, dimnames = list(NULL, character())),
+      column_terms = character()
+    )
+  }
 
   random <- .mlsim_build_outcome_random_spec(
     location_random = location_parts$random,
@@ -425,7 +610,8 @@ gen_template <- function(formula, scale, burnin,
     location_terms = colnames(location$X),
     ar_terms = colnames(location$Q),
     scale_terms = colnames(scale_matrix$matrix),
-    outcomes = outcomes
+    outcomes = outcomes,
+    scale_label = family_info$scale_label %||% "scale"
   )
 
   composition <- .mlsim_prepare_outcome_composition(composition, outcomes)
@@ -436,7 +622,7 @@ gen_template <- function(formula, scale, burnin,
 
   expected <- list(
     location = colnames(location$X),
-    scale = colnames(scale_matrix$matrix),
+    scale = colnames(scale_matrix$matrix) %||% character(),
     ar = colnames(location$Q),
     random = random$names
   )
@@ -445,6 +631,10 @@ gen_template <- function(formula, scale, burnin,
     formula = formula,
     scale = scale,
     outcomes = outcomes,
+    family = family_info$name,
+    family_info = family_info,
+    scale_label = family_info$scale_label %||% "scale",
+    trials_column = if (isTRUE(family_info$trials)) paste0(outcomes, "_trials") else NULL,
     X = location$X,
     Q = location$Q,
     W = scale_matrix$matrix,
@@ -473,10 +663,11 @@ gen_template <- function(formula, scale, burnin,
   .mlsim_stop("Outcome formula left-hand side must be `y` or `mvbind(y1, y2, ...)`.")
 }
 
-.mlsim_split_scale_formula <- function(scale) {
-  if (length(scale) != 3L || !is.symbol(scale[[2L]]) || !identical(as.character(scale[[2L]]), "sigma")) {
+.mlsim_split_scale_formula <- function(scale, dpar = "sigma") {
+  if (length(scale) != 3L || !is.symbol(scale[[2L]]) || !identical(as.character(scale[[2L]]), dpar)) {
     .mlsim_stop(
-      "The scale formula must have `sigma` on the left-hand side, and ar1() is not allowed in the scale formula. The scale model defines row-wise conditional residual/innovation variability, not scale dynamics."
+      "The scale formula must have `%s` on the left-hand side for this family, and ar1() is not allowed in the scale formula. The scale model defines row-wise conditional variability, not scale dynamics.",
+      dpar
     )
   }
   .mlsim_split_formula_rhs(scale[[3L]], component = "scale")
@@ -603,7 +794,7 @@ gen_template <- function(formula, scale, burnin,
   if (identical(op, "ar1")) {
     if (!isTRUE(allow_ar)) {
       .mlsim_stop(
-        "The scale formula must have `sigma` on the left-hand side, and ar1() is not allowed in the scale formula. The scale model defines row-wise conditional residual/innovation variability, not scale dynamics."
+        "ar1() is not allowed in the scale formula. The scale model defines row-wise conditional variability, not scale dynamics."
       )
     }
     if (length(expr) != 1L) {
@@ -772,7 +963,8 @@ gen_template <- function(formula, scale, burnin,
 .mlsim_build_outcome_random_spec <- function(location_random, scale_random,
                                              special_env, data, context,
                                              location_terms, ar_terms,
-                                             scale_terms, outcomes) {
+                                             scale_terms, outcomes,
+                                             scale_label = "scale") {
   all_random <- c(location_random, scale_random)
   if (length(all_random) == 0L) {
     return(list(group = NULL, location_Z = NULL, ar_Z = NULL, scale_Z = NULL,
@@ -822,7 +1014,7 @@ gen_template <- function(formula, scale, burnin,
   names <- c(
     .mlsim_random_effect_names("location", loc_terms, outcomes),
     .mlsim_random_effect_names("ar", ar_random_terms, outcomes),
-    .mlsim_random_effect_names("scale", sc_terms, outcomes)
+    .mlsim_random_effect_names("scale", sc_terms, outcomes, label = scale_label)
   )
   list(
     group = group,
@@ -868,7 +1060,7 @@ gen_template <- function(formula, scale, burnin,
   invisible(TRUE)
 }
 
-.mlsim_random_effect_names <- function(component, terms, outcomes) {
+.mlsim_random_effect_names <- function(component, terms, outcomes, label = component) {
   if (length(terms) == 0L) {
     return(character())
   }
@@ -880,7 +1072,7 @@ gen_template <- function(formula, scale, burnin,
     }), use.names = FALSE))
   }
   as.vector(vapply(terms, function(term) {
-    sprintf("%s|outcome=%s|term=%s", component, outcomes, term)
+    sprintf("%s|outcome=%s|term=%s", label, outcomes, term)
   }, character(length(outcomes))))
 }
 
@@ -936,7 +1128,8 @@ gen_template <- function(formula, scale, burnin,
 }
 
 .mlsim_simulate_outcome <- function(context, spec, params, burnin, ar_stability,
-                                    max_stability_attempts, shrink_target_radius) {
+                                    max_stability_attempts, shrink_target_radius,
+                                    trials = NULL) {
   checked <- .mlsim_validate_outcome_params(spec, params)
   random <- .mlsim_draw_outcome_random(
     spec,
@@ -946,6 +1139,17 @@ gen_template <- function(formula, scale, burnin,
     shrink_target_radius
   )
   mu <- .mlsim_outcome_location(spec, checked, random$draws)
+  if (!identical(spec$family %||% "gaussian", "gaussian")) {
+    return(.mlsim_simulate_outcome_family(
+      context = context,
+      spec = spec,
+      checked = checked,
+      random = random,
+      eta = mu,
+      burnin = burnin,
+      trials = trials
+    ))
+  }
   scale_eta <- .mlsim_outcome_scale(spec, checked, random$draws)
   sigma <- exp(scale_eta)
   phi <- .mlsim_outcome_phi(spec, checked, random$draws)
@@ -986,6 +1190,7 @@ gen_template <- function(formula, scale, burnin,
       vars = colnames(output),
       formula = spec$formula,
       scale = spec$scale,
+      family = "gaussian",
       params = checked$raw,
       parsed = .mlsim_outcome_parsed_metadata(spec),
       term_map = spec$term_map,
@@ -1020,6 +1225,138 @@ gen_template <- function(formula, scale, burnin,
   .mlsim_result(output, colnames(output), metadata)
 }
 
+.mlsim_simulate_outcome_family <- function(context, spec, checked, random, eta,
+                                           burnin, trials) {
+  family <- spec$family
+  info <- spec$family_info
+  outcome <- spec$outcomes
+  n <- nrow(eta)
+  scale_eta <- NULL
+  if (!is.null(info$dpar)) {
+    scale_eta <- .mlsim_outcome_scale(spec, checked, random$draws)
+  }
+  trials_resolved <- NULL
+  if (identical(family, "binomial")) {
+    trials_resolved <- .mlsim_resolve_size(trials, n, "trials")
+    if (any(trials_resolved < 1L)) {
+      .mlsim_stop("`trials` must resolve to integer values of at least 1 for `family = \"binomial\"`.")
+    }
+  }
+  values <- .mlsim_draw_outcome_family_values(
+    family,
+    as.vector(eta),
+    if (is.null(scale_eta)) NULL else as.vector(scale_eta),
+    trials_resolved
+  )
+  output <- data.table::data.table(values)
+  data.table::setnames(output, outcome)
+  if (!is.null(trials_resolved)) {
+    output[[spec$trials_column]] <- trials_resolved
+  }
+
+  mean_value <- .mlsim_mean_from_eta(family, eta)
+  colnames(mean_value) <- outcome
+  prob <- NULL
+  mu <- mean_value
+  if (identical(family, "binomial")) {
+    prob <- mean_value
+    mu <- prob * trials_resolved
+  }
+
+  metadata <- list(
+    distribution = "outcome",
+    level = if (is.null(context$n_groups)) "single" else "multilevel",
+    vars = names(output),
+    formula = spec$formula,
+    scale = spec$scale,
+    family = family,
+    params = checked$raw,
+    parsed = .mlsim_outcome_parsed_metadata(spec),
+    term_map = spec$term_map,
+    expected_parameter_names = spec$expected_parameter_names,
+    selected_column_roles = spec$selected_column_roles,
+    group_level_effects = random$draws,
+    proposal_group_level_effect_covariance = random$proposal_covariance,
+    realised_group_level_effect_covariance = random$realised_covariance,
+    eta = eta,
+    mu = mu,
+    burnin = list(
+      burnin = burnin,
+      burnin_type = "fixed",
+      burnin_reference_regime = NULL
+    ),
+    time_validation = list(required_complete_equally_spaced = FALSE),
+    compositional = FALSE
+  )
+  if (!is.null(info$dpar)) {
+    metadata$dpar <- list(name = info$dpar, eta = scale_eta, value = exp(scale_eta))
+  }
+  if (identical(family, "binomial")) {
+    metadata$prob <- prob
+    metadata$trials_column <- spec$trials_column
+  }
+
+  .mlsim_result(output, names(output), metadata)
+}
+
+.mlsim_draw_outcome_family_values <- function(family, eta, scale_eta, trials) {
+  n <- length(eta)
+  mean_value <- .mlsim_mean_from_eta(family, eta)
+  if (!all(is.finite(mean_value))) {
+    .mlsim_stop(
+      "Non-finite %s mean values were produced by the location linear predictor; check `params$location$beta` for extreme values.",
+      family
+    )
+  }
+  aux <- if (is.null(scale_eta)) NULL else exp(scale_eta)
+  if (!is.null(aux) && !all(is.finite(aux))) {
+    .mlsim_stop(
+      "Non-finite %s auxiliary scale parameter values were produced by the scale linear predictor; check `params$scale$beta` for extreme values.",
+      family
+    )
+  }
+  values <- switch(
+    family,
+    poisson = stats::rpois(n, lambda = mean_value),
+    binomial = stats::rbinom(n, size = trials, prob = mean_value),
+    negbin = stats::rnbinom(n, mu = mean_value, size = aux),
+    gamma = stats::rgamma(n, shape = aux, rate = aux / mean_value),
+    beta = stats::rbeta(n, shape1 = mean_value * aux, shape2 = (1 - mean_value) * aux),
+    .mlsim_stop("No outcome drawing method is defined for family `%s`.", family)
+  )
+  if (anyNA(values)) {
+    .mlsim_stop(
+      "Drawing %s outcomes produced missing values; the location/scale parameters are too extreme for this family.",
+      family
+    )
+  }
+  if (identical(family, "beta")) {
+    boundary <- sum(values <= 0 | values >= 1)
+    if (boundary > 0L) {
+      warning(
+        sprintf(
+          "%d beta outcome draw(s) are numerically at the 0/1 boundary; the location/scale parameters may be too extreme for a beta likelihood.",
+          boundary
+        ),
+        call. = FALSE
+      )
+    }
+  }
+  if (identical(family, "gamma")) {
+    boundary <- sum(values <= 0)
+    if (boundary > 0L) {
+      warning(
+        sprintf(
+          "%d gamma outcome draw(s) are numerically zero; the location/scale parameters may be too extreme for a gamma likelihood.",
+          boundary
+        ),
+        call. = FALSE
+      )
+    }
+  }
+  values
+}
+
 .mlsim_outcome_template_params <- function(spec) {
   location_beta <- matrix(
     0,
@@ -1027,19 +1364,23 @@ gen_template <- function(formula, scale, burnin,
     ncol = length(spec$outcomes),
     dimnames = list(spec$expected_parameter_names$location, spec$outcomes)
   )
-  scale_beta <- matrix(
-    0,
-    nrow = length(spec$expected_parameter_names$scale),
-    ncol = length(spec$outcomes),
-    dimnames = list(spec$expected_parameter_names$scale, spec$outcomes)
-  )
-  correlation <- diag(length(spec$outcomes))
-  dimnames(correlation) <- list(spec$outcomes, spec$outcomes)
 
-  params <- list(
-    location = list(beta = location_beta),
-    scale = list(beta = scale_beta, correlation = correlation)
-  )
+  params <- list(location = list(beta = location_beta))
+
+  if (!is.null(.mlsim_spec_dpar(spec))) {
+    scale_beta <- matrix(
+      0,
+      nrow = length(spec$expected_parameter_names$scale),
+      ncol = length(spec$outcomes),
+      dimnames = list(spec$expected_parameter_names$scale, spec$outcomes)
+    )
+    params$scale <- list(beta = scale_beta)
+    if (identical(.mlsim_spec_family(spec), "gaussian")) {
+      correlation <- diag(length(spec$outcomes))
+      dimnames(correlation) <- list(spec$outcomes, spec$outcomes)
+      params$scale$correlation <- correlation
+    }
+  }
 
   if (isTRUE(spec$has_ar)) {
     params$ar <- list(
@@ -1073,13 +1414,24 @@ gen_template <- function(formula, scale, burnin,
   params
 }
 
+.mlsim_spec_family <- function(spec) {
+  spec$family %||% "gaussian"
+}
+
+.mlsim_spec_dpar <- function(spec) {
+  if (is.null(spec$family_info)) "sigma" else spec$family_info$dpar
+}
+
 .mlsim_outcome_parsed_metadata <- function(spec) {
   list(
     outcomes = spec$outcomes,
     location_terms = colnames(spec$X),
     scale_terms = colnames(spec$W),
     ar_terms = colnames(spec$Q),
-    random_effect_names = spec$random$names
+    random_effect_names = spec$random$names,
+    family = .mlsim_spec_family(spec),
+    dpar = .mlsim_spec_dpar(spec),
+    trials_column = spec$trials_column
   )
 }
 
@@ -1093,17 +1445,27 @@ gen_template <- function(formula, scale, burnin,
     spec$outcomes,
     "params$location$beta"
   )
-  scale_beta <- .mlsim_check_parameter_matrix(
-    params$scale$beta,
-    spec$expected_parameter_names$scale,
-    spec$outcomes,
-    "params$scale$beta"
-  )
-  correlation <- .mlsim_check_outcome_correlation(
-    params$scale$correlation,
-    spec$outcomes,
-    "params$scale$correlation"
-  )
+  scale_beta <- NULL
+  correlation <- NULL
+  if (!is.null(.mlsim_spec_dpar(spec))) {
+    scale_beta <- .mlsim_check_parameter_matrix(
+      params$scale$beta,
+      spec$expected_parameter_names$scale,
+      spec$outcomes,
+      "params$scale$beta"
+    )
+    if (identical(.mlsim_spec_family(spec), "gaussian")) {
+      correlation <- .mlsim_check_outcome_correlation(
+        params$scale$correlation,
+        spec$outcomes,
+        "params$scale$correlation"
+      )
+    } else if (!is.null(params$scale$correlation)) {
+      .mlsim_stop("`params$scale$correlation` is only used for `family = \"gaussian\"`.")
+    }
+  } else if (!is.null(params$scale)) {
+    .mlsim_stop("`params$scale` must not be supplied for `family = \"%s\"`.", .mlsim_spec_family(spec))
+  }
   ar_beta <- NULL
   if (isTRUE(spec$has_ar)) {
     ar_beta <- .mlsim_check_ar_array(params$ar$beta, spec$expected_parameter_names$ar, spec$outcomes)
@@ -1306,6 +1668,20 @@ gen_template <- function(formula, scale, burnin,
   } else {
     stability$high_persistence_warning <- FALSE
   }
+  if (isTRUE(spec$has_ar) &&
+      identical(stability$time_varying_stability_guaranteed, FALSE)) {
+    warning(
+      "AR matrices vary over time within at least one group and their largest spectral norm is >= 1. Row-wise spectral radii below 1 do not guarantee stability of a time-varying VAR; inspect the simulated series or reduce moderated AR effects.",
+      call. = FALSE
+    )
+  }
+  rate <- stability$stability_acceptance_rate
+  if (!is.null(rate) && rate < 0.95) {
+    message(sprintf(
+      "AR stability resampling accepted %.1f%% of group-level effect draws, so the realized random-effect distribution is truncated relative to `params$random`. Compare the `realised_group_level_effect_covariance` generator metadata to the requested covariance.",
+      100 * rate
+    ))
+  }
   stability
 }
 
@@ -1342,6 +1718,17 @@ gen_template <- function(formula, scale, burnin,
     spectral_radius = radii
   )
   max_by_group <- as.numeric(tapply(radius_table$spectral_radius, radius_table$group, max))
+  keys <- .mlsim_phi_row_keys(phi)
+  varies_within_group <- any(vapply(
+    split(keys, spec$series$group_index),
+    function(k) length(unique(k)) > 1L,
+    logical(1)
+  ))
+  max_norm <- if (varies_within_group) {
+    max(.mlsim_phi_spectral_norms(phi), na.rm = TRUE)
+  } else {
+    NULL
+  }
   list(
     stability_rule = rule,
     stability_attempts_by_group_level = attempts,
@@ -1352,7 +1739,14 @@ gen_template <- function(formula, scale, burnin,
     },
     spectral_radius_by_group_level_and_row = radius_table,
     max_spectral_radius_by_group_level = max_by_group,
-    max_spectral_radius_overall = max(radii, na.rm = TRUE)
+    max_spectral_radius_overall = max(radii, na.rm = TRUE),
+    ar_matrices_vary_within_group = varies_within_group,
+    max_spectral_norm_overall = max_norm,
+    # products of individually stable matrices can diverge, so a row-wise
+    # spectral radius below 1 only guarantees stability when the AR matrix is
+    # constant within each series; a largest spectral norm below 1 is a
+    # sufficient condition for the time-varying case
+    time_varying_stability_guaranteed = if (varies_within_group) max_norm < 1 else TRUE
   )
 }
 
@@ -1362,25 +1756,46 @@ gen_template <- function(formula, scale, burnin,
   max(.mlsim_phi_radii(phi), na.rm = TRUE)
 }
 
+.mlsim_phi_row_keys <- function(phi) {
+  flat <- matrix(phi, nrow = dim(phi)[[1L]])
+  do.call(
+    paste,
+    c(lapply(seq_len(ncol(flat)), function(j) sprintf("%.17g", flat[, j])), list(sep = ","))
+  )
+}
+
+.mlsim_phi_rowwise_unique <- function(phi, fn) {
+  k <- dim(phi)[[2L]]
+  keys <- .mlsim_phi_row_keys(phi)
+  first_idx <- which(!duplicated(keys))
+  unique_values <- vapply(first_idx, function(i) {
+    fn(matrix(phi[i, , ], k, k))
+  }, numeric(1))
+  unique_values[match(keys, keys[first_idx])]
+}
+
 .mlsim_phi_radii <- function(phi) {
   if (is.null(phi) || length(phi) == 0L) {
     return(numeric())
   }
-  n <- dim(phi)[[1L]]
-  k <- dim(phi)[[2L]]
-  if (k == 1L) {
+  if (dim(phi)[[2L]] == 1L) {
     return(abs(as.vector(phi[, 1L, 1L])))
   }
-  flat <- matrix(phi, nrow = n)
-  keys <- do.call(
-    paste,
-    c(lapply(seq_len(ncol(flat)), function(j) sprintf("%.17g", flat[, j])), list(sep = ","))
-  )
-  first_idx <- which(!duplicated(keys))
-  unique_radii <- vapply(first_idx, function(i) {
-    max(Mod(eigen(matrix(phi[i, , ], k, k), only.values = TRUE)$values))
-  }, numeric(1))
-  unique_radii[match(keys, keys[first_idx])]
+  .mlsim_phi_rowwise_unique(phi, function(m) {
+    max(Mod(eigen(m, only.values = TRUE)$values))
+  })
+}
+
+.mlsim_phi_spectral_norms <- function(phi) {
+  if (is.null(phi) || length(phi) == 0L) {
+    return(numeric())
+  }
+  if (dim(phi)[[2L]] == 1L) {
+    return(abs(as.vector(phi[, 1L, 1L])))
+  }
+  .mlsim_phi_rowwise_unique(phi, function(m) {
+    max(svd(m, nu = 0L, nv = 0L)$d)
+  })
 }
 
 .mlsim_outcome_location <- function(spec, checked, draws) {
@@ -1401,11 +1816,12 @@ gen_template <- function(formula, scale, burnin,
 .mlsim_outcome_scale <- function(spec, checked, draws) {
   eta <- spec$W %*% checked$scale$beta
   colnames(eta) <- spec$outcomes
+  label <- spec$scale_label %||% "scale"
   if (!is.null(draws) && length(spec$random$scale_terms) > 0L) {
     for (term in spec$random$scale_terms) {
       z <- spec$random$scale_Z[, term]
       for (outcome in spec$outcomes) {
-        name <- sprintf("scale|outcome=%s|term=%s", outcome, term)
+        name <- sprintf("%s|outcome=%s|term=%s", label, outcome, term)
         eta[, outcome] <- eta[, outcome] + z * draws[spec$series$group_index, name]
       }
     }

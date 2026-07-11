@@ -333,10 +333,20 @@ test_that("multilevel MVN writes ILR-based random columns for compositional outp
     ".mlsim_z2_scale_random_intercept"
   )
 
+  decomposition_cols <- c(
+    "z1_between", "z2_between", "z1_within", "z2_within",
+    "sleep_between", "active_between", "sedentary_between"
+  )
   expect_false(any(c("z1", "z2") %in% names(sim$data)))
-  expect_true(all(c("sleep", "active", "sedentary", random_cols) %in% names(sim$data)))
-  expect_identical(sim$generator_specs$comp$vars, c("sleep", "active", "sedentary"))
-  expect_identical(sim$generator_metadata$comp$vars, c("sleep", "active", "sedentary"))
+  expect_true(all(c("sleep", "active", "sedentary", decomposition_cols, random_cols) %in% names(sim$data)))
+  expect_identical(
+    sim$generator_specs$comp$vars,
+    c("sleep", "active", "sedentary", decomposition_cols)
+  )
+  expect_identical(
+    sim$generator_metadata$comp$vars,
+    c("sleep", "active", "sedentary", decomposition_cols)
+  )
   lapply(random_cols, function(col) expect_group_constant(sim$data, col))
   expect_no_realized_random_metadata(sim$generator_metadata$comp)
 })
@@ -461,4 +471,123 @@ test_that("custom generator column roles are validated and preserved", {
     ),
     "duplicate variable/component"
   )
+})
+
+test_that("compositional multilevel MVN emits between/within columns and roles", {
+  sim <- simulate_data(
+    n_groups = 4,
+    n_per_group = 5,
+    group_id = "ID",
+    seed = 61,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        level = "multilevel",
+        fixed_intercept = c(0.2, -0.1),
+        random_cov = diag(2) * 0.2,
+        residual_cov = diag(2) * 0.4,
+        compositional = TRUE,
+        parts = c("sleep", "active", "sedentary"),
+        total = 24
+      )
+    )
+  )
+
+  data <- sim$data
+  expect_true(all(c(
+    "ilr1_between", "ilr2_between", "ilr1_within", "ilr2_within",
+    "sleep_between", "active_between", "sedentary_between"
+  ) %in% names(data)))
+
+  expect_equal(data$ilr1, data$ilr1_between + data$ilr1_within)
+  expect_equal(data$ilr2, data$ilr2_between + data$ilr2_within)
+  expect_equal(
+    rowSums(as.matrix(data[, c("sleep_between", "active_between", "sedentary_between"), with = FALSE])),
+    rep(24, nrow(data))
+  )
+  back <- multilevelcoda:::.mlsim_ilr_inverse(
+    as.matrix(data[, c("ilr1_between", "ilr2_between"), with = FALSE]),
+    parts = c("sleep", "active", "sedentary"),
+    total = 24,
+    sbp = sim$generator_metadata$comp$sbp
+  )$values
+  expect_equal(unname(back), unname(as.matrix(
+    data[, c("sleep_between", "active_between", "sedentary_between"), with = FALSE]
+  )))
+
+  roles <- sim$generator_metadata$comp$column_roles
+  expect_identical(sort(roles$column[roles$component == "between"]), c("ilr1_between", "ilr2_between"))
+  expect_identical(sort(roles$column[roles$component == "within"]), c("ilr1_within", "ilr2_within"))
+  expect_identical(sort(roles$column[roles$component == "observed"]), c("ilr1", "ilr2"))
+  expect_false(any(c("sleep", "active", "sedentary") %in% roles$variable))
+  expect_identical(
+    sim$generator_metadata$comp$between_parts_vars,
+    c("sleep_between", "active_between", "sedentary_between")
+  )
+
+  group_constant <- sim$data[, lapply(.SD, function(x) max(x) - min(x)), by = ID,
+                             .SDcols = c("ilr1_between", "sleep_between")]
+  expect_true(all(unlist(group_constant[, -1]) <= 1e-12))
+})
+
+test_that("compositional MVN roles adapt to keep_ilr and level", {
+  no_ilr <- simulate_data(
+    n_groups = 3,
+    n_per_group = 4,
+    group_id = "ID",
+    seed = 62,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        level = "multilevel",
+        fixed_intercept = c(0, 0),
+        random_cov = diag(2) * 0.2,
+        residual_cov = diag(2) * 0.4,
+        compositional = TRUE,
+        parts = c("a", "b", "c"),
+        keep_ilr = FALSE
+      )
+    )
+  )
+  expect_false(any(c("ilr1", "ilr2") %in% names(no_ilr$data)))
+  expect_true(all(c("ilr1_between", "ilr1_within") %in% names(no_ilr$data)))
+  roles <- no_ilr$generator_metadata$comp$column_roles
+  expect_false("observed" %in% roles$component)
+  expect_setequal(roles$component, c("between", "within"))
+
+  level2 <- simulate_data(
+    n_groups = 3,
+    n_per_group = 4,
+    group_id = "ID",
+    seed = 63,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        level = "level2",
+        fixed_intercept = c(0, 0),
+        residual_cov = diag(2),
+        compositional = TRUE,
+        parts = c("a", "b", "c")
+      )
+    )
+  )
+  roles2 <- level2$generator_metadata$comp$column_roles
+  expect_identical(unique(roles2$component), "between")
+  expect_identical(unique(roles2$level), "group")
+
+  single <- simulate_data(
+    n = 6,
+    seed = 64,
+    generators = list(
+      comp = gen_mvn(
+        c("ilr1", "ilr2"),
+        fixed_intercept = c(0, 0),
+        residual_cov = diag(2),
+        compositional = TRUE,
+        parts = c("a", "b", "c")
+      )
+    )
+  )
+  roles3 <- single$generator_metadata$comp$column_roles
+  expect_identical(unique(roles3$component), "observed")
 })

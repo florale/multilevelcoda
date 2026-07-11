@@ -39,7 +39,8 @@ gen_negbin(
 random-intercept model.}
 
 \item{size}{Binomial trial size. May be a scalar, vector, function of \code{n}, or
-count-distribution list.}
+count-distribution list. Count-distribution \code{minimum}/\code{maximum} bounds
+clamp draws to the bounds (censoring, not truncation).}
 
 \item{fixed_intercept}{Link-scale intercept. Binomial uses the logit link;
 Poisson and negative binomial use the log link.}

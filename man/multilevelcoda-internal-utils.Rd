@@ -4,22 +4,15 @@
 \alias{multilevelcoda-internal-utils}
 \alias{.mlsim_match_level}
 \alias{.mlsim_stop}
-\alias{.mlsim_format_args}
-\alias{.mlsim_warn_ignored_args}
-\alias{.mlsim_check_multilevel_unused}
-\alias{.mlsim_check_multilevel_required}
 \alias{.mlsim_check_vars}
 \alias{.mlsim_check_new_names_compatible}
 \alias{.mlsim_check_finite_numeric}
-\alias{.mlsim_check_prob}
 \alias{.mlsim_check_open_prob}
 \alias{.mlsim_check_categories}
 \alias{.mlsim_reference_index}
 \alias{.mlsim_check_categorical_ordered}
 \alias{.mlsim_check_categorical_logits}
 \alias{.mlsim_check_categorical_random_cov}
-\alias{.mlsim_resolve_category_prob}
-\alias{.mlsim_check_category_prob_matrix}
 \alias{.mlsim_baseline_category_prob}
 \alias{.mlsim_sample_categories}
 \alias{.mlsim_encode_categories}
@@ -39,11 +32,6 @@
 \alias{.mlsim_rmvnorm}
 \alias{.mlsim_with_seed}
 \alias{.mlsim_n_for_level}
-\alias{.mlsim_expand_level2}
-\alias{.mlsim_expand_level2_vector}
-\alias{.mlsim_check_multilevel_only_args}
-\alias{.mlsim_generator_contract}
-\alias{.mlsim_warn_direct_precedence}
 \alias{.mlsim_random_intercept_names}
 \alias{.mlsim_check_position_cov}
 \alias{.mlsim_joint_random_intercepts}
@@ -55,14 +43,9 @@
 \alias{.mlsim_multilevel_random_columns}
 \alias{.mlsim_categorical_random_columns}
 \alias{.mlsim_check_scale_fixed_intercept}
-\alias{.mlsim_random_eta}
 \alias{.mlsim_check_simple_residual_cor}
 \alias{.mlsim_mvn_row_residual}
 \alias{.mlsim_mvn_row_covariance_array}
-\alias{.mlsim_check_scale_or_arg}
-\alias{.mlsim_check_positive_or_null}
-\alias{.mlsim_simple_random_metadata}
-\alias{.mlsim_validate_scale_multilevel_args}
 \alias{.mlsim_mean_from_eta}
 \alias{.mlsim_parameter_metadata}
 \alias{.mlsim_column_roles}
@@ -79,21 +62,11 @@
 
 .mlsim_stop(..., call. = FALSE)
 
-.mlsim_format_args(args)
-
-.mlsim_warn_ignored_args(generator, used, ignored)
-
-.mlsim_check_multilevel_unused(level, supplied, generator, use)
-
-.mlsim_check_multilevel_required(level, supplied, generator)
-
 .mlsim_check_vars(vars, n = NULL, arg = "vars", allow_empty = FALSE)
 
 .mlsim_check_new_names_compatible(new, existing, arg = "generated names")
 
 .mlsim_check_finite_numeric(x, arg)
-
-.mlsim_check_prob(x, arg = "prob")
 
 .mlsim_check_open_prob(x, arg = "prob")
 
@@ -106,10 +79,6 @@
 .mlsim_check_categorical_logits(logits, nonreference, arg)
 
 .mlsim_check_categorical_random_cov(random_cov, nonreference)
-
-.mlsim_resolve_category_prob(prob, n, labels, arg = "prob")
-
-.mlsim_check_category_prob_matrix(prob, arg = "prob")
 
 .mlsim_baseline_category_prob(eta, reference_index, labels)
 
@@ -156,27 +125,6 @@
 
 .mlsim_n_for_level(level, context)
 
-.mlsim_expand_level2(values, level, context)
-
-.mlsim_expand_level2_vector(values, level, context)
-
-.mlsim_check_multilevel_only_args(level, supplied)
-
-.mlsim_generator_contract(
-  generator,
-  vars,
-  level,
-  vars_n = 1L,
-  direct_supplied = NULL,
-  multilevel_only = NULL,
-  multilevel_required = NULL,
-  multilevel_use = NULL,
-  scale_arg = NULL,
-  scale_fixed_intercept = NULL
-)
-
-.mlsim_warn_direct_precedence(level, generator, used, ignored)
-
 .mlsim_random_intercept_names(vars, scale = FALSE)
 
 .mlsim_check_position_cov(cov, names, arg = "random_cov")
@@ -203,37 +151,11 @@
   expected_names = NULL
 )
 
-.mlsim_random_eta(
-  type,
-  fixed_intercept,
-  random_cov,
-  context,
-  vars,
-  scale_fixed_intercept = NULL
-)
-
 .mlsim_check_simple_residual_cor(residual_cor, vars)
 
 .mlsim_mvn_row_residual(residual_sd, residual_cor)
 
 .mlsim_mvn_row_covariance_array(residual_sd, residual_cor)
-
-.mlsim_check_scale_or_arg(arg, arg_name, scale_fixed_intercept, generator)
-
-.mlsim_check_positive_or_null(x, arg)
-
-.mlsim_simple_random_metadata(
-  fixed_intercept,
-  random,
-  scale_fixed_intercept = NULL
-)
-
-.mlsim_validate_scale_multilevel_args(
-  level,
-  scale_fixed_intercept,
-  random_cov = NULL,
-  residual_cor = NULL
-)
 
 .mlsim_mean_from_eta(type, eta)
 
@@ -262,12 +184,8 @@ x \%||\% y
 
 \item{call.}{Logical flag passed to \code{\link[=stop]{stop()}}.}
 
-\item{args, used, ignored, supplied, use, direct_supplied, multilevel_only}{Character vectors or named logicals used to build diagnostics.}
-
-\item{generator}{Generator label used in diagnostic messages.}
-
-\item{vars, var, n, vars_n, names, arg, arg_name}{Variable names, target lengths,
-or argument labels.}
+\item{vars, var, n, names, arg}{Variable names, target lengths, or argument
+labels.}
 
 \item{allow_empty}{Logical flag allowing an empty name vector.}
 
@@ -301,20 +219,17 @@ matrices.}
 
 \item{context}{Simulation context supplied by \code{\link[=simulate_data]{simulate_data()}}.}
 
-\item{values, result}{Generated values or raw custom-generator result.}
-
-\item{multilevel_required, multilevel_use, scale_arg}{Multilevel constructor
-contract declarations.}
-
 \item{scale}{Logical flag for joint location/scale random effects.}
 
 \item{random, random_intercepts}{Random-effect draw metadata.}
 
+\item{scale_fixed_intercept}{Scale intercepts.}
+
 \item{type}{Distribution type.}
 
-\item{fixed_intercept, scale_fixed_intercept}{Location and scale intercepts.}
-
 \item{size}{Count-distribution size specification.}
+
+\item{values, result}{Generated values or raw custom-generator result.}
 
 \item{metadata, wrapper_metadata}{Metadata lists.}
 

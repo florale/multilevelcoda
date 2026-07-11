@@ -2,13 +2,15 @@
 % Please edit documentation in R/sim-outcome.R
 \name{gen_outcome}
 \alias{gen_outcome}
-\title{Generate Dynamic Gaussian and Compositional Outcomes}
+\title{Generate Dynamic Gaussian, Compositional, and GLM-Family Outcomes}
 \usage{
 gen_outcome(
   formula,
-  scale,
+  scale = NULL,
   params,
-  burnin,
+  burnin = NULL,
+  family = "gaussian",
+  trials = NULL,
   composition = list(parts = NULL, total = 24, sbp = NULL, keep_ilr = TRUE),
   ar_stability = c("resample", "shrink", "error"),
   max_stability_attempts = 1000,
@@ -17,26 +19,64 @@ gen_outcome(
 }
 \arguments{
 \item{formula}{Outcome location formula. The left-hand side may be a single
-outcome (\code{y}) or \code{mvbind(y1, y2, ...)}. The right-hand side may include
-ordinary model terms, \code{between(x)}, \code{within(x)}, \code{ar1()}, interactions, and
-one brms/lme4-style grouping term.}
+outcome (\code{y}) or, for \code{family = "gaussian"} only, \code{mvbind(y1, y2, ...)}.
+The right-hand side may include ordinary model terms, \code{between(x)},
+\code{within(x)}, interactions, one brms/lme4-style grouping term, and, for
+\code{family = "gaussian"} only, \code{ar1()}. \code{between()}/\code{within()} resolve
+against the column roles emitted by earlier predictor generators; this
+includes the ILR coordinates of multilevel compositional \code{\link[=gen_mvn]{gen_mvn()}}
+generators (for example \code{between(ilr1)}), enabling simulation of models
+where a scalar outcome depends on the between- and within-person parts
+of a composition. Roles apply to ILR coordinates, not to composition
+parts.}
 
-\item{scale}{Required scale formula with \code{sigma} on the left-hand side, for
-example \code{sigma ~ 1} or \code{sigma ~ treatment + (1 | ID)}. The scale model is
-on the log conditional standard-deviation scale.}
+\item{scale}{Scale formula with the family's brms distributional-parameter
+name on the left-hand side: \code{sigma} for \code{"gaussian"} (log conditional SD,
+for example \code{sigma ~ 1} or \code{sigma ~ treatment + (1 | ID)}), \code{shape} for
+\code{"negbin"} (log size) and \code{"gamma"} (log shape), and \code{phi} for \code{"beta"}
+(log precision). Required for these families; must be omitted for
+\code{"poisson"} and \code{"binomial"}, which have no auxiliary scale parameter.}
 
 \item{params}{List of true parameters. Required components are
-\code{params$location$beta}, \code{params$scale$beta}, and, for multivariate
-outcomes, \code{params$scale$correlation}. When AR terms are present,
+\code{params$location$beta} and, for families with a scale model,
+\code{params$scale$beta}. For multivariate Gaussian outcomes,
+\code{params$scale$correlation} is required. When AR terms are present,
 \code{params$ar$beta} is required. When grouping terms are present,
 \code{params$random[[group]]$covariance} is required.}
 
-\item{burnin}{Fixed non-negative integer burn-in length used when AR is
-active. Ignored when no AR terms are present.}
+\item{burnin}{Fixed integer burn-in length for the residual AR/VAR
+process. Required when \code{ar1()} appears in the location formula and
+ignored otherwise (non-AR Gaussian models and all non-Gaussian families
+have no burn-in phase). Each series is initialized at zero
+residuals and iterated \code{burnin} steps before the first observed row, so
+\code{burnin = 0} starts the residual process exactly at zero and the first
+observations are under-dispersed relative to the stationary
+distribution. Do not use \code{burnin = 0} or other small values for
+simulation studies: choose a burn-in long enough for the process to
+forget its start, for example at least \code{log(0.01) / log(rho)} steps,
+where \code{rho} is the largest spectral radius of the AR matrices (about 90
+steps at \code{rho = 0.95}).}
 
-\item{composition}{List controlling optional ILR back-transformation. Use
-\code{parts} or \code{sbp} to request compositional output, \code{total} for the closure
-total, and \code{keep_ilr} to keep ILR coordinates alongside parts.}
+\item{family}{Character scalar naming the outcome family: \code{"gaussian"}
+(default), \code{"poisson"} (log link), \code{"binomial"} (logit link, requires
+\code{trials}), \code{"negbin"} (log link, \code{scale} is log size), \code{"gamma"} (log
+link, \code{scale} is log shape), or \code{"beta"} (logit link, \code{scale} is log
+precision). Non-Gaussian families are univariate only and do not support
+\code{ar1()} or \code{composition}.}
+
+\item{trials}{Number of binomial trials, required for and only allowed with
+\code{family = "binomial"}. Accepts a scalar, a vector recycled to the number
+of rows, a function of \code{n}, or a count-distribution list as in
+\code{\link[=gen_binomial]{gen_binomial()}} (count-distribution \code{minimum}/\code{maximum} bounds clamp
+draws to the bounds; censoring, not truncation). Resolved trial sizes
+are written into the simulated
+data as a \verb{<outcome>_trials} column for use with
+\code{y | trials(y_trials)} in brms.}
+
+\item{composition}{List controlling optional ILR back-transformation
+(\code{family = "gaussian"} only). Use \code{parts} or \code{sbp} to request
+compositional output, \code{total} for the closure total, and \code{keep_ilr} to
+keep ILR coordinates alongside parts.}
 
 \item{ar_stability}{Handling for unstable AR matrices: \code{"resample"},
 \code{"shrink"}, or \code{"error"}.}
@@ -51,12 +91,32 @@ or shrinkage attempts.}
 An \code{mlsim_generator_spec} object for use in \code{\link[=simulate_data]{simulate_data()}}.
 }
 \description{
-Create an outcome generator for \code{\link[=simulate_data]{simulate_data()}}. Outcomes are simulated on
-a Gaussian scale, optionally as ILR coordinates that are back-transformed to
-strictly positive compositions. If \code{ar1()} appears in the location formula,
-it defines a residual VAR(1) process, not an observed lagged-outcome
-predictor.
+Create an outcome generator for \code{\link[=simulate_data]{simulate_data()}}. With the default
+\code{family = "gaussian"}, outcomes are simulated on a Gaussian scale,
+optionally as ILR coordinates that are back-transformed to strictly
+positive compositions, and \code{ar1()} in the location formula defines a
+residual VAR(1) process, not an observed lagged-outcome predictor.
+Non-Gaussian families (\code{"poisson"}, \code{"binomial"}, \code{"negbin"}, \code{"gamma"},
+\code{"beta"}) simulate a single outcome from the family distribution with the
+location linear predictor mapped through the family link.
 }
+\section{Non-Gaussian families}{
+
+Non-Gaussian outcomes are drawn independently per row from the family
+distribution after mapping the location linear predictor through the
+inverse link, with the auxiliary parameter (size, shape, or precision)
+taken as \code{exp()} of the scale linear predictor. \code{ar1()} is currently only
+supported for \code{family = "gaussian"}. Group-level effects on the location
+and scale linear predictors are drawn jointly from
+\code{params$random[[group]]$covariance} exactly as for Gaussian outcomes.
+Because the links are nonlinear, fixed effects are conditional
+(subject-specific) effects: the marginal mean of the outcome is not the
+inverse link of the fixed-effect predictor alone. Extreme linear-predictor
+values that produce non-finite means or auxiliary parameters are an error;
+draws that land on a boundary the family likelihood cannot support (beta
+outcomes numerically at 0 or 1, gamma outcomes at 0) produce a warning.
+}
+
 \section{Time spacing}{
 
 When \code{ar1()} is present, time must be complete and equally spaced within
@@ -82,6 +142,26 @@ with more extreme moderator draws, and the chance of an unstable row grows
 with the number of rows. \code{ar_stability = "resample"} redraws only
 group-level effects, so it cannot repair instability caused by the
 population-level part of a moderated AR term; that case errors instead.
+
+Two further diagnostics guard the validity of accepted draws. First, when
+the AR matrices vary over time within a series (moderated \code{ar1()} with
+more than one outcome), a spectral radius below 1 for every row is
+necessary but not sufficient for stability of the time-varying process:
+products of individually stable matrices can still diverge. The simulator
+therefore also computes the spectral norm (largest singular value) of each
+row-specific AR matrix; a largest norm below 1 guarantees stability. When
+the matrices vary within a series and the largest spectral norm is 1 or
+more, stability cannot be guaranteed and a warning is issued; the result
+is recorded in the stability metadata as
+\code{time_varying_stability_guaranteed}. Second, \code{ar_stability = "resample"}
+truncates the group-level effect distribution: each group's entire
+random-effect vector (location, scale, and AR effects jointly) is redrawn
+until the AR part is stable, so when the acceptance rate is below 1 the
+realized random-effect covariance is smaller than
+\code{params$random[[group]]$covariance} requested. The realized covariance is
+always recorded in the generator metadata as
+\code{realised_group_level_effect_covariance}, and a message is emitted when
+the acceptance rate falls below 0.95.
 }
 
 \section{Performance}{

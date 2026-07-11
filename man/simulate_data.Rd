@@ -32,7 +32,10 @@ created.}
 \item{n_per_group}{Group sizes. May be a scalar/vector, a function of
 \code{n_groups}, or a count-distribution list such as
 \code{list(distribution = "poisson", lambda = 4, minimum = 1)}. Requires
-\code{n_groups} and cannot be combined with \code{n}.}
+\code{n_groups} and cannot be combined with \code{n}. Count-distribution
+\code{minimum}/\code{maximum} bounds are applied by clamping draws to the bounds
+(censoring), which piles probability mass at the bounds rather than
+redistributing it as truncation would.}
 
 \item{group_id, obs_id}{Character scalars naming the group and observation
 index columns.}

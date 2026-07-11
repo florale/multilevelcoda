@@ -14,7 +14,10 @@
 #' @param n_per_group Group sizes. May be a scalar/vector, a function of
 #'   `n_groups`, or a count-distribution list such as
 #'   `list(distribution = "poisson", lambda = 4, minimum = 1)`. Requires
-#'   `n_groups` and cannot be combined with `n`.
+#'   `n_groups` and cannot be combined with `n`. Count-distribution
+#'   `minimum`/`maximum` bounds are applied by clamping draws to the bounds
+#'   (censoring), which piles probability mass at the bounds rather than
+#'   redistributing it as truncation would.
 #' @param group_id,obs_id Character scalars naming the group and observation
 #'   index columns.
 #' @param time_id Optional character scalar naming a time column.
