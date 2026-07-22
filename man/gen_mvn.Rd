@@ -87,6 +87,15 @@ ILR coordinates of a compositional generator, not to its parts. When
 \code{keep_ilr = FALSE} the observed ILR columns are dropped, but the
 between/within columns and their roles are still emitted for multilevel
 generators.
+
+Multilevel generators also record their group-level random-effect draws
+as per-row truth columns: \verb{.mlsim_<var>_random_intercept} for the
+location intercept and, when \code{random_cov} is a joint location-scale
+covariance, \verb{.mlsim_<var>_scale_random_intercept} for the scale
+intercept. The other multilevel scalar generators (\code{\link[=gen_negbin]{gen_negbin()}},
+\code{\link[=gen_gamma]{gen_gamma()}}, \code{\link[=gen_beta]{gen_beta()}}, \code{\link[=gen_poisson]{gen_poisson()}}, \code{\link[=gen_binomial]{gen_binomial()}}) share
+this machinery and emit the same columns. See the Value section of
+\code{\link[=simulate_data]{simulate_data()}} for the full naming contract.
 }
 \examples{
 sim <- simulate_data(

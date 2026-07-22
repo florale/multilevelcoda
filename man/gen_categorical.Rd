@@ -46,6 +46,13 @@ An \code{mlsim_generator_spec} object for use in \code{\link[=simulate_data]{sim
 Create a generator specification for binary or multicategory categorical
 variables.
 }
+\details{
+Multilevel categorical generators record their group-level random-effect
+draws as per-row truth columns named
+\verb{.mlsim_<var>_random_intercept_<category>}, one per non-reference
+category, with \verb{<var>} and \verb{<category>} sanitized by \code{\link[=make.names]{make.names()}}. See
+the Value section of \code{\link[=simulate_data]{simulate_data()}} for the full naming contract.
+}
 \examples{
 sim <- simulate_data(
   n = 6,

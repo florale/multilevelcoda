@@ -41,6 +41,24 @@
 #'   simulation.}
 #' }
 #'
+#' For multilevel predictor generators, `data` also contains the group-level
+#' random-effect draws expanded to one value per row, under a stable
+#' `.mlsim_` naming scheme:
+#' \describe{
+#'   \item{`.mlsim_<var>_random_intercept`}{The location random intercept of
+#'   a continuous variable (e.g. from [gen_mvn()]).}
+#'   \item{`.mlsim_<var>_scale_random_intercept`}{The scale random intercept
+#'   of a continuous variable, present only when the generator was given a
+#'   joint location-scale `random_cov`.}
+#'   \item{`.mlsim_<var>_random_intercept_<category>`}{The location random
+#'   intercept of a [gen_categorical()] variable, one column per
+#'   non-reference category.}
+#' }
+#' Both `<var>` and `<category>` are sanitized with [make.names()]. These are
+#' truth columns, not observed data: they record the generating group-level
+#' effects so the data-generating process can be validated, and they are
+#' never used as predictors by [prep_sim_analysis()].
+#'
 #' @details
 #' Generators are evaluated in list order. Each generator can depend on columns
 #' produced by earlier generators through the simulation context. Generated

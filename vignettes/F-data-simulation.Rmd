@@ -123,9 +123,9 @@ predictor generators.
 |---|---|
 | `level` | Choose row-level, group-level, or multilevel generation. |
 | `fixed_intercept` | Set the fixed location or link-scale intercept in any predictor generator. |
-| `random_cov` | Add group-specific random intercepts, and sometimes scale random effects. |
+| `random_cov` | Add group-specific random intercepts; a joint location-scale matrix also adds scale random effects. |
 | `residual_cov` | Set row-level residual variation for Gaussian and MVN generators. |
-| `scale_fixed_intercept` | Simulate group-varying log residual SD, size, shape, or precision. |
+| `scale_fixed_intercept` | Enable a scale model and set its fixed log-scale intercept (log residual SD, size, shape, or precision). |
 | `compositional`, `parts`, `sbp`, `total`, `keep_ilr` | Generate compositions from ILR coordinates and store SBP metadata. |
 | `between()`, `within()`, `ar1()` | Build outcome models from labelled predictor components (including ILR coordinates of compositional predictors) and residual VAR(1) dynamics. |
 
@@ -758,15 +758,25 @@ kable(parts_only$data)
 
 # Location-Scale Predictors
 
-For multilevel predictors, `scale_fixed_intercept` adds group-varying scale
-parameters, so that groups differ not only in their average level (location)
-but also in their variability (scale). For a univariate `gen_mvn()`
-generator, this is the log residual standard deviation. For the negative
-binomial, gamma, and beta generators, it controls the size, shape, and
-precision, respectively.
+`scale_fixed_intercept` enables a scale model and sets its fixed log-scale
+intercept. For a univariate `gen_mvn()` generator, the scale is the log
+residual standard deviation. For the negative binomial, gamma, and beta
+generators, it is the size, shape, and precision, respectively.
 
-In the metadata, we can see the group specific scale parameters that were
-generated.
+On its own, `scale_fixed_intercept` gives every group the same scale. To
+make groups differ not only in their average level (location) but also in
+their variability (scale), we supply a *joint* location-scale `random_cov`
+with dimension twice the number of variables, ordered with all location
+intercepts first and all scale intercepts second. A location-only
+`random_cov` leaves the scale constant between groups even when
+`scale_fixed_intercept` is set. The generators below are univariate, so
+their 2x2 `random_cov` matrices are the joint form: one location row and
+one scale row each, and both location and scale vary by group.
+
+There are two places to inspect the group-varying scale that was actually
+generated: the realized scale parameters in `generator_metadata` (shown
+below), and the group-level scale draws themselves, which appear in
+`sim$data` as `.mlsim_<variable>_scale_random_intercept` columns.
 
 
 ``` r
@@ -1460,8 +1470,8 @@ kable(dynamic_recovery[, !"simulator_name"], digits = 3)
 
 |type       |group |parameter                                    |  truth| estimate| est_error|  lower|  upper|   bias|covered |comparability |
 |:----------|:-----|:--------------------------------------------|------:|--------:|---------:|------:|------:|------:|:-------|:-------------|
-|fixed      |NA    |z11_Intercept                                |  0.000|    0.013|     0.014| -0.014|  0.041|  0.013|TRUE    |exact         |
-|fixed      |NA    |z21_Intercept                                |  0.000|   -0.017|     0.014| -0.047|  0.011| -0.017|TRUE    |exact         |
+|fixed      |NA    |z11_Intercept                                |  0.000|    0.013|     0.014| -0.014|  0.041|  0.013|TRUE    |approximate   |
+|fixed      |NA    |z21_Intercept                                |  0.000|   -0.017|     0.014| -0.047|  0.011| -0.017|TRUE    |approximate   |
 |fixed      |NA    |sigma_z11_Intercept                          | -0.916|   -0.921|     0.013| -0.948| -0.897| -0.005|TRUE    |approximate   |
 |fixed      |NA    |sigma_z21_Intercept                          | -1.050|   -1.058|     0.013| -1.082| -1.033| -0.008|TRUE    |approximate   |
 |fixed      |NA    |z11_lag_z1_1_within                          |  0.500|    0.474|     0.009|  0.457|  0.492| -0.026|FALSE   |approximate   |
@@ -1529,8 +1539,13 @@ series (Nickell bias; see Hamaker & Grasman, 2014, and the "Pragmatic
 default estimator" section of `?prep_sim_analysis`).
 
 This mismatch is intentional. It lets simulation studies quantify the bias
-of the standard analysis approach, and rows flagged `"exact"` are the ones
-where systematic bias would indicate a real problem. For a matched-model
+of the standard analysis approach. In fact, once `ar1()` is in the model,
+`sim_recovery()` flags *every* row `"approximate"`, including the location
+effects: the observed lag carries the lagged mean structure as well as the
+lagged residual, and person-mean centering does not generally remove it, so
+no parameter is guaranteed to keep its generating estimand. In static
+models, by contrast, most rows are `"exact"`, and those are the ones where
+systematic bias would indicate a real problem. For a matched-model
 recovery study, construct the analysis model by hand instead of using
 `prep_sim_analysis()`. The next section fits the non-centered alternative to
 the same simulated data, which shows how much of the AR attenuation comes
@@ -1560,14 +1575,12 @@ $\phi_i$.
 
 `prep_sim_analysis()` supports the NC parametrization through
 `lag_center = "none"`, which builds raw `lag_<response>` columns instead of
-the person-mean-centered `lag_<response>_within` columns. The truth table
-adjusts its `comparability` flags to match. Every location parameter is
-marked `"approximate"`, because the NC model estimates transformed
-quantities. The AR rows remain `"approximate"` as well, because the observed
-lag is still a proxy for the latent residual state, although these are now
-the rows we expect to be recovered nearly without bias. We reuse the
-simulated data from above, so the two analysis models see exactly the same
-observations.
+the person-mean-centered `lag_<response>_within` columns. The
+`comparability` flags do not change: with `ar1()` in the model, every row
+is `"approximate"` under either parametrization. What changes is which rows
+we expect to be recovered nearly without bias -- under NC, the AR rows.
+We reuse the simulated data from above, so the two analysis models see
+exactly the same observations.
 
 
 ``` r
@@ -1599,9 +1612,7 @@ dynamic_fit_nc <- brmcoda(
 
 The full recovery table for the non-centered model parallels the one shown
 above for the centered default. Note the `lag_<response>` parameter names,
-rather than `lag_<response>_within`. Note also that every location row,
-including the intercepts and their random-effect standard deviations and
-correlations, is now flagged `"approximate"`:
+rather than `lag_<response>_within`:
 
 
 ``` r

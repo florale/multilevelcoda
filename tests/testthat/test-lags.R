@@ -31,6 +31,23 @@ test_that("lag_by_time yields NA after a gap, silently", {
   expect_identical(meta$n_irregular, 0L)
 })
 
+test_that("lag_by_time stays silent when groups use different time steps", {
+  # heterogeneous spacing is diagnosed by prep_sim_analysis(); lag_by_time()
+  # itself keeps its documented silent-gap contract
+  d <- data.frame(
+    id = rep(c("a", "b"), each = 4),
+    day = c(1, 2, 3, 4, 1, 3, 5, 7),
+    y = 1:8
+  )
+  expect_silent(out <- lag_by_time(d, cols = "y", time = "day", group = "id"))
+
+  meta <- attr(out, "lag_by_time")
+  expect_identical(meta$time_step, 1)
+  # the step-2 group has no observation at day - 1, so all its lags are NA
+  expect_true(all(is.na(out$y_lag[out$id == "b"])))
+  expect_identical(meta$n_gaps, 3L)
+})
+
 test_that("lag_by_time handles Date time with skipped days", {
   d <- data.frame(date = as.Date("2026-01-01") + c(0, 1, 3, 4), y = 1:4)
   inferred <- lag_by_time(d, cols = "y", time = "date")

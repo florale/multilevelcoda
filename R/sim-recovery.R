@@ -47,8 +47,16 @@
 #' fitted parameter estimates the same quantity the simulator recorded,
 #' and `"approximate"` when the analysis model substitutes an observed
 #' proxy for a latent generating quantity that the parameter regresses
-#' on, conditions on, or is derived from. That principle resolves each
-#' parameter type as follows:
+#' on, conditions on, or is derived from. One consequence is stated up
+#' front: whenever the simulated model contains `ar1()`, \emph{every} row
+#' is `"approximate"`. The pragmatic analysis translates the latent
+#' residual dynamics into regression on lagged observed responses, and an
+#' observed lag carries the lagged mean structure
+#' (`y[t-1] = x[t-1] beta + e[t-1]`) alongside the lagged residual;
+#' person-mean centering does not generally remove the `x[t-1] beta`
+#' part, so no parameter in an AR model is guaranteed to keep its
+#' generating estimand. The principle resolves each parameter type as
+#' follows:
 #' \itemize{
 #'   \item \strong{`between()` and `within()` terms -- approximate.} The
 #'     simulator resolves these from the latent between- and
@@ -87,25 +95,25 @@
 #'     differs even for a plain scale intercept such as
 #'     `sigma_Intercept`. Without `ar1()`, scale rows follow the same
 #'     `between()`/`within()` rule as location rows.
-#'   \item \strong{Location fixed effects -- term-based under the default
-#'     centering, all approximate without centering.} With
-#'     `lag_center = "within"`, plain covariate effects and intercepts
-#'     remain `"exact"` even in AR models: the simulator applies the AR
-#'     dynamics to the residuals around the model-implied mean, so the
-#'     mean-structure coefficients keep the same estimand when the
-#'     analysis model adds centered lag predictors. With
-#'     `lag_center = "none"`, however, every location fixed effect
-#'     becomes `"approximate"`: the non-centered parametrization
-#'     estimates `(I - Phi_i) mu_i`-transformed quantities rather than
-#'     the recorded mean structure (Hamaker & Grasman 2014, Appendix 1),
-#'     and location covariate effects absorb omitted lagged-covariate
-#'     terms.
+#'   \item \strong{Location fixed effects -- approximate whenever the
+#'     model contains `ar1()`, otherwise term-based.} Under either
+#'     `lag_center` setting the fitted model regresses on an observed
+#'     lag whose lagged mean structure is not generally removed by
+#'     centering: when a predictor varies within series and is
+#'     autocorrelated, the model omits the corresponding
+#'     lagged-covariate term and the current covariate coefficient
+#'     absorbs part of it, biasing effects that would be exact in a
+#'     static model. With `lag_center = "none"` the contamination is
+#'     structural: the non-centered parametrization estimates
+#'     `(I - Phi_i) mu_i`-transformed quantities rather than the
+#'     recorded mean structure (Hamaker & Grasman 2014, Appendix 1).
+#'     Without `ar1()`, location fixed effects follow the
+#'     `between()`/`within()` term rule above.
 #'   \item \strong{Location random-effect standard deviations --
 #'     approximate whenever the model contains `ar1()`, under either
-#'     centering.} Although the location fixed effects keep their
-#'     estimand under CMC (the grand mean of person means is unbiased),
-#'     their \emph{dispersion} does not: under CMC the fitted random
-#'     intercept collapses to each person's observed mean, whose
+#'     centering.} The dispersion of the group-level effects is
+#'     distorted independently of the mean structure: under CMC the
+#'     fitted random intercept collapses to each person's observed mean, whose
 #'     across-person variance is `Var(mu_i) + Var(a-bar_i)` -- the trait
 #'     variance plus the variance of the person's sample mean of the
 #'     autoregressive residual. With persistent dynamics and short
@@ -126,9 +134,11 @@
 #'     recorded truth more exactly than the worse of the two coordinates
 #'     it correlates.
 #' }
-#' Everything else -- intercepts, plain covariate effects, and their
-#' group-level standard deviations and correlations -- is `"exact"`
-#' (subject to the `lag_center = "none"` downgrade described above).
+#' In short: with `ar1()` in the simulated model, every row is
+#' `"approximate"`. Without `ar1()`, intercepts, plain covariate
+#' effects, and their group-level standard deviations and correlations
+#' are `"exact"`, and only `between()`/`within()` terms (and whatever
+#' they touch) are `"approximate"`.
 #'
 #' Two related situations yield no recovery row at all rather than an
 #' `"approximate"` row: cross-block random-effect correlations when the
@@ -316,14 +326,9 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
     lag_columns <- stats::setNames(lag_columns, names(response_map))
   }
   has_ar <- !is.null(params$ar$beta)
-  # Non-centered lags (Hamaker & Grasman 2014) reparametrize the whole
-  # location mean structure through (I - Phi_i), so every location row
-  # becomes approximate -- see the Comparability section.
-  nc_ar <- has_ar &&
-    identical(analysis_metadata$lag_center %||% "within", "none")
 
   fixed <- .mlsim_recovery_fixed_truth(
-    params, prefixes, dpar, lag_columns, special_term_map, has_ar, nc_ar
+    params, prefixes, dpar, lag_columns, special_term_map, has_ar
   )
   random <- .mlsim_recovery_random_truth(
     params, prefixes, dpar, scale_label, lag_columns, special_term_map,
@@ -344,8 +349,7 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
 }
 
 .mlsim_recovery_fixed_truth <- function(params, prefixes, dpar, lag_columns,
-                                        special_term_map, has_ar,
-                                        nc_ar = FALSE) {
+                                        special_term_map, has_ar) {
   rows <- list()
   add <- function(parameter, truth, approximate, simulator_name) {
     rows[[length(rows) + 1L]] <<- data.table::data.table(
@@ -360,6 +364,9 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
     )
   }
 
+  # With ar1(), the analysis model regresses on observed-lag proxies whose
+  # lagged mean structure survives centering, so location effects can absorb
+  # omitted lagged-covariate terms -- see the Comparability section.
   location <- params$location$beta
   for (outcome in colnames(location)) {
     for (term in rownames(location)) {
@@ -369,7 +376,7 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
           .mlsim_recovery_term(term, special_term_map)
         ),
         location[term, outcome],
-        nc_ar || .mlsim_recovery_term_approximate(term),
+        has_ar || .mlsim_recovery_term_approximate(term),
         sprintf("location:%s@%s", term, outcome)
       )
     }

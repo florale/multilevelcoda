@@ -64,6 +64,24 @@ removed.}
 \item{\code{generator_metadata}}{Per-generator metadata recorded during
 simulation.}
 }
+
+For multilevel predictor generators, \code{data} also contains the group-level
+random-effect draws expanded to one value per row, under a stable
+\code{.mlsim_} naming scheme:
+\describe{
+\item{\verb{.mlsim_<var>_random_intercept}}{The location random intercept of
+a continuous variable (e.g. from \code{\link[=gen_mvn]{gen_mvn()}}).}
+\item{\verb{.mlsim_<var>_scale_random_intercept}}{The scale random intercept
+of a continuous variable, present only when the generator was given a
+joint location-scale \code{random_cov}.}
+\item{\verb{.mlsim_<var>_random_intercept_<category>}}{The location random
+intercept of a \code{\link[=gen_categorical]{gen_categorical()}} variable, one column per
+non-reference category.}
+}
+Both \verb{<var>} and \verb{<category>} are sanitized with \code{\link[=make.names]{make.names()}}. These are
+truth columns, not observed data: they record the generating group-level
+effects so the data-generating process can be validated, and they are
+never used as predictors by \code{\link[=prep_sim_analysis]{prep_sim_analysis()}}.
 }
 \description{
 Build a single-level, grouped, or longitudinal simulation design and evaluate

@@ -22,14 +22,21 @@ prep_sim_analysis(
 
 \item{drop_lag_na}{Logical scalar. When \code{FALSE}, the default, first rows in
 each series are retained and lag-derived columns are left as \code{NA}. When
-\code{TRUE}, rows with missing lag-derived predictors are removed.}
+\code{TRUE}, rows with missing lag-derived predictors are removed. If that
+removes every row of a group -- for example because the group's time
+spacing does not match the (inferred) \code{time_step} -- a warning lists the
+removed groups, which are also recorded in \code{metadata$dropped_groups}.}
 
 \item{time_step}{Optional positive scalar giving the spacing between
 consecutive time points of the simulation \code{time_id}, used to build
 \code{ar1()} lag columns with \code{\link[=lag_by_time]{lag_by_time()}}. When \code{NULL}, the default, the
 step is inferred as the smallest positive within-group time difference.
-For \code{Date} time the unit is days; for \code{POSIXct} time the unit is
-seconds. Ignored when the outcome formula has no \code{ar1()} term.}
+If groups are spaced differently, the smallest step wins: every lag of a
+more widely spaced group is \code{NA} because that group has no observation
+one inferred step earlier. A warning then lists the affected groups;
+supply \code{time_step} explicitly to silence it when the chosen step is
+intended. For \code{Date} time the unit is days; for \code{POSIXct} time the unit
+is seconds. Ignored when the outcome formula has no \code{ar1()} term.}
 
 \item{lag_center}{Character scalar controlling how \code{ar1()} lag columns are
 centered. With \code{"within"}, the default, each lagged response is centered
@@ -137,6 +144,16 @@ before the gap. The autoregressive coefficient therefore refers to one
 \code{time_step}. For data simulated with \code{ar1()} the time grid is complete and
 equally spaced, so the result is identical to a positional shift. The
 number of gap-affected rows is recorded in \code{metadata$lag_gaps}.
+
+Because a single \code{time_step} is applied to all groups, groups whose own
+spacing is wider than the inferred step end up with only \code{NA} lags, and
+\code{drop_lag_na = TRUE} would then remove them from the analysis data
+entirely. \code{prep_sim_analysis()} warns in both situations and records the
+diagnostics in the metadata: \code{metadata$time_step_by_group} (each group's
+smallest positive spacing, \code{NA} for single-observation groups),
+\code{metadata$time_step_heterogeneous} (whether those spacings differ),
+\code{metadata$lag_na_groups} (groups without a single usable lagged row), and
+\code{metadata$dropped_groups} (groups removed by \code{drop_lag_na}).
 }
 \section{Pragmatic default estimator}{
 
@@ -185,12 +202,16 @@ non-centered lagged outcome (\code{"none"}) recovers it nearly unbiased. The
 trade-off is that under \code{"none"} the whole location mean structure is
 reparametrized: the intercept estimates \verb{(I - Phi_i) mu_i} rather than the
 person mean, and any location covariate effects absorb omitted
-\verb{-Phi x_\{t-1\} beta} terms. \code{\link[=sim_recovery]{sim_recovery()}} therefore marks every location
-parameter (fixed and random) as \code{comparability = "approximate"} when
-\code{lag_center = "none"} and the formula contains \code{ar1()}. Use \code{"none"} when
-the average autoregressive (inertia and cross-lag) coefficients are the
-estimands of interest, and the default \code{"within"} when person means and
-their predictors must remain interpretable; the data-simulation vignette
+\verb{-Phi x_\{t-1\} beta} terms. Centering does not fully resolve this either:
+the centered observed lag still carries the lagged mean structure, so
+when a predictor varies within series its current coefficient can absorb
+omitted lagged-covariate terms under \code{"within"} as well.
+\code{\link[=sim_recovery]{sim_recovery()}} therefore marks every parameter as
+\code{comparability = "approximate"} whenever the formula contains \code{ar1()},
+under either \code{lag_center} setting. Use \code{"none"} when the average
+autoregressive (inertia and cross-lag) coefficients are the estimands of
+interest, and the default \code{"within"} when person means and their
+predictors must remain interpretable; the data-simulation vignette
 compares parameter recovery under both.
 }
 

@@ -6,7 +6,9 @@
 #'
 #' @param level Simulation level.
 #' @param ... Values passed to formatting or error helpers.
-#' @param call. Logical flag passed to [stop()].
+#' @param call. Logical flag passed to [stop()] or [warning()].
+#' @param ids,max_ids Identifier values and truncation limit for formatted
+#'   ID lists.
 #' @param vars,var,n,names,arg Variable names, target lengths, or argument
 #'   labels.
 #' @param allow_empty Logical flag allowing an empty name vector.
@@ -59,6 +61,24 @@ NULL
 #' @rdname multilevelcoda-internal-utils
 .mlsim_stop <- function(..., call. = FALSE) {
   stop(sprintf(...), call. = call.)
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_warn <- function(..., call. = FALSE) {
+  warning(sprintf(...), call. = call.)
+}
+
+#' @rdname multilevelcoda-internal-utils
+.mlsim_format_ids <- function(ids, max_ids = 5L) {
+  ids <- as.character(ids)
+  if (length(ids) <= max_ids) {
+    return(paste(ids, collapse = ", "))
+  }
+  sprintf(
+    "%s, and %d more",
+    paste(ids[seq_len(max_ids)], collapse = ", "),
+    length(ids) - max_ids
+  )
 }
 
 #' @rdname multilevelcoda-internal-utils

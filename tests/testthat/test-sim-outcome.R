@@ -1135,6 +1135,138 @@ test_that("prep_sim_analysis keeps complr aligned when gaps drop lag rows", {
   expect_identical(dropped$metadata$time_step, 1)
 })
 
+heterogeneous_step_sim <- function(seed = 309, n_groups = 3, n_per_group = 5) {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.2, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  simulate_data(
+    n_groups = n_groups,
+    n_per_group = n_per_group,
+    group_id = "ID",
+    time_id = "day",
+    seed = seed,
+    generators = list(
+      outcome = gen_outcome(y ~ ar1(), scale = sigma ~ 1, params = params, burnin = 2)
+    )
+  )
+}
+
+test_that("prep_sim_analysis warns when group time steps are heterogeneous", {
+  sim <- heterogeneous_step_sim()
+  wide_id <- sim$data$ID[[1L]]
+  # one participant observed every two days among daily participants
+  sim$data[ID == wide_id, day := day * 2L]
+
+  w <- testthat::capture_warnings(analysis <- prep_sim_analysis(sim))
+  expect_length(w, 2L)
+  expect_match(w[[1L]], "spaced more widely")
+  expect_match(w[[1L]], as.character(wide_id), fixed = TRUE)
+  expect_match(w[[2L]], "All `ar1\\(\\)` lag values are `NA`")
+  expect_match(w[[2L]], as.character(wide_id), fixed = TRUE)
+
+  expect_true(analysis$metadata$time_step_heterogeneous)
+  expect_identical(analysis$metadata$time_step, 1)
+  expect_equal(
+    unname(analysis$metadata$time_step_by_group[as.character(wide_id)]),
+    2
+  )
+  expect_identical(analysis$metadata$lag_na_groups, as.character(wide_id))
+  expect_true(all(is.na(analysis$data[ID == wide_id, lag_y_within])))
+  # the daily groups keep their usual single first-row NA
+  expect_true(all(
+    analysis$data[ID != wide_id, sum(is.na(lag_y_within)), by = ID]$V1 == 1L
+  ))
+
+  # an explicit step is a deliberate choice: only the consequence is reported
+  w_explicit <- testthat::capture_warnings(
+    explicit <- prep_sim_analysis(sim, time_step = 1)
+  )
+  expect_length(w_explicit, 1L)
+  expect_match(w_explicit, "All `ar1\\(\\)` lag values are `NA`")
+  expect_true(explicit$metadata$time_step_heterogeneous)
+})
+
+test_that("prep_sim_analysis stays silent when groups share a step but start apart", {
+  sim <- heterogeneous_step_sim(seed = 310)
+  shift_id <- sim$data$ID[[1L]]
+  sim$data[ID == shift_id, day := day + 10L]
+
+  expect_no_warning(analysis <- prep_sim_analysis(sim))
+  expect_false(analysis$metadata$time_step_heterogeneous)
+  expect_identical(analysis$metadata$lag_na_groups, character())
+  expect_identical(analysis$metadata$dropped_groups, character())
+})
+
+test_that("prep_sim_analysis warns when drop_lag_na removes whole groups", {
+  sim <- heterogeneous_step_sim(seed = 311)
+  gid <- sim$data$ID[[1L]]
+  first_day <- min(sim$data[ID == gid, day])
+  # a group reduced to a single observation has only NA lags
+  sim$data <- sim$data[ID != gid | day == first_day]
+
+  w <- testthat::capture_warnings(analysis <- prep_sim_analysis(sim))
+  expect_length(w, 1L)
+  expect_match(w, "contribute no usable lagged rows")
+  expect_match(w, as.character(gid), fixed = TRUE)
+  expect_true(gid %in% analysis$data$ID)
+  expect_identical(analysis$metadata$lag_na_groups, as.character(gid))
+  expect_identical(analysis$metadata$dropped_groups, character())
+
+  w_drop <- testthat::capture_warnings(
+    dropped <- prep_sim_analysis(sim, drop_lag_na = TRUE)
+  )
+  expect_length(w_drop, 1L)
+  expect_match(w_drop, "removed every row")
+  expect_match(w_drop, as.character(gid), fixed = TRUE)
+  expect_false(gid %in% dropped$data$ID)
+  expect_identical(dropped$metadata$dropped_groups, as.character(gid))
+})
+
+test_that("prep_sim_analysis group step checks skip single-level data", {
+  params <- list(
+    location = list(beta = matrix(0, nrow = 1, dimnames = list("(Intercept)", "y"))),
+    scale = list(beta = matrix(log(0.2), nrow = 1, dimnames = list("(Intercept)", "y"))),
+    ar = list(beta = array(0.2, dim = c(1, 1, 1), dimnames = list("ar1()", "y", "y")))
+  )
+  sim <- simulate_data(
+    n = 6,
+    time_id = "time",
+    seed = 312,
+    generators = list(
+      outcome = gen_outcome(y ~ ar1(), scale = sigma ~ 1, params = params, burnin = 2)
+    )
+  )
+  sim$data <- sim$data[time != 3]
+
+  expect_no_warning(analysis <- prep_sim_analysis(sim))
+  expect_no_warning(dropped <- prep_sim_analysis(sim, drop_lag_na = TRUE))
+  expect_null(analysis$metadata$time_step_by_group)
+  expect_false(analysis$metadata$time_step_heterogeneous)
+  expect_identical(dropped$metadata$dropped_groups, character())
+})
+
+test_that("prep_sim_analysis step checks handle Date and POSIXct times", {
+  sim <- heterogeneous_step_sim(seed = 313)
+  wide_id <- sim$data$ID[[1L]]
+  sim$data[ID == wide_id, day := day * 2L]
+  sim$data[, day := as.Date("2026-01-01") + day]
+
+  w <- testthat::capture_warnings(analysis <- prep_sim_analysis(sim))
+  expect_match(w[[1L]], "spaced more widely")
+  expect_true(analysis$metadata$time_step_heterogeneous)
+  expect_equal(
+    unname(analysis$metadata$time_step_by_group[as.character(wide_id)]),
+    2
+  )
+
+  hourly <- heterogeneous_step_sim(seed = 314)
+  hourly$data[, day := as.POSIXct("2026-01-01 00:00:00", tz = "UTC") + day * 3600]
+  expect_no_warning(hourly_analysis <- prep_sim_analysis(hourly))
+  expect_false(hourly_analysis$metadata$time_step_heterogeneous)
+})
+
 test_that("prep_sim_analysis reports missing or ambiguous outcome context", {
   expect_error(
     prep_sim_analysis(simulate_data(

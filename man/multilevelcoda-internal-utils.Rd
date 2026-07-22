@@ -4,6 +4,8 @@
 \alias{multilevelcoda-internal-utils}
 \alias{.mlsim_match_level}
 \alias{.mlsim_stop}
+\alias{.mlsim_warn}
+\alias{.mlsim_format_ids}
 \alias{.mlsim_check_vars}
 \alias{.mlsim_check_new_names_compatible}
 \alias{.mlsim_check_finite_numeric}
@@ -61,6 +63,10 @@
 .mlsim_match_level(level)
 
 .mlsim_stop(..., call. = FALSE)
+
+.mlsim_warn(..., call. = FALSE)
+
+.mlsim_format_ids(ids, max_ids = 5L)
 
 .mlsim_check_vars(vars, n = NULL, arg = "vars", allow_empty = FALSE)
 
@@ -182,7 +188,10 @@ x \%||\% y
 
 \item{...}{Values passed to formatting or error helpers.}
 
-\item{call.}{Logical flag passed to \code{\link[=stop]{stop()}}.}
+\item{call.}{Logical flag passed to \code{\link[=stop]{stop()}} or \code{\link[=warning]{warning()}}.}
+
+\item{ids, max_ids}{Identifier values and truncation limit for formatted
+ID lists.}
 
 \item{vars, var, n, names, arg}{Variable names, target lengths, or argument
 labels.}

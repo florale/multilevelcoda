@@ -710,6 +710,15 @@ NULL
 #' between/within columns and their roles are still emitted for multilevel
 #' generators.
 #'
+#' Multilevel generators also record their group-level random-effect draws
+#' as per-row truth columns: `.mlsim_<var>_random_intercept` for the
+#' location intercept and, when `random_cov` is a joint location-scale
+#' covariance, `.mlsim_<var>_scale_random_intercept` for the scale
+#' intercept. The other multilevel scalar generators ([gen_negbin()],
+#' [gen_gamma()], [gen_beta()], [gen_poisson()], [gen_binomial()]) share
+#' this machinery and emit the same columns. See the Value section of
+#' [simulate_data()] for the full naming contract.
+#'
 #' @examples
 #' sim <- simulate_data(
 #'   n = 4,
@@ -776,6 +785,13 @@ gen_mvn <- function(vars, level = c("single", "level2", "multilevel"),
 #'   `output = "factor"`.
 #'
 #' @return An `mlsim_generator_spec` object for use in [simulate_data()].
+#'
+#' @details
+#' Multilevel categorical generators record their group-level random-effect
+#' draws as per-row truth columns named
+#' `.mlsim_<var>_random_intercept_<category>`, one per non-reference
+#' category, with `<var>` and `<category>` sanitized by [make.names()]. See
+#' the Value section of [simulate_data()] for the full naming contract.
 #'
 #' @examples
 #' sim <- simulate_data(

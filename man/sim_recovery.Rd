@@ -90,8 +90,16 @@ The classification applies one principle. A row is \code{"exact"} when the
 fitted parameter estimates the same quantity the simulator recorded,
 and \code{"approximate"} when the analysis model substitutes an observed
 proxy for a latent generating quantity that the parameter regresses
-on, conditions on, or is derived from. That principle resolves each
-parameter type as follows:
+on, conditions on, or is derived from. One consequence is stated up
+front: whenever the simulated model contains \code{ar1()}, \emph{every} row
+is \code{"approximate"}. The pragmatic analysis translates the latent
+residual dynamics into regression on lagged observed responses, and an
+observed lag carries the lagged mean structure
+(\verb{y[t-1] = x[t-1] beta + e[t-1]}) alongside the lagged residual;
+person-mean centering does not generally remove the \verb{x[t-1] beta}
+part, so no parameter in an AR model is guaranteed to keep its
+generating estimand. The principle resolves each parameter type as
+follows:
 \itemize{
 \item \strong{\code{between()} and \code{within()} terms -- approximate.} The
 simulator resolves these from the latent between- and
@@ -130,25 +138,25 @@ part of the dynamics the proxy fails to explain, so the estimand
 differs even for a plain scale intercept such as
 \code{sigma_Intercept}. Without \code{ar1()}, scale rows follow the same
 \code{between()}/\code{within()} rule as location rows.
-\item \strong{Location fixed effects -- term-based under the default
-centering, all approximate without centering.} With
-\code{lag_center = "within"}, plain covariate effects and intercepts
-remain \code{"exact"} even in AR models: the simulator applies the AR
-dynamics to the residuals around the model-implied mean, so the
-mean-structure coefficients keep the same estimand when the
-analysis model adds centered lag predictors. With
-\code{lag_center = "none"}, however, every location fixed effect
-becomes \code{"approximate"}: the non-centered parametrization
-estimates \verb{(I - Phi_i) mu_i}-transformed quantities rather than
-the recorded mean structure (Hamaker & Grasman 2014, Appendix 1),
-and location covariate effects absorb omitted lagged-covariate
-terms.
+\item \strong{Location fixed effects -- approximate whenever the
+model contains \code{ar1()}, otherwise term-based.} Under either
+\code{lag_center} setting the fitted model regresses on an observed
+lag whose lagged mean structure is not generally removed by
+centering: when a predictor varies within series and is
+autocorrelated, the model omits the corresponding
+lagged-covariate term and the current covariate coefficient
+absorbs part of it, biasing effects that would be exact in a
+static model. With \code{lag_center = "none"} the contamination is
+structural: the non-centered parametrization estimates
+\verb{(I - Phi_i) mu_i}-transformed quantities rather than the
+recorded mean structure (Hamaker & Grasman 2014, Appendix 1).
+Without \code{ar1()}, location fixed effects follow the
+\code{between()}/\code{within()} term rule above.
 \item \strong{Location random-effect standard deviations --
 approximate whenever the model contains \code{ar1()}, under either
-centering.} Although the location fixed effects keep their
-estimand under CMC (the grand mean of person means is unbiased),
-their \emph{dispersion} does not: under CMC the fitted random
-intercept collapses to each person's observed mean, whose
+centering.} The dispersion of the group-level effects is
+distorted independently of the mean structure: under CMC the
+fitted random intercept collapses to each person's observed mean, whose
 across-person variance is \code{Var(mu_i) + Var(a-bar_i)} -- the trait
 variance plus the variance of the person's sample mean of the
 autoregressive residual. With persistent dynamics and short
@@ -169,9 +177,11 @@ coefficient is approximate.} A correlation cannot estimate its
 recorded truth more exactly than the worse of the two coordinates
 it correlates.
 }
-Everything else -- intercepts, plain covariate effects, and their
-group-level standard deviations and correlations -- is \code{"exact"}
-(subject to the \code{lag_center = "none"} downgrade described above).
+In short: with \code{ar1()} in the simulated model, every row is
+\code{"approximate"}. Without \code{ar1()}, intercepts, plain covariate
+effects, and their group-level standard deviations and correlations
+are \code{"exact"}, and only \code{between()}/\code{within()} terms (and whatever
+they touch) are \code{"approximate"}.
 
 Two related situations yield no recovery row at all rather than an
 \code{"approximate"} row: cross-block random-effect correlations when the

@@ -20,13 +20,20 @@
 #'   `distribution = "outcome"`.
 #' @param drop_lag_na Logical scalar. When `FALSE`, the default, first rows in
 #'   each series are retained and lag-derived columns are left as `NA`. When
-#'   `TRUE`, rows with missing lag-derived predictors are removed.
+#'   `TRUE`, rows with missing lag-derived predictors are removed. If that
+#'   removes every row of a group -- for example because the group's time
+#'   spacing does not match the (inferred) `time_step` -- a warning lists the
+#'   removed groups, which are also recorded in `metadata$dropped_groups`.
 #' @param time_step Optional positive scalar giving the spacing between
 #'   consecutive time points of the simulation `time_id`, used to build
 #'   `ar1()` lag columns with [lag_by_time()]. When `NULL`, the default, the
 #'   step is inferred as the smallest positive within-group time difference.
-#'   For `Date` time the unit is days; for `POSIXct` time the unit is
-#'   seconds. Ignored when the outcome formula has no `ar1()` term.
+#'   If groups are spaced differently, the smallest step wins: every lag of a
+#'   more widely spaced group is `NA` because that group has no observation
+#'   one inferred step earlier. A warning then lists the affected groups;
+#'   supply `time_step` explicitly to silence it when the chosen step is
+#'   intended. For `Date` time the unit is days; for `POSIXct` time the unit
+#'   is seconds. Ignored when the outcome formula has no `ar1()` term.
 #' @param lag_center Character scalar controlling how `ar1()` lag columns are
 #'   centered. With `"within"`, the default, each lagged response is centered
 #'   at the person's observed mean of the response, producing
@@ -117,6 +124,16 @@
 #' equally spaced, so the result is identical to a positional shift. The
 #' number of gap-affected rows is recorded in `metadata$lag_gaps`.
 #'
+#' Because a single `time_step` is applied to all groups, groups whose own
+#' spacing is wider than the inferred step end up with only `NA` lags, and
+#' `drop_lag_na = TRUE` would then remove them from the analysis data
+#' entirely. `prep_sim_analysis()` warns in both situations and records the
+#' diagnostics in the metadata: `metadata$time_step_by_group` (each group's
+#' smallest positive spacing, `NA` for single-observation groups),
+#' `metadata$time_step_heterogeneous` (whether those spacings differ),
+#' `metadata$lag_na_groups` (groups without a single usable lagged row), and
+#' `metadata$dropped_groups` (groups removed by `drop_lag_na`).
+#'
 #' @section Pragmatic default estimator:
 #' [gen_outcome()] simulates latent residual AR/VAR dynamics around the
 #' model-implied mean and resolves `between()`/`within()` from latent
@@ -163,12 +180,16 @@
 #' trade-off is that under `"none"` the whole location mean structure is
 #' reparametrized: the intercept estimates `(I - Phi_i) mu_i` rather than the
 #' person mean, and any location covariate effects absorb omitted
-#' `-Phi x_{t-1} beta` terms. [sim_recovery()] therefore marks every location
-#' parameter (fixed and random) as `comparability = "approximate"` when
-#' `lag_center = "none"` and the formula contains `ar1()`. Use `"none"` when
-#' the average autoregressive (inertia and cross-lag) coefficients are the
-#' estimands of interest, and the default `"within"` when person means and
-#' their predictors must remain interpretable; the data-simulation vignette
+#' `-Phi x_{t-1} beta` terms. Centering does not fully resolve this either:
+#' the centered observed lag still carries the lagged mean structure, so
+#' when a predictor varies within series its current coefficient can absorb
+#' omitted lagged-covariate terms under `"within"` as well.
+#' [sim_recovery()] therefore marks every parameter as
+#' `comparability = "approximate"` whenever the formula contains `ar1()`,
+#' under either `lag_center` setting. Use `"none"` when the average
+#' autoregressive (inertia and cross-lag) coefficients are the estimands of
+#' interest, and the default `"within"` when person means and their
+#' predictors must remain interpretable; the data-simulation vignette
 #' compares parameter recovery under both.
 #'
 #' @examples
@@ -353,6 +374,10 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
     lag_center = lag_center,
     dropped_rows = lag_info$dropped_rows,
     time_step = lag_info$time_step,
+    time_step_by_group = lag_info$time_step_by_group,
+    time_step_heterogeneous = lag_info$time_step_heterogeneous,
+    lag_na_groups = lag_info$lag_na_groups,
+    dropped_groups = lag_info$dropped_groups,
     lag_gaps = lag_info$lag_gaps,
     lag_irregular = lag_info$lag_irregular,
     formula = formula
@@ -386,6 +411,16 @@ print.mlsim_analysis <- function(x, ...) {
   if (length(x$metadata$lag_columns) > 0L) {
     cat("  lag predictors: ", paste(x$metadata$lag_columns, collapse = ", "), "\n", sep = "")
     cat("  lag centering: ", x$metadata$lag_center %||% "within", "\n", sep = "")
+    if (isTRUE(x$metadata$time_step_heterogeneous)) {
+      cat("  time step: heterogeneous across groups (see `$metadata$time_step_by_group`)\n")
+    }
+    if (length(x$metadata$dropped_groups %||% character()) > 0L) {
+      cat("  groups removed by drop_lag_na: ",
+          .mlsim_format_ids(x$metadata$dropped_groups), "\n", sep = "")
+    } else if (length(x$metadata$lag_na_groups %||% character()) > 0L) {
+      cat("  groups with all-NA lags: ",
+          .mlsim_format_ids(x$metadata$lag_na_groups), "\n", sep = "")
+    }
   }
   if (!is.null(x$truth)) {
     cat("  truth parameters: ", nrow(x$truth),
@@ -544,6 +579,16 @@ print.mlsim_analysis <- function(x, ...) {
   out
 }
 
+.mlsim_analysis_group_time_steps <- function(data, group_id, time_id) {
+  # per-group smallest positive spacing, mirroring the global inference in
+  # .mlc_lag_infer_step() so the two are directly comparable
+  data[, list(time_step = {
+    d <- diff(sort(as.numeric(get(time_id))))
+    d <- d[d > 0]
+    if (length(d) == 0L) NA_real_ else min(d)
+  }), by = group_id]
+}
+
 .mlsim_analysis_add_lag_columns <- function(data, response_names, has_ar, grouped,
                                             group_id, time_id, time_step, drop_lag_na,
                                             lag_center = "within") {
@@ -554,6 +599,10 @@ print.mlsim_analysis <- function(x, ...) {
       keep_rows = rep(TRUE, nrow(data)),
       dropped_rows = 0L,
       time_step = NULL,
+      time_step_by_group = NULL,
+      time_step_heterogeneous = FALSE,
+      lag_na_groups = character(),
+      dropped_groups = character(),
       lag_gaps = 0L,
       lag_irregular = 0L
     ))
@@ -576,6 +625,29 @@ print.mlsim_analysis <- function(x, ...) {
       "Preparing `ar1()` analysis terms would overwrite existing columns: %s. Rename or remove these columns from the simulated data first.",
       paste(sprintf("`%s`", colliding), collapse = ", ")
     )
+  }
+  group_steps <- NULL
+  step_heterogeneous <- FALSE
+  if (isTRUE(grouped)) {
+    step_dt <- .mlsim_analysis_group_time_steps(data, group_id, time_id)
+    group_steps <- stats::setNames(
+      step_dt$time_step, as.character(step_dt[[group_id]])
+    )
+    known <- !is.na(group_steps)
+    if (any(known)) {
+      reference_step <- min(group_steps[known])
+      tolerance <- 1e-8 * max(1, reference_step)
+      wider <- known & (group_steps - reference_step) > tolerance
+      step_heterogeneous <- any(wider)
+      if (step_heterogeneous && is.null(time_step)) {
+        .mlsim_warn(
+          "Inferred `time_step` %s does not match every `%s` group: %d group(s) are spaced more widely (%s; steps %s), so all of their `ar1()` lag values will be `NA`. Supply `time_step` explicitly if a different step is intended.",
+          format(reference_step), group_id, sum(wider),
+          .mlsim_format_ids(names(group_steps)[wider]),
+          .mlsim_format_ids(vapply(group_steps[wider], format, character(1L)))
+        )
+      }
+    }
   }
   raw_suffix <- ".__mlsim_raw_lag__"
   data <- lag_by_time(
@@ -601,10 +673,32 @@ print.mlsim_analysis <- function(x, ...) {
     }
     data[, (raw_col) := NULL]
   }
+  lag_na_groups <- character()
+  if (isTRUE(grouped)) {
+    usable <- data[, list(n_usable = sum(stats::complete.cases(.SD))),
+                   by = group_id, .SDcols = lag_columns]
+    lag_na_groups <- as.character(usable[[group_id]][usable$n_usable == 0L])
+  }
+  dropped_groups <- character()
   keep_rows <- rep(TRUE, nrow(data))
   if (isTRUE(drop_lag_na)) {
     keep_rows <- stats::complete.cases(data[, lag_columns, with = FALSE])
+    # a group loses every row under drop_lag_na exactly when it has no
+    # complete case over the lag columns, so the removed groups are the
+    # all-NA-lag groups
+    dropped_groups <- lag_na_groups
+    if (length(dropped_groups) > 0L) {
+      .mlsim_warn(
+        "`drop_lag_na = TRUE` removed every row of %d `%s` group(s) because all of their `ar1()` lag values are `NA`: %s.",
+        length(dropped_groups), group_id, .mlsim_format_ids(dropped_groups)
+      )
+    }
     data <- data[keep_rows]
+  } else if (length(lag_na_groups) > 0L) {
+    .mlsim_warn(
+      "All `ar1()` lag values are `NA` for %d `%s` group(s): %s. These groups contribute no usable lagged rows; check their time spacing or supply `time_step`.",
+      length(lag_na_groups), group_id, .mlsim_format_ids(lag_na_groups)
+    )
   }
   list(
     data = data,
@@ -612,6 +706,10 @@ print.mlsim_analysis <- function(x, ...) {
     keep_rows = keep_rows,
     dropped_rows = sum(!keep_rows),
     time_step = lag_meta$time_step,
+    time_step_by_group = group_steps,
+    time_step_heterogeneous = step_heterogeneous,
+    lag_na_groups = lag_na_groups,
+    dropped_groups = dropped_groups,
     lag_gaps = lag_meta$n_gaps,
     lag_irregular = lag_meta$n_irregular
   )

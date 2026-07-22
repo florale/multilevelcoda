@@ -92,10 +92,13 @@ test_that("truth table aligns dynamic multivariate parameters with brms names", 
     unique(fixed$comparability[grepl("lag_", fixed$parameter)]),
     "approximate"
   )
+  # with ar1() present, every row is approximate: the observed lag carries
+  # the lagged mean structure, so even location intercepts change estimand
   expect_identical(
     fixed$comparability[fixed$parameter %in% c("z11_Intercept", "z21_Intercept")],
-    c("exact", "exact")
+    c("approximate", "approximate")
   )
+  expect_identical(unique(truth$comparability), "approximate")
   # sigma is the innovation SD; conditional on pragmatic lags it is approximate
   expect_identical(
     fixed$comparability[grepl("^sigma_", fixed$parameter)],
@@ -135,10 +138,11 @@ test_that("truth table aligns dynamic multivariate parameters with brms names", 
 test_that("fixed-effect comparability flags follow the pragmatic estimator", {
   analysis <- prep_sim_analysis(dynamic_recovery_sim())
   truth <- as.data.frame(analysis$truth)
-  # location intercepts stay exact even in AR models; scale rows do not
+  # with ar1() present nothing is exact, not even location intercepts:
+  # the centered observed lag still carries the lagged mean structure
   expect_identical(
     truth$comparability[truth$parameter == "z11_Intercept" & truth$type == "fixed"],
-    "exact"
+    "approximate"
   )
   expect_identical(
     truth$comparability[truth$parameter == "sigma_z11_Intercept" & truth$type == "fixed"],
@@ -154,7 +158,7 @@ test_that("fixed-effect comparability flags follow the pragmatic estimator", {
   expect_identical(unique(cor_rows$comparability), "approximate")
 })
 
-test_that("lag_center = none renames AR truth and downgrades location comparability", {
+test_that("lag_center = none renames AR truth and keeps every row approximate", {
   sim <- dynamic_recovery_sim()
   analysis <- prep_sim_analysis(sim, lag_center = "none")
   default_analysis <- prep_sim_analysis(sim)
@@ -170,8 +174,8 @@ test_that("lag_center = none renames AR truth and downgrades location comparabil
       "z21_lag_z1_1", "z21_lag_z2_1"
     )
   )
-  # NC reparametrizes the mean structure, so location intercepts are no
-  # longer exact; AR and scale rows stay approximate as before
+  # NC reparametrizes the mean structure; as under the centered default,
+  # every row of an ar1() truth table is approximate
   expect_identical(
     fixed$comparability[fixed$parameter %in% c("z11_Intercept", "z21_Intercept")],
     c("approximate", "approximate")
