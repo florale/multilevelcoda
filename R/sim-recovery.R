@@ -27,132 +27,26 @@
 #' `trials()` term contributes no parameter. Because `ar1()`,
 #' multivariate `mvbind()` responses, and compositional outcomes are
 #' Gaussian-only simulator features, recovery tables for the other
-#' families never contain `rescor` rows and their comparability is
-#' `"exact"` except for `between()`/`within()` terms (see below).
+#' families never contain `rescor` rows.
 #'
-#' @section Comparability:
-#' [prep_sim_analysis()] deliberately builds the pragmatic observed-data
-#' model that applied analysts commonly fit, not the exact generating
-#' model (see the "Pragmatic default estimator" section in
-#' [prep_sim_analysis()]). Some fitted parameters therefore estimate a
-#' different estimand than the simulation truth they are matched to. The
-#' `comparability` column classifies every row as `"exact"` or
-#' `"approximate"` so that systematic bias can be attributed correctly:
-#' bias in an `"exact"` row signals a real problem (in the simulator, the
-#' model specification, or the sampler), whereas bias in an
-#' `"approximate"` row is an expected property of the pragmatic estimator
-#' and must not be read as a simulator error.
+#' Two situations yield no recovery row at all: cross-block random-effect
+#' correlations when the analysis was prepared with
+#' [prep_sim_analysis()]`(link_random = FALSE)` (the fitted model never
+#' samples them), and analysis models whose structure cannot be aligned
+#' with the simulator's single joint covariance (recorded in
+#' `metadata$truth_unavailable_reason`).
 #'
-#' The classification applies one principle. A row is `"exact"` when the
-#' fitted parameter estimates the same quantity the simulator recorded,
-#' and `"approximate"` when the analysis model substitutes an observed
-#' proxy for a latent generating quantity that the parameter regresses
-#' on, conditions on, or is derived from. One consequence is stated up
-#' front: whenever the simulated model contains `ar1()`, \emph{every} row
-#' is `"approximate"`. The pragmatic analysis translates the latent
-#' residual dynamics into regression on lagged observed responses, and an
-#' observed lag carries the lagged mean structure
-#' (`y[t-1] = x[t-1] beta + e[t-1]`) alongside the lagged residual;
-#' person-mean centering does not generally remove the `x[t-1] beta`
-#' part, so no parameter in an AR model is guaranteed to keep its
-#' generating estimand. The principle resolves each parameter type as
-#' follows:
-#' \itemize{
-#'   \item \strong{`between()` and `within()` terms -- approximate.} The
-#'     simulator resolves these from the latent between- and
-#'     within-person components supplied by the predictor generators; the
-#'     analysis model recomputes them by manifest person-mean centering
-#'     of the observed variable. Observed person means carry sampling
-#'     error, which biases between-person effects and contaminates
-#'     within-person effects, especially with short series (Ludtke et
-#'     al. 2008). An interaction term inherits the flag from any
-#'     `between()`/`within()` factor it contains.
-#'   \item \strong{Autoregressive parameters -- always approximate.} The
-#'     simulator's `ar1()` dynamics operate on the latent residual state;
-#'     the analysis model regresses on lagged \emph{observed} responses.
-#'     With the default `prep_sim_analysis(lag_center = "within")` the
-#'     lag is person-mean-centered, and the observed lag is an
-#'     error-prone proxy for the latent residual (finite-series person
-#'     means, mean-structure contamination, missing first observations),
-#'     so inertia and cross-lag estimates are attenuated relative to the
-#'     generating values (Hamaker & Grasman 2014). With
-#'     `lag_center = "none"` the average AR coefficients are expected to
-#'     be nearly unbiased (Hamaker & Grasman 2014), but the rows remain
-#'     `"approximate"`: the observed lag is still a proxy for the latent
-#'     state, and the reparametrized random intercept `(1 - phi_i) mu_i`
-#'     is not normally distributed even when `mu_i` is. This covers the
-#'     fixed AR coefficients and their group-level standard deviations
-#'     alike.
-#'   \item \strong{Scale (distributional) parameters -- approximate
-#'     whenever the model contains `ar1()`, otherwise term-based.} In an
-#'     AR model the simulator's scale submodel describes the standard
-#'     deviation of the \emph{innovations}, conditional on the true
-#'     latent previous residual state. The fitted scale parameters
-#'     instead describe the residual standard deviation conditional on
-#'     the pragmatic lag predictors. Because the observed lag is an
-#'     imperfect proxy, the conditional residual variance absorbs the
-#'     part of the dynamics the proxy fails to explain, so the estimand
-#'     differs even for a plain scale intercept such as
-#'     `sigma_Intercept`. Without `ar1()`, scale rows follow the same
-#'     `between()`/`within()` rule as location rows.
-#'   \item \strong{Location fixed effects -- approximate whenever the
-#'     model contains `ar1()`, otherwise term-based.} Under either
-#'     `lag_center` setting the fitted model regresses on an observed
-#'     lag whose lagged mean structure is not generally removed by
-#'     centering: when a predictor varies within series and is
-#'     autocorrelated, the model omits the corresponding
-#'     lagged-covariate term and the current covariate coefficient
-#'     absorbs part of it, biasing effects that would be exact in a
-#'     static model. With `lag_center = "none"` the contamination is
-#'     structural: the non-centered parametrization estimates
-#'     `(I - Phi_i) mu_i`-transformed quantities rather than the
-#'     recorded mean structure (Hamaker & Grasman 2014, Appendix 1).
-#'     Without `ar1()`, location fixed effects follow the
-#'     `between()`/`within()` term rule above.
-#'   \item \strong{Location random-effect standard deviations --
-#'     approximate whenever the model contains `ar1()`, under either
-#'     centering.} The dispersion of the group-level effects is
-#'     distorted independently of the mean structure: under CMC the
-#'     fitted random intercept collapses to each person's observed mean, whose
-#'     across-person variance is `Var(mu_i) + Var(a-bar_i)` -- the trait
-#'     variance plus the variance of the person's sample mean of the
-#'     autoregressive residual. With persistent dynamics and short
-#'     series, `Var(a-bar_i)` can dominate, so the fitted intercept SD
-#'     substantially overestimates the recorded `Var(mu_i)` (the same
-#'     manifest-centering problem as Ludtke et al. 2008, aggravated by
-#'     autocorrelation). Under NC the intercept is the transformed
-#'     `(1 - phi_i) mu_i`, so its SD underestimates the truth instead.
-#'     Without `ar1()`, location random-effect rows follow the same
-#'     term-based rule as the fixed effects.
-#'   \item \strong{Residual correlations (`rescor`) -- approximate if and
-#'     only if the model contains `ar1()`.} The recorded truth is the
-#'     correlation of the innovations; the fitted `rescor` is the
-#'     residual correlation conditional on the pragmatic lag predictors,
-#'     by the same argument as for the scale parameters.
-#'   \item \strong{Random-effect correlations -- approximate when either
-#'     coefficient is approximate.} A correlation cannot estimate its
-#'     recorded truth more exactly than the worse of the two coordinates
-#'     it correlates.
-#' }
-#' In short: with `ar1()` in the simulated model, every row is
-#' `"approximate"`. Without `ar1()`, intercepts, plain covariate
-#' effects, and their group-level standard deviations and correlations
-#' are `"exact"`, and only `between()`/`within()` terms (and whatever
-#' they touch) are `"approximate"`.
-#'
-#' Two related situations yield no recovery row at all rather than an
-#' `"approximate"` row: cross-block random-effect correlations when the
-#' analysis was prepared with `prep_sim_analysis(link_random = FALSE)`
-#' (the fitted model never samples them), and analysis models whose
-#' structure cannot be aligned with the simulator's single joint
-#' covariance (recorded in `metadata$truth_unavailable_reason`).
-#' `"approximate"` is reserved for parameters the model does estimate,
-#' just for a related estimand.
-#'
-#' The `print()` method reports interval coverage separately for
-#' exact-comparability rows because only those have a nominal coverage
-#' guarantee against the generating values; approximate rows quantify
-#' the bias of the pragmatic estimator instead.
+#' Interpreting the `bias` and `covered` columns requires knowing what the
+#' fitted model estimates. [prep_sim_analysis()] deliberately builds the
+#' pragmatic observed-data model that applied analysts commonly fit, not
+#' the matched model for the generating process, so some parameters
+#' estimate a related quantity rather than the one the simulator recorded
+#' -- most notably whenever the formula contains `ar1()`, and for
+#' `between()`/`within()` terms under the default
+#' `centering = "manifest"`. Systematic bias in those parameters is an
+#' expected property of the estimator, not an error in the simulator. See
+#' the "Pragmatic default estimator" section of [prep_sim_analysis()]
+#' before drawing conclusions from a recovery table.
 #'
 #' @param fit A [brmcoda()] model object or [brms::brmsfit] fitted to
 #'   `analysis$data` (or `analysis$complr`) using `analysis$formula`.
@@ -178,19 +72,9 @@
 #'     of the fitted parameter at `probs`.
 #'   \item `bias`: `estimate - truth`.
 #'   \item `covered`: whether `truth` lies inside `[lower, upper]`.
-#'   \item `comparability`: `"exact"` or `"approximate"` (see the
-#'     Comparability section).
 #'   \item `simulator_name`: the simulator-side parameter identifier the
 #'     row was derived from, for provenance.
 #' }
-#'
-#' @references
-#' Ludtke, O., et al. (2008). The multilevel latent covariate model.
-#' \emph{Psychological Methods}, 13(3), 203-229.
-#'
-#' Hamaker, E. L., & Grasman, R. P. P. P. (2014). To center or not to
-#' center? Investigating inertia with a multilevel autoregressive model.
-#' \emph{Frontiers in Psychology}, 5, 1492.
 #'
 #' @seealso [prep_sim_analysis()] for the analysis object and its
 #'   `$truth` table, [gen_template()] for authoring the truth values.
@@ -287,12 +171,10 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
   tbl <- data.table::copy(x)
   data.table::setattr(tbl, "class", class(data.table::data.table()))
   print(tbl, digits = digits, ...)
-  exact <- x$comparability == "exact"
   cat(sprintf(
-    "Coverage of the %.0f%% interval: %d/%d overall; %d/%d among exact-comparability parameters.\n",
+    "Coverage of the %.0f%% interval: %d/%d.\n",
     100 * (probs[[2L]] - probs[[1L]]),
-    sum(x$covered, na.rm = TRUE), nrow(x),
-    sum(x$covered & exact, na.rm = TRUE), sum(exact)
+    sum(x$covered, na.rm = TRUE), nrow(x)
   ))
   invisible(x)
 }
@@ -325,16 +207,14 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
   if (length(lag_columns) == length(response_map)) {
     lag_columns <- stats::setNames(lag_columns, names(response_map))
   }
-  has_ar <- !is.null(params$ar$beta)
-
   fixed <- .mlsim_recovery_fixed_truth(
-    params, prefixes, dpar, lag_columns, special_term_map, has_ar
+    params, prefixes, dpar, lag_columns, special_term_map
   )
   random <- .mlsim_recovery_random_truth(
     params, prefixes, dpar, scale_label, lag_columns, special_term_map,
-    has_ar, isTRUE(analysis_metadata$link_random)
+    isTRUE(analysis_metadata$link_random)
   )
-  rescor <- .mlsim_recovery_rescor_truth(params, prefixes, family, has_ar)
+  rescor <- .mlsim_recovery_rescor_truth(params, prefixes, family)
 
   truth <- data.table::rbindlist(list(fixed, random, rescor), use.names = TRUE)
   keys <- .mlsim_recovery_keys(truth)
@@ -349,9 +229,9 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
 }
 
 .mlsim_recovery_fixed_truth <- function(params, prefixes, dpar, lag_columns,
-                                        special_term_map, has_ar) {
+                                        special_term_map) {
   rows <- list()
-  add <- function(parameter, truth, approximate, simulator_name) {
+  add <- function(parameter, truth, simulator_name) {
     rows[[length(rows) + 1L]] <<- data.table::data.table(
       type = "fixed",
       group = NA_character_,
@@ -359,14 +239,10 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
       coef1 = NA_character_,
       coef2 = NA_character_,
       truth = truth,
-      comparability = if (isTRUE(approximate)) "approximate" else "exact",
       simulator_name = simulator_name
     )
   }
 
-  # With ar1(), the analysis model regresses on observed-lag proxies whose
-  # lagged mean structure survives centering, so location effects can absorb
-  # omitted lagged-covariate terms -- see the Comparability section.
   location <- params$location$beta
   for (outcome in colnames(location)) {
     for (term in rownames(location)) {
@@ -376,14 +252,10 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
           .mlsim_recovery_term(term, special_term_map)
         ),
         location[term, outcome],
-        has_ar || .mlsim_recovery_term_approximate(term),
         sprintf("location:%s@%s", term, outcome)
       )
     }
   }
-  # With ar1(), every scale parameter (including the intercept) describes
-  # residuals conditional on observed-lag proxies rather than the generating
-  # innovations -- see the Comparability section of ?sim_recovery.
   scale_beta <- params$scale$beta
   if (!is.null(scale_beta)) {
     for (outcome in colnames(scale_beta)) {
@@ -395,7 +267,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
             .mlsim_recovery_term(term, special_term_map)
           ),
           scale_beta[term, outcome],
-          has_ar || .mlsim_recovery_term_approximate(term),
           sprintf("scale:%s@%s", term, outcome)
         )
       }
@@ -412,7 +283,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
               .mlsim_recovery_ar_term(ar_term, from, lag_columns, special_term_map)
             ),
             ar_beta[ar_term, to, from],
-            TRUE,
             sprintf("ar:%s@to=%s,from=%s", ar_term, to, from)
           )
         }
@@ -424,7 +294,7 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
 
 .mlsim_recovery_random_truth <- function(params, prefixes, dpar, scale_label,
                                          lag_columns, special_term_map,
-                                         has_ar, link_random) {
+                                         link_random) {
   if (is.null(params$random) || length(params$random) == 0L) {
     return(NULL)
   }
@@ -452,20 +322,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
       )
     }
   }, character(1))
-  approximate <- vapply(parsed, function(p) {
-    if (identical(p$component, "ar")) {
-      TRUE
-    } else if (identical(p$component, "location")) {
-      # With ar1(), the fitted location random-effect dispersion is estimated
-      # conditional on observed-lag proxies: under CMC the intercept absorbs
-      # each person's sample mean of the persistent residual (inflating the
-      # SD), and under NC the intercept is the transformed (I - Phi_i) mu_i.
-      # Either way the recorded truth is a different estimand.
-      has_ar || .mlsim_recovery_term_approximate(p$term)
-    } else {
-      has_ar || .mlsim_recovery_term_approximate(p$term)
-    }
-  }, logical(1))
   # brms estimates correlations within one covariance block; without ID-linked
   # random terms the location/AR (mu) and scale (dpar) formulas form separate
   # blocks, so cross-block truth correlations have no fitted counterpart.
@@ -480,7 +336,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
     coef1 = NA_character_,
     coef2 = NA_character_,
     truth = sqrt(diag(covariance)),
-    comparability = ifelse(approximate, "approximate", "exact"),
     simulator_name = simulator_names
   )
 
@@ -502,7 +357,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
           coef1 = coef_names[[j]],
           coef2 = coef_names[[i]],
           truth = correlation[i, j],
-          comparability = if (approximate[[i]] || approximate[[j]]) "approximate" else "exact",
           simulator_name = sprintf("cor:%s,%s", simulator_names[[j]], simulator_names[[i]])
         )
       }
@@ -511,7 +365,7 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
   data.table::rbindlist(c(list(sd_rows), cor_rows))
 }
 
-.mlsim_recovery_rescor_truth <- function(params, prefixes, family, has_ar) {
+.mlsim_recovery_rescor_truth <- function(params, prefixes, family) {
   correlation <- params$scale$correlation
   if (!identical(family, "gaussian") || is.null(correlation) ||
       length(prefixes) < 2L) {
@@ -530,7 +384,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
         coef1 = coef1,
         coef2 = coef2,
         truth = correlation[outcomes[[i]], outcomes[[j]]],
-        comparability = if (isTRUE(has_ar)) "approximate" else "exact",
         simulator_name = sprintf("rescor:%s,%s", outcomes[[j]], outcomes[[i]])
       )
     }
@@ -680,14 +533,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
     if (is_ar[[i]]) lag_column else .mlsim_recovery_term(pieces[[i]], special_term_map)
   }, character(1))
   paste(pieces, collapse = ":")
-}
-
-# between()/within() terms are fit by manifest person-mean centering, a
-# different estimand from the latent generating components (Ludtke et al.
-# 2008) -- see the Comparability section of ?sim_recovery.
-.mlsim_recovery_term_approximate <- function(term) {
-  pieces <- strsplit(term, ":", fixed = TRUE)[[1L]]
-  any(startsWith(pieces, "between(") | startsWith(pieces, "within("))
 }
 
 # estimate extraction and joining ----------------------------------------
@@ -860,7 +705,6 @@ print.mlsim_recovery <- function(x, digits = 3, ...) {
     upper = matched$upper,
     bias = matched$estimate - truth$truth,
     covered = truth$truth >= matched$lower & truth$truth <= matched$upper,
-    comparability = truth$comparability,
     simulator_name = truth$simulator_name
   )
   out

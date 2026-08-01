@@ -38,23 +38,25 @@ library(multilevelcoda)
 library(knitr)
 library(data.table)
 library(cmdstanr)
+library(brms)
+library(JWileymisc)
+library(ggplot2)
 
 options(digits = 3, pillar.sigfig = 3)
 ```
 
-This vignette shows how to use the `simulate_data()` function from the
-`multilevelcoda` package to simulate data, including multilevel and
-compositional data. Data simulation is useful for multiple purposes, such as:
+This vignette shows how to use the data simulation features that are part
+of the `multilevelcoda` package, particularly the `simulate_data()` function.
+Data simulation is useful for multiple purposes, such as:
 
 - Power analysis and sample size planning.
 - Method development and testing.
 - Generating synthetic data to test models or write analysis code before data
   collection finishes.
 
-Simulating data can become complex quickly, especially for multilevel or
-compositional data. The `simulate_data()` function is designed to support
-these efforts. Broadly, `simulate_data()` builds an indexed design, runs
-named generators in order, and returns an `mlsim_data` object with four main
+The `simulate_data()` function is designed to support these efforts.
+Broadly, `simulate_data()` builds an indexed design, runs
+named generators in order, and returns an `mlsim_data` object with major
 pieces:
 
 - `data`: the generated `data.table`.
@@ -64,16 +66,25 @@ pieces:
 - `generator_metadata`: e.g., parameters, random effects, covariance
   matrices, helper columns.
 
-The first half of this vignette covers study designs and the predictor
-generators. The second half turns to model-based outcomes: we simulate
+The first part of this vignette covers study designs and the predictor
+generators. The second part turns to model-based outcomes: we simulate
 outcomes from known parameters, fit the matching models, and check how well
 the true values are recovered.
 
+*Note that while part of the aspirations of data simulation here are to support
+things like Monte Carlo power analyses and simulation studies,
+these remain difficult for two reasons.
+Firstly, specifying all necessary parameters is not trivial, and it is our 
+experience as researchers that such information is unlikely to be available 
+prior to data collection. Secondly, Bayesian multilevel models are rather 
+computationally demanding. Many random effects are possible, even sensible,
+and so at least in 2026, the computational demands of simulating and running 
+hundreds of models exceeds most local devices and would likely require access
+to a high performance server.*
+
 # Features at a Glance
 
-The following tables give a high level summary of the current features. We
-come back to many of these options with worked examples throughout the
-vignette.
+The following tables summarise current features.
 
 ## Design options
 
@@ -81,9 +92,9 @@ Design options control the highest level structure of the simulated data.
 
 | Option | Use |
 |---|---|
-| `n` | Total rows for a single-level design, or total rows to divide across groups. |
+| `n` | Total rows for a single-level design, or total rows to divide across groups if multilevel. |
 | `n_groups` | Number of groups in a grouped or multilevel design. |
-| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list. |
+| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list (the latter support unequal or variable sample sizes per group as is common in real data). |
 | `group_id` | Name of the grouping column. |
 | `obs_id` | Name of the within-design observation index. |
 | `time_id` | Optional time column name. |
@@ -93,15 +104,14 @@ Design options control the highest level structure of the simulated data.
 
 ## Generator families
 
-Generators are used to add simulated data columns. Each generator draws its
-own values, but later generators can depend on columns created by earlier
-generators through the simulation context. For example, `gen_outcome()`
-builds outcomes from previously generated predictors. The current generators
-are listed below.
+Generators add simulated data columns. Each generator draws its
+own values. However, `gen_outcome()` can generate outcomes that
+depend on columns created by earlier generators through the simulation context.
+The current generators are listed below.
 
 | Generator | Role |
 |---|---|
-| `gen_mvn()` | Univariate and multivariate Gaussian predictors, including ILR compositional back-transforms. |
+| `gen_mvn()` | Univariate and multivariate Gaussian predictors, including ILR compositions and back-transforms to original compositional scale. |
 | `gen_categorical()` | Binary, unordered categorical, and ordered categorical variables. |
 | `gen_binomial()` | Binomial counts with logit-scale multilevel support. |
 | `gen_poisson()` | Poisson counts with log-scale multilevel support. |
@@ -113,8 +123,8 @@ are listed below.
 
 ## Advanced simulation options
 
-These are a sample of more advanced simulation features that apply to the
-predictor generators.
+These are some of the features supported by generators. Not all features are
+necessarily supported by all generators.
 
 | Feature | Use |
 |---|---|
@@ -128,8 +138,10 @@ predictor generators.
 
 # Study Designs: Groups, Sizes, and Time
 
-To get started, here is a simple, single level example. Each variable in
-this first example is generated independently of the others.
+To start, let's look at a simple, single level example. 
+Here we generate one normally distributed variable, one categorical
+variable with three levels, and one binary categorical variable.
+Each variable in this first example is generated independently of the others.
 
 ```{r}
 #| label: single-level-data
@@ -155,7 +167,7 @@ kable(single$data)
 single
 ```
 
-Printing an `mlsim_data` object gives a compact overview on the console. If
+Printing an `mlsim_data` object gives an overview of the design. If
 we want the design and generator metadata as `data.table` objects, we can
 use `summary()`.
 
@@ -166,9 +178,9 @@ summary(single)$design
 summary(single)$generators
 ```
 
-We can generate multilevel structures as well. A single scalar `n_per_group`
+We can generate multilevel data as well. A single scalar `n_per_group`
 creates a balanced grouped design, with exactly the same number of
-observations per group.
+observations per group. To show it more easily, we make just one variable.
 
 ```{r}
 #| label: balanced-grouped-design
@@ -186,16 +198,24 @@ balanced <- simulate_data(
 kable(balanced$data)
 ```
 
-However, this was still effectively single level, Gaussian data. We can
-improve on that. Here we give essentially the parameters of a random
+However, while we generate the labels for multilevel data,
+the variable `x` was still single level, Gaussian data. 
+To address this, we speicfy the parameters of a random
 intercept only multilevel model, which is used to generate matching data.
 The `fixed_intercept` is the overall mean, `random_cov` is the group-level
 variance, and `residual_cov` is the residual variance. The `level` argument
 controls where a variable varies: `level = "multilevel"` gives row-level
 values with group-specific random effects, and `level = "level2"` gives one
 value per group, constant within groups but varying between them. The same
-approach broadly applies to other generator families, and we return to
-`level` in more detail in the next section.
+approach broadly applies to other generator families.
+
+Note that in the data output are the simulated data as well as the "true"
+between and within values. These are useful because in a multilevel structure,
+with a small, finite number of samples for a participant, the sample 
+mean can differ from that person's true mean. These values instead show
+the "true" values. This can be important for subsequent simulations 
+(e.g., outcome generation where we would want it generated from the truth,
+not from the sample).
 
 ```{r}
 #| label: balanced-multilevel-design
@@ -216,7 +236,7 @@ kable(balanced2$data)
 ```
 
 
-If we specify `n_per_group` as a vector, we get an unbalanced design.
+If we specify `n_per_group` as a vector, we can get an unbalanced design.
 
 ```{r}
 #| label: unbalanced-vector-design
@@ -238,7 +258,8 @@ kable(unbalanced$data)
 
 Group sizes can also be drawn from a count distribution. We give a list with
 the distribution name and its parameters, along with optional minimum and
-maximum sizes.
+maximum sizes. This is an easier way to specify that there may be differences
+without having to manually specify the number for each participant.
 
 ```{r}
 #| label: sampled-group-sizes
@@ -261,7 +282,6 @@ drawn_sizes <- simulate_data(
 
 kable(drawn_sizes$data)
 ```
-
 
 Longitudinal designs can add a time index. When groups have different
 lengths, `time_truncate = TRUE` uses the first values for shorter groups.
@@ -287,40 +307,12 @@ dated <- simulate_data(
 kable(dated$data)
 ```
 
-# Single-Level, Group-Level, and Multilevel Predictors
-
-The `level` argument controls whether values vary by row, by group, or by
-row with group-specific random effects. This example generates one variable
-of each type.
-
-```{r}
-#| label: predictor-levels-demo
-
-levels_demo <- simulate_data(
-  n_groups = 4,
-  n_per_group = 4,
-  seed = 2026,
-  generators = list(
-    row_x = gen_mvn("row_x", fixed_intercept = 0, residual_cov = 1),
-    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 10, residual_cov = 1),
-    mixed_x = gen_mvn(
-      "mixed_x",
-      level = "multilevel",
-      fixed_intercept = 5,
-      random_cov = 0.50,
-      residual_cov = 1
-    )
-  )
-)
-
-levels_demo
-```
-
 # Distribution Families
 
 All predictor generators use fixed location or link-scale intercepts, and
 the multilevel forms add random covariance terms. Here is a quick
-demonstration of the different distribution families with single level data.
+demonstration of different distribution families that we support 
+with single level data.
 
 ```{r}
 #| label: distribution-families
@@ -432,7 +424,8 @@ kable(categorical_ml$data)
 `gen_mvn()` simulates correlated blocks of variables. With
 `compositional = TRUE`, the MVN columns are interpreted as ILR coordinates
 and back-transformed into compositional parts. Here we are back to single
-level data.
+level data for the first illustration. With MVN data, we need to specify
+the residual covariance matrix, which is used to control any correlation.
 
 ```{r}
 #| label: correlated-composition
@@ -449,8 +442,8 @@ correlated_comp <- simulate_data(
     ),
     time_use = gen_mvn(
       c("ilr_1", "ilr_2"),
-      fixed_intercept = c(0, 0),
-      residual_cov = diag(c(0.30, 0.20)),
+      fixed_intercept = c(0.4, -1.5),
+      residual_cov = diag(c(0.05, 0.05)),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -481,8 +474,8 @@ parts_only <- simulate_data(
   generators = list(
     time_use = gen_mvn(
       c("z1", "z2"),
-      fixed_intercept = c(0, 0),
-      residual_cov = diag(2),
+      fixed_intercept = c(0.4, -1.5),
+      residual_cov = diag(c(0.05, 0.05)),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -553,7 +546,7 @@ location_scale <- simulate_data(
 
 kable(data.table(
   group_id = location_scale$data$group_id,
-  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd,
+  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd[, "symptom"],
   event_count_size = location_scale$generator_metadata$event_count$size
 ))
 ```
@@ -566,69 +559,80 @@ metadata. They can use the active design columns, previously generated
 variables, and any extra arguments supplied to `gen_custom()`. Their
 metadata is captured in the same way as for the built-in generators.
 
+Below is an examplethat can be useful when trying to simulate synthetic
+data for use in building or testing data analysis code. For example,
+this could support pre-registration, registered reports where data 
+analysis code is written in advance, or power analyses where there is 
+pilot data on variables that follow distributions that do not conveniently
+match any of the currently supported distributions.
+We use `density_inversion()` function which first calculates the 
+density of a set of values passed in, and then inverts to generate
+synthetic data with approximately the same density.
+We apply it to the `iris` data built into `R` for which the 
+petal lengths are famously bimodal. While not exact, we can 
+see that the simulated data broadly captures and reflects the petal length
+data present in the `iris` dataset. You may want more metadata saved, 
+but here we just save the source (density inversion) and the number of 
+pilot samples passed in.
+
 ```{r}
 #| label: custom-generators
 
-pilot_sampler <- function(context, vars, level, pilot_values) {
-  values <- sample(pilot_values, context$n_rows, replace = TRUE)
+custom_sampler <- function(context, vars, level, pilot_values) {
+  values <- density_inversion(pilot_values, n = context$n_rows,
+    KDEn = 50)
 
   list(
     data = data.frame(values = values),
     names = vars,
-    metadata = list(source = "pilot bootstrap", n_pilot = length(pilot_values))
-  )
-}
-
-clinic_load_sampler <- function(context, vars, level) {
-  load_values <- c("low", "medium", "high")
-  group_load <- load_values[context$data[[context$group_id]]]
-
-  list(
-    data = data.frame(load = group_load),
-    names = vars,
-    metadata = list(source = "derived from group index")
+    metadata = list(source = "density inversion", n_pilot = length(pilot_values))
   )
 }
 
 custom <- simulate_data(
-  n_groups = 3,
-  n_per_group = 4,
+  n = 500,
   seed = 2026,
   generators = list(
-    pilot_x = gen_custom(
-      "pilot_x",
-      generator = pilot_sampler,
-      pilot_values = c(1.2, 1.4, 1.8, 2.5, 3.1)
-    ),
-    clinic_load = gen_custom(
-      "clinic_load",
-      generator = clinic_load_sampler
+    custom = gen_custom(
+      "custom",
+      generator = custom_sampler,
+      pilot_values = iris$Petal.Length
     )
   )
 )
 
-kable(custom$data)
+dcompare <- data.table(
+  value = c(iris$Petal.Length, custom$data$custom),
+  group = rep(c("original", "simulated"), times = c(
+    length(iris$Petal.Length),
+    length(custom$data$custom)
+  )))
+
+ggplot(dcompare, aes(value, colour = group, linetype = group)) +
+  geom_density(linewidth = 1) + theme_classic()
 ```
 
 # A First Outcome Model and Parameter Recovery
 
 So far, we have only simulated predictors. `gen_outcome()` adds a
-model-based outcome generator to the same `simulate_data()` workflow. It is
-designed for simulation studies where outcomes are generated from a known
-location model, a known scale model, and, optionally, a residual
-autoregressive process. The rest of this vignette focuses on the workflow
+model-based outcome generator to the same `simulate_data()` workflow.
+
+The rest of this vignette focuses on the workflow
 that builds on it: simulate data with known parameters, prepare an analysis
 data set, fit the matching model, and check that the true values are
 recovered.
 
 Before the more complex models in the later sections, here is the complete
-loop on the simplest useful example: a Gaussian outcome with one predictor
-and a random intercept. We write the parameter matrices by hand here, so
-their structure is visible. The location matrix has one row per term and one
+loop on a simple example: a Gaussian outcome with one predictor
+and a random intercept. We need to specify all of the parameters and 
+parameter matrices. The location matrix has one row per term and one
 column per outcome, the scale matrix holds the log residual standard
 deviation, and the random-effect covariance uses structured names to label
-which parameter each random effect belongs to. The next section shows how
-`gen_template()` can create these structures for us.
+which parameter each random effect belongs to. Even in this simple example,
+the number of parameters and the specific structure to hold them is 
+rather complicated. The next section will show how
+`gen_template()` can create these structures for us, which is probably
+easier for most use cases.
 
 ```{r}
 #| label: first-outcome
@@ -653,7 +657,7 @@ first_params <- list(
 )
 
 first_sim <- simulate_data(
-  n_groups = 100,
+  n_groups = 200,
   n_per_group = 10,
   group_id = "ID",
   seed = 2026,
@@ -669,7 +673,8 @@ kable(head(first_sim$data))
 `prep_sim_analysis()` turns the simulated data into an analysis-ready data
 set and infers the matching `brms` formula. It also returns the true
 parameter values in `$truth`, labeled with the parameter names the fitted
-model will use.
+model will use. The goal of this is to support cases where we want to test
+if the true value was recovered (e.g., simulation studies on bias, coverage rates).
 
 ```{r}
 #| label: first-outcome-prep
@@ -687,8 +692,6 @@ There is no composition in this example, so we fit the model directly with
 #| message: false
 #| warning: false
 
-library(brms)
-
 first_fit <- brm(
   formula = first_analysis$formula,
   data = first_analysis$data,
@@ -702,6 +705,8 @@ first_fit <- brm(
 )
 ```
 
+This object is a regular `brms` object so we could summary, predict, etc
+However, there are some more helper functions that may be useful here.
 `sim_recovery()` joins the fitted estimates with the simulation truth by
 parameter name, and adds bias and interval-coverage columns.
 
@@ -715,52 +720,78 @@ kable(first_recovery[, !"simulator_name"], digits = 3)
 
 Each row is one model parameter. The `truth` column holds the generating
 value, `bias` is the difference between the posterior estimate and the
-truth, and `covered` indicates whether the truth falls inside the 95%
-credible interval. The `comparability` column flags whether the fitted
-parameter estimates exactly the quantity the simulator recorded; in this
-simple model, every row is `"exact"`, so any systematic bias here would
-indicate a real problem. We will see `"approximate"` rows, and what they
-mean, in the next section.
+truth, and `covered` indicates whether the truth falls inside the
+credible interval. In this simple model the analysis matches the
+data-generating process, so each fitted parameter estimates exactly the
+quantity the simulator recorded. That will not always hold: as we get into
+time series and multilevel predictors below, the analysis we fit no longer
+matches the simulation model exactly, and some parameters then estimate a
+related quantity instead.
 
 # Dynamic Outcome Simulation
 
-The first outcome example used a simple Gaussian model. `gen_outcome()` also
-supports residual autoregressive dynamics and multivariate compositional
-outcomes, which we combine in this section. As before, we focus on the
-default `family = "gaussian"`. Non-Gaussian families are covered in the
-[Non-Gaussian Outcomes] section below.
+A major use case we are interested in for `multilevelcoda` are 
+intensive longitudinal studies, such as wearables or diet or time use 
+measured in people across consecutive days, for example for 1-2 weeks.
+In these cases, the data are multilevel, but importantly, they also are
+time series. Even if not all analyses are fundamentally focused on or 
+even include a time series component, the underlying data would or could.
+To support that and simulate data that ideally match real data as much as 
+feasible, we support dynamic outcome simulation, or outcomes that are 
+assumed to be time series.
+
+`gen_outcome()`  supports residual autoregressive dynamics and multivariate compositional outcomes, which we combine in this section.
+As before, we focus on the default `family = "gaussian"`.
 
 For Gaussian outcomes, the scale model is required. Use `scale = sigma ~ 1`
-for a constant conditional standard deviation. When `ar1()` is present, the
-scale model controls the variability of the innovations. When `ar1()` is
+for a constant conditional standard deviation. 
+Dynamics are supported through an autoregressive component, implemented
+using `ar1()`. When `ar1()` is present, the
+scale model controls the variability **of the innovations**. When `ar1()` is
 absent, it controls ordinary residual variability. Note that the AR process
-is applied to the residual ILR states, not to lagged observed outcomes, and
-that `ar1()` is currently only supported for `family = "gaussian"`.
+is applied to the residual ILR states, not to lagged observed outcomes.
+`ar1()` is currently only supported for `family = "gaussian"`. This is 
+because building models with residual autoregression and innovations 
+becomes substantially more complicated for categorical data and other 
+not Gaussian distributions.
 
 When `ar1()` is present, `burnin` is required. Each series starts with zero
 residuals and is iterated `burnin` steps before the first observed row. Do
 not use `burnin = 0` or other small values with `ar1()`. If the burn-in is
 too short, the first observations will be under-dispersed relative to the
 stationary distribution of the AR process. Choose a burn-in long enough for
-the process to forget its start. A useful rule of thumb is at least
+the process to forget its start. A simple decision rule can be at least
 `log(0.01) / log(rho)` steps, where `rho` is the largest spectral radius of
 the AR matrices, which works out to about 90 steps at `rho = 0.95`. Models
 without `ar1()` have no burn-in phase, so `burnin` can simply be omitted.
 
-In the first outcome example, we wrote the parameter matrices by hand. For
-more complex specifications, that becomes difficult. To help with this,
-`gen_template()` asks the simulator for the exact structure needed. We run
-the template with the same formulas, grouping structure, and composition
+In the first outcome example, we wrote the parameter matrices by hand.
+However, that is quite difficult with many names. To help with this,
+`gen_template()` can be used. Basically, it is a stand-in for 
+`gen_outcome()` which does not require parameters to be specified but will
+generate the full structure so we can extract the necessary parameter matrices.
+We run the template with the same formulas, grouping structure, and composition
 settings that we plan to use in the final simulation. The design size does
 not need to match: a small template design is enough to obtain the parameter
 structure, which we then fill in and reuse for the full-size simulation.
+
+Here we see our first dynamic outcome formula. The setup here is a 
+3 component compositional dyanmic outcome. Much of the formula is a
+"standard" multivariate, multilevel location scale formula specification
+for `brms`. What is new is the use of `ar1()`. This gets parsed by 
+`multilevelcoda` and automatically expanded to mean the lag1 
+outcome variable, and this can be done as fixed and random effects,
+as done below. Now once we have the template, we can extract the relevant
+parameter matrices and then specify the parameter values we want to use
+for the simulation. This saves us manually writing / figuring out the 
+structure and the very specific names needed for `simulate_data()`.
 
 ```{r}
 #| label: dynamic-outcome-setup
 
 dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ ar1() + (1 + ar1() | ID)
 dynamic_scale_formula <- sigma ~ 1 + (1 | ID)
-dynamic_composition <- list(parts = c("sleep", "sedentary", "activity"), total = 24)
+dynamic_composition <- list(parts = c("sleep", "activity", "sedentary"), total = 24)
 
 dynamic_template <- simulate_data(
   n_groups = 4,
@@ -779,8 +810,8 @@ dynamic_template <- simulate_data(
 )
 
 dynamic_params <- dynamic_template$generator_metadata$outcome_template$params
-dynamic_params$location$beta["(Intercept)", ] <- c(0, 0)
-dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.4, 0.35))
+dynamic_params$location$beta["(Intercept)", ] <- c(0.2, -1.5)
+dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.2, 0.15))
 dynamic_params$ar$beta["ar1()", , ] <- matrix(c(0.50, 0.10, 0.10, 0.30), 2, 2, byrow = TRUE)
 
 dynamic_random_names <- rownames(dynamic_params$random$ID$covariance)
@@ -796,12 +827,14 @@ dynamic_random_sd_values <- c(
 )
 dynamic_random_sd <- dynamic_random_sd_values[dynamic_random_names]
 
+## we initialise all the random effect correlations at 0
 dynamic_random_cor <- diag(length(dynamic_random_names))
 dimnames(dynamic_random_cor) <- list(dynamic_random_names, dynamic_random_names)
 set_dynamic_random_cor <- function(x, y, value) {
   dynamic_random_cor[x, y] <<- value
   dynamic_random_cor[y, x] <<- value
 }
+## we set a few select correlations to non zero values
 set_dynamic_random_cor(
   "location|outcome=ilr1|term=(Intercept)",
   "ar|term=ar1()|to=ilr1|from=ilr1",
@@ -834,20 +867,43 @@ dynamic_params$random$ID$covariance <- diag(dynamic_random_sd) %*%
 dimnames(dynamic_params$random$ID$covariance) <- list(dynamic_random_names, dynamic_random_names)
 ```
 
-We use clearly visible dynamics to make the centering comparison later in
-this section easy to read. The fixed autoregressive (diagonal) coefficients
+We use clearly visible dynamics for autoregression
+to make the centering comparison later in this section clearer.
+The fixed autoregressive (diagonal) coefficients
 are 0.50 and 0.30, and the cross-lagged (off-diagonal) coefficients are
-0.10. Together, these give the fixed AR matrix a spectral radius of about
-0.54. The burn-in of 150 steps is far above the `log(0.01) / log(rho)` rule
-of thumb.
+0.10. The off diagonal coefficients could be zero, but keeping them
+probably makes some sense as it is plausible, depending on the 
+sequential binary partition used, that one ILR would have some 
+predictive utility to the subsequent value of other ILRs, especially
+as two ILRs commonly will include values from at least one common 
+component. In any case, these values give the fixed AR matrix a spectral
+radius of about 0.54. A burn-in of 150 steps is far above the 
+`log(0.01) / log(rho)` approximate rule. For simulating individual datasets,
+we do not see  a reason not to put a very generous burnin because the 
+computational cost, especially vis a vis the cost of fitting any analytic 
+model to such complex data is negligible in our view. That said, it does 
+add some time just to the data simulation, and we can see that if a very 
+large number of people or hundreds or thousdands of datasets were being 
+simulated, there may be some utility in striving for the "minimal" burnin
+needed. Another reason for our larger choice is that with random slopes,
+while the fixed matrix may have a low spectral radius, unless we had 
+distinct burnins for different people, some participants, due to random
+effects, could have a larger spectral radius.
 
-We also keep the group-level AR standard deviations small: 0.02 for the
+We keep the group-level AR standard deviations small: 0.02 for the
 autoregressive terms and 0.01 for the cross-lagged terms. Larger random
-slopes would eventually push individual AR matrices toward the stationarity
-boundary, which triggers resampling and truncates the random-effect
-distribution. Finally, we simulate 50 observations per person. Series length
-matters here, because the person means used by the centered estimator become
-more precise as the series grows.
+slopes can push individual AR matrices toward the stationarity
+boundary. 
+
+If we get towards a stationary point, that will trigger resampling and 
+truncate the random-effect distribution (because internally, the code 
+will ensure that stationary matrices for any given participant is not used). 
+Finally, we simulate 50 observations per person. Series length
+matters here and probably quite a bit.
+We simulate data based on a residual process. However, for analyses it is 
+quite common to just use a lagged outcome value possibly person mean centred.
+In these cases, it becomes much more precise as the time series length 
+increases, because otherwise, we are centering on something rather noisy.
 
 ```{r}
 #| label: dynamic-outcome-simulation
@@ -874,40 +930,29 @@ kable(head(dynamic_comp$data[, c("ID", "day", "ilr1", "ilr2", "sleep", "sedentar
 ```
 
 Before fitting anything, we can run a few quick checks on the simulation.
-First, the expected parameter names from the template and from the final
-simulation should be identical, which confirms that the parameters we
-edited line up with what the simulator actually used. Second, the realized
-maximum spectral radius across the individual AR matrices should be below 1,
-which confirms that every simulated series is stationary. Here it is around
+For example, we can look at the realized maximum spectral radius across the individual AR matrices, which should be below 1. Here it is around
 0.6, only a little above the fixed-matrix value of 0.54, because we kept the
-AR random effects small. Third, the parts should sum to the compositional
-total of 24 in every row.
+AR random effects small.
 
 ```{r}
 #| label: dynamic-outcome-diagnostics
 
-dynamic_template$generator_metadata$outcome_template$expected_parameter_names
-
-dynamic_comp$generator_metadata$outcome$expected_parameter_names
-
 dynamic_comp$generator_metadata$outcome$ar$stability$max_spectral_radius_overall
 
-table(rowSums(as.matrix(dynamic_comp$data[, c("sleep", "sedentary", "activity"), with = FALSE])))
 ```
 
 Next, we prepare the generated data into an analysis data set that can be
 passed to `brmcoda()`. `prep_sim_analysis()` rebuilds a `complr` object
 using the same SBP basis as the simulator and translates `ar1()` into
-within-person centered, lagged ILR predictors. The fitted model includes
+within-person centered, lag 1 ILR predictors. The fitted model includes
 random level terms, random inertia terms through the lagged ILR slopes, and
 random conditional variability through response-specific `sigma` models.
 
 The lag columns are built by the exported `lag_by_time()` helper. These are
-*time-based* lags on `time_id`, not positional row shifts, so a row's lag
-comes from the observation at `time - time_step`. This matters when working
-with real data that has skipped time points, such as a missed diary day. The
-row after a gap gets an `NA` lag, rather than silently lagging across the
-gap. The step is inferred as the smallest positive within-person time
+*time-based* lags on `time_id`, so a row's lag comes from the observation at 
+`time - time_step`. This matters when working with real data that has skipped 
+time points, such as a missed diary day. The row after a gap gets an `NA` lag. 
+The step is inferred as the smallest positive within-person time
 difference, or it can be set explicitly with
 `prep_sim_analysis(sim, time_step = )`. The number of gap-affected rows is
 recorded in `metadata$lag_gaps`. `lag_by_time()` can also be used directly
@@ -920,21 +965,37 @@ effects from one joint covariance, and the linked syntax lets the analysis
 model estimate their correlations. Here, that joins all eight random effects
 (mean levels, lagged slopes, and `sigma` intercepts for both responses) into
 a single correlated block, which matches the generative model. One practical
-caveat is that large linked random-effect blocks are demanding for
-approximate algorithms, and variational inference and pathfinder often fail
-on them. For very large designs fitted with those algorithms, we can opt out
-with `prep_sim_analysis(sim, link_random = FALSE)`, which emits separate,
-uncorrelated random-effect blocks instead.
+caveat is that large linked random-effect blocks are demanding.
+For very large designs, we can opt out with
+`prep_sim_analysis(sim, link_random = FALSE)`, which emits separate,
+uncorrelated random-effect blocks instead. Of course, if the simulation
+included correlations (any non zero true correlations), this will 
+result in some degree of bias. Of course, even this may be interesting
+to study. The possible number of random effects grows very quickly.
+For example, with a 5 part composition, there are 4 ILR terms, resulting
+in: 4 location intercepts, 4 scale intercepts, 4 autoregressive slopes,
+and 12 cross-lagged slopes for a total of 24 parameters that could be 
+all random effects and if so a 24 x 24 random effect covariance matrix would 
+have 300 parameters (24 variances and 276 unique covariances). Such a 
+large matrix would be extremely unstable with small sample sizes.
+Even with large sample sizes, it would likely be very computationally demanding.
+So an interesting simulation question could be: how much bias in the fixed
+effect autoregression estimates is introduced by forcing the random 
+effect covariances to be zero?
+
+In any case, back to our actual example, we can prepare the analysis
+and see the columns and formulae. All of the data and appropriate names
+for the data and formulae are generated automatically.
 
 ```{r}
 #| label: dynamic-analysis-prep
 
-dynamic_analysis <- prep_sim_analysis(dynamic_comp)
+dynamic_analysis <- prep_sim_analysis(dynamic_comp, centering = "latent")
 dynamic_analysis$metadata$lag_columns
 dynamic_analysis$formula
 ```
 
-These are the largest models in this vignette, with 10,000 rows, a bivariate
+These are large models, with 10,000 rows, a bivariate
 response, and a linked random-effect block. To speed things up, the fits
 below use `brms` within-chain threading on top of the two parallel chains,
 via `threads = brms::threading(4, static = TRUE)`. Using `static = TRUE`
@@ -976,10 +1037,8 @@ matching the two by hand is error-prone. To avoid this,
 `prep_sim_analysis()` returns the truth table pre-aligned to the analysis
 model's parameter names in `$truth`. `sim_recovery()` then joins it with the
 fitted model's posterior summaries (`fixef()`, `VarCorr()`, and the residual
-correlations) by name, and adds bias and interval-coverage columns. Every
-truth value must match exactly one fitted parameter and vice versa, so a
-renamed or missing parameter is a loud error rather than a silently
-mislabeled row. Random effects are reported on the standard deviation and
+correlations) by name, and adds bias and interval-coverage columns.
+Random effects are reported on the standard deviation and
 correlation scale used by `VarCorr()`.
 
 ```{r}
@@ -993,13 +1052,13 @@ Most parameters are recovered well, but two patterns are worth noting.
 First, the AR "inertia" coefficients are estimated somewhat below their true
 values, with credible intervals that can exclude the truth. Second, the
 location random-intercept standard deviations are estimated above their true
-values. Under person-mean centering, the fitted intercept collapses to each
-person's observed mean. The variance of those observed means is the trait
+values. Under person-mean centering (the default),
+the fitted intercept is each person's observed mean.
+The variance of those observed means is the trait
 variance plus the variance of each person's sample mean of the
 autoregressive residual, which inflates the estimated standard deviation.
 
 Both patterns are expected and are not bugs in the simulator or the model.
-The `comparability` column marks these rows as `"approximate"`.
 `prep_sim_analysis()` deliberately builds the *pragmatic* analysis model
 that researchers typically fit to observed data: `ar1()` becomes
 person-mean-centered lagged *observed* responses, whereas `gen_outcome()`
@@ -1008,17 +1067,23 @@ with person-mean centering is known to attenuate inertia and cross-lag
 estimates relative to the latent generating values, especially with short
 series (Nickell bias; see Hamaker & Grasman, 2014, and the "Pragmatic
 default estimator" section of `?prep_sim_analysis`).
+Note that in `prep_sim_analysis()`, we used `centering = "latent"`
+to build the lagged predictors, this means that the person mean centering 
+is done on the true latent person means, rather than observed person means.
+However, these are still not the same as the latent residuals.
 
-This mismatch is intentional. It lets simulation studies quantify the bias
-of the standard analysis approach. In fact, once `ar1()` is in the model,
-`sim_recovery()` flags *every* row `"approximate"`, including the location
-effects: the observed lag carries the lagged mean structure as well as the
-lagged residual, and person-mean centering does not generally remove it, so
-no parameter is guaranteed to keep its generating estimand. In static
-models, by contrast, most rows are `"exact"`, and those are the ones where
-systematic bias would indicate a real problem. For a matched-model
-recovery study, construct the analysis model by hand instead of using
-`prep_sim_analysis()`. The next section fits the non-centered alternative to
+This mismatch is intentional as latent residual VAR(1) models, at least that
+can be easily fit, have various limitations (e.g., in our simulation 
+we support the autoregressive effects being moderated by other variables).
+Because of this, once `ar1()` is in the model, to our knowledge *no*
+parameter is guaranteed to keep its generating estimand, including the
+location effects: the observed lag carries the lagged mean structure as well
+as the lagged residual, and person-mean centering does not generally remove
+it. Static models are the more forgiving case. There most parameters do
+estimate the quantity the simulator recorded, and those are the ones where
+systematic bias would indicate a problem.
+
+The next section fits the non-centered alternative to
 the same simulated data, which shows how much of the AR attenuation comes
 from the centering itself.
 
@@ -1027,8 +1092,9 @@ from the centering itself.
 The person-mean-centered lagged predictor used above is only one of two
 common ways to parametrize a multilevel autoregressive model. Hamaker &
 Grasman (2014) compare them directly. With cluster-mean centering (CMC, the
-`prep_sim_analysis()` default), the average autoregressive coefficient is
-attenuated toward zero. Regressing on the raw, *non-centered* lagged outcome
+`prep_sim_analysis()` default also called person-mean centred),
+the average autoregressive coefficient is
+attenuated toward zero. Regressing on the raw, *non-centred* lagged outcome
 (NC) instead recovers the average autoregressive coefficient nearly
 unbiased.
 
@@ -1037,7 +1103,7 @@ parametrization, the model intercept corresponds to $(1 - \phi_i)\,\mu_i$
 (multivariate: $(\mathbf{I} - \boldsymbol{\Phi}_i)\,\boldsymbol{\mu}_i$)
 rather than the person mean $\mu_i$. As a result, the location intercepts,
 and their random-effect standard deviations and correlations, no longer
-estimate the simulator's mean-structure truth. Hamaker & Grasman's practical
+estimate the simulated data's mean-structure truth. Hamaker & Grasman's practical
 recommendation is therefore to fit *both* parametrizations: NC when the
 average inertia and cross-lag effects are the parameters of interest, and
 CMC when person means must remain meaningful, for example for interpretable
@@ -1046,10 +1112,11 @@ $\phi_i$.
 
 `prep_sim_analysis()` supports the NC parametrization through
 `lag_center = "none"`, which builds raw `lag_<response>` columns instead of
-the person-mean-centered `lag_<response>_within` columns. The
-`comparability` flags do not change: with `ar1()` in the model, every row
-is `"approximate"` under either parametrization. What changes is which rows
-we expect to be recovered nearly without bias -- under NC, the AR rows.
+the person-mean-centered `lag_<response>_within` columns. The caveat above
+does not change: with `ar1()` in the model, no parameter is guaranteed to
+keep its generating estimand under either parametrization. What changes is
+which parameters we expect to be recovered nearly without bias.
+Under NC, the AR rows. Under CMC, the intercepts and means.
 We reuse the simulated data from above, so the two analysis models see
 exactly the same observations.
 
@@ -1117,19 +1184,10 @@ The inertia (diagonal) coefficients show the pattern Hamaker & Grasman
 estimates land close to the truth, with credible intervals that cover it.
 
 The level parameters tell a different story, and neither parametrization
-recovers them exactly. This is why `sim_recovery()` flags every location
-random-effect row `"approximate"` whenever the model contains `ar1()`. The
-fixed intercepts are both zero here, so the difference is invisible in them.
-The random-intercept standard deviations, however, reveal it in both
-directions. The NC model estimates the spread of
-$(\mathbf{I} - \boldsymbol{\Phi}_i)\,\boldsymbol{\mu}_i$ across people,
-roughly $(1 - \phi)\,\sigma_{u0}$ here. With positive inertia, that is
-smaller than the spread of $\boldsymbol{\mu}_i$, so the NC estimate is too
-low. The CMC model instead estimates the spread of the observed person
-means. Their variance is the trait variance *plus* the variance of each
-person's sample mean of the autoregressive residual, so the CMC estimate is
-too high. Longer series shrink the CMC inflation, because the residual mean
-averages away as $T$ grows, but they do not change the NC shrinkage:
+recovers them exactly.
+Longer series shrink the CMC inflation, because the residual mean
+averages away as $T$ grows, but they do not change the NC shrinkage.
+So, generally the CMC will be closer than the NC for the intercepts.
 
 ```{r}
 #| label: dynamic-recovery-compare-levels
@@ -1148,13 +1206,10 @@ level_comparison <- merge(
 kable(level_comparison, digits = 3)
 ```
 
-Neither parametrization dominates. The non-centered model recovers the
-dynamics. The centered model recovers the fixed level parameters and comes
-closer on their dispersion, increasingly so as the series lengthen. Which
-one to fit, or whether to fit both as Hamaker & Grasman (2014) recommend,
-depends on which parameters the simulation study is designed to check. See
-the Comparability section of `?sim_recovery` for how the truth table records
-these differences.
+Which one to fit, or whether to fit both as Hamaker & Grasman (2014) recommend,
+depends on which parameters matter to you. See
+the "Pragmatic default estimator" section of `?prep_sim_analysis` for more on
+which parameters keep their generating estimand under each parametrization.
 
 # Simulating the Between-Within (brmcoda) Model
 
@@ -1279,7 +1334,7 @@ kable(bw_recovery[, !"simulator_name"], digits = 3)
 ```
 
 The same caveat about what is being estimated applies here as for the
-dynamic model, and the `comparability` column again marks the affected rows.
+dynamic model.
 The fitted `bz*` coefficients use the ILR of each person's closed
 *arithmetic-mean* composition, computed from the observed parts. The
 simulation truth `between(ilr)` is instead the latent group-level ILR mean.
@@ -1287,6 +1342,49 @@ These differ, and observed between-person predictors are biased for latent
 between-person effects when the series are short (Ludtke et al., 2008).
 Within-person effects are typically recovered well. See the "Pragmatic
 default estimator" section of `?prep_sim_analysis` for details.
+
+However, if desired we can use the simulated latent variables directly.
+
+```{r}
+#| label: bw-analysis-prep-latent
+
+bw_analysis_latent <- prep_sim_analysis(bw_sim, centering = "latent")
+
+```
+
+```{r}
+#| label: bw-fit-latent
+#| results: hide
+#| message: false
+#| warning: false
+
+bw_fit_latent <- brmcoda(
+  complr = bw_analysis_latent$complr,
+  formula = bw_analysis_latent$formula,
+  backend = "cmdstanr",
+  seed = 2026,
+  chains = 2,
+  cores = 2,
+  iter = 1000,
+  refresh = 0
+)
+```
+
+And the recovery
+
+```{r}
+#| label: bw-recovery-latent
+#| results: asis
+
+bw_recovery_latent <- sim_recovery(bw_fit_latent, bw_analysis_latent)
+kable(bw_recovery_latent[, !"simulator_name"], digits = 3)
+```
+
+The `bz*` rows are the ones to compare against the previous table. Here they
+estimate the latent between-person composition the simulator generated from,
+rather than an observed proxy for it, so any remaining bias in them is not
+attributable to the arithmetic-versus-geometric centering gap. The `wz*` rows
+were already recovered well and change little.
 
 Finally, because the fit is a regular `brmcoda` model with a `complr`
 object, substitution analyses work directly on the simulated data:
@@ -1340,8 +1438,6 @@ expecting point equality.
 
 ```{r}
 #| label: glm-outcome-setup
-
-library(brms)
 
 glm_intercept_beta <- function(value, terms = "(Intercept)") {
   matrix(value, nrow = length(terms), dimnames = list(terms, "y"))

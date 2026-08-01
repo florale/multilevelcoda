@@ -24,15 +24,12 @@ vignette: >
 
 ``` r
 library(multilevelcoda)
-#> 
-#> Attaching package: 'multilevelcoda'
-#> The following object is masked from 'package:base':
-#> 
-#>     sub
 library(knitr)
 library(data.table)
+#> data.table 1.18.4 using 9 threads (see ?getDTthreads).  Latest news: r-datatable.com
 #> 
 #> Attaching package: 'data.table'
+#> 
 #> The following object is masked from 'package:base':
 #> 
 #>     %notin%
@@ -41,23 +38,38 @@ library(cmdstanr)
 #> - CmdStanR documentation and vignettes: mc-stan.org/cmdstanr
 #> - CmdStan path: /Users/wileyj/.cmdstan/cmdstan-2.39.0
 #> - CmdStan version: 2.39.0
+library(brms)
+#> Loading required package: Rcpp
+#> Loading 'brms' package (version 2.23.0). Useful instructions
+#> can be found by typing help('brms'). A more detailed introduction
+#> to the package is available through vignette('brms_overview').
+#> 
+#> Attaching package: 'brms'
+#> 
+#> The following object is masked from 'package:stats':
+#> 
+#>     ar
+library(JWileymisc)
+#> Registered S3 method overwritten by 'lme4':
+#>   method           from
+#>   na.action.merMod car
+library(ggplot2)
 
 options(digits = 3, pillar.sigfig = 3)
 ```
 
-This vignette shows how to use the `simulate_data()` function from the
-`multilevelcoda` package to simulate data, including multilevel and
-compositional data. Data simulation is useful for multiple purposes, such as:
+This vignette shows how to use the data simulation features that are part
+of the `multilevelcoda` package, particularly the `simulate_data()` function.
+Data simulation is useful for multiple purposes, such as:
 
 - Power analysis and sample size planning.
 - Method development and testing.
 - Generating synthetic data to test models or write analysis code before data
   collection finishes.
 
-Simulating data can become complex quickly, especially for multilevel or
-compositional data. The `simulate_data()` function is designed to support
-these efforts. Broadly, `simulate_data()` builds an indexed design, runs
-named generators in order, and returns an `mlsim_data` object with four main
+The `simulate_data()` function is designed to support these efforts.
+Broadly, `simulate_data()` builds an indexed design, runs
+named generators in order, and returns an `mlsim_data` object with major
 pieces:
 
 - `data`: the generated `data.table`.
@@ -67,16 +79,25 @@ pieces:
 - `generator_metadata`: e.g., parameters, random effects, covariance
   matrices, helper columns.
 
-The first half of this vignette covers study designs and the predictor
-generators. The second half turns to model-based outcomes: we simulate
+The first part of this vignette covers study designs and the predictor
+generators. The second part turns to model-based outcomes: we simulate
 outcomes from known parameters, fit the matching models, and check how well
 the true values are recovered.
 
+*Note that while part of the aspirations of data simulation here are to support
+things like Monte Carlo power analyses and simulation studies,
+these remain difficult for two reasons.
+Firstly, specifying all necessary parameters is not trivial, and it is our 
+experience as researchers that such information is unlikely to be available 
+prior to data collection. Secondly, Bayesian multilevel models are rather 
+computationally demanding. Many random effects are possible, even sensible,
+and so at least in 2026, the computational demands of simulating and running 
+hundreds of models exceeds most local devices and would likely require access
+to a high performance server.*
+
 # Features at a Glance
 
-The following tables give a high level summary of the current features. We
-come back to many of these options with worked examples throughout the
-vignette.
+The following tables summarise current features.
 
 ## Design options
 
@@ -84,9 +105,9 @@ Design options control the highest level structure of the simulated data.
 
 | Option | Use |
 |---|---|
-| `n` | Total rows for a single-level design, or total rows to divide across groups. |
+| `n` | Total rows for a single-level design, or total rows to divide across groups if multilevel. |
 | `n_groups` | Number of groups in a grouped or multilevel design. |
-| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list. |
+| `n_per_group` | Group sizes: scalar, vector, function, or count-distribution list (the latter support unequal or variable sample sizes per group as is common in real data). |
 | `group_id` | Name of the grouping column. |
 | `obs_id` | Name of the within-design observation index. |
 | `time_id` | Optional time column name. |
@@ -96,15 +117,14 @@ Design options control the highest level structure of the simulated data.
 
 ## Generator families
 
-Generators are used to add simulated data columns. Each generator draws its
-own values, but later generators can depend on columns created by earlier
-generators through the simulation context. For example, `gen_outcome()`
-builds outcomes from previously generated predictors. The current generators
-are listed below.
+Generators add simulated data columns. Each generator draws its
+own values. However, `gen_outcome()` can generate outcomes that
+depend on columns created by earlier generators through the simulation context.
+The current generators are listed below.
 
 | Generator | Role |
 |---|---|
-| `gen_mvn()` | Univariate and multivariate Gaussian predictors, including ILR compositional back-transforms. |
+| `gen_mvn()` | Univariate and multivariate Gaussian predictors, including ILR compositions and back-transforms to original compositional scale. |
 | `gen_categorical()` | Binary, unordered categorical, and ordered categorical variables. |
 | `gen_binomial()` | Binomial counts with logit-scale multilevel support. |
 | `gen_poisson()` | Poisson counts with log-scale multilevel support. |
@@ -116,8 +136,8 @@ are listed below.
 
 ## Advanced simulation options
 
-These are a sample of more advanced simulation features that apply to the
-predictor generators.
+These are some of the features supported by generators. Not all features are
+necessarily supported by all generators.
 
 | Feature | Use |
 |---|---|
@@ -131,8 +151,10 @@ predictor generators.
 
 # Study Designs: Groups, Sizes, and Time
 
-To get started, here is a simple, single level example. Each variable in
-this first example is generated independently of the others.
+To start, let's look at a simple, single level example. 
+Here we generate one normally distributed variable, one categorical
+variable with three levels, and one binary categorical variable.
+Each variable in this first example is generated independently of the others.
 
 
 ``` r
@@ -194,19 +216,19 @@ single
 #>         tx  categorical single   tx
 ```
 
-Printing an `mlsim_data` object gives a compact overview on the console. If
+Printing an `mlsim_data` object gives an overview of the design. If
 we want the design and generator metadata as `data.table` objects, we can
 use `summary()`.
 
 
 ``` r
 summary(single)$design
-#>        n n_cols n_generated_cols n_groups group_id group_size_min
-#>    <int>  <int>            <int>    <int>   <char>          <int>
-#> 1:    20      4                3       NA     <NA>             NA
-#>    group_size_median group_size_max obs_id time_id  seed n_generators
-#>                <num>          <int> <char>  <char> <int>        <int>
-#> 1:                NA             NA obs_id    <NA>  2026            3
+#>        n n_cols n_generated_cols n_groups group_id group_size_min group_size_median
+#>    <int>  <int>            <int>    <int>   <char>          <int>             <num>
+#> 1:    20      4                3       NA     <NA>             NA                NA
+#>    group_size_max obs_id time_id  seed n_generators
+#>             <int> <char>  <char> <int>        <int>
+#> 1:             NA obs_id    <NA>  2026            3
 summary(single)$generators
 #>    generator distribution  level   vars n_vars parameter_level parameter_count
 #>       <char>       <char> <char> <char>  <int>          <char>           <int>
@@ -218,21 +240,16 @@ summary(single)$generators
 #> 1:               TRUE                FALSE                 TRUE          FALSE
 #> 2:               TRUE                FALSE                 TRUE          FALSE
 #> 3:               TRUE                FALSE                 TRUE          FALSE
-#>    has_random_effects has_residuals has_scale_model has_composition
-#>                <lgcl>        <lgcl>          <lgcl>          <lgcl>
-#> 1:              FALSE          TRUE           FALSE           FALSE
-#> 2:              FALSE         FALSE           FALSE           FALSE
-#> 3:              FALSE         FALSE           FALSE           FALSE
-#>    has_custom_output
-#>               <lgcl>
-#> 1:             FALSE
-#> 2:             FALSE
-#> 3:             FALSE
+#>    has_random_effects has_residuals has_scale_model has_composition has_custom_output
+#>                <lgcl>        <lgcl>          <lgcl>          <lgcl>            <lgcl>
+#> 1:              FALSE          TRUE           FALSE           FALSE             FALSE
+#> 2:              FALSE         FALSE           FALSE           FALSE             FALSE
+#> 3:              FALSE         FALSE           FALSE           FALSE             FALSE
 ```
 
-We can generate multilevel structures as well. A single scalar `n_per_group`
+We can generate multilevel data as well. A single scalar `n_per_group`
 creates a balanced grouped design, with exactly the same number of
-observations per group.
+observations per group. To show it more easily, we make just one variable.
 
 
 ``` r
@@ -267,16 +284,24 @@ kable(balanced$data)
 
 
 
-However, this was still effectively single level, Gaussian data. We can
-improve on that. Here we give essentially the parameters of a random
+However, while we generate the labels for multilevel data,
+the variable `x` was still single level, Gaussian data. 
+To address this, we speicfy the parameters of a random
 intercept only multilevel model, which is used to generate matching data.
 The `fixed_intercept` is the overall mean, `random_cov` is the group-level
 variance, and `residual_cov` is the residual variance. The `level` argument
 controls where a variable varies: `level = "multilevel"` gives row-level
 values with group-specific random effects, and `level = "level2"` gives one
 value per group, constant within groups but varying between them. The same
-approach broadly applies to other generator families, and we return to
-`level` in more detail in the next section.
+approach broadly applies to other generator families.
+
+Note that in the data output are the simulated data as well as the "true"
+between and within values. These are useful because in a multilevel structure,
+with a small, finite number of samples for a participant, the sample 
+mean can differ from that person's true mean. These values instead show
+the "true" values. This can be important for subsequent simulations 
+(e.g., outcome generation where we would want it generated from the truth,
+not from the sample).
 
 
 ``` r
@@ -314,7 +339,7 @@ kable(balanced2$data)
 
 
 
-If we specify `n_per_group` as a vector, we get an unbalanced design.
+If we specify `n_per_group` as a vector, we can get an unbalanced design.
 
 
 ``` r
@@ -355,7 +380,8 @@ kable(unbalanced$data)
 
 Group sizes can also be drawn from a count distribution. We give a list with
 the distribution name and its parameters, along with optional minimum and
-maximum sizes.
+maximum sizes. This is an easier way to specify that there may be differences
+without having to manually specify the number for each participant.
 
 
 ``` r
@@ -403,7 +429,6 @@ kable(drawn_sizes$data)
 
 
 
-
 Longitudinal designs can add a time index. When groups have different
 lengths, `time_truncate = TRUE` uses the first values for shorter groups.
 Adding a time index may not matter for some designs, but it is useful for
@@ -446,51 +471,12 @@ kable(dated$data)
 
 
 
-# Single-Level, Group-Level, and Multilevel Predictors
-
-The `level` argument controls whether values vary by row, by group, or by
-row with group-specific random effects. This example generates one variable
-of each type.
-
-
-``` r
-levels_demo <- simulate_data(
-  n_groups = 4,
-  n_per_group = 4,
-  seed = 2026,
-  generators = list(
-    row_x = gen_mvn("row_x", fixed_intercept = 0, residual_cov = 1),
-    group_x = gen_mvn("group_x", level = "level2", fixed_intercept = 10, residual_cov = 1),
-    mixed_x = gen_mvn(
-      "mixed_x",
-      level = "multilevel",
-      fixed_intercept = 5,
-      random_cov = 0.50,
-      residual_cov = 1
-    )
-  )
-)
-
-levels_demo
-#> <mlsim_data>
-#>   rows: 16
-#>   columns: 8 (generated: 6)
-#>   seed: 2026
-#>   grouping: group_id (4 groups; size min/median/max: 4/4/4)
-#>   generators: 3
-#> 
-#> Generators:
-#>  generator distribution      level    vars
-#>      row_x          mvn     single   row_x
-#>    group_x          mvn     level2 group_x
-#>    mixed_x          mvn multilevel mixed_x
-```
-
 # Distribution Families
 
 All predictor generators use fixed location or link-scale intercepts, and
 the multilevel forms add random covariance terms. Here is a quick
-demonstration of the different distribution families with single level data.
+demonstration of different distribution families that we support 
+with single level data.
 
 
 ``` r
@@ -664,7 +650,8 @@ kable(categorical_ml$data)
 `gen_mvn()` simulates correlated blocks of variables. With
 `compositional = TRUE`, the MVN columns are interpreted as ILR coordinates
 and back-transformed into compositional parts. Here we are back to single
-level data.
+level data for the first illustration. With MVN data, we need to specify
+the residual covariance matrix, which is used to control any correlation.
 
 
 ``` r
@@ -679,8 +666,8 @@ correlated_comp <- simulate_data(
     ),
     time_use = gen_mvn(
       c("ilr_1", "ilr_2"),
-      fixed_intercept = c(0, 0),
-      residual_cov = diag(c(0.30, 0.20)),
+      fixed_intercept = c(0.4, -1.5),
+      residual_cov = diag(c(0.05, 0.05)),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -694,16 +681,16 @@ kable(correlated_comp$data)
 
 
 
-| obs_id| affect| energy|  ilr_1|  ilr_2| sleep| active| sedentary|
-|------:|------:|------:|------:|------:|-----:|------:|---------:|
-|      1|  0.351|  1.566| -0.338| -0.022|  5.96|   8.88|      9.16|
-|      2| -0.587| -0.290| -0.119| -0.853|  6.40|   4.05|     13.54|
-|      3|  0.355|  0.938|  0.441| -0.774| 10.24|   3.45|     10.31|
-|      4|  0.366|  0.561| -0.378| -0.026|  5.75|   8.96|      9.29|
-|      5| -0.405|  0.238|  0.180| -0.289|  9.10|   5.95|      8.95|
-|      6| -1.890| -1.579|  0.090| -0.772|  7.83|   4.06|     12.10|
-|      7|  0.922| -0.962|  0.762|  0.237| 13.36|   6.21|      4.44|
-|      8| -1.621|  0.655| -0.803| -0.074|  3.78|   9.58|     10.64|
+| obs_id| affect| energy|  ilr_1| ilr_2| sleep| active| sedentary|
+|------:|------:|------:|------:|-----:|-----:|------:|---------:|
+|      1|  0.351|  1.566|  0.389| -1.36|  8.38|   1.99|      13.6|
+|      2| -0.587| -0.290| -0.027| -1.45|  5.64|   2.09|      16.3|
+|      3|  0.355|  0.938|  0.013| -1.68|  5.30|   1.59|      17.1|
+|      4|  0.366|  0.561|  0.387| -1.35|  8.41|   2.02|      13.6|
+|      5| -0.405|  0.238|  0.256| -1.57|  6.93|   1.67|      15.4|
+|      6| -1.890| -1.579|  0.014| -1.54|  5.65|   1.87|      16.5|
+|      7|  0.922| -0.962|  0.518| -1.81|  7.86|   1.16|      15.0|
+|      8| -1.621|  0.655|  0.363| -1.17|  8.73|   2.44|      12.8|
 
 
 
@@ -730,8 +717,8 @@ parts_only <- simulate_data(
   generators = list(
     time_use = gen_mvn(
       c("z1", "z2"),
-      fixed_intercept = c(0, 0),
-      residual_cov = diag(2),
+      fixed_intercept = c(0.4, -1.5),
+      residual_cov = diag(c(0.05, 0.05)),
       compositional = TRUE,
       parts = c("sleep", "active", "sedentary"),
       total = 24,
@@ -747,11 +734,11 @@ kable(parts_only$data)
 
 | obs_id| sleep| active| sedentary|
 |------:|-----:|------:|---------:|
-|      1| 21.86|   1.45|     0.694|
-|      2| 11.64|   2.21|    10.153|
-|      3| 15.23|   4.82|     3.956|
-|      4|  7.27|   7.87|     8.867|
-|      5| 10.69|   3.73|     9.582|
+|      1| 12.41|   1.44|      10.2|
+|      2|  8.38|   1.23|      14.4|
+|      3|  9.70|   1.59|      12.7|
+|      4|  7.83|   1.69|      14.5|
+|      5|  8.29|   1.39|      14.3|
 
 
 
@@ -812,35 +799,35 @@ location_scale <- simulate_data(
 
 kable(data.table(
   group_id = location_scale$data$group_id,
-  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd,
+  symptom_residual_sd = location_scale$generator_metadata$symptom$residual_sd[, "symptom"],
   event_count_size = location_scale$generator_metadata$event_count$size
 ))
 ```
 
 
 
-| group_id| symptom_residual_sd.symptom| event_count_size|
-|--------:|---------------------------:|----------------:|
-|        1|                        1.29|             5.99|
-|        1|                        1.29|             5.99|
-|        1|                        1.29|             5.99|
-|        1|                        1.29|             5.99|
-|        1|                        1.29|             5.99|
-|        2|                        2.57|             4.75|
-|        2|                        2.57|             4.75|
-|        2|                        2.57|             4.75|
-|        2|                        2.57|             4.75|
-|        2|                        2.57|             4.75|
-|        3|                        1.39|             6.04|
-|        3|                        1.39|             6.04|
-|        3|                        1.39|             6.04|
-|        3|                        1.39|             6.04|
-|        3|                        1.39|             6.04|
-|        4|                        1.54|             4.54|
-|        4|                        1.54|             4.54|
-|        4|                        1.54|             4.54|
-|        4|                        1.54|             4.54|
-|        4|                        1.54|             4.54|
+| group_id| symptom_residual_sd| event_count_size|
+|--------:|-------------------:|----------------:|
+|        1|                1.29|             5.99|
+|        1|                1.29|             5.99|
+|        1|                1.29|             5.99|
+|        1|                1.29|             5.99|
+|        1|                1.29|             5.99|
+|        2|                2.57|             4.75|
+|        2|                2.57|             4.75|
+|        2|                2.57|             4.75|
+|        2|                2.57|             4.75|
+|        2|                2.57|             4.75|
+|        3|                1.39|             6.04|
+|        3|                1.39|             6.04|
+|        3|                1.39|             6.04|
+|        3|                1.39|             6.04|
+|        3|                1.39|             6.04|
+|        4|                1.54|             4.54|
+|        4|                1.54|             4.54|
+|        4|                1.54|             4.54|
+|        4|                1.54|             4.54|
+|        4|                1.54|             4.54|
 
 
 
@@ -852,87 +839,84 @@ metadata. They can use the active design columns, previously generated
 variables, and any extra arguments supplied to `gen_custom()`. Their
 metadata is captured in the same way as for the built-in generators.
 
+Below is an examplethat can be useful when trying to simulate synthetic
+data for use in building or testing data analysis code. For example,
+this could support pre-registration, registered reports where data 
+analysis code is written in advance, or power analyses where there is 
+pilot data on variables that follow distributions that do not conveniently
+match any of the currently supported distributions.
+We use `density_inversion()` function which first calculates the 
+density of a set of values passed in, and then inverts to generate
+synthetic data with approximately the same density.
+We apply it to the `iris` data built into `R` for which the 
+petal lengths are famously bimodal. While not exact, we can 
+see that the simulated data broadly captures and reflects the petal length
+data present in the `iris` dataset. You may want more metadata saved, 
+but here we just save the source (density inversion) and the number of 
+pilot samples passed in.
+
 
 ``` r
-pilot_sampler <- function(context, vars, level, pilot_values) {
-  values <- sample(pilot_values, context$n_rows, replace = TRUE)
+custom_sampler <- function(context, vars, level, pilot_values) {
+  values <- density_inversion(pilot_values, n = context$n_rows,
+    KDEn = 50)
 
   list(
     data = data.frame(values = values),
     names = vars,
-    metadata = list(source = "pilot bootstrap", n_pilot = length(pilot_values))
-  )
-}
-
-clinic_load_sampler <- function(context, vars, level) {
-  load_values <- c("low", "medium", "high")
-  group_load <- load_values[context$data[[context$group_id]]]
-
-  list(
-    data = data.frame(load = group_load),
-    names = vars,
-    metadata = list(source = "derived from group index")
+    metadata = list(source = "density inversion", n_pilot = length(pilot_values))
   )
 }
 
 custom <- simulate_data(
-  n_groups = 3,
-  n_per_group = 4,
+  n = 500,
   seed = 2026,
   generators = list(
-    pilot_x = gen_custom(
-      "pilot_x",
-      generator = pilot_sampler,
-      pilot_values = c(1.2, 1.4, 1.8, 2.5, 3.1)
-    ),
-    clinic_load = gen_custom(
-      "clinic_load",
-      generator = clinic_load_sampler
+    custom = gen_custom(
+      "custom",
+      generator = custom_sampler,
+      pilot_values = iris$Petal.Length
     )
   )
 )
 
-kable(custom$data)
+dcompare <- data.table(
+  value = c(iris$Petal.Length, custom$data$custom),
+  group = rep(c("original", "simulated"), times = c(
+    length(iris$Petal.Length),
+    length(custom$data$custom)
+  )))
+
+ggplot(dcompare, aes(value, colour = group, linetype = group)) +
+  geom_density(linewidth = 1) + theme_classic()
 ```
 
-
-
-| group_id| obs_id| pilot_x|clinic_load |
-|--------:|------:|-------:|:-----------|
-|        1|      1|     3.1|low         |
-|        1|      2|     1.2|low         |
-|        1|      3|     1.2|low         |
-|        1|      4|     3.1|low         |
-|        2|      1|     1.8|medium      |
-|        2|      2|     2.5|medium      |
-|        2|      3|     2.5|medium      |
-|        2|      4|     3.1|medium      |
-|        3|      1|     2.5|high        |
-|        3|      2|     1.4|high        |
-|        3|      3|     1.4|high        |
-|        3|      4|     1.8|high        |
-
-
+<div class="figure" style="text-align: center">
+<img src="mlmcoda-custom-generators-1.png" alt="plot of chunk custom-generators"  />
+<p class="caption">plot of chunk custom-generators</p>
+</div>
 
 # A First Outcome Model and Parameter Recovery
 
 So far, we have only simulated predictors. `gen_outcome()` adds a
-model-based outcome generator to the same `simulate_data()` workflow. It is
-designed for simulation studies where outcomes are generated from a known
-location model, a known scale model, and, optionally, a residual
-autoregressive process. The rest of this vignette focuses on the workflow
+model-based outcome generator to the same `simulate_data()` workflow.
+
+The rest of this vignette focuses on the workflow
 that builds on it: simulate data with known parameters, prepare an analysis
 data set, fit the matching model, and check that the true values are
 recovered.
 
 Before the more complex models in the later sections, here is the complete
-loop on the simplest useful example: a Gaussian outcome with one predictor
-and a random intercept. We write the parameter matrices by hand here, so
-their structure is visible. The location matrix has one row per term and one
+loop on a simple example: a Gaussian outcome with one predictor
+and a random intercept. We need to specify all of the parameters and 
+parameter matrices. The location matrix has one row per term and one
 column per outcome, the scale matrix holds the log residual standard
 deviation, and the random-effect covariance uses structured names to label
-which parameter each random effect belongs to. The next section shows how
-`gen_template()` can create these structures for us.
+which parameter each random effect belongs to. Even in this simple example,
+the number of parameters and the specific structure to hold them is 
+rather complicated. The next section will show how
+`gen_template()` can create these structures for us, which is probably
+easier for most use cases.
 
 
 ``` r
@@ -955,7 +939,7 @@ first_params <- list(
 )
 
 first_sim <- simulate_data(
-  n_groups = 100,
+  n_groups = 200,
   n_per_group = 10,
   group_id = "ID",
   seed = 2026,
@@ -972,19 +956,20 @@ kable(head(first_sim$data))
 
 | ID| obs_id|      x|    y|
 |--:|------:|------:|----:|
-|  1|      1|  0.521| 3.46|
-|  1|      2| -1.080| 2.69|
-|  1|      3|  0.139| 1.59|
-|  1|      4| -0.085| 1.57|
-|  1|      5| -0.667| 1.50|
-|  1|      6| -2.516| 1.59|
+|  1|      1|  0.521| 1.76|
+|  1|      2| -1.080| 2.40|
+|  1|      3|  0.139| 1.11|
+|  1|      4| -0.085| 1.40|
+|  1|      5| -0.667| 1.59|
+|  1|      6| -2.516| 1.57|
 
 
 
 `prep_sim_analysis()` turns the simulated data into an analysis-ready data
 set and infers the matching `brms` formula. It also returns the true
 parameter values in `$truth`, labeled with the parameter names the fitted
-model will use.
+model will use. The goal of this is to support cases where we want to test
+if the true value was recovered (e.g., simulation studies on bias, coverage rates).
 
 
 ``` r
@@ -999,8 +984,6 @@ There is no composition in this example, so we fit the model directly with
 
 
 ``` r
-library(brms)
-
 first_fit <- brm(
   formula = first_analysis$formula,
   data = first_analysis$data,
@@ -1014,6 +997,8 @@ first_fit <- brm(
 )
 ```
 
+This object is a regular `brms` object so we could summary, predict, etc
+However, there are some more helper functions that may be useful here.
 `sim_recovery()` joins the fitted estimates with the simulation truth by
 parameter name, and adds bias and interval-coverage columns.
 
@@ -1025,62 +1010,88 @@ kable(first_recovery[, !"simulator_name"], digits = 3)
 
 
 
-|type      |group |parameter       |  truth| estimate| est_error|  lower|  upper|   bias|covered |comparability |
-|:---------|:-----|:---------------|------:|--------:|---------:|------:|------:|------:|:-------|:-------------|
-|fixed     |NA    |Intercept       |  2.000|    1.984|     0.041|  1.902|  2.064| -0.016|TRUE    |exact         |
-|fixed     |NA    |x               |  0.500|    0.553|     0.026|  0.504|  0.605|  0.053|FALSE   |exact         |
-|fixed     |NA    |sigma_Intercept | -0.223|   -0.272|     0.023| -0.317| -0.227| -0.049|FALSE   |exact         |
-|random_sd |ID    |Intercept       |  0.300|    0.331|     0.037|  0.264|  0.406|  0.031|TRUE    |exact         |
+|type      |group |parameter       |  truth| estimate| est_error|  lower|  upper|   bias|covered |
+|:---------|:-----|:---------------|------:|--------:|---------:|------:|------:|------:|:-------|
+|fixed     |NA    |Intercept       |  2.000|    1.977|     0.029|  1.918|  2.035| -0.023|TRUE    |
+|fixed     |NA    |x               |  0.500|    0.495|     0.020|  0.455|  0.533| -0.005|TRUE    |
+|fixed     |NA    |sigma_Intercept | -0.223|   -0.218|     0.017| -0.251| -0.185|  0.005|TRUE    |
+|random_sd |ID    |Intercept       |  0.300|    0.304|     0.026|  0.259|  0.356|  0.004|TRUE    |
 
 
 
 Each row is one model parameter. The `truth` column holds the generating
 value, `bias` is the difference between the posterior estimate and the
-truth, and `covered` indicates whether the truth falls inside the 95%
-credible interval. The `comparability` column flags whether the fitted
-parameter estimates exactly the quantity the simulator recorded; in this
-simple model, every row is `"exact"`, so any systematic bias here would
-indicate a real problem. We will see `"approximate"` rows, and what they
-mean, in the next section.
+truth, and `covered` indicates whether the truth falls inside the
+credible interval. In this simple model the analysis matches the
+data-generating process, so each fitted parameter estimates exactly the
+quantity the simulator recorded. That will not always hold: as we get into
+time series and multilevel predictors below, the analysis we fit no longer
+matches the simulation model exactly, and some parameters then estimate a
+related quantity instead.
 
 # Dynamic Outcome Simulation
 
-The first outcome example used a simple Gaussian model. `gen_outcome()` also
-supports residual autoregressive dynamics and multivariate compositional
-outcomes, which we combine in this section. As before, we focus on the
-default `family = "gaussian"`. Non-Gaussian families are covered in the
-[Non-Gaussian Outcomes] section below.
+A major use case we are interested in for `multilevelcoda` are 
+intensive longitudinal studies, such as wearables or diet or time use 
+measured in people across consecutive days, for example for 1-2 weeks.
+In these cases, the data are multilevel, but importantly, they also are
+time series. Even if not all analyses are fundamentally focused on or 
+even include a time series component, the underlying data would or could.
+To support that and simulate data that ideally match real data as much as 
+feasible, we support dynamic outcome simulation, or outcomes that are 
+assumed to be time series.
+
+`gen_outcome()`  supports residual autoregressive dynamics and multivariate compositional outcomes, which we combine in this section.
+As before, we focus on the default `family = "gaussian"`.
 
 For Gaussian outcomes, the scale model is required. Use `scale = sigma ~ 1`
-for a constant conditional standard deviation. When `ar1()` is present, the
-scale model controls the variability of the innovations. When `ar1()` is
+for a constant conditional standard deviation. 
+Dynamics are supported through an autoregressive component, implemented
+using `ar1()`. When `ar1()` is present, the
+scale model controls the variability **of the innovations**. When `ar1()` is
 absent, it controls ordinary residual variability. Note that the AR process
-is applied to the residual ILR states, not to lagged observed outcomes, and
-that `ar1()` is currently only supported for `family = "gaussian"`.
+is applied to the residual ILR states, not to lagged observed outcomes.
+`ar1()` is currently only supported for `family = "gaussian"`. This is 
+because building models with residual autoregression and innovations 
+becomes substantially more complicated for categorical data and other 
+not Gaussian distributions.
 
 When `ar1()` is present, `burnin` is required. Each series starts with zero
 residuals and is iterated `burnin` steps before the first observed row. Do
 not use `burnin = 0` or other small values with `ar1()`. If the burn-in is
 too short, the first observations will be under-dispersed relative to the
 stationary distribution of the AR process. Choose a burn-in long enough for
-the process to forget its start. A useful rule of thumb is at least
+the process to forget its start. A simple decision rule can be at least
 `log(0.01) / log(rho)` steps, where `rho` is the largest spectral radius of
 the AR matrices, which works out to about 90 steps at `rho = 0.95`. Models
 without `ar1()` have no burn-in phase, so `burnin` can simply be omitted.
 
-In the first outcome example, we wrote the parameter matrices by hand. For
-more complex specifications, that becomes difficult. To help with this,
-`gen_template()` asks the simulator for the exact structure needed. We run
-the template with the same formulas, grouping structure, and composition
+In the first outcome example, we wrote the parameter matrices by hand.
+However, that is quite difficult with many names. To help with this,
+`gen_template()` can be used. Basically, it is a stand-in for 
+`gen_outcome()` which does not require parameters to be specified but will
+generate the full structure so we can extract the necessary parameter matrices.
+We run the template with the same formulas, grouping structure, and composition
 settings that we plan to use in the final simulation. The design size does
 not need to match: a small template design is enough to obtain the parameter
 structure, which we then fill in and reuse for the full-size simulation.
+
+Here we see our first dynamic outcome formula. The setup here is a 
+3 component compositional dyanmic outcome. Much of the formula is a
+"standard" multivariate, multilevel location scale formula specification
+for `brms`. What is new is the use of `ar1()`. This gets parsed by 
+`multilevelcoda` and automatically expanded to mean the lag1 
+outcome variable, and this can be done as fixed and random effects,
+as done below. Now once we have the template, we can extract the relevant
+parameter matrices and then specify the parameter values we want to use
+for the simulation. This saves us manually writing / figuring out the 
+structure and the very specific names needed for `simulate_data()`.
 
 
 ``` r
 dynamic_outcome_formula <- mvbind(ilr1, ilr2) ~ ar1() + (1 + ar1() | ID)
 dynamic_scale_formula <- sigma ~ 1 + (1 | ID)
-dynamic_composition <- list(parts = c("sleep", "sedentary", "activity"), total = 24)
+dynamic_composition <- list(parts = c("sleep", "activity", "sedentary"), total = 24)
 
 dynamic_template <- simulate_data(
   n_groups = 4,
@@ -1099,8 +1110,8 @@ dynamic_template <- simulate_data(
 )
 
 dynamic_params <- dynamic_template$generator_metadata$outcome_template$params
-dynamic_params$location$beta["(Intercept)", ] <- c(0, 0)
-dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.4, 0.35))
+dynamic_params$location$beta["(Intercept)", ] <- c(0.2, -1.5)
+dynamic_params$scale$beta["(Intercept)", ] <- log(c(0.2, 0.15))
 dynamic_params$ar$beta["ar1()", , ] <- matrix(c(0.50, 0.10, 0.10, 0.30), 2, 2, byrow = TRUE)
 
 dynamic_random_names <- rownames(dynamic_params$random$ID$covariance)
@@ -1116,12 +1127,14 @@ dynamic_random_sd_values <- c(
 )
 dynamic_random_sd <- dynamic_random_sd_values[dynamic_random_names]
 
+## we initialise all the random effect correlations at 0
 dynamic_random_cor <- diag(length(dynamic_random_names))
 dimnames(dynamic_random_cor) <- list(dynamic_random_names, dynamic_random_names)
 set_dynamic_random_cor <- function(x, y, value) {
   dynamic_random_cor[x, y] <<- value
   dynamic_random_cor[y, x] <<- value
 }
+## we set a few select correlations to non zero values
 set_dynamic_random_cor(
   "location|outcome=ilr1|term=(Intercept)",
   "ar|term=ar1()|to=ilr1|from=ilr1",
@@ -1154,20 +1167,43 @@ dynamic_params$random$ID$covariance <- diag(dynamic_random_sd) %*%
 dimnames(dynamic_params$random$ID$covariance) <- list(dynamic_random_names, dynamic_random_names)
 ```
 
-We use clearly visible dynamics to make the centering comparison later in
-this section easy to read. The fixed autoregressive (diagonal) coefficients
+We use clearly visible dynamics for autoregression
+to make the centering comparison later in this section clearer.
+The fixed autoregressive (diagonal) coefficients
 are 0.50 and 0.30, and the cross-lagged (off-diagonal) coefficients are
-0.10. Together, these give the fixed AR matrix a spectral radius of about
-0.54. The burn-in of 150 steps is far above the `log(0.01) / log(rho)` rule
-of thumb.
+0.10. The off diagonal coefficients could be zero, but keeping them
+probably makes some sense as it is plausible, depending on the 
+sequential binary partition used, that one ILR would have some 
+predictive utility to the subsequent value of other ILRs, especially
+as two ILRs commonly will include values from at least one common 
+component. In any case, these values give the fixed AR matrix a spectral
+radius of about 0.54. A burn-in of 150 steps is far above the 
+`log(0.01) / log(rho)` approximate rule. For simulating individual datasets,
+we do not see  a reason not to put a very generous burnin because the 
+computational cost, especially vis a vis the cost of fitting any analytic 
+model to such complex data is negligible in our view. That said, it does 
+add some time just to the data simulation, and we can see that if a very 
+large number of people or hundreds or thousdands of datasets were being 
+simulated, there may be some utility in striving for the "minimal" burnin
+needed. Another reason for our larger choice is that with random slopes,
+while the fixed matrix may have a low spectral radius, unless we had 
+distinct burnins for different people, some participants, due to random
+effects, could have a larger spectral radius.
 
-We also keep the group-level AR standard deviations small: 0.02 for the
+We keep the group-level AR standard deviations small: 0.02 for the
 autoregressive terms and 0.01 for the cross-lagged terms. Larger random
-slopes would eventually push individual AR matrices toward the stationarity
-boundary, which triggers resampling and truncates the random-effect
-distribution. Finally, we simulate 50 observations per person. Series length
-matters here, because the person means used by the centered estimator become
-more precise as the series grows.
+slopes can push individual AR matrices toward the stationarity
+boundary. 
+
+If we get towards a stationary point, that will trigger resampling and 
+truncate the random-effect distribution (because internally, the code 
+will ensure that stationary matrices for any given participant is not used). 
+Finally, we simulate 50 observations per person. Series length
+matters here and probably quite a bit.
+We simulate data based on a residual process. However, for analyses it is 
+quite common to just use a lagged outcome value possibly person mean centred.
+In these cases, it becomes much more precise as the time series length 
+increases, because otherwise, we are centering on something rather noisy.
 
 
 ``` r
@@ -1193,91 +1229,40 @@ kable(head(dynamic_comp$data[, c("ID", "day", "ilr1", "ilr2", "sleep", "sedentar
 
 
 
-| ID| day|   ilr1|   ilr2| sleep| sedentary| activity|
-|--:|---:|------:|------:|-----:|---------:|--------:|
-|  1|   1|  0.697| -0.102| 12.95|      5.13|     5.93|
-|  1|   2|  0.414|  0.559| 10.43|      9.34|     4.23|
-|  1|   3|  0.083|  0.146|  8.52|      8.53|     6.94|
-|  1|   4| -0.044|  0.576|  7.30|     11.58|     5.12|
-|  1|   5|  0.411|  0.068| 10.86|      6.89|     6.26|
-|  1|   6|  0.539|  0.614| 11.26|      8.98|     3.77|
+| ID| day|  ilr1|  ilr2| sleep| sedentary| activity|
+|--:|---:|-----:|-----:|-----:|---------:|--------:|
+|  1|   1| 0.600| -1.43|  9.62|      12.7|     1.68|
+|  1|   2| 0.461| -1.14|  9.48|      12.1|     2.40|
+|  1|   3| 0.292| -1.32|  7.86|      14.0|     2.16|
+|  1|   4| 0.230| -1.14|  7.93|      13.4|     2.67|
+|  1|   5| 0.454| -1.36|  8.82|      13.2|     1.93|
+|  1|   6| 0.521| -1.12|  9.96|      11.7|     2.38|
 
 
 
 Before fitting anything, we can run a few quick checks on the simulation.
-First, the expected parameter names from the template and from the final
-simulation should be identical, which confirms that the parameters we
-edited line up with what the simulator actually used. Second, the realized
-maximum spectral radius across the individual AR matrices should be below 1,
-which confirms that every simulated series is stationary. Here it is around
+For example, we can look at the realized maximum spectral radius across the individual AR matrices, which should be below 1. Here it is around
 0.6, only a little above the fixed-matrix value of 0.54, because we kept the
-AR random effects small. Third, the parts should sum to the compositional
-total of 24 in every row.
+AR random effects small.
 
 
 ``` r
-dynamic_template$generator_metadata$outcome_template$expected_parameter_names
-#> $location
-#> [1] "(Intercept)"
-#> 
-#> $scale
-#> [1] "(Intercept)"
-#> 
-#> $ar
-#> [1] "ar1()"
-#> 
-#> $random
-#> [1] "location|outcome=ilr1|term=(Intercept)"
-#> [2] "location|outcome=ilr2|term=(Intercept)"
-#> [3] "ar|term=ar1()|to=ilr1|from=ilr1"       
-#> [4] "ar|term=ar1()|to=ilr1|from=ilr2"       
-#> [5] "ar|term=ar1()|to=ilr2|from=ilr1"       
-#> [6] "ar|term=ar1()|to=ilr2|from=ilr2"       
-#> [7] "scale|outcome=ilr1|term=(Intercept)"   
-#> [8] "scale|outcome=ilr2|term=(Intercept)"
-
-dynamic_comp$generator_metadata$outcome$expected_parameter_names
-#> $location
-#> [1] "(Intercept)"
-#> 
-#> $scale
-#> [1] "(Intercept)"
-#> 
-#> $ar
-#> [1] "ar1()"
-#> 
-#> $random
-#> [1] "location|outcome=ilr1|term=(Intercept)"
-#> [2] "location|outcome=ilr2|term=(Intercept)"
-#> [3] "ar|term=ar1()|to=ilr1|from=ilr1"       
-#> [4] "ar|term=ar1()|to=ilr1|from=ilr2"       
-#> [5] "ar|term=ar1()|to=ilr2|from=ilr1"       
-#> [6] "ar|term=ar1()|to=ilr2|from=ilr2"       
-#> [7] "scale|outcome=ilr1|term=(Intercept)"   
-#> [8] "scale|outcome=ilr2|term=(Intercept)"
-
 dynamic_comp$generator_metadata$outcome$ar$stability$max_spectral_radius_overall
 #> [1] 0.596
-
-table(rowSums(as.matrix(dynamic_comp$data[, c("sleep", "sedentary", "activity"), with = FALSE])))
-#> 
-#>    24 
-#> 10000
 ```
 
 Next, we prepare the generated data into an analysis data set that can be
 passed to `brmcoda()`. `prep_sim_analysis()` rebuilds a `complr` object
 using the same SBP basis as the simulator and translates `ar1()` into
-within-person centered, lagged ILR predictors. The fitted model includes
+within-person centered, lag 1 ILR predictors. The fitted model includes
 random level terms, random inertia terms through the lagged ILR slopes, and
 random conditional variability through response-specific `sigma` models.
 
 The lag columns are built by the exported `lag_by_time()` helper. These are
-*time-based* lags on `time_id`, not positional row shifts, so a row's lag
-comes from the observation at `time - time_step`. This matters when working
-with real data that has skipped time points, such as a missed diary day. The
-row after a gap gets an `NA` lag, rather than silently lagging across the
-gap. The step is inferred as the smallest positive within-person time
+*time-based* lags on `time_id`, so a row's lag comes from the observation at 
+`time - time_step`. This matters when working with real data that has skipped 
+time points, such as a missed diary day. The row after a gap gets an `NA` lag. 
+The step is inferred as the smallest positive within-person time
 difference, or it can be set explicitly with
 `prep_sim_analysis(sim, time_step = )`. The number of gap-affected rows is
 recorded in `metadata$lag_gaps`. `lag_by_time()` can also be used directly
@@ -1290,25 +1275,41 @@ effects from one joint covariance, and the linked syntax lets the analysis
 model estimate their correlations. Here, that joins all eight random effects
 (mean levels, lagged slopes, and `sigma` intercepts for both responses) into
 a single correlated block, which matches the generative model. One practical
-caveat is that large linked random-effect blocks are demanding for
-approximate algorithms, and variational inference and pathfinder often fail
-on them. For very large designs fitted with those algorithms, we can opt out
-with `prep_sim_analysis(sim, link_random = FALSE)`, which emits separate,
-uncorrelated random-effect blocks instead.
+caveat is that large linked random-effect blocks are demanding.
+For very large designs, we can opt out with
+`prep_sim_analysis(sim, link_random = FALSE)`, which emits separate,
+uncorrelated random-effect blocks instead. Of course, if the simulation
+included correlations (any non zero true correlations), this will 
+result in some degree of bias. Of course, even this may be interesting
+to study. The possible number of random effects grows very quickly.
+For example, with a 5 part composition, there are 4 ILR terms, resulting
+in: 4 location intercepts, 4 scale intercepts, 4 autoregressive slopes,
+and 12 cross-lagged slopes for a total of 24 parameters that could be 
+all random effects and if so a 24 x 24 random effect covariance matrix would 
+have 300 parameters (24 variances and 276 unique covariances). Such a 
+large matrix would be extremely unstable with small sample sizes.
+Even with large sample sizes, it would likely be very computationally demanding.
+So an interesting simulation question could be: how much bias in the fixed
+effect autoregression estimates is introduced by forcing the random 
+effect covariances to be zero?
+
+In any case, back to our actual example, we can prepare the analysis
+and see the columns and formulae. All of the data and appropriate names
+for the data and formulae are generated automatically.
 
 
 ``` r
-dynamic_analysis <- prep_sim_analysis(dynamic_comp)
+dynamic_analysis <- prep_sim_analysis(dynamic_comp, centering = "latent")
 dynamic_analysis$metadata$lag_columns
-#> [1] "lag_z1_1_within" "lag_z2_1_within"
+#> [1] "lag_z1_1_latent" "lag_z2_1_latent"
 dynamic_analysis$formula
-#> z1_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | p1 | ID) 
+#> z1_1 ~ lag_z1_1_latent + lag_z2_1_latent + (1 + lag_z1_1_latent + lag_z2_1_latent | p1 | ID) 
 #> sigma ~ 1 + (1 | p1 | ID)
-#> z2_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | p1 | ID) 
+#> z2_1 ~ lag_z1_1_latent + lag_z2_1_latent + (1 + lag_z1_1_latent + lag_z2_1_latent | p1 | ID) 
 #> sigma ~ 1 + (1 | p1 | ID)
 ```
 
-These are the largest models in this vignette, with 10,000 rows, a bivariate
+These are large models, with 10,000 rows, a bivariate
 response, and a linked random-effect block. To speed things up, the fits
 below use `brms` within-chain threading on top of the two parallel chains,
 via `threads = brms::threading(4, static = TRUE)`. Using `static = TRUE`
@@ -1333,15 +1334,15 @@ dynamic_fit <- brmcoda(
 
 ``` r
 summary(dynamic_fit)
-#> Warning: Parts of the model have not converged (some Rhats are > 1.05). Be
-#> careful when analysing the results! We recommend running more iterations and/or
-#> setting stronger priors.
+#> Warning: Parts of the model have not converged (some Rhats are > 1.05). Be careful when
+#> analysing the results! We recommend running more iterations and/or setting stronger
+#> priors.
 #>  Family: MV(gaussian, gaussian) 
 #>   Links: mu = identity; sigma = log
 #>          mu = identity; sigma = log 
-#> Formula: z1_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | p1 | ID) 
+#> Formula: z1_1 ~ lag_z1_1_latent + lag_z2_1_latent + (1 + lag_z1_1_latent + lag_z2_1_latent | p1 | ID) 
 #>          sigma ~ 1 + (1 | p1 | ID)
-#>          z2_1 ~ lag_z1_1_within + lag_z2_1_within + (1 + lag_z1_1_within + lag_z2_1_within | p1 | ID) 
+#>          z2_1 ~ lag_z1_1_latent + lag_z2_1_latent + (1 + lag_z1_1_latent + lag_z2_1_latent | p1 | ID) 
 #>          sigma ~ 1 + (1 | p1 | ID)
 #>    Data: complr$dataout (Number of observations: 9800) 
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -1349,95 +1350,95 @@ summary(dynamic_fit)
 #> 
 #> Multilevel Hyperparameters:
 #> ~ID (Number of levels: 200) 
-#>                                              Estimate Est.Error l-95% CI
-#> sd(z11_Intercept)                                0.22      0.01     0.20
-#> sd(z11_lag_z1_1_within)                          0.02      0.02     0.00
-#> sd(z11_lag_z2_1_within)                          0.03      0.02     0.00
-#> sd(sigma_z11_Intercept)                          0.15      0.01     0.13
-#> sd(z21_Intercept)                                0.20      0.01     0.18
-#> sd(z21_lag_z1_1_within)                          0.02      0.01     0.00
-#> sd(z21_lag_z2_1_within)                          0.02      0.01     0.00
-#> sd(sigma_z21_Intercept)                          0.14      0.01     0.12
-#> cor(z11_Intercept,z11_lag_z1_1_within)           0.13      0.29    -0.49
-#> cor(z11_Intercept,z11_lag_z2_1_within)           0.34      0.26    -0.26
-#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.07      0.33    -0.57
-#> cor(z11_Intercept,sigma_z11_Intercept)          -0.17      0.08    -0.32
-#> cor(z11_lag_z1_1_within,sigma_z11_Intercept)    -0.05      0.27    -0.55
-#> cor(z11_lag_z2_1_within,sigma_z11_Intercept)     0.11      0.25    -0.41
-#> cor(z11_Intercept,z21_Intercept)                -0.00      0.07    -0.14
-#> cor(z11_lag_z1_1_within,z21_Intercept)          -0.07      0.29    -0.57
-#> cor(z11_lag_z2_1_within,z21_Intercept)          -0.01      0.25    -0.46
-#> cor(sigma_z11_Intercept,z21_Intercept)           0.08      0.09    -0.08
-#> cor(z11_Intercept,z21_lag_z1_1_within)          -0.12      0.30    -0.67
-#> cor(z11_lag_z1_1_within,z21_lag_z1_1_within)    -0.03      0.32    -0.64
-#> cor(z11_lag_z2_1_within,z21_lag_z1_1_within)    -0.05      0.33    -0.68
-#> cor(sigma_z11_Intercept,z21_lag_z1_1_within)    -0.09      0.30    -0.62
-#> cor(z21_Intercept,z21_lag_z1_1_within)          -0.02      0.29    -0.57
-#> cor(z11_Intercept,z21_lag_z2_1_within)           0.12      0.30    -0.52
-#> cor(z11_lag_z1_1_within,z21_lag_z2_1_within)     0.04      0.34    -0.63
-#> cor(z11_lag_z2_1_within,z21_lag_z2_1_within)     0.09      0.33    -0.56
-#> cor(sigma_z11_Intercept,z21_lag_z2_1_within)    -0.05      0.30    -0.63
-#> cor(z21_Intercept,z21_lag_z2_1_within)           0.06      0.30    -0.54
-#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)    -0.03      0.32    -0.66
-#> cor(z11_Intercept,sigma_z21_Intercept)           0.14      0.09    -0.03
-#> cor(z11_lag_z1_1_within,sigma_z21_Intercept)     0.12      0.34    -0.61
-#> cor(z11_lag_z2_1_within,sigma_z21_Intercept)     0.10      0.26    -0.41
-#> cor(sigma_z11_Intercept,sigma_z21_Intercept)     0.18      0.10    -0.01
-#> cor(z21_Intercept,sigma_z21_Intercept)          -0.09      0.09    -0.25
-#> cor(z21_lag_z1_1_within,sigma_z21_Intercept)    -0.06      0.33    -0.68
-#> cor(z21_lag_z2_1_within,sigma_z21_Intercept)    -0.03      0.30    -0.61
-#>                                              u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(z11_Intercept)                                0.25 1.02      139      263
-#> sd(z11_lag_z1_1_within)                          0.06 1.00       63      315
-#> sd(z11_lag_z2_1_within)                          0.07 1.00      146      264
-#> sd(sigma_z11_Intercept)                          0.17 1.01      371      603
-#> sd(z21_Intercept)                                0.22 1.02      277      536
-#> sd(z21_lag_z1_1_within)                          0.04 1.00      265      354
-#> sd(z21_lag_z2_1_within)                          0.06 1.02      228      296
-#> sd(sigma_z21_Intercept)                          0.16 1.00      569      634
-#> cor(z11_Intercept,z11_lag_z1_1_within)           0.66 1.00     1333      606
-#> cor(z11_Intercept,z11_lag_z2_1_within)           0.75 1.00     1209      661
-#> cor(z11_lag_z1_1_within,z11_lag_z2_1_within)     0.65 1.00      531      598
-#> cor(z11_Intercept,sigma_z11_Intercept)          -0.01 1.00      688      788
-#> cor(z11_lag_z1_1_within,sigma_z11_Intercept)     0.50 1.19       12      108
-#> cor(z11_lag_z2_1_within,sigma_z11_Intercept)     0.59 1.03       52       93
-#> cor(z11_Intercept,z21_Intercept)                 0.14 1.02      305      539
-#> cor(z11_lag_z1_1_within,z21_Intercept)           0.55 1.17       10       20
-#> cor(z11_lag_z2_1_within,z21_Intercept)           0.47 1.17        9       91
-#> cor(sigma_z11_Intercept,z21_Intercept)           0.26 1.00      433      652
-#> cor(z11_Intercept,z21_lag_z1_1_within)           0.46 1.00     1386      773
-#> cor(z11_lag_z1_1_within,z21_lag_z1_1_within)     0.58 1.00      658      677
-#> cor(z11_lag_z2_1_within,z21_lag_z1_1_within)     0.58 1.00      789      762
-#> cor(sigma_z11_Intercept,z21_lag_z1_1_within)     0.51 1.00     1787      923
-#> cor(z21_Intercept,z21_lag_z1_1_within)           0.53 1.00     1934      806
-#> cor(z11_Intercept,z21_lag_z2_1_within)           0.67 1.00     1365      561
-#> cor(z11_lag_z1_1_within,z21_lag_z2_1_within)     0.64 1.00      681      586
-#> cor(z11_lag_z2_1_within,z21_lag_z2_1_within)     0.68 1.00      907      845
-#> cor(sigma_z11_Intercept,z21_lag_z2_1_within)     0.55 1.00     1294      801
-#> cor(z21_Intercept,z21_lag_z2_1_within)           0.62 1.01     1639      542
-#> cor(z21_lag_z1_1_within,z21_lag_z2_1_within)     0.57 1.00      821      747
-#> cor(z11_Intercept,sigma_z21_Intercept)           0.30 1.00      754      878
-#> cor(z11_lag_z1_1_within,sigma_z21_Intercept)     0.67 1.15       11       15
-#> cor(z11_lag_z2_1_within,sigma_z21_Intercept)     0.58 1.03       50      117
-#> cor(sigma_z11_Intercept,sigma_z21_Intercept)     0.38 1.00      595      724
-#> cor(z21_Intercept,sigma_z21_Intercept)           0.08 1.00     1084      801
-#> cor(z21_lag_z1_1_within,sigma_z21_Intercept)     0.56 1.04       44      212
-#> cor(z21_lag_z2_1_within,sigma_z21_Intercept)     0.52 1.05       45      187
+#>                                              Estimate Est.Error l-95% CI u-95% CI Rhat
+#> sd(z11_Intercept)                                0.20      0.01     0.18     0.21 1.01
+#> sd(z11_lag_z1_1_latent)                          0.03      0.02     0.00     0.06 1.03
+#> sd(z11_lag_z2_1_latent)                          0.04      0.02     0.00     0.08 1.05
+#> sd(sigma_z11_Intercept)                          0.15      0.01     0.13     0.18 1.00
+#> sd(z21_Intercept)                                0.19      0.01     0.17     0.21 1.00
+#> sd(z21_lag_z1_1_latent)                          0.01      0.01     0.00     0.04 1.01
+#> sd(z21_lag_z2_1_latent)                          0.02      0.02     0.00     0.06 1.00
+#> sd(sigma_z21_Intercept)                          0.14      0.01     0.12     0.16 1.00
+#> cor(z11_Intercept,z11_lag_z1_1_latent)           0.22      0.26    -0.36     0.67 1.00
+#> cor(z11_Intercept,z11_lag_z2_1_latent)           0.35      0.26    -0.23     0.76 1.00
+#> cor(z11_lag_z1_1_latent,z11_lag_z2_1_latent)     0.11      0.33    -0.55     0.70 1.01
+#> cor(z11_Intercept,sigma_z11_Intercept)          -0.16      0.08    -0.31    -0.00 1.00
+#> cor(z11_lag_z1_1_latent,sigma_z11_Intercept)    -0.03      0.28    -0.53     0.54 1.03
+#> cor(z11_lag_z2_1_latent,sigma_z11_Intercept)     0.11      0.28    -0.46     0.62 1.09
+#> cor(z11_Intercept,z21_Intercept)                -0.07      0.07    -0.21     0.07 1.01
+#> cor(z11_lag_z1_1_latent,z21_Intercept)          -0.08      0.21    -0.66     0.30 1.02
+#> cor(z11_lag_z2_1_latent,z21_Intercept)          -0.04      0.25    -0.44     0.57 1.10
+#> cor(sigma_z11_Intercept,z21_Intercept)           0.07      0.08    -0.08     0.23 1.01
+#> cor(z11_Intercept,z21_lag_z1_1_latent)          -0.12      0.29    -0.64     0.46 1.01
+#> cor(z11_lag_z1_1_latent,z21_lag_z1_1_latent)    -0.06      0.32    -0.66     0.60 1.00
+#> cor(z11_lag_z2_1_latent,z21_lag_z1_1_latent)    -0.03      0.33    -0.66     0.60 1.00
+#> cor(sigma_z11_Intercept,z21_lag_z1_1_latent)    -0.06      0.31    -0.62     0.56 1.00
+#> cor(z21_Intercept,z21_lag_z1_1_latent)          -0.03      0.28    -0.55     0.55 1.00
+#> cor(z11_Intercept,z21_lag_z2_1_latent)           0.16      0.30    -0.48     0.68 1.00
+#> cor(z11_lag_z1_1_latent,z21_lag_z2_1_latent)     0.08      0.33    -0.57     0.65 1.01
+#> cor(z11_lag_z2_1_latent,z21_lag_z2_1_latent)     0.09      0.35    -0.58     0.75 1.01
+#> cor(sigma_z11_Intercept,z21_lag_z2_1_latent)    -0.04      0.28    -0.57     0.52 1.00
+#> cor(z21_Intercept,z21_lag_z2_1_latent)          -0.03      0.30    -0.61     0.53 1.00
+#> cor(z21_lag_z1_1_latent,z21_lag_z2_1_latent)    -0.04      0.33    -0.64     0.62 1.00
+#> cor(z11_Intercept,sigma_z21_Intercept)           0.17      0.09     0.01     0.34 1.00
+#> cor(z11_lag_z1_1_latent,sigma_z21_Intercept)     0.16      0.29    -0.43     0.66 1.08
+#> cor(z11_lag_z2_1_latent,sigma_z21_Intercept)    -0.02      0.28    -0.54     0.58 1.05
+#> cor(sigma_z11_Intercept,sigma_z21_Intercept)     0.19      0.10    -0.02     0.38 1.00
+#> cor(z21_Intercept,sigma_z21_Intercept)          -0.09      0.09    -0.26     0.08 1.01
+#> cor(z21_lag_z1_1_latent,sigma_z21_Intercept)    -0.17      0.28    -0.66     0.41 1.02
+#> cor(z21_lag_z2_1_latent,sigma_z21_Intercept)    -0.04      0.29    -0.63     0.52 1.02
+#>                                              Bulk_ESS Tail_ESS
+#> sd(z11_Intercept)                                  70      245
+#> sd(z11_lag_z1_1_latent)                            71      348
+#> sd(z11_lag_z2_1_latent)                            43      360
+#> sd(sigma_z11_Intercept)                           449      683
+#> sd(z21_Intercept)                                 288      394
+#> sd(z21_lag_z1_1_latent)                           244      557
+#> sd(z21_lag_z2_1_latent)                           251      445
+#> sd(sigma_z21_Intercept)                           559      816
+#> cor(z11_Intercept,z11_lag_z1_1_latent)           1162      718
+#> cor(z11_Intercept,z11_lag_z2_1_latent)            849      449
+#> cor(z11_lag_z1_1_latent,z11_lag_z2_1_latent)      360      455
+#> cor(z11_Intercept,sigma_z11_Intercept)            564      683
+#> cor(z11_lag_z1_1_latent,sigma_z11_Intercept)       31       77
+#> cor(z11_lag_z2_1_latent,sigma_z11_Intercept)       18       46
+#> cor(z11_Intercept,z21_Intercept)                   90      245
+#> cor(z11_lag_z1_1_latent,z21_Intercept)             24       48
+#> cor(z11_lag_z2_1_latent,z21_Intercept)             23       37
+#> cor(sigma_z11_Intercept,z21_Intercept)            126      234
+#> cor(z11_Intercept,z21_lag_z1_1_latent)           1845      468
+#> cor(z11_lag_z1_1_latent,z21_lag_z1_1_latent)      560      590
+#> cor(z11_lag_z2_1_latent,z21_lag_z1_1_latent)      898      793
+#> cor(sigma_z11_Intercept,z21_lag_z1_1_latent)     1380      826
+#> cor(z21_Intercept,z21_lag_z1_1_latent)           1559      744
+#> cor(z11_Intercept,z21_lag_z2_1_latent)           1243      719
+#> cor(z11_lag_z1_1_latent,z21_lag_z2_1_latent)      759      705
+#> cor(z11_lag_z2_1_latent,z21_lag_z2_1_latent)      303      538
+#> cor(sigma_z11_Intercept,z21_lag_z2_1_latent)     1100      912
+#> cor(z21_Intercept,z21_lag_z2_1_latent)           1486      685
+#> cor(z21_lag_z1_1_latent,z21_lag_z2_1_latent)      890      768
+#> cor(z11_Intercept,sigma_z21_Intercept)            780      652
+#> cor(z11_lag_z1_1_latent,sigma_z21_Intercept)       26       61
+#> cor(z11_lag_z2_1_latent,sigma_z21_Intercept)       35       38
+#> cor(sigma_z11_Intercept,sigma_z21_Intercept)      466      657
+#> cor(z21_Intercept,sigma_z21_Intercept)           1011      841
+#> cor(z21_lag_z1_1_latent,sigma_z21_Intercept)       58       87
+#> cor(z21_lag_z2_1_latent,sigma_z21_Intercept)       69      310
 #> 
 #> Regression Coefficients:
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> z11_Intercept           0.01      0.01    -0.01     0.04 1.01      113      295
-#> sigma_z11_Intercept    -0.92      0.01    -0.95    -0.90 1.00      656      699
-#> z21_Intercept          -0.02      0.01    -0.05     0.01 1.01      543      680
-#> sigma_z21_Intercept    -1.06      0.01    -1.08    -1.03 1.00      818      630
-#> z11_lag_z1_1_within     0.47      0.01     0.46     0.49 1.00     1592      741
-#> z11_lag_z2_1_within     0.10      0.01     0.08     0.13 1.00     1174      643
-#> z21_lag_z1_1_within     0.10      0.01     0.08     0.11 1.00     2143      648
-#> z21_lag_z2_1_within     0.27      0.01     0.25     0.29 1.00     1809      640
+#> z11_Intercept           0.23      0.01     0.20     0.25 1.01       43      112
+#> sigma_z11_Intercept    -1.61      0.01    -1.64    -1.59 1.00      421      643
+#> z21_Intercept          -1.52      0.01    -1.54    -1.49 1.01      213      481
+#> sigma_z21_Intercept    -1.90      0.01    -1.93    -1.88 1.01      856      796
+#> z11_lag_z1_1_latent     0.47      0.01     0.46     0.49 1.00     1474      584
+#> z11_lag_z2_1_latent     0.10      0.01     0.08     0.13 1.00      970      805
+#> z21_lag_z1_1_latent     0.10      0.01     0.08     0.11 1.00     1941      657
+#> z21_lag_z2_1_latent     0.27      0.01     0.25     0.29 1.00     2349      787
 #> 
 #> Residual Correlations: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> rescor(z11,z21)    -0.00      0.01    -0.02     0.02 1.00     2472      658
+#> rescor(z11,z21)    -0.00      0.01    -0.02     0.02 1.00     1624      702
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1454,10 +1455,8 @@ matching the two by hand is error-prone. To avoid this,
 `prep_sim_analysis()` returns the truth table pre-aligned to the analysis
 model's parameter names in `$truth`. `sim_recovery()` then joins it with the
 fitted model's posterior summaries (`fixef()`, `VarCorr()`, and the residual
-correlations) by name, and adds bias and interval-coverage columns. Every
-truth value must match exactly one fitted parameter and vice versa, so a
-renamed or missing parameter is a loud error rather than a silently
-mislabeled row. Random effects are reported on the standard deviation and
+correlations) by name, and adds bias and interval-coverage columns.
+Random effects are reported on the standard deviation and
 correlation scale used by `VarCorr()`.
 
 
@@ -1468,53 +1467,53 @@ kable(dynamic_recovery[, !"simulator_name"], digits = 3)
 
 
 
-|type       |group |parameter                                    |  truth| estimate| est_error|  lower|  upper|   bias|covered |comparability |
-|:----------|:-----|:--------------------------------------------|------:|--------:|---------:|------:|------:|------:|:-------|:-------------|
-|fixed      |NA    |z11_Intercept                                |  0.000|    0.013|     0.014| -0.014|  0.041|  0.013|TRUE    |approximate   |
-|fixed      |NA    |z21_Intercept                                |  0.000|   -0.017|     0.014| -0.047|  0.011| -0.017|TRUE    |approximate   |
-|fixed      |NA    |sigma_z11_Intercept                          | -0.916|   -0.921|     0.013| -0.948| -0.897| -0.005|TRUE    |approximate   |
-|fixed      |NA    |sigma_z21_Intercept                          | -1.050|   -1.058|     0.013| -1.082| -1.033| -0.008|TRUE    |approximate   |
-|fixed      |NA    |z11_lag_z1_1_within                          |  0.500|    0.474|     0.009|  0.457|  0.492| -0.026|FALSE   |approximate   |
-|fixed      |NA    |z11_lag_z2_1_within                          |  0.100|    0.104|     0.012|  0.081|  0.127|  0.004|TRUE    |approximate   |
-|fixed      |NA    |z21_lag_z1_1_within                          |  0.100|    0.096|     0.008|  0.080|  0.112| -0.004|TRUE    |approximate   |
-|fixed      |NA    |z21_lag_z2_1_within                          |  0.300|    0.272|     0.010|  0.253|  0.292| -0.028|FALSE   |approximate   |
-|random_sd  |ID    |z11_Intercept                                |  0.200|    0.224|     0.012|  0.201|  0.248|  0.024|FALSE   |approximate   |
-|random_sd  |ID    |z21_Intercept                                |  0.180|    0.198|     0.011|  0.179|  0.222|  0.018|TRUE    |approximate   |
-|random_sd  |ID    |z11_lag_z1_1_within                          |  0.020|    0.022|     0.016|  0.001|  0.060|  0.002|TRUE    |approximate   |
-|random_sd  |ID    |z11_lag_z2_1_within                          |  0.010|    0.032|     0.018|  0.002|  0.070|  0.022|TRUE    |approximate   |
-|random_sd  |ID    |z21_lag_z1_1_within                          |  0.010|    0.015|     0.012|  0.001|  0.044|  0.005|TRUE    |approximate   |
-|random_sd  |ID    |z21_lag_z2_1_within                          |  0.020|    0.019|     0.015|  0.001|  0.056| -0.001|TRUE    |approximate   |
-|random_sd  |ID    |sigma_z11_Intercept                          |  0.160|    0.152|     0.011|  0.130|  0.173| -0.008|TRUE    |approximate   |
-|random_sd  |ID    |sigma_z21_Intercept                          |  0.140|    0.139|     0.011|  0.118|  0.161| -0.001|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z21_Intercept)             |  0.000|   -0.002|     0.073| -0.142|  0.139| -0.002|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z11_lag_z1_1_within)       |  0.200|    0.133|     0.289| -0.487|  0.660| -0.067|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z11_lag_z2_1_within)       |  0.000|    0.342|     0.259| -0.257|  0.750|  0.342|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z21_lag_z1_1_within)       |  0.000|   -0.117|     0.297| -0.668|  0.462| -0.117|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z21_lag_z2_1_within)       |  0.000|    0.123|     0.303| -0.519|  0.668|  0.123|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,sigma_z11_Intercept)       |  0.000|   -0.169|     0.080| -0.323| -0.009| -0.169|FALSE   |approximate   |
-|random_cor |ID    |cor(z11_Intercept,sigma_z21_Intercept)       |  0.000|    0.137|     0.087| -0.035|  0.304|  0.137|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z11_lag_z1_1_within)       |  0.000|   -0.067|     0.290| -0.565|  0.551| -0.067|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z11_lag_z2_1_within)       |  0.000|   -0.013|     0.252| -0.464|  0.466| -0.013|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z21_lag_z1_1_within)       |  0.200|   -0.020|     0.291| -0.572|  0.533| -0.220|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z21_lag_z2_1_within)       |  0.000|    0.062|     0.301| -0.541|  0.624|  0.062|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,sigma_z11_Intercept)       |  0.000|    0.084|     0.089| -0.081|  0.256|  0.084|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,sigma_z21_Intercept)       |  0.000|   -0.088|     0.087| -0.253|  0.083| -0.088|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1_within,z11_lag_z2_1_within) |  0.150|    0.067|     0.330| -0.569|  0.652| -0.083|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1_within,z21_lag_z1_1_within) |  0.000|   -0.026|     0.320| -0.640|  0.580| -0.026|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1_within,z21_lag_z2_1_within) |  0.000|    0.041|     0.341| -0.628|  0.641|  0.041|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1_within,sigma_z11_Intercept) |  0.000|   -0.048|     0.274| -0.550|  0.499| -0.048|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1_within,sigma_z21_Intercept) |  0.000|    0.125|     0.336| -0.608|  0.670|  0.125|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1_within,z21_lag_z1_1_within) |  0.000|   -0.049|     0.334| -0.682|  0.584| -0.049|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1_within,z21_lag_z2_1_within) |  0.000|    0.091|     0.331| -0.561|  0.684|  0.091|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1_within,sigma_z11_Intercept) |  0.000|    0.108|     0.255| -0.413|  0.585|  0.108|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1_within,sigma_z21_Intercept) |  0.000|    0.101|     0.257| -0.415|  0.575|  0.101|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z1_1_within,z21_lag_z2_1_within) |  0.150|   -0.032|     0.322| -0.664|  0.571| -0.182|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z1_1_within,sigma_z11_Intercept) |  0.000|   -0.086|     0.298| -0.621|  0.511| -0.086|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z1_1_within,sigma_z21_Intercept) |  0.000|   -0.057|     0.329| -0.679|  0.557| -0.057|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z2_1_within,sigma_z11_Intercept) |  0.000|   -0.050|     0.305| -0.630|  0.545| -0.050|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z2_1_within,sigma_z21_Intercept) |  0.000|   -0.026|     0.302| -0.612|  0.525| -0.026|TRUE    |approximate   |
-|random_cor |ID    |cor(sigma_z11_Intercept,sigma_z21_Intercept) |  0.000|    0.182|     0.101| -0.013|  0.384|  0.182|TRUE    |approximate   |
-|rescor     |NA    |rescor(z11,z21)                              |  0.000|    0.000|     0.011| -0.021|  0.020|  0.000|TRUE    |approximate   |
+|type       |group |parameter                                    | truth| estimate| est_error|  lower|  upper|   bias|covered |
+|:----------|:-----|:--------------------------------------------|-----:|--------:|---------:|------:|------:|------:|:-------|
+|fixed      |NA    |z11_Intercept                                |  0.20|    0.225|     0.013|  0.201|  0.248|  0.025|FALSE   |
+|fixed      |NA    |z21_Intercept                                | -1.50|   -1.515|     0.013| -1.540| -1.489| -0.015|TRUE    |
+|fixed      |NA    |sigma_z11_Intercept                          | -1.61|   -1.614|     0.013| -1.639| -1.588| -0.005|TRUE    |
+|fixed      |NA    |sigma_z21_Intercept                          | -1.90|   -1.905|     0.012| -1.927| -1.882| -0.008|TRUE    |
+|fixed      |NA    |z11_lag_z1_1_latent                          |  0.50|    0.475|     0.009|  0.456|  0.492| -0.025|FALSE   |
+|fixed      |NA    |z11_lag_z2_1_latent                          |  0.10|    0.104|     0.013|  0.079|  0.131|  0.004|TRUE    |
+|fixed      |NA    |z21_lag_z1_1_latent                          |  0.10|    0.097|     0.007|  0.083|  0.111| -0.003|TRUE    |
+|fixed      |NA    |z21_lag_z2_1_latent                          |  0.30|    0.273|     0.010|  0.252|  0.293| -0.027|FALSE   |
+|random_sd  |ID    |z11_Intercept                                |  0.20|    0.196|     0.010|  0.179|  0.214| -0.004|TRUE    |
+|random_sd  |ID    |z21_Intercept                                |  0.18|    0.185|     0.010|  0.167|  0.207|  0.005|TRUE    |
+|random_sd  |ID    |z11_lag_z1_1_latent                          |  0.02|    0.025|     0.016|  0.002|  0.059|  0.005|TRUE    |
+|random_sd  |ID    |z11_lag_z2_1_latent                          |  0.01|    0.036|     0.021|  0.002|  0.079|  0.026|TRUE    |
+|random_sd  |ID    |z21_lag_z1_1_latent                          |  0.01|    0.014|     0.011|  0.001|  0.040|  0.004|TRUE    |
+|random_sd  |ID    |z21_lag_z2_1_latent                          |  0.02|    0.021|     0.015|  0.001|  0.058|  0.001|TRUE    |
+|random_sd  |ID    |sigma_z11_Intercept                          |  0.16|    0.152|     0.012|  0.131|  0.176| -0.008|TRUE    |
+|random_sd  |ID    |sigma_z21_Intercept                          |  0.14|    0.140|     0.011|  0.119|  0.161|  0.000|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z21_Intercept)             |  0.00|   -0.072|     0.071| -0.214|  0.073| -0.072|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z11_lag_z1_1_latent)       |  0.20|    0.218|     0.258| -0.362|  0.672|  0.018|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z11_lag_z2_1_latent)       |  0.00|    0.345|     0.257| -0.228|  0.757|  0.345|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z21_lag_z1_1_latent)       |  0.00|   -0.125|     0.289| -0.636|  0.458| -0.125|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z21_lag_z2_1_latent)       |  0.00|    0.162|     0.300| -0.482|  0.682|  0.162|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,sigma_z11_Intercept)       |  0.00|   -0.156|     0.080| -0.306| -0.001| -0.156|FALSE   |
+|random_cor |ID    |cor(z11_Intercept,sigma_z21_Intercept)       |  0.00|    0.171|     0.085|  0.011|  0.344|  0.171|FALSE   |
+|random_cor |ID    |cor(z21_Intercept,z11_lag_z1_1_latent)       |  0.00|   -0.084|     0.213| -0.658|  0.300| -0.084|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z11_lag_z2_1_latent)       |  0.00|   -0.042|     0.251| -0.439|  0.574| -0.042|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z21_lag_z1_1_latent)       |  0.20|   -0.026|     0.279| -0.554|  0.549| -0.226|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z21_lag_z2_1_latent)       |  0.00|   -0.029|     0.296| -0.610|  0.527| -0.029|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,sigma_z11_Intercept)       |  0.00|    0.067|     0.081| -0.081|  0.226|  0.067|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,sigma_z21_Intercept)       |  0.00|   -0.093|     0.089| -0.258|  0.085| -0.093|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1_latent,z11_lag_z2_1_latent) |  0.15|    0.113|     0.326| -0.546|  0.702| -0.037|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1_latent,z21_lag_z1_1_latent) |  0.00|   -0.055|     0.324| -0.662|  0.597| -0.055|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1_latent,z21_lag_z2_1_latent) |  0.00|    0.081|     0.326| -0.574|  0.646|  0.081|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1_latent,sigma_z11_Intercept) |  0.00|   -0.035|     0.278| -0.526|  0.538| -0.035|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1_latent,sigma_z21_Intercept) |  0.00|    0.158|     0.294| -0.431|  0.663|  0.158|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1_latent,z21_lag_z1_1_latent) |  0.00|   -0.028|     0.331| -0.658|  0.597| -0.028|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1_latent,z21_lag_z2_1_latent) |  0.00|    0.085|     0.351| -0.583|  0.749|  0.085|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1_latent,sigma_z11_Intercept) |  0.00|    0.114|     0.283| -0.462|  0.622|  0.114|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1_latent,sigma_z21_Intercept) |  0.00|   -0.016|     0.279| -0.542|  0.575| -0.016|TRUE    |
+|random_cor |ID    |cor(z21_lag_z1_1_latent,z21_lag_z2_1_latent) |  0.15|   -0.040|     0.328| -0.636|  0.617| -0.190|TRUE    |
+|random_cor |ID    |cor(z21_lag_z1_1_latent,sigma_z11_Intercept) |  0.00|   -0.064|     0.305| -0.621|  0.558| -0.064|TRUE    |
+|random_cor |ID    |cor(z21_lag_z1_1_latent,sigma_z21_Intercept) |  0.00|   -0.167|     0.281| -0.663|  0.409| -0.167|TRUE    |
+|random_cor |ID    |cor(z21_lag_z2_1_latent,sigma_z11_Intercept) |  0.00|   -0.043|     0.283| -0.570|  0.522| -0.043|TRUE    |
+|random_cor |ID    |cor(z21_lag_z2_1_latent,sigma_z21_Intercept) |  0.00|   -0.035|     0.290| -0.626|  0.517| -0.035|TRUE    |
+|random_cor |ID    |cor(sigma_z11_Intercept,sigma_z21_Intercept) |  0.00|    0.186|     0.102| -0.016|  0.379|  0.186|TRUE    |
+|rescor     |NA    |rescor(z11,z21)                              |  0.00|   -0.001|     0.010| -0.019|  0.018| -0.001|TRUE    |
 
 
 
@@ -1522,13 +1521,13 @@ Most parameters are recovered well, but two patterns are worth noting.
 First, the AR "inertia" coefficients are estimated somewhat below their true
 values, with credible intervals that can exclude the truth. Second, the
 location random-intercept standard deviations are estimated above their true
-values. Under person-mean centering, the fitted intercept collapses to each
-person's observed mean. The variance of those observed means is the trait
+values. Under person-mean centering (the default),
+the fitted intercept is each person's observed mean.
+The variance of those observed means is the trait
 variance plus the variance of each person's sample mean of the
 autoregressive residual, which inflates the estimated standard deviation.
 
 Both patterns are expected and are not bugs in the simulator or the model.
-The `comparability` column marks these rows as `"approximate"`.
 `prep_sim_analysis()` deliberately builds the *pragmatic* analysis model
 that researchers typically fit to observed data: `ar1()` becomes
 person-mean-centered lagged *observed* responses, whereas `gen_outcome()`
@@ -1537,17 +1536,23 @@ with person-mean centering is known to attenuate inertia and cross-lag
 estimates relative to the latent generating values, especially with short
 series (Nickell bias; see Hamaker & Grasman, 2014, and the "Pragmatic
 default estimator" section of `?prep_sim_analysis`).
+Note that in `prep_sim_analysis()`, we used `centering = "latent"`
+to build the lagged predictors, this means that the person mean centering 
+is done on the true latent person means, rather than observed person means.
+However, these are still not the same as the latent residuals.
 
-This mismatch is intentional. It lets simulation studies quantify the bias
-of the standard analysis approach. In fact, once `ar1()` is in the model,
-`sim_recovery()` flags *every* row `"approximate"`, including the location
-effects: the observed lag carries the lagged mean structure as well as the
-lagged residual, and person-mean centering does not generally remove it, so
-no parameter is guaranteed to keep its generating estimand. In static
-models, by contrast, most rows are `"exact"`, and those are the ones where
-systematic bias would indicate a real problem. For a matched-model
-recovery study, construct the analysis model by hand instead of using
-`prep_sim_analysis()`. The next section fits the non-centered alternative to
+This mismatch is intentional as latent residual VAR(1) models, at least that
+can be easily fit, have various limitations (e.g., in our simulation 
+we support the autoregressive effects being moderated by other variables).
+Because of this, once `ar1()` is in the model, to our knowledge *no*
+parameter is guaranteed to keep its generating estimand, including the
+location effects: the observed lag carries the lagged mean structure as well
+as the lagged residual, and person-mean centering does not generally remove
+it. Static models are the more forgiving case. There most parameters do
+estimate the quantity the simulator recorded, and those are the ones where
+systematic bias would indicate a problem.
+
+The next section fits the non-centered alternative to
 the same simulated data, which shows how much of the AR attenuation comes
 from the centering itself.
 
@@ -1556,8 +1561,9 @@ from the centering itself.
 The person-mean-centered lagged predictor used above is only one of two
 common ways to parametrize a multilevel autoregressive model. Hamaker &
 Grasman (2014) compare them directly. With cluster-mean centering (CMC, the
-`prep_sim_analysis()` default), the average autoregressive coefficient is
-attenuated toward zero. Regressing on the raw, *non-centered* lagged outcome
+`prep_sim_analysis()` default also called person-mean centred),
+the average autoregressive coefficient is
+attenuated toward zero. Regressing on the raw, *non-centred* lagged outcome
 (NC) instead recovers the average autoregressive coefficient nearly
 unbiased.
 
@@ -1566,7 +1572,7 @@ parametrization, the model intercept corresponds to $(1 - \phi_i)\,\mu_i$
 (multivariate: $(\mathbf{I} - \boldsymbol{\Phi}_i)\,\boldsymbol{\mu}_i$)
 rather than the person mean $\mu_i$. As a result, the location intercepts,
 and their random-effect standard deviations and correlations, no longer
-estimate the simulator's mean-structure truth. Hamaker & Grasman's practical
+estimate the simulated data's mean-structure truth. Hamaker & Grasman's practical
 recommendation is therefore to fit *both* parametrizations: NC when the
 average inertia and cross-lag effects are the parameters of interest, and
 CMC when person means must remain meaningful, for example for interpretable
@@ -1575,10 +1581,11 @@ $\phi_i$.
 
 `prep_sim_analysis()` supports the NC parametrization through
 `lag_center = "none"`, which builds raw `lag_<response>` columns instead of
-the person-mean-centered `lag_<response>_within` columns. The
-`comparability` flags do not change: with `ar1()` in the model, every row
-is `"approximate"` under either parametrization. What changes is which rows
-we expect to be recovered nearly without bias -- under NC, the AR rows.
+the person-mean-centered `lag_<response>_within` columns. The caveat above
+does not change: with `ar1()` in the model, no parameter is guaranteed to
+keep its generating estimand under either parametrization. What changes is
+which parameters we expect to be recovered nearly without bias.
+Under NC, the AR rows. Under CMC, the intercepts and means.
 We reuse the simulated data from above, so the two analysis models see
 exactly the same observations.
 
@@ -1622,53 +1629,53 @@ kable(dynamic_recovery_nc[, !"simulator_name"], digits = 3)
 
 
 
-|type       |group |parameter                                    |  truth| estimate| est_error|  lower|  upper|   bias|covered |comparability |
-|:----------|:-----|:--------------------------------------------|------:|--------:|---------:|------:|------:|------:|:-------|:-------------|
-|fixed      |NA    |z11_Intercept                                |  0.000|    0.007|     0.009| -0.010|  0.024|  0.007|TRUE    |approximate   |
-|fixed      |NA    |z21_Intercept                                |  0.000|   -0.013|     0.011| -0.034|  0.009| -0.013|TRUE    |approximate   |
-|fixed      |NA    |sigma_z11_Intercept                          | -0.916|   -0.920|     0.014| -0.946| -0.893| -0.004|TRUE    |approximate   |
-|fixed      |NA    |sigma_z21_Intercept                          | -1.050|   -1.057|     0.013| -1.081| -1.034| -0.007|TRUE    |approximate   |
-|fixed      |NA    |z11_lag_z1_1                                 |  0.500|    0.507|     0.010|  0.488|  0.526|  0.007|TRUE    |approximate   |
-|fixed      |NA    |z11_lag_z2_1                                 |  0.100|    0.107|     0.011|  0.083|  0.127|  0.007|TRUE    |approximate   |
-|fixed      |NA    |z21_lag_z1_1                                 |  0.100|    0.097|     0.007|  0.083|  0.111| -0.003|TRUE    |approximate   |
-|fixed      |NA    |z21_lag_z2_1                                 |  0.300|    0.300|     0.011|  0.278|  0.320|  0.000|TRUE    |approximate   |
-|random_sd  |ID    |z11_Intercept                                |  0.200|    0.102|     0.008|  0.088|  0.118| -0.098|FALSE   |approximate   |
-|random_sd  |ID    |z21_Intercept                                |  0.180|    0.136|     0.008|  0.121|  0.152| -0.044|FALSE   |approximate   |
-|random_sd  |ID    |z11_lag_z1_1                                 |  0.020|    0.019|     0.014|  0.001|  0.051| -0.001|TRUE    |approximate   |
-|random_sd  |ID    |z11_lag_z2_1                                 |  0.010|    0.030|     0.018|  0.001|  0.065|  0.020|TRUE    |approximate   |
-|random_sd  |ID    |z21_lag_z1_1                                 |  0.010|    0.015|     0.011|  0.001|  0.043|  0.005|TRUE    |approximate   |
-|random_sd  |ID    |z21_lag_z2_1                                 |  0.020|    0.017|     0.013|  0.001|  0.048| -0.003|TRUE    |approximate   |
-|random_sd  |ID    |sigma_z11_Intercept                          |  0.160|    0.151|     0.011|  0.131|  0.173| -0.009|TRUE    |approximate   |
-|random_sd  |ID    |sigma_z21_Intercept                          |  0.140|    0.139|     0.011|  0.117|  0.163| -0.001|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z21_Intercept)             |  0.000|   -0.400|     0.078| -0.550| -0.241| -0.400|FALSE   |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z11_lag_z1_1)              |  0.200|    0.164|     0.294| -0.489|  0.689| -0.036|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z11_lag_z2_1)              |  0.000|    0.299|     0.270| -0.297|  0.743|  0.299|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z21_lag_z1_1)              |  0.000|   -0.100|     0.299| -0.629|  0.498| -0.100|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,z21_lag_z2_1)              |  0.000|    0.127|     0.333| -0.543|  0.697|  0.127|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_Intercept,sigma_z11_Intercept)       |  0.000|   -0.213|     0.099| -0.399| -0.013| -0.213|FALSE   |approximate   |
-|random_cor |ID    |cor(z11_Intercept,sigma_z21_Intercept)       |  0.000|    0.162|     0.096| -0.017|  0.346|  0.162|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z11_lag_z1_1)              |  0.000|   -0.091|     0.310| -0.666|  0.575| -0.091|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z11_lag_z2_1)              |  0.000|   -0.056|     0.285| -0.672|  0.479| -0.056|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z21_lag_z1_1)              |  0.200|    0.031|     0.292| -0.549|  0.599| -0.169|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,z21_lag_z2_1)              |  0.000|    0.049|     0.310| -0.551|  0.615|  0.049|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,sigma_z11_Intercept)       |  0.000|    0.101|     0.088| -0.073|  0.272|  0.101|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_Intercept,sigma_z21_Intercept)       |  0.000|   -0.115|     0.090| -0.293|  0.058| -0.115|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1,z11_lag_z2_1)               |  0.150|    0.033|     0.315| -0.557|  0.601| -0.117|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1,z21_lag_z1_1)               |  0.000|   -0.026|     0.333| -0.648|  0.608| -0.026|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1,z21_lag_z2_1)               |  0.000|    0.056|     0.332| -0.590|  0.676|  0.056|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1,sigma_z11_Intercept)        |  0.000|   -0.165|     0.280| -0.625|  0.417| -0.165|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z1_1,sigma_z21_Intercept)        |  0.000|    0.127|     0.287| -0.503|  0.650|  0.127|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1,z21_lag_z1_1)               |  0.000|   -0.006|     0.335| -0.650|  0.623| -0.006|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1,z21_lag_z2_1)               |  0.000|    0.053|     0.344| -0.600|  0.681|  0.053|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1,sigma_z11_Intercept)        |  0.000|    0.131|     0.267| -0.482|  0.580|  0.131|TRUE    |approximate   |
-|random_cor |ID    |cor(z11_lag_z2_1,sigma_z21_Intercept)        |  0.000|    0.088|     0.301| -0.505|  0.680|  0.088|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z1_1,z21_lag_z2_1)               |  0.150|   -0.020|     0.333| -0.673|  0.633| -0.170|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z1_1,sigma_z11_Intercept)        |  0.000|   -0.063|     0.312| -0.635|  0.528| -0.063|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z1_1,sigma_z21_Intercept)        |  0.000|   -0.123|     0.284| -0.663|  0.451| -0.123|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z2_1,sigma_z11_Intercept)        |  0.000|   -0.089|     0.315| -0.660|  0.535| -0.089|TRUE    |approximate   |
-|random_cor |ID    |cor(z21_lag_z2_1,sigma_z21_Intercept)        |  0.000|    0.051|     0.286| -0.512|  0.620|  0.051|TRUE    |approximate   |
-|random_cor |ID    |cor(sigma_z11_Intercept,sigma_z21_Intercept) |  0.000|    0.176|     0.096| -0.009|  0.353|  0.176|TRUE    |approximate   |
-|rescor     |NA    |rescor(z11,z21)                              |  0.000|    0.000|     0.010| -0.020|  0.019|  0.000|TRUE    |approximate   |
+|type       |group |parameter                                    | truth| estimate| est_error|  lower|  upper|   bias|covered |
+|:----------|:-----|:--------------------------------------------|-----:|--------:|---------:|------:|------:|------:|:-------|
+|fixed      |NA    |z11_Intercept                                |  0.20|    0.270|     0.020|  0.234|  0.311|  0.070|FALSE   |
+|fixed      |NA    |z21_Intercept                                | -1.50|   -1.082|     0.018| -1.119| -1.048|  0.418|FALSE   |
+|fixed      |NA    |sigma_z11_Intercept                          | -1.61|   -1.613|     0.013| -1.639| -1.588| -0.003|TRUE    |
+|fixed      |NA    |sigma_z21_Intercept                          | -1.90|   -1.905|     0.012| -1.929| -1.882| -0.008|TRUE    |
+|fixed      |NA    |z11_lag_z1_1                                 |  0.50|    0.508|     0.010|  0.489|  0.527|  0.008|TRUE    |
+|fixed      |NA    |z11_lag_z2_1                                 |  0.10|    0.108|     0.012|  0.085|  0.132|  0.008|TRUE    |
+|fixed      |NA    |z21_lag_z1_1                                 |  0.10|    0.098|     0.007|  0.085|  0.112| -0.002|TRUE    |
+|fixed      |NA    |z21_lag_z2_1                                 |  0.30|    0.300|     0.011|  0.279|  0.321|  0.000|TRUE    |
+|random_sd  |ID    |z11_Intercept                                |  0.20|    0.105|     0.012|  0.086|  0.135| -0.095|FALSE   |
+|random_sd  |ID    |z21_Intercept                                |  0.18|    0.132|     0.011|  0.110|  0.155| -0.048|FALSE   |
+|random_sd  |ID    |z11_lag_z1_1                                 |  0.02|    0.018|     0.013|  0.000|  0.049| -0.002|TRUE    |
+|random_sd  |ID    |z11_lag_z2_1                                 |  0.01|    0.013|     0.010|  0.001|  0.036|  0.003|TRUE    |
+|random_sd  |ID    |z21_lag_z1_1                                 |  0.01|    0.012|     0.010|  0.000|  0.036|  0.002|TRUE    |
+|random_sd  |ID    |z21_lag_z2_1                                 |  0.02|    0.016|     0.011|  0.001|  0.039| -0.004|TRUE    |
+|random_sd  |ID    |sigma_z11_Intercept                          |  0.16|    0.151|     0.011|  0.129|  0.174| -0.009|TRUE    |
+|random_sd  |ID    |sigma_z21_Intercept                          |  0.14|    0.139|     0.011|  0.119|  0.160| -0.001|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z21_Intercept)             |  0.00|   -0.305|     0.107| -0.490| -0.087| -0.305|FALSE   |
+|random_cor |ID    |cor(z11_Intercept,z11_lag_z1_1)              |  0.20|    0.137|     0.302| -0.495|  0.698| -0.063|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z11_lag_z2_1)              |  0.00|    0.258|     0.357| -0.489|  0.808|  0.258|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z21_lag_z1_1)              |  0.00|   -0.099|     0.284| -0.628|  0.478| -0.099|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,z21_lag_z2_1)              |  0.00|    0.192|     0.312| -0.463|  0.717|  0.192|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,sigma_z11_Intercept)       |  0.00|   -0.157|     0.106| -0.350|  0.062| -0.157|TRUE    |
+|random_cor |ID    |cor(z11_Intercept,sigma_z21_Intercept)       |  0.00|    0.175|     0.112| -0.071|  0.383|  0.175|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z11_lag_z1_1)              |  0.00|   -0.129|     0.268| -0.687|  0.389| -0.129|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z11_lag_z2_1)              |  0.00|    0.167|     0.286| -0.450|  0.659|  0.167|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z21_lag_z1_1)              |  0.20|    0.013|     0.306| -0.592|  0.599| -0.187|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,z21_lag_z2_1)              |  0.00|    0.050|     0.303| -0.576|  0.606|  0.050|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,sigma_z11_Intercept)       |  0.00|    0.080|     0.101| -0.140|  0.269|  0.080|TRUE    |
+|random_cor |ID    |cor(z21_Intercept,sigma_z21_Intercept)       |  0.00|   -0.121|     0.103| -0.326|  0.075| -0.121|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1,z11_lag_z2_1)               |  0.15|    0.006|     0.337| -0.610|  0.639| -0.144|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1,z21_lag_z1_1)               |  0.00|   -0.014|     0.329| -0.602|  0.623| -0.014|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1,z21_lag_z2_1)               |  0.00|    0.076|     0.338| -0.582|  0.696|  0.076|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1,sigma_z11_Intercept)        |  0.00|   -0.214|     0.302| -0.750|  0.396| -0.214|TRUE    |
+|random_cor |ID    |cor(z11_lag_z1_1,sigma_z21_Intercept)        |  0.00|    0.048|     0.266| -0.534|  0.533|  0.048|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1,z21_lag_z1_1)               |  0.00|   -0.010|     0.331| -0.620|  0.631| -0.010|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1,z21_lag_z2_1)               |  0.00|    0.028|     0.325| -0.567|  0.650|  0.028|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1,sigma_z11_Intercept)        |  0.00|   -0.052|     0.322| -0.656|  0.558| -0.052|TRUE    |
+|random_cor |ID    |cor(z11_lag_z2_1,sigma_z21_Intercept)        |  0.00|    0.046|     0.329| -0.572|  0.672|  0.046|TRUE    |
+|random_cor |ID    |cor(z21_lag_z1_1,z21_lag_z2_1)               |  0.15|   -0.006|     0.319| -0.631|  0.588| -0.156|TRUE    |
+|random_cor |ID    |cor(z21_lag_z1_1,sigma_z11_Intercept)        |  0.00|   -0.059|     0.314| -0.651|  0.572| -0.059|TRUE    |
+|random_cor |ID    |cor(z21_lag_z1_1,sigma_z21_Intercept)        |  0.00|   -0.091|     0.294| -0.633|  0.506| -0.091|TRUE    |
+|random_cor |ID    |cor(z21_lag_z2_1,sigma_z11_Intercept)        |  0.00|   -0.104|     0.306| -0.665|  0.533| -0.104|TRUE    |
+|random_cor |ID    |cor(z21_lag_z2_1,sigma_z21_Intercept)        |  0.00|   -0.034|     0.286| -0.578|  0.522| -0.034|TRUE    |
+|random_cor |ID    |cor(sigma_z11_Intercept,sigma_z21_Intercept) |  0.00|    0.179|     0.103| -0.040|  0.378|  0.179|TRUE    |
+|rescor     |NA    |rescor(z11,z21)                              |  0.00|    0.000|     0.011| -0.021|  0.021|  0.000|TRUE    |
 
 
 
@@ -1695,10 +1702,10 @@ kable(ar_comparison, digits = 3)
 
 |simulator_name             | truth| estimate_cmc|ci_cmc         | bias_cmc| estimate_nc|ci_nc          | bias_nc|
 |:--------------------------|-----:|------------:|:--------------|--------:|-----------:|:--------------|-------:|
-|ar:ar1()@to=ilr1,from=ilr1 |   0.5|        0.474|[0.457, 0.492] |   -0.026|       0.507|[0.488, 0.526] |   0.007|
-|ar:ar1()@to=ilr1,from=ilr2 |   0.1|        0.104|[0.081, 0.127] |    0.004|       0.107|[0.083, 0.127] |   0.007|
-|ar:ar1()@to=ilr2,from=ilr1 |   0.1|        0.096|[0.080, 0.112] |   -0.004|       0.097|[0.083, 0.111] |  -0.003|
-|ar:ar1()@to=ilr2,from=ilr2 |   0.3|        0.272|[0.253, 0.292] |   -0.028|       0.300|[0.278, 0.320] |   0.000|
+|ar:ar1()@to=ilr1,from=ilr1 |   0.5|        0.475|[0.456, 0.492] |   -0.025|       0.508|[0.489, 0.527] |   0.008|
+|ar:ar1()@to=ilr1,from=ilr2 |   0.1|        0.104|[0.079, 0.131] |    0.004|       0.108|[0.085, 0.132] |   0.008|
+|ar:ar1()@to=ilr2,from=ilr1 |   0.1|        0.097|[0.083, 0.111] |   -0.003|       0.098|[0.085, 0.112] |  -0.002|
+|ar:ar1()@to=ilr2,from=ilr2 |   0.3|        0.273|[0.252, 0.293] |   -0.027|       0.300|[0.279, 0.321] |   0.000|
 
 
 
@@ -1707,19 +1714,10 @@ The inertia (diagonal) coefficients show the pattern Hamaker & Grasman
 estimates land close to the truth, with credible intervals that cover it.
 
 The level parameters tell a different story, and neither parametrization
-recovers them exactly. This is why `sim_recovery()` flags every location
-random-effect row `"approximate"` whenever the model contains `ar1()`. The
-fixed intercepts are both zero here, so the difference is invisible in them.
-The random-intercept standard deviations, however, reveal it in both
-directions. The NC model estimates the spread of
-$(\mathbf{I} - \boldsymbol{\Phi}_i)\,\boldsymbol{\mu}_i$ across people,
-roughly $(1 - \phi)\,\sigma_{u0}$ here. With positive inertia, that is
-smaller than the spread of $\boldsymbol{\mu}_i$, so the NC estimate is too
-low. The CMC model instead estimates the spread of the observed person
-means. Their variance is the trait variance *plus* the variance of each
-person's sample mean of the autoregressive residual, so the CMC estimate is
-too high. Longer series shrink the CMC inflation, because the residual mean
-averages away as $T$ grows, but they do not change the NC shrinkage:
+recovers them exactly.
+Longer series shrink the CMC inflation, because the residual mean
+averages away as $T$ grows, but they do not change the NC shrinkage.
+So, generally the CMC will be closer than the NC for the intercepts.
 
 
 ``` r
@@ -1739,22 +1737,19 @@ kable(level_comparison, digits = 3)
 
 
 
-|simulator_name                                   |type      | truth| estimate_cmc|ci_cmc          | bias_cmc| estimate_nc|ci_nc           | bias_nc|
-|:------------------------------------------------|:---------|-----:|------------:|:---------------|--------:|-----------:|:---------------|-------:|
-|location:(Intercept)@ilr1                        |fixed     |  0.00|        0.013|[-0.014, 0.041] |    0.013|       0.007|[-0.010, 0.024] |   0.007|
-|location:(Intercept)@ilr2                        |fixed     |  0.00|       -0.017|[-0.047, 0.011] |   -0.017|      -0.013|[-0.034, 0.009] |  -0.013|
-|location&#124;outcome=ilr1&#124;term=(Intercept) |random_sd |  0.20|        0.224|[0.201, 0.248]  |    0.024|       0.102|[0.088, 0.118]  |  -0.098|
-|location&#124;outcome=ilr2&#124;term=(Intercept) |random_sd |  0.18|        0.198|[0.179, 0.222]  |    0.018|       0.136|[0.121, 0.152]  |  -0.044|
+|simulator_name                                   |type      | truth| estimate_cmc|ci_cmc           | bias_cmc| estimate_nc|ci_nc            | bias_nc|
+|:------------------------------------------------|:---------|-----:|------------:|:----------------|--------:|-----------:|:----------------|-------:|
+|location:(Intercept)@ilr1                        |fixed     |  0.20|        0.225|[0.201, 0.248]   |    0.025|       0.270|[0.234, 0.311]   |   0.070|
+|location:(Intercept)@ilr2                        |fixed     | -1.50|       -1.515|[-1.540, -1.489] |   -0.015|      -1.082|[-1.119, -1.048] |   0.418|
+|location&#124;outcome=ilr1&#124;term=(Intercept) |random_sd |  0.20|        0.196|[0.179, 0.214]   |   -0.004|       0.105|[0.086, 0.135]   |  -0.095|
+|location&#124;outcome=ilr2&#124;term=(Intercept) |random_sd |  0.18|        0.185|[0.167, 0.207]   |    0.005|       0.132|[0.110, 0.155]   |  -0.048|
 
 
 
-Neither parametrization dominates. The non-centered model recovers the
-dynamics. The centered model recovers the fixed level parameters and comes
-closer on their dispersion, increasingly so as the series lengthen. Which
-one to fit, or whether to fit both as Hamaker & Grasman (2014) recommend,
-depends on which parameters the simulation study is designed to check. See
-the Comparability section of `?sim_recovery` for how the truth table records
-these differences.
+Which one to fit, or whether to fit both as Hamaker & Grasman (2014) recommend,
+depends on which parameters matter to you. See
+the "Pragmatic default estimator" section of `?prep_sim_analysis` for more on
+which parameters keep their generating estimand under each parametrization.
 
 # Simulating the Between-Within (brmcoda) Model
 
@@ -1893,20 +1888,20 @@ kable(bw_recovery[, !"simulator_name"], digits = 3)
 
 
 
-|type      |group |parameter       |  truth| estimate| est_error|  lower|  upper|   bias|covered |comparability |
-|:---------|:-----|:---------------|------:|--------:|---------:|------:|------:|------:|:-------|:-------------|
-|fixed     |NA    |Intercept       |  0.000|    0.006|     0.032| -0.055|  0.072|  0.006|TRUE    |exact         |
-|fixed     |NA    |bz1_1           |  0.500|    0.409|     0.066|  0.271|  0.539| -0.091|TRUE    |approximate   |
-|fixed     |NA    |bz2_1           | -0.300|   -0.292|     0.057| -0.402| -0.187|  0.008|TRUE    |approximate   |
-|fixed     |NA    |wz1_1           |  0.200|    0.209|     0.014|  0.182|  0.236|  0.009|TRUE    |approximate   |
-|fixed     |NA    |wz2_1           |  0.100|    0.092|     0.013|  0.066|  0.115| -0.008|TRUE    |approximate   |
-|fixed     |NA    |sigma_Intercept | -1.204|   -1.191|     0.019| -1.227| -1.156|  0.013|TRUE    |exact         |
-|random_sd |ID    |Intercept       |  0.316|    0.321|     0.022|  0.281|  0.367|  0.005|TRUE    |exact         |
+|type      |group |parameter       |  truth| estimate| est_error|  lower|  upper|   bias|covered |
+|:---------|:-----|:---------------|------:|--------:|---------:|------:|------:|------:|:-------|
+|fixed     |NA    |Intercept       |  0.000|    0.006|     0.032| -0.055|  0.072|  0.006|TRUE    |
+|fixed     |NA    |bz1_1           |  0.500|    0.409|     0.066|  0.271|  0.539| -0.091|TRUE    |
+|fixed     |NA    |bz2_1           | -0.300|   -0.292|     0.057| -0.402| -0.187|  0.008|TRUE    |
+|fixed     |NA    |wz1_1           |  0.200|    0.209|     0.014|  0.182|  0.236|  0.009|TRUE    |
+|fixed     |NA    |wz2_1           |  0.100|    0.092|     0.013|  0.066|  0.115| -0.008|TRUE    |
+|fixed     |NA    |sigma_Intercept | -1.204|   -1.191|     0.019| -1.227| -1.156|  0.013|TRUE    |
+|random_sd |ID    |Intercept       |  0.316|    0.321|     0.022|  0.281|  0.367|  0.005|TRUE    |
 
 
 
 The same caveat about what is being estimated applies here as for the
-dynamic model, and the `comparability` column again marks the affected rows.
+dynamic model.
 The fitted `bz*` coefficients use the ILR of each person's closed
 *arithmetic-mean* composition, computed from the observed parts. The
 simulation truth `between(ilr)` is instead the latent group-level ILR mean.
@@ -1915,6 +1910,56 @@ between-person effects when the series are short (Ludtke et al., 2008).
 Within-person effects are typically recovered well. See the "Pragmatic
 default estimator" section of `?prep_sim_analysis` for details.
 
+However, if desired we can use the simulated latent variables directly.
+
+
+``` r
+bw_analysis_latent <- prep_sim_analysis(bw_sim, centering = "latent")
+
+```
+
+
+``` r
+bw_fit_latent <- brmcoda(
+  complr = bw_analysis_latent$complr,
+  formula = bw_analysis_latent$formula,
+  backend = "cmdstanr",
+  seed = 2026,
+  chains = 2,
+  cores = 2,
+  iter = 1000,
+  refresh = 0
+)
+```
+
+And the recovery
+
+
+``` r
+bw_recovery_latent <- sim_recovery(bw_fit_latent, bw_analysis_latent)
+kable(bw_recovery_latent[, !"simulator_name"], digits = 3)
+```
+
+
+
+|type      |group |parameter       |  truth| estimate| est_error|  lower|  upper|   bias|covered |
+|:---------|:-----|:---------------|------:|--------:|---------:|------:|------:|------:|:-------|
+|fixed     |NA    |Intercept       |  0.000|   -0.005|     0.028| -0.061|  0.053| -0.005|TRUE    |
+|fixed     |NA    |bz1_1           |  0.500|    0.453|     0.072|  0.310|  0.594| -0.047|TRUE    |
+|fixed     |NA    |bz2_1           | -0.300|   -0.338|     0.064| -0.454| -0.211| -0.038|TRUE    |
+|fixed     |NA    |wz1_1           |  0.200|    0.209|     0.014|  0.183|  0.237|  0.009|TRUE    |
+|fixed     |NA    |wz2_1           |  0.100|    0.092|     0.013|  0.067|  0.116| -0.008|TRUE    |
+|fixed     |NA    |sigma_Intercept | -1.204|   -1.190|     0.019| -1.229| -1.153|  0.014|TRUE    |
+|random_sd |ID    |Intercept       |  0.316|    0.309|     0.020|  0.270|  0.348| -0.008|TRUE    |
+
+
+
+The `bz*` rows are the ones to compare against the previous table. Here they
+estimate the latent between-person composition the simulator generated from,
+rather than an observed proxy for it, so any remaining bias in them is not
+attributable to the arithmetic-versus-geometric centering gap. The `wz*` rows
+were already recovered well and change little.
+
 Finally, because the fit is a regular `brmcoda` model with a `complr`
 object, substitution analyses work directly on the simulated data:
 
@@ -1922,22 +1967,14 @@ object, substitution analyses work directly on the simulated data:
 ``` r
 bw_sub <- substitution(bw_fit, delta = 1, level = "within")
 summary(bw_sub)
-#>    Estimate Est.Error CI_low CI_high Delta      From        To  Level Reference
-#>       <num>     <num>  <num>   <num> <num>    <char>    <char> <char>    <char>
-#> 1:     0.02         0   0.02    0.03     1    active     sleep within grandmean
-#> 2:     0.04         0   0.03    0.04     1 sedentary     sleep within grandmean
-#> 3:    -0.02         0  -0.03   -0.02     1     sleep    active within grandmean
-#> 4:     0.02         0   0.01    0.02     1 sedentary    active within grandmean
-#> 5:    -0.04         0  -0.04   -0.03     1     sleep sedentary within grandmean
-#> 6:    -0.01         0  -0.02   -0.01     1    active sedentary within grandmean
-#>      Resp
-#>    <char>
-#> 1:      y
-#> 2:      y
-#> 3:      y
-#> 4:      y
-#> 5:      y
-#> 6:      y
+#>    Estimate Est.Error CI_low CI_high Delta      From        To  Level Reference   Resp
+#>       <num>     <num>  <num>   <num> <num>    <char>    <char> <char>    <char> <char>
+#> 1:     0.02         0   0.02    0.03     1    active     sleep within grandmean      y
+#> 2:     0.04         0   0.03    0.04     1 sedentary     sleep within grandmean      y
+#> 3:    -0.02         0  -0.03   -0.02     1     sleep    active within grandmean      y
+#> 4:     0.02         0   0.01    0.02     1 sedentary    active within grandmean      y
+#> 5:    -0.04         0  -0.04   -0.03     1     sleep sedentary within grandmean      y
+#> 6:    -0.01         0  -0.02   -0.01     1    active sedentary within grandmean      y
 ```
 
 # Non-Gaussian Outcomes
@@ -1982,8 +2019,6 @@ expecting point equality.
 
 
 ``` r
-library(brms)
-
 glm_intercept_beta <- function(value, terms = "(Intercept)") {
   matrix(value, nrow = length(terms), dimnames = list(terms, "y"))
 }
@@ -2074,11 +2109,11 @@ glm_show_recovery(poisson_fit, poisson_analysis)
 
 
 
-|type      |group |parameter | truth| estimate| est_error| lower| upper|   bias|covered |comparability |
-|:---------|:-----|:---------|-----:|--------:|---------:|-----:|-----:|------:|:-------|:-------------|
-|fixed     |NA    |Intercept |   1.0|    0.932|     0.045| 0.842| 1.013| -0.068|TRUE    |exact         |
-|fixed     |NA    |x         |   0.3|    0.311|     0.019| 0.272| 0.347|  0.011|TRUE    |exact         |
-|random_sd |ID    |Intercept |   0.4|    0.435|     0.038| 0.366| 0.516|  0.035|TRUE    |exact         |
+|type      |group |parameter | truth| estimate| est_error| lower| upper|   bias|covered |
+|:---------|:-----|:---------|-----:|--------:|---------:|-----:|-----:|------:|:-------|
+|fixed     |NA    |Intercept |   1.0|    0.932|     0.045| 0.842| 1.013| -0.068|TRUE    |
+|fixed     |NA    |x         |   0.3|    0.311|     0.019| 0.272| 0.347|  0.011|TRUE    |
+|random_sd |ID    |Intercept |   0.4|    0.435|     0.038| 0.366| 0.516|  0.035|TRUE    |
 
 
 
@@ -2147,10 +2182,10 @@ glm_show_recovery(binomial_fit, binomial_analysis)
 
 
 
-|type  |group |parameter | truth| estimate| est_error|  lower|  upper|  bias|covered |comparability |
-|:-----|:-----|:---------|-----:|--------:|---------:|------:|------:|-----:|:-------|:-------------|
-|fixed |NA    |Intercept |  -0.5|   -0.497|      0.03| -0.555| -0.441| 0.003|TRUE    |exact         |
-|fixed |NA    |x         |   0.4|    0.401|      0.03|  0.341|  0.460| 0.001|TRUE    |exact         |
+|type  |group |parameter | truth| estimate| est_error|  lower|  upper|  bias|covered |
+|:-----|:-----|:---------|-----:|--------:|---------:|------:|------:|-----:|:-------|
+|fixed |NA    |Intercept |  -0.5|   -0.497|      0.03| -0.555| -0.441| 0.003|TRUE    |
+|fixed |NA    |x         |   0.4|    0.401|      0.03|  0.341|  0.460| 0.001|TRUE    |
 
 
 
@@ -2218,11 +2253,11 @@ glm_show_recovery(negbin_fit, negbin_analysis)
 
 
 
-|type  |group |parameter       | truth| estimate| est_error| lower| upper|   bias|covered |comparability |
-|:-----|:-----|:---------------|-----:|--------:|---------:|-----:|-----:|------:|:-------|:-------------|
-|fixed |NA    |Intercept       | 1.000|    1.020|     0.043| 0.930| 1.102|  0.020|TRUE    |exact         |
-|fixed |NA    |x               | 0.300|    0.304|     0.040| 0.222| 0.380|  0.004|TRUE    |exact         |
-|fixed |NA    |shape_Intercept | 0.693|    0.625|     0.115| 0.412| 0.856| -0.068|TRUE    |exact         |
+|type  |group |parameter       | truth| estimate| est_error| lower| upper|   bias|covered |
+|:-----|:-----|:---------------|-----:|--------:|---------:|-----:|-----:|------:|:-------|
+|fixed |NA    |Intercept       | 1.000|    1.020|     0.043| 0.930| 1.102|  0.020|TRUE    |
+|fixed |NA    |x               | 0.300|    0.304|     0.040| 0.222| 0.380|  0.004|TRUE    |
+|fixed |NA    |shape_Intercept | 0.693|    0.625|     0.115| 0.412| 0.856| -0.068|TRUE    |
 
 
 
@@ -2288,11 +2323,11 @@ glm_show_recovery(gamma_fit, gamma_analysis)
 
 
 
-|type  |group |parameter       | truth| estimate| est_error| lower| upper|  bias|covered |comparability |
-|:-----|:-----|:---------------|-----:|--------:|---------:|-----:|-----:|-----:|:-------|:-------------|
-|fixed |NA    |Intercept       |   0.5|    0.516|     0.025| 0.466| 0.565| 0.016|TRUE    |exact         |
-|fixed |NA    |x               |   0.2|    0.201|     0.023| 0.159| 0.242| 0.001|TRUE    |exact         |
-|fixed |NA    |shape_Intercept |   1.1|    1.145|     0.061| 1.027| 1.265| 0.046|TRUE    |exact         |
+|type  |group |parameter       | truth| estimate| est_error| lower| upper|  bias|covered |
+|:-----|:-----|:---------------|-----:|--------:|---------:|-----:|-----:|-----:|:-------|
+|fixed |NA    |Intercept       |   0.5|    0.516|     0.025| 0.466| 0.565| 0.016|TRUE    |
+|fixed |NA    |x               |   0.2|    0.201|     0.023| 0.159| 0.242| 0.001|TRUE    |
+|fixed |NA    |shape_Intercept |   1.1|    1.145|     0.061| 1.027| 1.265| 0.046|TRUE    |
 
 
 
@@ -2374,13 +2409,13 @@ glm_show_recovery(beta_fit, beta_analysis)
 
 
 
-|type       |group |parameter                    | truth| estimate| est_error|  lower| upper|   bias|covered |comparability |
-|:----------|:-----|:----------------------------|-----:|--------:|---------:|------:|-----:|------:|:-------|:-------------|
-|fixed      |NA    |Intercept                    |   0.2|    0.210|     0.029|  0.154| 0.265|  0.010|TRUE    |exact         |
-|fixed      |NA    |phi_Intercept                |   3.0|    2.972|     0.049|  2.876| 3.072| -0.023|TRUE    |exact         |
-|random_sd  |ID    |Intercept                    |   0.3|    0.336|     0.024|  0.291| 0.385|  0.036|TRUE    |exact         |
-|random_sd  |ID    |phi_Intercept                |   0.2|    0.166|     0.081|  0.022| 0.328| -0.034|TRUE    |exact         |
-|random_cor |ID    |cor(Intercept,phi_Intercept) |   0.3|    0.484|     0.297| -0.169| 0.966|  0.184|TRUE    |exact         |
+|type       |group |parameter                    | truth| estimate| est_error|  lower| upper|   bias|covered |
+|:----------|:-----|:----------------------------|-----:|--------:|---------:|------:|-----:|------:|:-------|
+|fixed      |NA    |Intercept                    |   0.2|    0.210|     0.029|  0.154| 0.265|  0.010|TRUE    |
+|fixed      |NA    |phi_Intercept                |   3.0|    2.972|     0.049|  2.876| 3.072| -0.023|TRUE    |
+|random_sd  |ID    |Intercept                    |   0.3|    0.336|     0.024|  0.291| 0.385|  0.036|TRUE    |
+|random_sd  |ID    |phi_Intercept                |   0.2|    0.166|     0.081|  0.022| 0.328| -0.034|TRUE    |
+|random_cor |ID    |cor(Intercept,phi_Intercept) |   0.3|    0.484|     0.297| -0.169| 0.966|  0.184|TRUE    |
 
 
 

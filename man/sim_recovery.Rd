@@ -34,8 +34,6 @@ correlations for \code{random_cor} rows).
 of the fitted parameter at \code{probs}.
 \item \code{bias}: \code{estimate - truth}.
 \item \code{covered}: whether \code{truth} lies inside \verb{[lower, upper]}.
-\item \code{comparability}: \code{"exact"} or \code{"approximate"} (see the
-Comparability section).
 \item \code{simulator_name}: the simulator-side parameter identifier the
 row was derived from, for provenance.
 }
@@ -69,135 +67,27 @@ parameter, so their tables contain no scale rows, and a binomial
 \code{trials()} term contributes no parameter. Because \code{ar1()},
 multivariate \code{mvbind()} responses, and compositional outcomes are
 Gaussian-only simulator features, recovery tables for the other
-families never contain \code{rescor} rows and their comparability is
-\code{"exact"} except for \code{between()}/\code{within()} terms (see below).
+families never contain \code{rescor} rows.
+
+Two situations yield no recovery row at all: cross-block random-effect
+correlations when the analysis was prepared with
+\code{\link[=prep_sim_analysis]{prep_sim_analysis()}}\code{(link_random = FALSE)} (the fitted model never
+samples them), and analysis models whose structure cannot be aligned
+with the simulator's single joint covariance (recorded in
+\code{metadata$truth_unavailable_reason}).
+
+Interpreting the \code{bias} and \code{covered} columns requires knowing what the
+fitted model estimates. \code{\link[=prep_sim_analysis]{prep_sim_analysis()}} deliberately builds the
+pragmatic observed-data model that applied analysts commonly fit, not
+the matched model for the generating process, so some parameters
+estimate a related quantity rather than the one the simulator recorded
+-- most notably whenever the formula contains \code{ar1()}, and for
+\code{between()}/\code{within()} terms under the default
+\code{centering = "manifest"}. Systematic bias in those parameters is an
+expected property of the estimator, not an error in the simulator. See
+the "Pragmatic default estimator" section of \code{\link[=prep_sim_analysis]{prep_sim_analysis()}}
+before drawing conclusions from a recovery table.
 }
-\section{Comparability}{
-
-\code{\link[=prep_sim_analysis]{prep_sim_analysis()}} deliberately builds the pragmatic observed-data
-model that applied analysts commonly fit, not the exact generating
-model (see the "Pragmatic default estimator" section in
-\code{\link[=prep_sim_analysis]{prep_sim_analysis()}}). Some fitted parameters therefore estimate a
-different estimand than the simulation truth they are matched to. The
-\code{comparability} column classifies every row as \code{"exact"} or
-\code{"approximate"} so that systematic bias can be attributed correctly:
-bias in an \code{"exact"} row signals a real problem (in the simulator, the
-model specification, or the sampler), whereas bias in an
-\code{"approximate"} row is an expected property of the pragmatic estimator
-and must not be read as a simulator error.
-
-The classification applies one principle. A row is \code{"exact"} when the
-fitted parameter estimates the same quantity the simulator recorded,
-and \code{"approximate"} when the analysis model substitutes an observed
-proxy for a latent generating quantity that the parameter regresses
-on, conditions on, or is derived from. One consequence is stated up
-front: whenever the simulated model contains \code{ar1()}, \emph{every} row
-is \code{"approximate"}. The pragmatic analysis translates the latent
-residual dynamics into regression on lagged observed responses, and an
-observed lag carries the lagged mean structure
-(\verb{y[t-1] = x[t-1] beta + e[t-1]}) alongside the lagged residual;
-person-mean centering does not generally remove the \verb{x[t-1] beta}
-part, so no parameter in an AR model is guaranteed to keep its
-generating estimand. The principle resolves each parameter type as
-follows:
-\itemize{
-\item \strong{\code{between()} and \code{within()} terms -- approximate.} The
-simulator resolves these from the latent between- and
-within-person components supplied by the predictor generators; the
-analysis model recomputes them by manifest person-mean centering
-of the observed variable. Observed person means carry sampling
-error, which biases between-person effects and contaminates
-within-person effects, especially with short series (Ludtke et
-al. 2008). An interaction term inherits the flag from any
-\code{between()}/\code{within()} factor it contains.
-\item \strong{Autoregressive parameters -- always approximate.} The
-simulator's \code{ar1()} dynamics operate on the latent residual state;
-the analysis model regresses on lagged \emph{observed} responses.
-With the default \code{prep_sim_analysis(lag_center = "within")} the
-lag is person-mean-centered, and the observed lag is an
-error-prone proxy for the latent residual (finite-series person
-means, mean-structure contamination, missing first observations),
-so inertia and cross-lag estimates are attenuated relative to the
-generating values (Hamaker & Grasman 2014). With
-\code{lag_center = "none"} the average AR coefficients are expected to
-be nearly unbiased (Hamaker & Grasman 2014), but the rows remain
-\code{"approximate"}: the observed lag is still a proxy for the latent
-state, and the reparametrized random intercept \verb{(1 - phi_i) mu_i}
-is not normally distributed even when \code{mu_i} is. This covers the
-fixed AR coefficients and their group-level standard deviations
-alike.
-\item \strong{Scale (distributional) parameters -- approximate
-whenever the model contains \code{ar1()}, otherwise term-based.} In an
-AR model the simulator's scale submodel describes the standard
-deviation of the \emph{innovations}, conditional on the true
-latent previous residual state. The fitted scale parameters
-instead describe the residual standard deviation conditional on
-the pragmatic lag predictors. Because the observed lag is an
-imperfect proxy, the conditional residual variance absorbs the
-part of the dynamics the proxy fails to explain, so the estimand
-differs even for a plain scale intercept such as
-\code{sigma_Intercept}. Without \code{ar1()}, scale rows follow the same
-\code{between()}/\code{within()} rule as location rows.
-\item \strong{Location fixed effects -- approximate whenever the
-model contains \code{ar1()}, otherwise term-based.} Under either
-\code{lag_center} setting the fitted model regresses on an observed
-lag whose lagged mean structure is not generally removed by
-centering: when a predictor varies within series and is
-autocorrelated, the model omits the corresponding
-lagged-covariate term and the current covariate coefficient
-absorbs part of it, biasing effects that would be exact in a
-static model. With \code{lag_center = "none"} the contamination is
-structural: the non-centered parametrization estimates
-\verb{(I - Phi_i) mu_i}-transformed quantities rather than the
-recorded mean structure (Hamaker & Grasman 2014, Appendix 1).
-Without \code{ar1()}, location fixed effects follow the
-\code{between()}/\code{within()} term rule above.
-\item \strong{Location random-effect standard deviations --
-approximate whenever the model contains \code{ar1()}, under either
-centering.} The dispersion of the group-level effects is
-distorted independently of the mean structure: under CMC the
-fitted random intercept collapses to each person's observed mean, whose
-across-person variance is \code{Var(mu_i) + Var(a-bar_i)} -- the trait
-variance plus the variance of the person's sample mean of the
-autoregressive residual. With persistent dynamics and short
-series, \code{Var(a-bar_i)} can dominate, so the fitted intercept SD
-substantially overestimates the recorded \code{Var(mu_i)} (the same
-manifest-centering problem as Ludtke et al. 2008, aggravated by
-autocorrelation). Under NC the intercept is the transformed
-\verb{(1 - phi_i) mu_i}, so its SD underestimates the truth instead.
-Without \code{ar1()}, location random-effect rows follow the same
-term-based rule as the fixed effects.
-\item \strong{Residual correlations (\code{rescor}) -- approximate if and
-only if the model contains \code{ar1()}.} The recorded truth is the
-correlation of the innovations; the fitted \code{rescor} is the
-residual correlation conditional on the pragmatic lag predictors,
-by the same argument as for the scale parameters.
-\item \strong{Random-effect correlations -- approximate when either
-coefficient is approximate.} A correlation cannot estimate its
-recorded truth more exactly than the worse of the two coordinates
-it correlates.
-}
-In short: with \code{ar1()} in the simulated model, every row is
-\code{"approximate"}. Without \code{ar1()}, intercepts, plain covariate
-effects, and their group-level standard deviations and correlations
-are \code{"exact"}, and only \code{between()}/\code{within()} terms (and whatever
-they touch) are \code{"approximate"}.
-
-Two related situations yield no recovery row at all rather than an
-\code{"approximate"} row: cross-block random-effect correlations when the
-analysis was prepared with \code{prep_sim_analysis(link_random = FALSE)}
-(the fitted model never samples them), and analysis models whose
-structure cannot be aligned with the simulator's single joint
-covariance (recorded in \code{metadata$truth_unavailable_reason}).
-\code{"approximate"} is reserved for parameters the model does estimate,
-just for a related estimand.
-
-The \code{print()} method reports interval coverage separately for
-exact-comparability rows because only those have a nominal coverage
-guarantee against the generating values; approximate rows quantify
-the bias of the pragmatic estimator instead.
-}
-
 \examples{
 \donttest{
 if (requireNamespace("cmdstanr", quietly = TRUE)) {
@@ -234,14 +124,6 @@ if (requireNamespace("cmdstanr", quietly = TRUE)) {
 }
 }
 
-}
-\references{
-Ludtke, O., et al. (2008). The multilevel latent covariate model.
-\emph{Psychological Methods}, 13(3), 203-229.
-
-Hamaker, E. L., & Grasman, R. P. P. P. (2014). To center or not to
-center? Investigating inertia with a multilevel autoregressive model.
-\emph{Frontiers in Psychology}, 5, 1492.
 }
 \seealso{
 \code{\link[=prep_sim_analysis]{prep_sim_analysis()}} for the analysis object and its

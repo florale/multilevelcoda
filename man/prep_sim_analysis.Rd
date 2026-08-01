@@ -10,6 +10,7 @@ prep_sim_analysis(
   drop_lag_na = FALSE,
   time_step = NULL,
   lag_center = c("within", "none"),
+  centering = c("manifest", "latent"),
   link_random = TRUE
 )
 }
@@ -38,19 +39,41 @@ supply \code{time_step} explicitly to silence it when the chosen step is
 intended. For \code{Date} time the unit is days; for \code{POSIXct} time the unit
 is seconds. Ignored when the outcome formula has no \code{ar1()} term.}
 
-\item{lag_center}{Character scalar controlling how \code{ar1()} lag columns are
-centered. With \code{"within"}, the default, each lagged response is centered
-at the person's observed mean of the response, producing
-\verb{lag_<response>_within} columns (cluster-mean centering, CMC). With
-\code{"none"}, the raw lagged response is used as-is, producing
-\verb{lag_<response>} columns (no centering, NC) -- the non-centered
-parametrization of Hamaker & Grasman (2014). Under \code{"none"} the model
-intercept estimates \code{(1 - phi_i) * mu_i} (multivariate:
+\item{lag_center}{Character scalar controlling \emph{whether} \code{ar1()} lag columns
+are centered; \code{centering} controls \emph{which values} that centering uses.
+With \code{"within"}, the default, the lag is centered: under the default
+\code{centering = "manifest"} at the person's observed mean of the response,
+producing \verb{lag_<response>_within} columns (cluster-mean centering, CMC),
+and under \code{centering = "latent"} at the latent conditional mean, which is
+the recorded latent residual state, producing \verb{lag_<response>_latent}
+columns. With \code{"none"}, the raw lagged response is used as-is under either
+\code{centering}, producing \verb{lag_<response>} columns (no centering, NC) -- the
+non-centered parametrization of Hamaker & Grasman (2014). Under \code{"none"}
+the model intercept estimates \code{(1 - phi_i) * mu_i} (multivariate:
 \verb{(I - Phi_i) mu_i}) rather than the person mean \code{mu_i}, so location
 parameters lose their direct correspondence with the simulation truth;
-see the "Pragmatic default estimator" section and the Comparability
-section of \code{\link[=sim_recovery]{sim_recovery()}}. Ignored when the outcome formula has no
-\code{ar1()} term.}
+see the "Pragmatic default estimator" section. Ignored when the outcome
+formula has no \code{ar1()} term.}
+
+\item{centering}{Character scalar controlling which values the analysis
+centers with, for \code{between()} and \code{within()} columns and for a centered
+\code{ar1()} lag alike. With \code{"manifest"}, the default, \code{between()}/\code{within()}
+columns are recomputed from the observed data as applied analysts would --
+person means for scalars and the closed arithmetic-mean composition for
+compositional predictors -- which are observed proxies for the generating
+components rather than the components themselves. With \code{"latent"}, they
+are taken from the generating components the simulator recorded, so they
+match the simulated quantity exactly. \code{"latent"} requires a grouped design
+and generators that emitted latent components, and is available only in
+simulated data; see the "Latent centering" section. When the formula
+contains \code{ar1()} and the lag is centered (\code{lag_center = "within"}, the
+default), \code{"latent"} also centers the lag with latent values, which makes
+it the recorded latent residual state; see the "Latent centering and
+\code{ar1()}" section for why even that oracle leaves the autoregressive
+parameters biased in models with group-level effects. With
+\code{lag_center = "none"} there is no lag centering
+for \code{centering} to act on, so the two settings compose freely. Ignored
+when the outcome formula has no \code{between()}, \code{within()}, or \code{ar1()} terms.}
 
 \item{link_random}{Logical scalar. When \code{TRUE}, the default, grouping
 factors that appear in both the mean and the scale formulas emit brms
@@ -125,12 +148,20 @@ syntax lets the analysis model estimate their correlation; see
 \code{link_random} to opt out for large models fitted with approximate
 algorithms.
 
-For dynamic formulas, \code{ar1()} is translated to lagged observed response
-columns. By default (\code{lag_center = "within"}) these are centered at each
-person's observed mean of all their values (not the mean of the lagged
-values) and named \verb{lag_<response>_within}; with \code{lag_center = "none"} the
-raw lagged responses are used and named \verb{lag_<response>}. For
-compositional outcomes, the helper
+For dynamic formulas, \code{ar1()} is translated to lagged response columns whose
+construction and name follow the two centering arguments:
+\itemize{
+\item \code{lag_center = "within"}, \code{centering = "manifest"} (both defaults):
+the lagged observed response centered at each person's observed mean of
+all their values (not the mean of the lagged values),
+\verb{lag_<response>_within}.
+\item \code{lag_center = "within"}, \code{centering = "latent"}: the lagged response
+centered at the latent conditional mean, which is the recorded latent
+residual state, \verb{lag_<response>_latent}.
+\item \code{lag_center = "none"}, either \code{centering}: the raw lagged observed
+response, \verb{lag_<response>}.
+}
+For compositional outcomes, the helper
 rebuilds the ILR coordinates through \code{\link[=complr]{complr()}} using the simulator's parts
 and SBP metadata, then lags the generated \code{z} coordinates used by
 \code{\link[=brmcoda]{brmcoda()}}.
@@ -160,8 +191,8 @@ smallest positive spacing, \code{NA} for single-observation groups),
 \code{\link[=gen_outcome]{gen_outcome()}} simulates latent residual AR/VAR dynamics around the
 model-implied mean and resolves \code{between()}/\code{within()} from latent
 generating components supplied by upstream predictor generators.
-\code{prep_sim_analysis()} instead constructs the model applied analysts
-commonly fit to observed data:
+By default (\code{centering = "manifest"}) \code{prep_sim_analysis()} instead
+constructs the model applied analysts commonly fit to observed data:
 \itemize{
 \item \code{between(x)} and \code{within(x)} become \code{x_between} and \code{x_within},
 recomputed from realised person means of the observed \code{x} (manifest
@@ -174,10 +205,13 @@ latent residual state.
 between composition is the ILR of each person's closed
 \emph{arithmetic-mean} composition of the observed parts. The
 simulator's \code{between(ilr)}, in contrast, is the latent group-level ILR
-mean (whose back-transform is a geometric-mean-style composition).
-These are different estimands, and manifest centering is biased for
-latent between-person effects with short series, just as for scalar
-predictors.
+mean, whose back-transform is the closed \emph{geometric} (Aitchison)
+center. These are different estimands, and the gap has two parts: a
+structural Jensen gap between the arithmetic and geometric centers,
+which does \emph{not} shrink as the number of observations per group
+grows, plus ordinary sampling error, which does. Manifest centering is
+therefore biased for latent between-person effects even in long series,
+unlike the scalar case where only sampling error is involved.
 }
 These observed-data constructions target different estimands from the
 simulation truth. Manifest person-mean centering and observed-score lagged
@@ -188,13 +222,81 @@ Grasman 2014). This mismatch is intentional: it lets simulation studies
 quantify the bias of the pragmatic estimator. Do not interpret systematic
 discrepancies between estimates from this default analysis model and the
 \code{gen_outcome()} truth parameters as errors in the simulator.
-\code{\link[=sim_recovery]{sim_recovery()}} marks every affected parameter with
-\code{comparability = "approximate"}; its Comparability section documents the
-full decision rules and their justification, parameter type by parameter
-type. For matched-model recovery studies, construct the analysis model by
-hand instead of using this helper.
+}
 
-The centering of the \code{ar1()} lag columns is controlled by \code{lag_center}.
+\section{Latent centering}{
+
+\code{centering = "latent"} replaces the manifest construction with the
+generating components themselves, so for the affected \code{between()}/\code{within()}
+terms the fitted model targets exactly the quantity the simulator recorded:
+\itemize{
+\item Scalar predictors take \code{x_between} from the column the generator
+labelled with component \code{"between"} -- for \code{level = "level2"}
+predictors that is the variable itself -- and set
+\code{x_within <- x - x_between}.
+\item Compositional predictors keep the returned \code{\link[=complr]{complr()}} object, but
+its between and within blocks (\code{bX}, \code{wX}, \code{bZ}, \code{wZ}, and the matching
+\verb{b<part>}/\verb{w<part>}/\verb{bz*}/\verb{wz*} columns) are rebuilt from the latent
+between composition emitted by the generator. Column names are
+unchanged, so \code{\link[=brmcoda]{brmcoda()}} and \code{\link[=substitution]{substitution()}} work as usual.
+}
+This is an oracle: the latent components exist only in simulated data, so
+\code{"latent"} has no counterpart in a real analysis. Use it to separate
+estimator bias from simulator error -- if a parameter is recovered under
+\code{"latent"} but not under \code{"manifest"}, the gap is the estimator's, not the
+simulator's. It requires a grouped design and a generator that emitted
+latent components; \code{gen_custom()} generators that label roles without
+emitting them can only be analysed with \code{"manifest"}.
+}
+
+\section{Latent centering and \code{ar1()}}{
+
+When the outcome formula contains \code{ar1()} and the lag is centered
+(\code{lag_center = "within"}, the default), \code{centering = "latent"} centers the
+lag with latent values, which replaces the lag predictor entirely: instead
+of a lagged \emph{observed} response centered at the person's observed mean,
+the analysis uses the latent residual state the simulator recorded, in
+columns named \verb{lag_<response>_latent}. The two constructions are the same
+operation applied with different values, because the recorded residual is
+\code{y_t - mu_t}, the response centered at its latent conditional mean. The
+latent state needs no further centering: person-mean centering it on top
+would reintroduce exactly the attenuation this construction avoids.
+
+With \code{lag_center = "none"} there is no lag centering for \code{centering} to act
+on, so the raw lagged observed response is used under \code{"latent"} just as it
+is under \code{"manifest"}. That combination is the point of keeping the two
+arguments separate: a model can carry \code{between()}/\code{within()} predictors that
+have nothing to do with the lag, and those can be built from the latent
+generating components while the AR part keeps the non-centered
+parametrization discussed below.
+
+A latent lag makes the AR, scale and \code{rescor} parameters estimate exactly
+what the simulator recorded \strong{only when the analysis model has no
+group-level effects}. The reason is not the proxy
+problem that \code{lag_center} addresses. Writing the generating model as
+\verb{z_t = X_t beta + Phi e_\{t-1\} + eps_t}, the regressor \verb{e_\{t-1\}} is
+\emph{predetermined} but not \emph{strictly exogenous}: \code{Cov(eps_t, e_t)}
+equals the innovation variance, and \code{e_t} is the next row's regressor. Any
+estimator that mixes rows within a group -- which is what the random-effects
+GLS transformation implied by a \code{(1 | group)} term does -- picks up that
+cross-row covariance and incurs an O(1/T) dynamic-panel (Nickell) bias.
+Substituting the true latent state removes the measurement problem but not
+this one. So with any group-level effect, no parameter of a dynamic model is
+guaranteed to keep its generating estimand, under either centering.
+
+For a matched-model recovery of a \emph{multilevel} dynamic model, the
+appropriate analysis is not lag regression at all but a residual
+autocorrelation structure, for example
+\code{brms::bf(y ~ 1 + (1 | ID)) + brms::ar(time = day, gr = ID, p = 1, cov = TRUE)}.
+That form is outside what this helper builds -- brms \code{ar()} supports only a
+scalar unmoderated AR per response and parametrizes \code{sigma} as the marginal
+rather than the innovation standard deviation -- so construct it by hand.
+
+Note that under \code{"manifest"} the latent columns of the same name are
+overwritten in \code{analysis$data}; \code{sim$data} always keeps the originals.
+
+Whether the \code{ar1()} lag columns are centered at all is controlled by
+\code{lag_center}, independently of \code{centering}.
 Hamaker & Grasman (2014) show that in multilevel autoregressive models,
 cluster-mean centering the lagged outcome (the \code{"within"} default)
 attenuates the average autoregressive coefficient, whereas the
@@ -205,10 +307,10 @@ person mean, and any location covariate effects absorb omitted
 \verb{-Phi x_\{t-1\} beta} terms. Centering does not fully resolve this either:
 the centered observed lag still carries the lagged mean structure, so
 when a predictor varies within series its current coefficient can absorb
-omitted lagged-covariate terms under \code{"within"} as well.
-\code{\link[=sim_recovery]{sim_recovery()}} therefore marks every parameter as
-\code{comparability = "approximate"} whenever the formula contains \code{ar1()},
-under either \code{lag_center} setting. Use \code{"none"} when the average
+omitted lagged-covariate terms under \code{"within"} as well. Whenever the
+formula contains \code{ar1()} and the lag is an observed response, then, no
+parameter is guaranteed to keep its generating estimand, under either
+\code{lag_center} setting. Use \code{"none"} when the average
 autoregressive (inertia and cross-lag) coefficients are the estimands of
 interest, and the default \code{"within"} when person means and their
 predictors must remain interpretable; the data-simulation vignette
@@ -234,4 +336,12 @@ sim <- simulate_data(
 analysis <- prep_sim_analysis(sim)
 analysis$formula
 
+}
+\references{
+Ludtke, O., et al. (2008). The multilevel latent covariate model.
+\emph{Psychological Methods}, 13(3), 203-229.
+
+Hamaker, E. L., & Grasman, R. P. P. P. (2014). To center or not to
+center? Investigating inertia with a multilevel autoregressive model.
+\emph{Frontiers in Psychology}, 5, 1492.
 }

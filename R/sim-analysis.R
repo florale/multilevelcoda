@@ -34,19 +34,40 @@
 #'   supply `time_step` explicitly to silence it when the chosen step is
 #'   intended. For `Date` time the unit is days; for `POSIXct` time the unit
 #'   is seconds. Ignored when the outcome formula has no `ar1()` term.
-#' @param lag_center Character scalar controlling how `ar1()` lag columns are
-#'   centered. With `"within"`, the default, each lagged response is centered
-#'   at the person's observed mean of the response, producing
-#'   `lag_<response>_within` columns (cluster-mean centering, CMC). With
-#'   `"none"`, the raw lagged response is used as-is, producing
-#'   `lag_<response>` columns (no centering, NC) -- the non-centered
-#'   parametrization of Hamaker & Grasman (2014). Under `"none"` the model
-#'   intercept estimates `(1 - phi_i) * mu_i` (multivariate:
+#' @param lag_center Character scalar controlling *whether* `ar1()` lag columns
+#'   are centered; `centering` controls *which values* that centering uses.
+#'   With `"within"`, the default, the lag is centered: under the default
+#'   `centering = "manifest"` at the person's observed mean of the response,
+#'   producing `lag_<response>_within` columns (cluster-mean centering, CMC),
+#'   and under `centering = "latent"` at the latent conditional mean, which is
+#'   the recorded latent residual state, producing `lag_<response>_latent`
+#'   columns. With `"none"`, the raw lagged response is used as-is under either
+#'   `centering`, producing `lag_<response>` columns (no centering, NC) -- the
+#'   non-centered parametrization of Hamaker & Grasman (2014). Under `"none"`
+#'   the model intercept estimates `(1 - phi_i) * mu_i` (multivariate:
 #'   `(I - Phi_i) mu_i`) rather than the person mean `mu_i`, so location
 #'   parameters lose their direct correspondence with the simulation truth;
-#'   see the "Pragmatic default estimator" section and the Comparability
-#'   section of [sim_recovery()]. Ignored when the outcome formula has no
-#'   `ar1()` term.
+#'   see the "Pragmatic default estimator" section. Ignored when the outcome
+#'   formula has no `ar1()` term.
+#' @param centering Character scalar controlling which values the analysis
+#'   centers with, for `between()` and `within()` columns and for a centered
+#'   `ar1()` lag alike. With `"manifest"`, the default, `between()`/`within()`
+#'   columns are recomputed from the observed data as applied analysts would --
+#'   person means for scalars and the closed arithmetic-mean composition for
+#'   compositional predictors -- which are observed proxies for the generating
+#'   components rather than the components themselves. With `"latent"`, they
+#'   are taken from the generating components the simulator recorded, so they
+#'   match the simulated quantity exactly. `"latent"` requires a grouped design
+#'   and generators that emitted latent components, and is available only in
+#'   simulated data; see the "Latent centering" section. When the formula
+#'   contains `ar1()` and the lag is centered (`lag_center = "within"`, the
+#'   default), `"latent"` also centers the lag with latent values, which makes
+#'   it the recorded latent residual state; see the "Latent centering and
+#'   `ar1()`" section for why even that oracle leaves the autoregressive
+#'   parameters biased in models with group-level effects. With
+#'   `lag_center = "none"` there is no lag centering
+#'   for `centering` to act on, so the two settings compose freely. Ignored
+#'   when the outcome formula has no `between()`, `within()`, or `ar1()` terms.
 #' @param link_random Logical scalar. When `TRUE`, the default, grouping
 #'   factors that appear in both the mean and the scale formulas emit brms
 #'   ID-linked random effects (for example `(1 | p1 | ID)`), so the analysis
@@ -104,12 +125,20 @@
 #' `link_random` to opt out for large models fitted with approximate
 #' algorithms.
 #'
-#' For dynamic formulas, `ar1()` is translated to lagged observed response
-#' columns. By default (`lag_center = "within"`) these are centered at each
-#' person's observed mean of all their values (not the mean of the lagged
-#' values) and named `lag_<response>_within`; with `lag_center = "none"` the
-#' raw lagged responses are used and named `lag_<response>`. For
-#' compositional outcomes, the helper
+#' For dynamic formulas, `ar1()` is translated to lagged response columns whose
+#' construction and name follow the two centering arguments:
+#' \itemize{
+#'   \item `lag_center = "within"`, `centering = "manifest"` (both defaults):
+#'     the lagged observed response centered at each person's observed mean of
+#'     all their values (not the mean of the lagged values),
+#'     `lag_<response>_within`.
+#'   \item `lag_center = "within"`, `centering = "latent"`: the lagged response
+#'     centered at the latent conditional mean, which is the recorded latent
+#'     residual state, `lag_<response>_latent`.
+#'   \item `lag_center = "none"`, either `centering`: the raw lagged observed
+#'     response, `lag_<response>`.
+#' }
+#' For compositional outcomes, the helper
 #' rebuilds the ILR coordinates through [complr()] using the simulator's parts
 #' and SBP metadata, then lags the generated `z` coordinates used by
 #' [brmcoda()].
@@ -138,8 +167,8 @@
 #' [gen_outcome()] simulates latent residual AR/VAR dynamics around the
 #' model-implied mean and resolves `between()`/`within()` from latent
 #' generating components supplied by upstream predictor generators.
-#' `prep_sim_analysis()` instead constructs the model applied analysts
-#' commonly fit to observed data:
+#' By default (`centering = "manifest"`) `prep_sim_analysis()` instead
+#' constructs the model applied analysts commonly fit to observed data:
 #' \itemize{
 #'   \item `between(x)` and `within(x)` become `x_between` and `x_within`,
 #'     recomputed from realised person means of the observed `x` (manifest
@@ -152,10 +181,13 @@
 #'     between composition is the ILR of each person's closed
 #'     \emph{arithmetic-mean} composition of the observed parts. The
 #'     simulator's `between(ilr)`, in contrast, is the latent group-level ILR
-#'     mean (whose back-transform is a geometric-mean-style composition).
-#'     These are different estimands, and manifest centering is biased for
-#'     latent between-person effects with short series, just as for scalar
-#'     predictors.
+#'     mean, whose back-transform is the closed \emph{geometric} (Aitchison)
+#'     center. These are different estimands, and the gap has two parts: a
+#'     structural Jensen gap between the arithmetic and geometric centers,
+#'     which does \emph{not} shrink as the number of observations per group
+#'     grows, plus ordinary sampling error, which does. Manifest centering is
+#'     therefore biased for latent between-person effects even in long series,
+#'     unlike the scalar case where only sampling error is involved.
 #' }
 #' These observed-data constructions target different estimands from the
 #' simulation truth. Manifest person-mean centering and observed-score lagged
@@ -166,13 +198,77 @@
 #' quantify the bias of the pragmatic estimator. Do not interpret systematic
 #' discrepancies between estimates from this default analysis model and the
 #' `gen_outcome()` truth parameters as errors in the simulator.
-#' [sim_recovery()] marks every affected parameter with
-#' `comparability = "approximate"`; its Comparability section documents the
-#' full decision rules and their justification, parameter type by parameter
-#' type. For matched-model recovery studies, construct the analysis model by
-#' hand instead of using this helper.
 #'
-#' The centering of the `ar1()` lag columns is controlled by `lag_center`.
+#' @section Latent centering:
+#' `centering = "latent"` replaces the manifest construction with the
+#' generating components themselves, so for the affected `between()`/`within()`
+#' terms the fitted model targets exactly the quantity the simulator recorded:
+#' \itemize{
+#'   \item Scalar predictors take `x_between` from the column the generator
+#'     labelled with component `"between"` -- for `level = "level2"`
+#'     predictors that is the variable itself -- and set
+#'     `x_within <- x - x_between`.
+#'   \item Compositional predictors keep the returned [complr()] object, but
+#'     its between and within blocks (`bX`, `wX`, `bZ`, `wZ`, and the matching
+#'     `b<part>`/`w<part>`/`bz*`/`wz*` columns) are rebuilt from the latent
+#'     between composition emitted by the generator. Column names are
+#'     unchanged, so [brmcoda()] and [substitution()] work as usual.
+#' }
+#' This is an oracle: the latent components exist only in simulated data, so
+#' `"latent"` has no counterpart in a real analysis. Use it to separate
+#' estimator bias from simulator error -- if a parameter is recovered under
+#' `"latent"` but not under `"manifest"`, the gap is the estimator's, not the
+#' simulator's. It requires a grouped design and a generator that emitted
+#' latent components; `gen_custom()` generators that label roles without
+#' emitting them can only be analysed with `"manifest"`.
+#'
+#' @section Latent centering and `ar1()`:
+#' When the outcome formula contains `ar1()` and the lag is centered
+#' (`lag_center = "within"`, the default), `centering = "latent"` centers the
+#' lag with latent values, which replaces the lag predictor entirely: instead
+#' of a lagged \emph{observed} response centered at the person's observed mean,
+#' the analysis uses the latent residual state the simulator recorded, in
+#' columns named `lag_<response>_latent`. The two constructions are the same
+#' operation applied with different values, because the recorded residual is
+#' `y_t - mu_t`, the response centered at its latent conditional mean. The
+#' latent state needs no further centering: person-mean centering it on top
+#' would reintroduce exactly the attenuation this construction avoids.
+#'
+#' With `lag_center = "none"` there is no lag centering for `centering` to act
+#' on, so the raw lagged observed response is used under `"latent"` just as it
+#' is under `"manifest"`. That combination is the point of keeping the two
+#' arguments separate: a model can carry `between()`/`within()` predictors that
+#' have nothing to do with the lag, and those can be built from the latent
+#' generating components while the AR part keeps the non-centered
+#' parametrization discussed below.
+#'
+#' A latent lag makes the AR, scale and `rescor` parameters estimate exactly
+#' what the simulator recorded \strong{only when the analysis model has no
+#' group-level effects}. The reason is not the proxy
+#' problem that `lag_center` addresses. Writing the generating model as
+#' `z_t = X_t beta + Phi e_{t-1} + eps_t`, the regressor `e_{t-1}` is
+#' \emph{predetermined} but not \emph{strictly exogenous}: `Cov(eps_t, e_t)`
+#' equals the innovation variance, and `e_t` is the next row's regressor. Any
+#' estimator that mixes rows within a group -- which is what the random-effects
+#' GLS transformation implied by a `(1 | group)` term does -- picks up that
+#' cross-row covariance and incurs an O(1/T) dynamic-panel (Nickell) bias.
+#' Substituting the true latent state removes the measurement problem but not
+#' this one. So with any group-level effect, no parameter of a dynamic model is
+#' guaranteed to keep its generating estimand, under either centering.
+#'
+#' For a matched-model recovery of a \emph{multilevel} dynamic model, the
+#' appropriate analysis is not lag regression at all but a residual
+#' autocorrelation structure, for example
+#' `brms::bf(y ~ 1 + (1 | ID)) + brms::ar(time = day, gr = ID, p = 1, cov = TRUE)`.
+#' That form is outside what this helper builds -- brms `ar()` supports only a
+#' scalar unmoderated AR per response and parametrizes `sigma` as the marginal
+#' rather than the innovation standard deviation -- so construct it by hand.
+#'
+#' Note that under `"manifest"` the latent columns of the same name are
+#' overwritten in `analysis$data`; `sim$data` always keeps the originals.
+#'
+#' Whether the `ar1()` lag columns are centered at all is controlled by
+#' `lag_center`, independently of `centering`.
 #' Hamaker & Grasman (2014) show that in multilevel autoregressive models,
 #' cluster-mean centering the lagged outcome (the `"within"` default)
 #' attenuates the average autoregressive coefficient, whereas the
@@ -183,14 +279,22 @@
 #' `-Phi x_{t-1} beta` terms. Centering does not fully resolve this either:
 #' the centered observed lag still carries the lagged mean structure, so
 #' when a predictor varies within series its current coefficient can absorb
-#' omitted lagged-covariate terms under `"within"` as well.
-#' [sim_recovery()] therefore marks every parameter as
-#' `comparability = "approximate"` whenever the formula contains `ar1()`,
-#' under either `lag_center` setting. Use `"none"` when the average
+#' omitted lagged-covariate terms under `"within"` as well. Whenever the
+#' formula contains `ar1()` and the lag is an observed response, then, no
+#' parameter is guaranteed to keep its generating estimand, under either
+#' `lag_center` setting. Use `"none"` when the average
 #' autoregressive (inertia and cross-lag) coefficients are the estimands of
 #' interest, and the default `"within"` when person means and their
 #' predictors must remain interpretable; the data-simulation vignette
 #' compares parameter recovery under both.
+#'
+#' @references
+#' Ludtke, O., et al. (2008). The multilevel latent covariate model.
+#' \emph{Psychological Methods}, 13(3), 203-229.
+#'
+#' Hamaker, E. L., & Grasman, R. P. P. P. (2014). To center or not to
+#' center? Investigating inertia with a multilevel autoregressive model.
+#' \emph{Frontiers in Psychology}, 5, 1492.
 #'
 #' @examples
 #' params <- list(
@@ -215,6 +319,7 @@
 prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
                               time_step = NULL,
                               lag_center = c("within", "none"),
+                              centering = c("manifest", "latent"),
                               link_random = TRUE) {
   if (!inherits(sim, "mlsim_data")) {
     .mlsim_stop("`sim` must be an `mlsim_data` object returned by `simulate_data()`.")
@@ -230,6 +335,7 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
     }
   }
   lag_center <- match.arg(lag_center)
+  centering <- match.arg(centering)
   link_random <- .mlsim_check_scalar_logical(link_random, "link_random")
   outcome <- .mlsim_analysis_resolve_outcome(sim, outcome)
   outcome_metadata <- sim$generator_metadata[[outcome]]
@@ -248,6 +354,13 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
   grouped <- !is.null(sim$metadata$n_groups)
   time_id <- sim$metadata$time_id
   has_ar <- length(parsed$ar_terms %||% character()) > 0L
+  # the two arguments have separate jobs: `lag_center` says whether the ar1()
+  # lag is centered at all, `centering` says which values any centering uses.
+  # Centering the lag with latent values means the recorded latent residual
+  # state, y[t] - mu[t], the mirror of centering with the observed person mean
+  lag_latent <- identical(centering, "latent") &&
+    identical(lag_center, "within") &&
+    isTRUE(has_ar)
 
   if (!is.null(trials_column) && !trials_column %in% names(data)) {
     .mlsim_stop(
@@ -259,9 +372,20 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
   if (isTRUE(grouped) && !group_id %in% names(data)) {
     .mlsim_stop("The active grouping column `%s` is missing from `sim$data`.", group_id)
   }
+  latent_lag_sources <- NULL
   if (isTRUE(has_ar)) {
     if (is.null(time_id) || !time_id %in% names(data)) {
       .mlsim_stop("Preparing `ar1()` analysis terms requires the simulation `time_id` column.")
+    }
+    if (isTRUE(lag_latent)) {
+      # attach before the reorder below: the recorded residual is in generation
+      # row order, so setorderv() must carry each value with its own row
+      latent_lag_sources <- .mlsim_analysis_attach_latent_residual(
+        data = data,
+        outcome_metadata = outcome_metadata,
+        outcomes = outcomes,
+        outcome = outcome
+      )
     }
     # ordering keeps the output rows stable; lag correctness comes from the
     # time-based matching in lag_by_time(), not from row adjacency
@@ -278,7 +402,8 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
     outcome_metadata,
     grouped,
     group_id,
-    exclude_variables = unique(ilr_roles$variable)
+    exclude_variables = unique(ilr_roles$variable),
+    centering = centering
   )
   compositional <- isTRUE(outcome_metadata$compositional)
   if (isTRUE(compositional) &&
@@ -298,6 +423,12 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
       total = compositions$total,
       idvar = if (isTRUE(grouped)) group_id else NULL
     )
+    if (identical(centering, "latent")) {
+      complr_object <- .mlsim_analysis_recenter_complr(
+        complr_object = complr_object,
+        compositions = compositions
+      )
+    }
     data <- data.table::copy(complr_object$dataout)
     if (!is.null(compositions$outcome_index)) {
       response_names <- colnames(complr_object$output[[compositions$outcome_index]]$Z)
@@ -322,7 +453,14 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
     time_id = time_id,
     time_step = time_step,
     drop_lag_na = drop_lag_na,
-    lag_center = lag_center
+    lag_center = lag_center,
+    # reordered to match `unname(response_map)` positionally: the residual is
+    # keyed by simulator outcome name, the responses by analysis column name
+    lag_source_names = if (isTRUE(lag_latent)) {
+      unname(latent_lag_sources[names(response_map)])
+    } else {
+      NULL
+    }
   )
   data <- lag_info$data
 
@@ -372,6 +510,8 @@ prep_sim_analysis <- function(sim, outcome = NULL, drop_lag_na = FALSE,
     special_term_map = special_term_map,
     lag_columns = lag_info$lag_columns,
     lag_center = lag_center,
+    lag_latent = lag_latent,
+    centering = centering,
     dropped_rows = lag_info$dropped_rows,
     time_step = lag_info$time_step,
     time_step_by_group = lag_info$time_step_by_group,
@@ -408,9 +548,12 @@ print.mlsim_analysis <- function(x, ...) {
   if (length(x$metadata$derived_roles$column %||% character()) > 0L) {
     cat("  derived predictors: ", paste(unique(x$metadata$derived_roles$column), collapse = ", "), "\n", sep = "")
   }
+  cat("  centering: ", x$metadata$centering %||% "manifest", "\n", sep = "")
   if (length(x$metadata$lag_columns) > 0L) {
     cat("  lag predictors: ", paste(x$metadata$lag_columns, collapse = ", "), "\n", sep = "")
-    cat("  lag centering: ", x$metadata$lag_center %||% "within", "\n", sep = "")
+    cat("  lag centering: ", x$metadata$lag_center %||% "within",
+        if (isTRUE(x$metadata$lag_latent)) " (latent residual state)" else "",
+        "\n", sep = "")
     if (isTRUE(x$metadata$time_step_heterogeneous)) {
       cat("  time step: heterogeneous across groups (see `$metadata$time_step_by_group`)\n")
     }
@@ -521,8 +664,125 @@ print.mlsim_analysis <- function(x, ...) {
   )
 }
 
+.mlsim_analysis_latent_residual_names <- function(outcomes) {
+  paste0(".mlsim_", .mlsim_internal_name_piece(outcomes), "_ar_residual")
+}
+
+.mlsim_analysis_attach_latent_residual <- function(data, outcome_metadata, outcomes, outcome) {
+  residual <- outcome_metadata$residual
+  advice <- paste0(
+    "Only Gaussian `gen_outcome()` models with `ar1()` record it; use ",
+    "`centering = \"manifest\"` otherwise."
+  )
+  if (is.null(residual) || !is.matrix(residual)) {
+    .mlsim_stop(
+      paste0(
+        "`centering = \"latent\"` requires the latent AR residual state recorded by ",
+        "`gen_outcome()`, but `sim$generator_metadata[[\"%s\"]]$residual` is missing. %s"
+      ),
+      outcome, advice
+    )
+  }
+  if (nrow(residual) != nrow(data)) {
+    .mlsim_stop(
+      paste0(
+        "The latent AR residual state recorded for outcome generator `%s` has %d rows but ",
+        "`sim$data` has %d. Refusing to build a misaligned latent lag."
+      ),
+      outcome, nrow(residual), nrow(data)
+    )
+  }
+  missing_outcomes <- setdiff(outcomes, colnames(residual))
+  if (length(missing_outcomes) > 0L) {
+    .mlsim_stop(
+      paste0(
+        "The latent AR residual state recorded for outcome generator `%s` is missing ",
+        "column(s) %s. %s"
+      ),
+      outcome,
+      paste(sprintf("`%s`", missing_outcomes), collapse = ", "),
+      advice
+    )
+  }
+  source_names <- stats::setNames(
+    .mlsim_analysis_latent_residual_names(outcomes),
+    outcomes
+  )
+  existing <- intersect(source_names, names(data))
+  if (length(existing) > 0L) {
+    .mlsim_stop(
+      "Cannot attach the latent AR residual state because column(s) %s already exist.",
+      paste(sprintf("`%s`", existing), collapse = ", ")
+    )
+  }
+  for (nm in outcomes) {
+    data.table::set(data, j = source_names[[nm]], value = residual[, nm])
+  }
+  source_names
+}
+
+.mlsim_analysis_recenter_complr <- function(complr_object, compositions) {
+  # predictor compositions only: a compositional outcome's own blocks are not
+  # between/within predictors, so they keep the published arithmetic centering
+  predictor_indices <- seq_along(compositions$generators)
+  if (length(predictor_indices) == 0L) {
+    return(complr_object)
+  }
+  if (!identical(complr_object$transform, "ilr")) {
+    .mlsim_stop(
+      "`centering = \"latent\"` is only supported for the `ilr` transform, not `%s`.",
+      complr_object$transform
+    )
+  }
+  # datain is the frame complr() was given, so its rows already match the
+  # complr blocks even when ar1() reordered the analysis data
+  datain <- complr_object$datain
+  for (j in predictor_indices) {
+    out <- complr_object$output[[j]]
+    parts <- out$parts
+    between_cols <- paste0(parts, "_between")
+    missing_cols <- setdiff(between_cols, names(datain))
+    if (length(missing_cols) > 0L) {
+      .mlsim_stop(
+        paste0(
+          "`centering = \"latent\"` requires the latent between composition of generator ",
+          "`%s`, but column(s) %s are missing. Only multilevel compositional generators ",
+          "emit them; use `centering = \"manifest\"` otherwise."
+        ),
+        compositions$generators[[j]],
+        paste(sprintf("`%s`", missing_cols), collapse = ", ")
+      )
+    }
+    # mirrors complr(): close the between composition, take the perturbation
+    # difference for within, then map both through the stored ilr basis
+    bX <- acomp(datain[, between_cols, with = FALSE], total = out$total)
+    colnames(bX) <- colnames(out$bX)
+    wX <- out$X - bX
+    colnames(wX) <- colnames(out$wX)
+    bZ <- ilr(bX, V = out$psi)
+    wZ <- ilr(wX, V = out$psi)
+    colnames(bZ) <- colnames(out$bZ)
+    colnames(wZ) <- colnames(out$wZ)
+
+    out$bX <- bX
+    out$wX <- wX
+    out$bZ <- bZ
+    out$wZ <- wZ
+    out$dataout <- cbind(out$X, bX, wX, out$Z, bZ, wZ)
+    complr_object$output[[j]] <- out
+
+    recentered <- out$dataout
+    for (nm in c(colnames(bX), colnames(wX), colnames(bZ), colnames(wZ))) {
+      data.table::set(complr_object$dataout, j = nm, value = recentered[, nm])
+    }
+  }
+  complr_object
+}
+
 .mlsim_analysis_add_role_columns <- function(data, outcome_metadata, grouped, group_id,
-                                             exclude_variables = character()) {
+                                             exclude_variables = character(),
+                                             centering = c("manifest", "latent")) {
+  centering <- match.arg(centering)
   roles <- outcome_metadata$selected_column_roles
   if (is.null(roles) || nrow(roles) == 0L) {
     return(data.table::data.table(
@@ -532,7 +792,8 @@ print.mlsim_analysis <- function(x, ...) {
       overwritten = logical()
     ))
   }
-  roles <- unique(roles[, c("variable", "component"), with = FALSE])
+  role_cols <- intersect(c("variable", "component", "column", "generator"), names(roles))
+  roles <- unique(roles[, role_cols, with = FALSE])
   roles <- roles[roles$component %in% c("between", "within")]
   roles <- roles[!roles$variable %in% exclude_variables]
   if (nrow(roles) == 0L) {
@@ -567,7 +828,15 @@ print.mlsim_analysis <- function(x, ...) {
     mean_col <- paste(variable, "between", sep = "_")
     within_col <- paste(variable, "within", sep = "_")
     mean_tmp <- paste0(".__mlsim_analysis_mean_", make.names(variable), "__")
-    data[, (mean_tmp) := mean(get(variable), na.rm = TRUE), by = group_id]
+    if (identical(centering, "latent")) {
+      # the latent between column is the one the generator labelled with
+      # component "between"; for `level = "level2"` predictors that is the
+      # variable itself, so pasting "_between" would not find it
+      source_col <- .mlsim_analysis_latent_between_column(roles, variable, data)
+      data[, (mean_tmp) := get(source_col)]
+    } else {
+      data[, (mean_tmp) := mean(get(variable), na.rm = TRUE), by = group_id]
+    }
     if ("between" %in% needed) {
       data[, (mean_col) := get(mean_tmp)]
     }
@@ -577,6 +846,34 @@ print.mlsim_analysis <- function(x, ...) {
     data[, (mean_tmp) := NULL]
   }
   out
+}
+
+.mlsim_analysis_latent_between_column <- function(roles, variable, data) {
+  is_between <- roles$variable == variable & roles$component == "between"
+  column <- if ("column" %in% names(roles)) roles$column[is_between] else character()
+  if (length(column) != 1L) {
+    # only within() was referenced, so no between role row was recorded
+    column <- paste(variable, "between", sep = "_")
+  }
+  if (!column %in% names(data)) {
+    generator <- if ("generator" %in% names(roles)) {
+      unique(roles$generator[roles$variable == variable])
+    } else {
+      character()
+    }
+    .mlsim_stop(
+      paste0(
+        "`centering = \"latent\"` requires the latent between component of `%s`, ",
+        "but column `%s` is missing from `sim$data`%s. Generators that label ",
+        "between/within roles without emitting the matching latent columns can only ",
+        "be analysed with `centering = \"manifest\"`."
+      ),
+      variable,
+      column,
+      if (length(generator) == 1L) sprintf(" (generator `%s`)", generator) else ""
+    )
+  }
+  column
 }
 
 .mlsim_analysis_group_time_steps <- function(data, group_id, time_id) {
@@ -591,7 +888,9 @@ print.mlsim_analysis <- function(x, ...) {
 
 .mlsim_analysis_add_lag_columns <- function(data, response_names, has_ar, grouped,
                                             group_id, time_id, time_step, drop_lag_na,
-                                            lag_center = "within") {
+                                            lag_center = "within",
+                                            lag_source_names = NULL) {
+  latent <- !is.null(lag_source_names)
   if (!isTRUE(has_ar)) {
     return(list(
       data = data,
@@ -614,7 +913,24 @@ print.mlsim_analysis <- function(x, ...) {
       paste(missing_responses, collapse = ", ")
     )
   }
-  lag_columns <- if (identical(lag_center, "within")) {
+  if (isTRUE(latent)) {
+    if (length(lag_source_names) != length(response_names)) {
+      .mlsim_stop(
+        "Internal error: %d latent lag source column(s) for %d response(s).",
+        length(lag_source_names), length(response_names)
+      )
+    }
+    missing_sources <- lag_source_names[!lag_source_names %in% names(data)]
+    if (length(missing_sources) > 0L) {
+      .mlsim_stop(
+        "Cannot prepare latent `ar1()` analysis terms because residual columns are missing: %s.",
+        paste(missing_sources, collapse = ", ")
+      )
+    }
+  }
+  lag_columns <- if (isTRUE(latent)) {
+    paste0("lag_", response_names, "_latent")
+  } else if (identical(lag_center, "within")) {
     paste0("lag_", response_names, "_within")
   } else {
     paste0("lag_", response_names)
@@ -650,9 +966,12 @@ print.mlsim_analysis <- function(x, ...) {
     }
   }
   raw_suffix <- ".__mlsim_raw_lag__"
+  # lag the latent residual state rather than the observed response under latent
+  # centering; lag_by_time() applies the same time-based matching either way
+  lag_inputs <- if (isTRUE(latent)) lag_source_names else response_names
   data <- lag_by_time(
     data,
-    cols = response_names,
+    cols = lag_inputs,
     time = time_id,
     group = if (isTRUE(grouped)) group_id else NULL,
     time_step = time_step,
@@ -663,8 +982,12 @@ print.mlsim_analysis <- function(x, ...) {
   for (i in seq_along(response_names)) {
     response <- response_names[[i]]
     lag_col <- lag_columns[[i]]
-    raw_col <- paste0(response, raw_suffix)
-    if (identical(lag_center, "none")) {
+    raw_col <- paste0(lag_inputs[[i]], raw_suffix)
+    if (isTRUE(latent)) {
+      # the latent residual is already zero-mean stationary; centering it would
+      # reintroduce the very attenuation this construction avoids
+      data[, (lag_col) := get(raw_col)]
+    } else if (identical(lag_center, "none")) {
       data[, (lag_col) := get(raw_col)]
     } else if (isTRUE(grouped)) {
       data[, (lag_col) := get(raw_col) - mean(get(response), na.rm = TRUE), by = group_id]
@@ -672,6 +995,12 @@ print.mlsim_analysis <- function(x, ...) {
       data[, (lag_col) := get(raw_col) - mean(get(response), na.rm = TRUE)]
     }
     data[, (raw_col) := NULL]
+  }
+  if (isTRUE(latent)) {
+    # drop the contemporaneous residual columns before the NA/keep_rows logic so
+    # complete.cases() sees only lag columns, and so `y - e == mu` does not ship
+    # a fully-determining oracle inside `analysis$data`
+    data[, (lag_source_names) := NULL]
   }
   lag_na_groups <- character()
   if (isTRUE(grouped)) {

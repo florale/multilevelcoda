@@ -88,22 +88,6 @@ test_that("truth table aligns dynamic multivariate parameters with brms names", 
     fixed$truth[fixed$parameter == "z11_lag_z2_1_within"],
     params$ar$beta["ar1()", "ilr1", "ilr2"]
   )
-  expect_identical(
-    unique(fixed$comparability[grepl("lag_", fixed$parameter)]),
-    "approximate"
-  )
-  # with ar1() present, every row is approximate: the observed lag carries
-  # the lagged mean structure, so even location intercepts change estimand
-  expect_identical(
-    fixed$comparability[fixed$parameter %in% c("z11_Intercept", "z21_Intercept")],
-    c("approximate", "approximate")
-  )
-  expect_identical(unique(truth$comparability), "approximate")
-  # sigma is the innovation SD; conditional on pragmatic lags it is approximate
-  expect_identical(
-    fixed$comparability[grepl("^sigma_", fixed$parameter)],
-    c("approximate", "approximate")
-  )
 
   random_sd <- truth[truth$type == "random_sd", ]
   expect_identical(unique(random_sd$group), "ID")
@@ -132,33 +116,9 @@ test_that("truth table aligns dynamic multivariate parameters with brms names", 
   rescor <- truth[truth$type == "rescor", ]
   expect_identical(rescor$parameter, "rescor(z11,z21)")
   expect_identical(rescor$truth, 0.3)
-  expect_identical(rescor$comparability, "approximate")
 })
 
-test_that("fixed-effect comparability flags follow the pragmatic estimator", {
-  analysis <- prep_sim_analysis(dynamic_recovery_sim())
-  truth <- as.data.frame(analysis$truth)
-  # with ar1() present nothing is exact, not even location intercepts:
-  # the centered observed lag still carries the lagged mean structure
-  expect_identical(
-    truth$comparability[truth$parameter == "z11_Intercept" & truth$type == "fixed"],
-    "approximate"
-  )
-  expect_identical(
-    truth$comparability[truth$parameter == "sigma_z11_Intercept" & truth$type == "fixed"],
-    "approximate"
-  )
-  # with ar1() present, every random-effect SD is approximate, including the
-  # location intercepts: under CMC the fitted intercept dispersion absorbs
-  # the variance of each person's residual sample mean
-  random_sd <- truth[truth$type == "random_sd", ]
-  expect_identical(unique(random_sd$comparability), "approximate")
-  # correlations inherit approximate from their endpoints
-  cor_rows <- truth[truth$type == "random_cor", ]
-  expect_identical(unique(cor_rows$comparability), "approximate")
-})
-
-test_that("lag_center = none renames AR truth and keeps every row approximate", {
+test_that("lag_center = none renames AR truth", {
   sim <- dynamic_recovery_sim()
   analysis <- prep_sim_analysis(sim, lag_center = "none")
   default_analysis <- prep_sim_analysis(sim)
@@ -174,28 +134,6 @@ test_that("lag_center = none renames AR truth and keeps every row approximate", 
       "z21_lag_z1_1", "z21_lag_z2_1"
     )
   )
-  # NC reparametrizes the mean structure; as under the centered default,
-  # every row of an ar1() truth table is approximate
-  expect_identical(
-    fixed$comparability[fixed$parameter %in% c("z11_Intercept", "z21_Intercept")],
-    c("approximate", "approximate")
-  )
-  expect_identical(
-    unique(fixed$comparability[grepl("lag_", fixed$parameter)]),
-    "approximate"
-  )
-  expect_identical(
-    unique(fixed$comparability[grepl("^sigma_", fixed$parameter)]),
-    "approximate"
-  )
-
-  random_sd <- truth[truth$type == "random_sd", ]
-  expect_identical(
-    unique(random_sd$comparability[random_sd$parameter %in% c("z11_Intercept", "z21_Intercept")]),
-    "approximate"
-  )
-  random_cor <- truth[truth$type == "random_cor", ]
-  expect_identical(unique(random_cor$comparability), "approximate")
 
   # simulator names are the stable cross-parametrization key
   expect_identical(analysis$truth$simulator_name, default_analysis$truth$simulator_name)
@@ -222,7 +160,7 @@ test_that("link_random = FALSE drops cross-block random correlations from truth"
   )
 })
 
-test_that("univariate outcomes use unprefixed names and flag manifest centering", {
+test_that("univariate outcomes use unprefixed parameter names", {
   params <- list(
     location = list(beta = matrix(
       c(0.4, 0.3, 0.2),
@@ -259,20 +197,10 @@ test_that("univariate outcomes use unprefixed names and flag manifest centering"
     truth$parameter[truth$type == "fixed"],
     c("Intercept", "x_between", "x_within", "sigma_Intercept")
   )
-  expect_identical(
-    truth$comparability[truth$parameter %in% c("x_between", "x_within")],
-    c("approximate", "approximate")
-  )
-  expect_identical(
-    truth$comparability[truth$parameter %in% c("Intercept", "sigma_Intercept") &
-                          truth$type == "fixed"],
-    c("exact", "exact")
-  )
   random_sd <- truth[truth$type == "random_sd", ]
   expect_identical(random_sd$parameter, "Intercept")
   expect_identical(random_sd$group, "ID")
   expect_identical(random_sd$truth, 0.5)
-  expect_identical(random_sd$comparability, "exact")
   expect_false(any(truth$type == "rescor"))
 })
 
@@ -426,7 +354,6 @@ test_that("non-gaussian families use their dpar names and never rescor", {
   )
   gamma_truth <- as.data.frame(prep_sim_analysis(gamma_sim)$truth)
   expect_setequal(gamma_truth$parameter, c("Intercept", "shape_Intercept"))
-  expect_true(all(gamma_truth$comparability == "exact"))
 })
 
 test_that("ambiguous sanitized response names abort instead of mislabeling", {
@@ -637,7 +564,6 @@ test_that("non-gaussian dpar truth joins fitted estimates end-to-end", {
     joined$bias[joined$parameter == "phi_Intercept"],
     0
   )
-  expect_true(all(joined$comparability == "exact"))
 })
 
 test_that("lag_center = none truth joins fitted estimates end-to-end", {
@@ -671,7 +597,6 @@ test_that("lag_center = none truth joins fitted estimates end-to-end", {
   expect_identical(nrow(joined), nrow(analysis$truth))
   expect_setequal(joined$parameter, c("Intercept", "lag_y", "sigma_Intercept"))
   expect_identical(joined$bias[joined$parameter == "lag_y"], 0)
-  expect_true(all(joined$comparability == "approximate"))
 })
 
 test_that("sim_recovery validates inputs before touching the fit", {
@@ -759,5 +684,5 @@ test_that("print methods surface truth availability and coverage", {
   joined <- multilevelcoda:::.mlsim_recovery_join(analysis$truth, estimates)
   data.table::setattr(joined, "probs", c(0.025, 0.975))
   data.table::setattr(joined, "class", c("mlsim_recovery", class(data.table::data.table())))
-  expect_output(print(joined), "Coverage of the 95% interval: 2/2")
+  expect_output(print(joined), "Coverage of the 95% interval: 2/2\\.")
 })
