@@ -46,7 +46,8 @@ gen_negbin(
 - size:
 
   Binomial trial size. May be a scalar, vector, function of `n`, or
-  count-distribution list.
+  count-distribution list. Count-distribution `minimum`/`maximum` bounds
+  clamp draws to the bounds (censoring, not truncation).
 
 - fixed_intercept:
 

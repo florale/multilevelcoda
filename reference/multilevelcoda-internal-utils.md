@@ -11,21 +11,15 @@ metadata shared by generator implementations.
 
 .mlsim_stop(..., call. = FALSE)
 
-.mlsim_format_args(args)
+.mlsim_warn(..., call. = FALSE)
 
-.mlsim_warn_ignored_args(generator, used, ignored)
-
-.mlsim_check_multilevel_unused(level, supplied, generator, use)
-
-.mlsim_check_multilevel_required(level, supplied, generator)
+.mlsim_format_ids(ids, max_ids = 5L)
 
 .mlsim_check_vars(vars, n = NULL, arg = "vars", allow_empty = FALSE)
 
 .mlsim_check_new_names_compatible(new, existing, arg = "generated names")
 
 .mlsim_check_finite_numeric(x, arg)
-
-.mlsim_check_prob(x, arg = "prob")
 
 .mlsim_check_open_prob(x, arg = "prob")
 
@@ -38,10 +32,6 @@ metadata shared by generator implementations.
 .mlsim_check_categorical_logits(logits, nonreference, arg)
 
 .mlsim_check_categorical_random_cov(random_cov, nonreference)
-
-.mlsim_resolve_category_prob(prob, n, labels, arg = "prob")
-
-.mlsim_check_category_prob_matrix(prob, arg = "prob")
 
 .mlsim_baseline_category_prob(eta, reference_index, labels)
 
@@ -88,27 +78,6 @@ metadata shared by generator implementations.
 
 .mlsim_n_for_level(level, context)
 
-.mlsim_expand_level2(values, level, context)
-
-.mlsim_expand_level2_vector(values, level, context)
-
-.mlsim_check_multilevel_only_args(level, supplied)
-
-.mlsim_generator_contract(
-  generator,
-  vars,
-  level,
-  vars_n = 1L,
-  direct_supplied = NULL,
-  multilevel_only = NULL,
-  multilevel_required = NULL,
-  multilevel_use = NULL,
-  scale_arg = NULL,
-  scale_fixed_intercept = NULL
-)
-
-.mlsim_warn_direct_precedence(level, generator, used, ignored)
-
 .mlsim_random_intercept_names(vars, scale = FALSE)
 
 .mlsim_check_position_cov(cov, names, arg = "random_cov")
@@ -135,37 +104,11 @@ metadata shared by generator implementations.
   expected_names = NULL
 )
 
-.mlsim_random_eta(
-  type,
-  fixed_intercept,
-  random_cov,
-  context,
-  vars,
-  scale_fixed_intercept = NULL
-)
-
 .mlsim_check_simple_residual_cor(residual_cor, vars)
 
 .mlsim_mvn_row_residual(residual_sd, residual_cor)
 
 .mlsim_mvn_row_covariance_array(residual_sd, residual_cor)
-
-.mlsim_check_scale_or_arg(arg, arg_name, scale_fixed_intercept, generator)
-
-.mlsim_check_positive_or_null(x, arg)
-
-.mlsim_simple_random_metadata(
-  fixed_intercept,
-  random,
-  scale_fixed_intercept = NULL
-)
-
-.mlsim_validate_scale_multilevel_args(
-  level,
-  scale_fixed_intercept,
-  random_cov = NULL,
-  residual_cor = NULL
-)
 
 .mlsim_mean_from_eta(type, eta)
 
@@ -200,17 +143,14 @@ x %||% y
 
 - call.:
 
-  Logical flag passed to [`stop()`](https://rdrr.io/r/base/stop.html).
+  Logical flag passed to [`stop()`](https://rdrr.io/r/base/stop.html) or
+  [`warning()`](https://rdrr.io/r/base/warning.html).
 
-- args, used, ignored, supplied, use, direct_supplied, multilevel_only:
+- ids, max_ids:
 
-  Character vectors or named logicals used to build diagnostics.
+  Identifier values and truncation limit for formatted ID lists.
 
-- generator:
-
-  Generator label used in diagnostic messages.
-
-- vars, var, n, vars_n, names, arg, arg_name:
+- vars, var, n, names, arg:
 
   Variable names, target lengths, or argument labels.
 
@@ -271,14 +211,6 @@ x %||% y
   Simulation context supplied by
   [`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md).
 
-- values, result:
-
-  Generated values or raw custom-generator result.
-
-- multilevel_required, multilevel_use, scale_arg:
-
-  Multilevel constructor contract declarations.
-
 - scale:
 
   Logical flag for joint location/scale random effects.
@@ -287,17 +219,21 @@ x %||% y
 
   Random-effect draw metadata.
 
+- scale_fixed_intercept:
+
+  Scale intercepts.
+
 - type:
 
   Distribution type.
 
-- fixed_intercept, scale_fixed_intercept:
-
-  Location and scale intercepts.
-
 - size:
 
   Count-distribution size specification.
+
+- values, result:
+
+  Generated values or raw custom-generator result.
 
 - metadata, wrapper_metadata:
 

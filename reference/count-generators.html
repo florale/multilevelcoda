@@ -98,7 +98,8 @@ random-intercept model.</p></dd>
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
 <dd><p>Binomial trial size. May be a scalar, vector, function of <code>n</code>, or
-count-distribution list.</p></dd>
+count-distribution list. Count-distribution <code>minimum</code>/<code>maximum</code> bounds
+clamp draws to the bounds (censoring, not truncation).</p></dd>
 
 
 <dt id="arg-fixed-intercept">fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-fixed-intercept"></a></dt>
@@ -178,7 +179,7 @@ size is <code>exp(scale_fixed_intercept)</code>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

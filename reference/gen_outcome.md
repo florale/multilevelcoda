@@ -1,20 +1,26 @@
-# Generate Dynamic Gaussian and Compositional Outcomes
+# Generate Dynamic Gaussian, Compositional, and GLM-Family Outcomes
 
 Create an outcome generator for
 [`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md).
-Outcomes are simulated on a Gaussian scale, optionally as ILR
-coordinates that are back-transformed to strictly positive compositions.
-If `ar1()` appears in the location formula, it defines a residual VAR(1)
-process, not an observed lagged-outcome predictor.
+With the default `family = "gaussian"`, outcomes are simulated on a
+Gaussian scale, optionally as ILR coordinates that are back-transformed
+to strictly positive compositions, and `ar1()` in the location formula
+defines a residual VAR(1) process, not an observed lagged-outcome
+predictor. Non-Gaussian families (`"poisson"`, `"binomial"`, `"negbin"`,
+`"gamma"`, `"beta"`) simulate a single outcome from the family
+distribution with the location linear predictor mapped through the
+family link.
 
 ## Usage
 
 ``` r
 gen_outcome(
   formula,
-  scale,
+  scale = NULL,
   params,
-  burnin,
+  burnin = NULL,
+  family = "gaussian",
+  trials = NULL,
   composition = list(parts = NULL, total = 24, sbp = NULL, keep_ilr = TRUE),
   ar_stability = c("resample", "shrink", "error"),
   max_stability_attempts = 1000,
@@ -27,34 +33,78 @@ gen_outcome(
 - formula:
 
   Outcome location formula. The left-hand side may be a single outcome
-  (`y`) or `mvbind(y1, y2, ...)`. The right-hand side may include
-  ordinary model terms, `between(x)`, `within(x)`, `ar1()`,
-  interactions, and one brms/lme4-style grouping term.
+  (`y`) or, for `family = "gaussian"` only, `mvbind(y1, y2, ...)`. The
+  right-hand side may include ordinary model terms, `between(x)`,
+  `within(x)`, interactions, one brms/lme4-style grouping term, and, for
+  `family = "gaussian"` only, `ar1()`.
+  `between()`/[`within()`](https://rdrr.io/r/base/with.html) resolve
+  against the column roles emitted by earlier predictor generators; this
+  includes the ILR coordinates of multilevel compositional
+  [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md)
+  generators (for example `between(ilr1)`), enabling simulation of
+  models where a scalar outcome depends on the between- and
+  within-person parts of a composition. Roles apply to ILR coordinates,
+  not to composition parts.
 
 - scale:
 
-  Required scale formula with `sigma` on the left-hand side, for example
-  `sigma ~ 1` or `sigma ~ treatment + (1 | ID)`. The scale model is on
-  the log conditional standard-deviation scale.
+  Scale formula with the family's brms distributional-parameter name on
+  the left-hand side: `sigma` for `"gaussian"` (log conditional SD, for
+  example `sigma ~ 1` or `sigma ~ treatment + (1 | ID)`), `shape` for
+  `"negbin"` (log size) and `"gamma"` (log shape), and `phi` for
+  `"beta"` (log precision). Required for these families; must be omitted
+  for `"poisson"` and `"binomial"`, which have no auxiliary scale
+  parameter.
 
 - params:
 
   List of true parameters. Required components are
-  `params$location$beta`, `params$scale$beta`, and, for multivariate
-  outcomes, `params$scale$correlation`. When AR terms are present,
+  `params$location$beta` and, for families with a scale model,
+  `params$scale$beta`. For multivariate Gaussian outcomes,
+  `params$scale$correlation` is required. When AR terms are present,
   `params$ar$beta` is required. When grouping terms are present,
   `params$random[[group]]$covariance` is required.
 
 - burnin:
 
-  Fixed non-negative integer burn-in length used when AR is active.
-  Ignored when no AR terms are present.
+  Fixed integer burn-in length for the residual AR/VAR process. Required
+  when `ar1()` appears in the location formula and ignored otherwise
+  (non-AR Gaussian models and all non-Gaussian families have no burn-in
+  phase). Each series is initialized at zero residuals and iterated
+  `burnin` steps before the first observed row, so `burnin = 0` starts
+  the residual process exactly at zero and the first observations are
+  under-dispersed relative to the stationary distribution. Do not use
+  `burnin = 0` or other small values for simulation studies: choose a
+  burn-in long enough for the process to forget its start, for example
+  at least `log(0.01) / log(rho)` steps, where `rho` is the largest
+  spectral radius of the AR matrices (about 90 steps at `rho = 0.95`).
+
+- family:
+
+  Character scalar naming the outcome family: `"gaussian"` (default),
+  `"poisson"` (log link), `"binomial"` (logit link, requires `trials`),
+  `"negbin"` (log link, `scale` is log size), `"gamma"` (log link,
+  `scale` is log shape), or `"beta"` (logit link, `scale` is log
+  precision). Non-Gaussian families are univariate only and do not
+  support `ar1()` or `composition`.
+
+- trials:
+
+  Number of binomial trials, required for and only allowed with
+  `family = "binomial"`. Accepts a scalar, a vector recycled to the
+  number of rows, a function of `n`, or a count-distribution list as in
+  [`gen_binomial()`](https://florale.github.io/multilevelcoda/reference/count-generators.md)
+  (count-distribution `minimum`/`maximum` bounds clamp draws to the
+  bounds; censoring, not truncation). Resolved trial sizes are written
+  into the simulated data as a `<outcome>_trials` column for use with
+  `y | trials(y_trials)` in brms.
 
 - composition:
 
-  List controlling optional ILR back-transformation. Use `parts` or
-  `sbp` to request compositional output, `total` for the closure total,
-  and `keep_ilr` to keep ILR coordinates alongside parts.
+  List controlling optional ILR back-transformation
+  (`family = "gaussian"` only). Use `parts` or `sbp` to request
+  compositional output, `total` for the closure total, and `keep_ilr` to
+  keep ILR coordinates alongside parts.
 
 - ar_stability:
 
@@ -73,6 +123,24 @@ gen_outcome(
 
 An `mlsim_generator_spec` object for use in
 [`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md).
+
+## Non-Gaussian families
+
+Non-Gaussian outcomes are drawn independently per row from the family
+distribution after mapping the location linear predictor through the
+inverse link, with the auxiliary parameter (size, shape, or precision)
+taken as [`exp()`](https://rdrr.io/r/base/Log.html) of the scale linear
+predictor. `ar1()` is currently only supported for
+`family = "gaussian"`. Group-level effects on the location and scale
+linear predictors are drawn jointly from
+`params$random[[group]]$covariance` exactly as for Gaussian outcomes.
+Because the links are nonlinear, fixed effects are conditional
+(subject-specific) effects: the marginal mean of the outcome is not the
+inverse link of the fixed-effect predictor alone. Extreme
+linear-predictor values that produce non-finite means or auxiliary
+parameters are an error; draws that land on a boundary the family
+likelihood cannot support (beta outcomes numerically at 0 or 1, gamma
+outcomes at 0) produce a warning.
 
 ## Time spacing
 
@@ -99,6 +167,26 @@ draws, and the chance of an unstable row grows with the number of rows.
 `ar_stability = "resample"` redraws only group-level effects, so it
 cannot repair instability caused by the population-level part of a
 moderated AR term; that case errors instead.
+
+Two further diagnostics guard the validity of accepted draws. First,
+when the AR matrices vary over time within a series (moderated `ar1()`
+with more than one outcome), a spectral radius below 1 for every row is
+necessary but not sufficient for stability of the time-varying process:
+products of individually stable matrices can still diverge. The
+simulator therefore also computes the spectral norm (largest singular
+value) of each row-specific AR matrix; a largest norm below 1 guarantees
+stability. When the matrices vary within a series and the largest
+spectral norm is 1 or more, stability cannot be guaranteed and a warning
+is issued; the result is recorded in the stability metadata as
+`time_varying_stability_guaranteed`. Second, `ar_stability = "resample"`
+truncates the group-level effect distribution: each group's entire
+random-effect vector (location, scale, and AR effects jointly) is
+redrawn until the AR part is stable, so when the acceptance rate is
+below 1 the realized random-effect covariance is smaller than
+`params$random[[group]]$covariance` requested. The realized covariance
+is always recorded in the generator metadata as
+`realised_group_level_effect_covariance`, and a message is emitted when
+the acceptance rate falls below 0.95.
 
 ## Performance
 

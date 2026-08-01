@@ -103,6 +103,39 @@ Compositional MVN generators simulate ILR coordinates first, then use
 the SBP basis to transform the coordinates into positive composition
 parts that sum to `total`.
 
+Multilevel generators additionally emit the latent between- and
+within-group components of each generated variable as visible columns.
+For non-compositional variables these are `<var>_between` (the
+group-level mean, fixed plus random intercept) and `<var>_within` (the
+row-level residual), with `<var> = <var>_between + <var>_within`
+exactly. For compositional generators the same decomposition is emitted
+on the ILR scale (`<ilr>_between`, `<ilr>_within`), together with the
+true between composition `<part>_between`, the closed back-transform of
+the group-level ILR means. All generated variables are labelled with
+column roles so that `between()` and
+[`within()`](https://rdrr.io/r/base/with.html) terms in
+[`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
+formulas resolve to the latent components; roles (and hence
+`between()`/[`within()`](https://rdrr.io/r/base/with.html)) apply to the
+ILR coordinates of a compositional generator, not to its parts. When
+`keep_ilr = FALSE` the observed ILR columns are dropped, but the
+between/within columns and their roles are still emitted for multilevel
+generators.
+
+Multilevel generators also record their group-level random-effect draws
+as per-row truth columns: `.mlsim_<var>_random_intercept` for the
+location intercept and, when `random_cov` is a joint location-scale
+covariance, `.mlsim_<var>_scale_random_intercept` for the scale
+intercept. The other multilevel scalar generators
+([`gen_negbin()`](https://florale.github.io/multilevelcoda/reference/count-generators.md),
+[`gen_gamma()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md),
+[`gen_beta()`](https://florale.github.io/multilevelcoda/reference/continuous-generators.md),
+[`gen_poisson()`](https://florale.github.io/multilevelcoda/reference/count-generators.md),
+[`gen_binomial()`](https://florale.github.io/multilevelcoda/reference/count-generators.md))
+share this machinery and emit the same columns. See the Value section of
+[`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
+for the full naming contract.
+
 ## See also
 
 Other predictor generators:

@@ -43,7 +43,10 @@ simulate_data(
   Group sizes. May be a scalar/vector, a function of `n_groups`, or a
   count-distribution list such as
   `list(distribution = "poisson", lambda = 4, minimum = 1)`. Requires
-  `n_groups` and cannot be combined with `n`.
+  `n_groups` and cannot be combined with `n`. Count-distribution
+  `minimum`/`maximum` bounds are applied by clamping draws to the bounds
+  (censoring), which piles probability mass at the bounds rather than
+  redistributing it as truncation would.
 
 - group_id, obs_id:
 
@@ -90,6 +93,33 @@ An object of class `mlsim_data`, a list with:
 - `generator_metadata`:
 
   Per-generator metadata recorded during simulation.
+
+For multilevel predictor generators, `data` also contains the
+group-level random-effect draws expanded to one value per row, under a
+stable `.mlsim_` naming scheme:
+
+- `.mlsim_<var>_random_intercept`:
+
+  The location random intercept of a continuous variable (e.g. from
+  [`gen_mvn()`](https://florale.github.io/multilevelcoda/reference/gen_mvn.md)).
+
+- `.mlsim_<var>_scale_random_intercept`:
+
+  The scale random intercept of a continuous variable, present only when
+  the generator was given a joint location-scale `random_cov`.
+
+- `.mlsim_<var>_random_intercept_<category>`:
+
+  The location random intercept of a
+  [`gen_categorical()`](https://florale.github.io/multilevelcoda/reference/gen_categorical.md)
+  variable, one column per non-reference category.
+
+Both `<var>` and `<category>` are sanitized with
+[`make.names()`](https://rdrr.io/r/base/make.names.html). These are
+truth columns, not observed data: they record the generating group-level
+effects so the data-generating process can be validated, and they are
+never used as predictors by
+[`prep_sim_analysis()`](https://florale.github.io/multilevelcoda/reference/prep_sim_analysis.md).
 
 ## Details
 

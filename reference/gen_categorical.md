@@ -63,6 +63,17 @@ gen_categorical(
 An `mlsim_generator_spec` object for use in
 [`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md).
 
+## Details
+
+Multilevel categorical generators record their group-level random-effect
+draws as per-row truth columns named
+`.mlsim_<var>_random_intercept_<category>`, one per non-reference
+category, with `<var>` and `<category>` sanitized by
+[`make.names()`](https://rdrr.io/r/base/make.names.html). See the Value
+section of
+[`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
+for the full naming contract.
+
 ## See also
 
 Other predictor generators:

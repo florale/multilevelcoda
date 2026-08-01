@@ -64,21 +64,15 @@ generator implementations.</p>
 <span></span>
 <span><span class="fu">.mlsim_stop</span><span class="op">(</span><span class="va">...</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">.mlsim_format_args</span><span class="op">(</span><span class="va">args</span><span class="op">)</span></span>
+<span><span class="fu">.mlsim_warn</span><span class="op">(</span><span class="va">...</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">.mlsim_warn_ignored_args</span><span class="op">(</span><span class="va">generator</span>, <span class="va">used</span>, <span class="va">ignored</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_multilevel_unused</span><span class="op">(</span><span class="va">level</span>, <span class="va">supplied</span>, <span class="va">generator</span>, <span class="va">use</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_multilevel_required</span><span class="op">(</span><span class="va">level</span>, <span class="va">supplied</span>, <span class="va">generator</span><span class="op">)</span></span>
+<span><span class="fu">.mlsim_format_ids</span><span class="op">(</span><span class="va">ids</span>, max_ids <span class="op">=</span> <span class="fl">5L</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_vars</span><span class="op">(</span><span class="va">vars</span>, n <span class="op">=</span> <span class="cn">NULL</span>, arg <span class="op">=</span> <span class="st">"vars"</span>, allow_empty <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_new_names_compatible</span><span class="op">(</span><span class="va">new</span>, <span class="va">existing</span>, arg <span class="op">=</span> <span class="st">"generated names"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_finite_numeric</span><span class="op">(</span><span class="va">x</span>, <span class="va">arg</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_prob</span><span class="op">(</span><span class="va">x</span>, arg <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_open_prob</span><span class="op">(</span><span class="va">x</span>, arg <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
 <span></span>
@@ -91,10 +85,6 @@ generator implementations.</p>
 <span><span class="fu">.mlsim_check_categorical_logits</span><span class="op">(</span><span class="va">logits</span>, <span class="va">nonreference</span>, <span class="va">arg</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_categorical_random_cov</span><span class="op">(</span><span class="va">random_cov</span>, <span class="va">nonreference</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_resolve_category_prob</span><span class="op">(</span><span class="va">prob</span>, <span class="va">n</span>, <span class="va">labels</span>, arg <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_category_prob_matrix</span><span class="op">(</span><span class="va">prob</span>, arg <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_baseline_category_prob</span><span class="op">(</span><span class="va">eta</span>, <span class="va">reference_index</span>, <span class="va">labels</span><span class="op">)</span></span>
 <span></span>
@@ -141,27 +131,6 @@ generator implementations.</p>
 <span></span>
 <span><span class="fu">.mlsim_n_for_level</span><span class="op">(</span><span class="va">level</span>, <span class="va">context</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">.mlsim_expand_level2</span><span class="op">(</span><span class="va">values</span>, <span class="va">level</span>, <span class="va">context</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_expand_level2_vector</span><span class="op">(</span><span class="va">values</span>, <span class="va">level</span>, <span class="va">context</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_multilevel_only_args</span><span class="op">(</span><span class="va">level</span>, <span class="va">supplied</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_generator_contract</span><span class="op">(</span></span>
-<span>  <span class="va">generator</span>,</span>
-<span>  <span class="va">vars</span>,</span>
-<span>  <span class="va">level</span>,</span>
-<span>  vars_n <span class="op">=</span> <span class="fl">1L</span>,</span>
-<span>  direct_supplied <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  multilevel_only <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  multilevel_required <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  multilevel_use <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_warn_direct_precedence</span><span class="op">(</span><span class="va">level</span>, <span class="va">generator</span>, <span class="va">used</span>, <span class="va">ignored</span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu">.mlsim_random_intercept_names</span><span class="op">(</span><span class="va">vars</span>, scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_check_position_cov</span><span class="op">(</span><span class="va">cov</span>, <span class="va">names</span>, arg <span class="op">=</span> <span class="st">"random_cov"</span><span class="op">)</span></span>
@@ -188,37 +157,11 @@ generator implementations.</p>
 <span>  expected_names <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">.mlsim_random_eta</span><span class="op">(</span></span>
-<span>  <span class="va">type</span>,</span>
-<span>  <span class="va">fixed_intercept</span>,</span>
-<span>  <span class="va">random_cov</span>,</span>
-<span>  <span class="va">context</span>,</span>
-<span>  <span class="va">vars</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu">.mlsim_check_simple_residual_cor</span><span class="op">(</span><span class="va">residual_cor</span>, <span class="va">vars</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_mvn_row_residual</span><span class="op">(</span><span class="va">residual_sd</span>, <span class="va">residual_cor</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_mvn_row_covariance_array</span><span class="op">(</span><span class="va">residual_sd</span>, <span class="va">residual_cor</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_scale_or_arg</span><span class="op">(</span><span class="va">arg</span>, <span class="va">arg_name</span>, <span class="va">scale_fixed_intercept</span>, <span class="va">generator</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_check_positive_or_null</span><span class="op">(</span><span class="va">x</span>, <span class="va">arg</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_simple_random_metadata</span><span class="op">(</span></span>
-<span>  <span class="va">fixed_intercept</span>,</span>
-<span>  <span class="va">random</span>,</span>
-<span>  scale_fixed_intercept <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">.mlsim_validate_scale_multilevel_args</span><span class="op">(</span></span>
-<span>  <span class="va">level</span>,</span>
-<span>  <span class="va">scale_fixed_intercept</span>,</span>
-<span>  random_cov <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  residual_cor <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">.mlsim_mean_from_eta</span><span class="op">(</span><span class="va">type</span>, <span class="va">eta</span><span class="op">)</span></span>
 <span></span>
@@ -254,20 +197,17 @@ generator implementations.</p>
 
 
 <dt id="arg-call-">call.<a class="anchor" aria-label="anchor" href="#arg-call-"></a></dt>
-<dd><p>Logical flag passed to <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>.</p></dd>
+<dd><p>Logical flag passed to <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code> or <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>.</p></dd>
 
 
-<dt id="arg-args-used-ignored-supplied-use-direct-supplied-multilevel-only">args, used, ignored, supplied, use, direct_supplied, multilevel_only<a class="anchor" aria-label="anchor" href="#arg-args-used-ignored-supplied-use-direct-supplied-multilevel-only"></a></dt>
-<dd><p>Character vectors or named logicals used to build diagnostics.</p></dd>
+<dt id="arg-ids-max-ids">ids, max_ids<a class="anchor" aria-label="anchor" href="#arg-ids-max-ids"></a></dt>
+<dd><p>Identifier values and truncation limit for formatted
+ID lists.</p></dd>
 
 
-<dt id="arg-generator">generator<a class="anchor" aria-label="anchor" href="#arg-generator"></a></dt>
-<dd><p>Generator label used in diagnostic messages.</p></dd>
-
-
-<dt id="arg-vars-var-n-vars-n-names-arg-arg-name">vars, var, n, vars_n, names, arg, arg_name<a class="anchor" aria-label="anchor" href="#arg-vars-var-n-vars-n-names-arg-arg-name"></a></dt>
-<dd><p>Variable names, target lengths,
-or argument labels.</p></dd>
+<dt id="arg-vars-var-n-names-arg">vars, var, n, names, arg<a class="anchor" aria-label="anchor" href="#arg-vars-var-n-names-arg"></a></dt>
+<dd><p>Variable names, target lengths, or argument
+labels.</p></dd>
 
 
 <dt id="arg-allow-empty">allow_empty<a class="anchor" aria-label="anchor" href="#arg-allow-empty"></a></dt>
@@ -330,15 +270,6 @@ matrices.</p></dd>
 <dd><p>Simulation context supplied by <code><a href="simulate_data.html">simulate_data()</a></code>.</p></dd>
 
 
-<dt id="arg-values-result">values, result<a class="anchor" aria-label="anchor" href="#arg-values-result"></a></dt>
-<dd><p>Generated values or raw custom-generator result.</p></dd>
-
-
-<dt id="arg-multilevel-required-multilevel-use-scale-arg">multilevel_required, multilevel_use, scale_arg<a class="anchor" aria-label="anchor" href="#arg-multilevel-required-multilevel-use-scale-arg"></a></dt>
-<dd><p>Multilevel constructor
-contract declarations.</p></dd>
-
-
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>Logical flag for joint location/scale random effects.</p></dd>
 
@@ -347,16 +278,20 @@ contract declarations.</p></dd>
 <dd><p>Random-effect draw metadata.</p></dd>
 
 
+<dt id="arg-scale-fixed-intercept">scale_fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-scale-fixed-intercept"></a></dt>
+<dd><p>Scale intercepts.</p></dd>
+
+
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>Distribution type.</p></dd>
 
 
-<dt id="arg-fixed-intercept-scale-fixed-intercept">fixed_intercept, scale_fixed_intercept<a class="anchor" aria-label="anchor" href="#arg-fixed-intercept-scale-fixed-intercept"></a></dt>
-<dd><p>Location and scale intercepts.</p></dd>
-
-
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
 <dd><p>Count-distribution size specification.</p></dd>
+
+
+<dt id="arg-values-result">values, result<a class="anchor" aria-label="anchor" href="#arg-values-result"></a></dt>
+<dd><p>Generated values or raw custom-generator result.</p></dd>
 
 
 <dt id="arg-metadata-wrapper-metadata">metadata, wrapper_metadata<a class="anchor" aria-label="anchor" href="#arg-metadata-wrapper-metadata"></a></dt>
@@ -399,7 +334,7 @@ result.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

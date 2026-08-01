@@ -110,7 +110,7 @@
   : Generate Normal, Multivariate Normal, and Compositional Variables
 
 - [`gen_outcome()`](https://florale.github.io/multilevelcoda/reference/gen_outcome.md)
-  : Generate Dynamic Gaussian and Compositional Outcomes
+  : Generate Dynamic Gaussian, Compositional, and GLM-Family Outcomes
 
 - [`gen_template()`](https://florale.github.io/multilevelcoda/reference/gen_template.md)
   :
@@ -148,6 +148,9 @@
   :
 
   Checks if argument is a `substitution` object
+
+- [`lag_by_time()`](https://florale.github.io/multilevelcoda/reference/lag_by_time.md)
+  : Lag Columns by Time
 
 - [`launch_shinystan(`*`<brmcoda>`*`)`](https://florale.github.io/multilevelcoda/reference/launch_shinystan.brmcoda.md)
   :
@@ -260,6 +263,9 @@
 
 - [`sim`](https://florale.github.io/multilevelcoda/reference/sim.md) :
   multilevelcoda Simulation Study results
+
+- [`sim_recovery()`](https://florale.github.io/multilevelcoda/reference/sim_recovery.md)
+  : Align Fitted Estimates with Simulation Truth
 
 - [`simulate_data()`](https://florale.github.io/multilevelcoda/reference/simulate_data.md)
   : Simulate Data from Generator Specifications
